@@ -1,0 +1,113 @@
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;900&display=swap');
+@import "tailwindcss";
+
+/* ========= BASE GLOBAL STYLES (silver / grey theme) ========= */
+@layer base {
+  *,
+  *::before,
+  *::after {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+  }
+
+  html,
+  body,
+  #root {
+    height: 100%;
+  }
+
+  /* smoother scrolling */
+  html {
+    scroll-behavior: smooth;
+  }
+
+  body {
+    font-family: 'Poppins', system-ui, -apple-system, BlinkMacSystemFont,
+      'Segoe UI', sans-serif;
+    @apply text-gray-200 overflow-x-hidden;
+    /* silver-grey background */
+    background: radial-gradient(circle at top, #2b2d31 0, #0f0f12 55%, #000 100%);
+  }
+
+  /* TYPOGRAPHY */
+  h1,
+  h2,
+  h3,
+  h4 {
+    font-weight: 700;
+    letter-spacing: 0.03em;
+    color: #f9fafb;
+  }
+
+  h1 {
+    font-size: clamp(2.4rem, 4vw, 3.4rem);
+    line-height: 1.1;
+  }
+
+  h2 {
+    font-size: clamp(1.8rem, 3vw, 2.4rem);
+  }
+
+  h3 {
+    font-size: 1.2rem;
+  }
+
+  p {
+    line-height: 1.6;
+    color: #d1d5db;
+    font-size: 0.95rem;
+  }
+
+  /* LINKS */
+  a {
+    color: #c0c0c0;
+    text-decoration: none;
+    transition: color 0.2s ease, opacity 0.2s ease;
+  }
+
+  a:hover {
+    color: #f5f5f5;
+  }
+
+  /* LAYOUT SHELL (actual flex layout is in App.tsx) */
+  #root {
+    min-height: 100vh;
+  }
+
+  /* generic page container spacing */
+  main {
+    padding-top: 88px; /* space for navbar */
+  }
+
+  main > div,
+  header,
+  section {
+    max-width: 1120px;
+    margin: 0 auto;
+    padding-inline: 1.5rem;
+  }
+
+  /* ✅ footer: DON'T override styles from the component */
+  footer {
+    margin-top: 0; /* you can even delete this whole block */
+  }
+}
+
+/* optional: silver glow animation utility */
+@keyframes roshanGlow {
+  0%,
+  100% {
+    filter: drop-shadow(0 0 8px rgba(212, 212, 212, 0.45));
+  }
+  50% {
+    filter: drop-shadow(0 0 13px rgba(212, 212, 212, 0.75));
+  }
+}
+
+@layer utilities {
+  .roshan-glow {
+    animation: roshanGlow 2.4s ease-in-out infinite;
+  }
+}
+

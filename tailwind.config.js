@@ -1,39 +1,29 @@
 /** @type {import('tailwindcss').Config} */
 export default {
-  content: [
-    "./index.html",
-    "./src/**/*.{js,ts,jsx,tsx}",
-  ],
+  content: ["./index.html", "./src/**/*.{js,ts,jsx,tsx}"],
   theme: {
     extend: {
-      colors: {
-        radiant: '#66BB6A',
-        dire: '#EF5350',
-        ancient: '#8D6E63',
-        ti: '#FFD700',
-      },
       fontFamily: {
-        radiant: ['"Radiance"', 'sans-serif'],
-        dire: ['"Exocet"', 'sans-serif'],
+        poppins: ["Poppins", "system-ui"],
       },
-      // This enables the glow drop-shadow used in the navbar
-      dropShadow: {
-        glow: '0 0 20px rgba(255, 215, 0, 0.8)',
-        'glow-lg': '0 0 40px rgba(255, 215, 0, 0.9)',
-        'radiant-glow': '0 0 30px rgba(102, 187, 106, 0.7)',
-        'dire-glow': '0 0 30px rgba(239, 83, 80, 0.7)',
+      colors: {
+        trr: {
+          gold: "#FFD700",
+          silver: "#C0C0C0",
+          bronze: "#CD7F32",
+          blood: "#FF0033",
+          glass: "rgba(5,7,10,0.94)",
+        },
       },
-      // Optional: add keyframes for extra animations later
-      keyframes: {
-        'shimmer': {
-          '0%': { transform: 'translateX(-100%)' },
-          '100%': { transform: 'translateX(100%)' },
-        }
+      boxShadow: {
+        trr: "0 18px 45px rgba(0,0,0,0.7)",
+        glow: "0 0 22px rgba(168,85,247,0.65)",
       },
-      animation: {
-        shimmer: 'shimmer 2s infinite',
-      }
+      backgroundImage: {
+        trrRadial:
+          "radial-gradient(circle at top, #2b2d31 0, #0f0f12 55%, #000 100%)",
+      },
     },
   },
   plugins: [],
-}
+};

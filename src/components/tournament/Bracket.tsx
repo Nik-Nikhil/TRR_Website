@@ -1,5 +1,5 @@
 // src/components/tournament/Bracket.tsx
-import { primaryTournament } from '../../data/mockTournaments';
+import { primaryTournament } from '../../pages/data/mockTournaments';
 import MatchCard from './MatchCard';
 
 export default function Bracket() {

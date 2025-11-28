@@ -1,0 +1,325 @@
+// dotabuffSteamMapping.ts
+
+export const dotabuffByNick: Record<string, string> = {
+  SlowFast: "https://www.dotabuff.com/players/101698448",
+  RockeR: "https://www.dotabuff.com/players/312460637",
+  Narai:"https://www.dotabuff.com/players/217437998",
+  Hunt: "https://www.dotabuff.com/players/161910981",
+  CLASH: "https://www.dotabuff.com/players/180790099",
+  Helm: "https://www.dotabuff.com/players/86755875",
+  Toby: "https://www.dotabuff.com/players/178952102",
+  DJ: "https://www.dotabuff.com/players/83551346   ",
+  PREDATOR: "https://www.dotabuff.com/players/97488483",
+  Ravi: "https://www.dotabuff.com/players/79540445",
+  Kolly: "https://www.dotabuff.com/players/254192704",
+  Server:"https://www.dotabuff.com/players/416883344",
+  Phola:"https://www.dotabuff.com/players/156497533",
+  MaDaRa: "https://www.dotabuff.com/players/373096307",
+  Machine:"https://www.dotabuff.com/players/334629972",
+  MVRK:"https://www.dotabuff.com/players/1110866865",
+  Irox: "https://www.dotabuff.com/players/127527866",
+  Slappy:"https://www.dotabuff.com/players/87407672",
+  Atomic: "https://www.dotabuff.com/players/458334798",
+  "r3ciprocal" :"https://www.dotabuff.com/players/320180936",
+  abbhY: "https://www.dotabuff.com/players/1586168440",
+  Masara: "https://www.dotabuff.com/players/338423041",
+  Irene: "https://www.dotabuff.com/players/1046979507",
+  Nikhil: "https://www.dotabuff.com/players/285735420",
+  Banner: "https://www.dotabuff.com/players/233614633",
+  LordImpaler: "https://www.dotabuff.com/players/70552906",
+  "Skyie@": "https://www.dotabuff.com/players/1843170184",
+  Godspeed:"https://www.dotabuff.com/players/117470743",
+  GRIMM:"https://www.dotabuff.com/players/343722089",
+  DeathShadow:"https://www.dotabuff.com/players/1777591587",
+  Insanekid08: "https://www.dotabuff.com/players/115036796",
+  Bazinga: "https://www.dotabuff.com/players/174818342",
+  AaRoN: "https://www.dotabuff.com/players/403543580",
+  Bolt:"https://www.dotabuff.com/players/198357419",
+  Billy:"https://www.dotabuff.com/players/328783708",
+  STORM4:"https://www.dotabuff.com/players/162879676",
+  Nabeel:"https://www.dotabuff.com/players/187802246",
+  Sovan: "https://www.dotabuff.com/players/259705757",
+  "420-smurf": "https://www.dotabuff.com/players/1225962940",
+  Maliketh: "https://www.dotabuff.com/players/347724207",
+  Akash: "https://www.dotabuff.com/players/177441711",
+  MSlayer: "https://www.dotabuff.com/players/31903773",
+  "Master Instinct":"https://www.dotabuff.com/players/164611222",
+  "Inner Peace-":"https://www.dotabuff.com/players/153206336",
+  "Arindam7": "https://www.dotabuff.com/players/184046251",
+  Farhan:"https://www.dotabuff.com/players/219729309",
+  "Noob CA": "https://www.dotabuff.com/players/117998542",
+  Guts:"https://www.dotabuff.com/players/192497788",
+  Madlad : "https://www.dotabuff.com/players/106411799",
+  Voodoo: "https://www.dotabuff.com/players/1100513353",
+  "Ali Gm'Y": "https://www.dotabuff.com/players/161190694",
+  zRomep: "https://www.dotabuff.com/players/417265967",
+  Shiro:"https://www.dotabuff.com/players/131653044",
+  Tukiyem:"https://www.dotabuff.com/players/190377080",
+  shezdbest: "https://www.dotabuff.com/players/107767543",
+  "Prime.One" : "http://dotabuff.com/players/157493768",
+  Sherlocked: "https://www.dotabuff.com/players/365947296",
+  "Tundra.Goku": "https://www.dotabuff.com/players/108935531",
+  ScripTeR:"https://www.dotabuff.com/players/454270393",
+  DRAGONEYE:"https://www.dotabuff.com/players/438446336",
+  Sphere:"https://www.dotabuff.com/players/1069363108",
+  gxnova:"https://www.dotabuff.com/players/177541135",
+  "Position 0" : "https://www.dotabuff.com/players/442883191",
+  Ryujin: "https://www.dotabuff.com/players/365512602",
+  DK: "https://www.dotabuff.com/players/370873135",
+  Lanson: "https://www.dotabuff.com/players/238422845",
+  "Jin[X]eD": "https://www.dotabuff.com/players/153148404",
+  Fyt:"https://www.dotabuff.com/players/116523834",
+  Flamy:"https://www.dotabuff.com/players/386964482",
+  LYRRAD:"https://www.dotabuff.com/players/110547655",
+  "hakuna_matata":"https://www.dotabuff.com/players/29004114",
+  DynamoDon:"https://www.dotabuff.com/players/256634096",
+  FOX : "https://www.dotabuff.com/players/841481273",
+  "Ov3rconfidenc3": "http://www.dotabuff.com/players/107656345",
+  "Dr_Nemesis_X":"https://www.dotabuff.com/players/410923078",
+  Yuno:"https://www.dotabuff.com/players/1077021946",
+  Shaidota:"https://www.dotabuff.com/players/852647381",
+  "BrõwÑ ẞöy":"https://www.dotabuff.com/players/265432420",
+  "SSM-iwnl":"https://www.dotabuff.com/players/200337180",
+  "MYM|LUCKY13":"https://www.dotabuff.com/players/151519254",
+  Pero:"https://www.dotabuff.com/players/367730370",
+  "Mr.Crystal":"https://www.dotabuff.com/players/174601077",
+  Dropthebass:"https://www.dotabuff.com/players/187665471",
+  Grizzly:"https://www.dotabuff.com/players/303324682",
+  Penda:"https://www.dotabuff.com/players/344855205",
+  Shikamaru:"https://www.dotabuff.com/players/1194659222",
+  Faith:"https://www.dotabuff.com/players/151298548",
+  "Memelord Ozai":"https://www.dotabuff.com/players/895017702",
+  Blitzip:"https://www.dotabuff.com/players/48081935",
+  cpt_flux:"https://www.dotabuff.com/players/247416589",
+  Jinx:"http://dotabuff.com/players/100322353",
+  "No One":"https://www.dotabuff.com/players/169545690",
+  "Swaggy Brisngr":"https://www.dotabuff.com/players/196897558",
+  RB:"https://www.dotabuff.com/players/910251150",
+  Epizeuxius:"https://www.dotabuff.com/players/325514595",
+  "Ultra.NoobPk": "https://www.dotabuff.com/players/352574888",
+  Gifty:"https://www.dotabuff.com/players/100482441",
+  "Eric Dane":"https://www.dotabuff.com/players/194662907",
+  "Still Panda YT":"https://www.dotabuff.com/players/1087827783",
+  Rinne: "https://www.dotabuff.com/players/303481878",
+  "ShabbY**":"https://www.dotabuff.com/players/212670189",
+  "hAz3":"https://www.dotabuff.com/players/103008410",
+  Nj:"https://www.dotabuff.com/players/300437831",
+  "pEnduUu":"https://www.dotabuff.com/players/395728952",
+  Setupathi:"https://www.dotabuff.com/players/163081720",
+  "rA'V!":"https://www.dotabuff.com/players/38399697",
+  RyuGa:"https://www.dotabuff.com/players/308549189",
+  Maldini:"https://www.dotabuff.com/players/372372038",
+  Dranzer:"https://www.dotabuff.com/players/389146865",
+  Gorki:"https://www.dotabuff.com/players/158129704",
+  Bluediamond:"https://www.dotabuff.com/players/1125030620",
+  "Uma1s":"https://www.dotabuff.com/players/87745449",
+  Alcromido:"https://www.dotabuff.com/players/236325918",
+  dante:"https://www.dotabuff.com/players/142153780",
+  bull:"https://www.dotabuff.com/players/120073059",
+  pYro:"https://www.dotabuff.com/players/96848415",
+  Kakashi:"https://www.dotabuff.com/players/1674352366",
+  "Puppy boss":"https://www.dotabuff.com/players/196473202",
+  "cigerettes after sex":"https://www.dotabuff.com/players/131688985",
+  "DoT":"https://www.dotabuff.com/players/428813002",
+  "420":"https://www.dotabuff.com/players/339389334",
+  "Meow Meow Madafaka":"https://www.dotabuff.com/players/403056733",
+  Kakarot:"https://www.dotabuff.com/players/464167658",
+  Icarus:"https://www.dotabuff.com/players/1673844832",
+  "Fren-_-zied":"https://www.dotabuff.com/players/863525897",
+  "Roronoa Zoro":"https://www.dotabuff.com/players/377904244",
+  SJ:"https://www.dotabuff.com/players/294332070",
+  "Sridharocky":"https://www.dotabuff.com/players/238789905",
+  "DroN3":"https://www.dotabuff.com/players/175402350",
+  "fLabber":"https://www.dotabuff.com/players/121342098",
+  "Ronbawa":"https://www.dotabuff.com/players/235500535",
+  Future:"https://www.dotabuff.com/players/243816705",
+  "IM still Noob":"https://www.dotabuff.com/players/282566732",
+  Porthos:"https://www.dotabuff.com/players/241994225",
+  "S1mpleO":"https://www.dotabuff.com/players/151519430",
+  BaPU:"https://www.dotabuff.com/players/360320191",
+  "zai_7":"https://www.dotabuff.com/players/19976382",
+  TeRroRr:"https://www.dotabuff.com/players/157563163",
+  Kunaka:"https://www.dotabuff.com/players/299333421",
+  FADE:"https://www.dotabuff.com/players/247366709",
+  "Gotatch captain":"https://www.dotabuff.com/players/362408057",
+  Zombie:"https://www.dotabuff.com/players/176430389",
+  "LightNing Goku":"https://www.dotabuff.com/players/156748904",
+  "*Foujii":"https://www.dotabuff.com/players/294123944",
+  "aizEn-":"https://www.dotabuff.com/players/481733631",
+  "Iceman-":"https://www.dotabuff.com/players/288448614",
+  Sejlur:"https://www.dotabuff.com/players/87272126",
+  "Mr Pudge":"https://www.dotabuff.com/players/372388008",
+  "The Beast":"https://www.dotabuff.com/players/108442027",
+  TamBamGOD:"https://www.dotabuff.com/players/329866715",
+  MGL:"https://www.dotabuff.com/players/1206079336",
+  "Eternal_Bliz2ard":"https://www.dotabuff.com/players/390311540",
+  "Draco~":"https://www.dotabuff.com/players/191112024",
+  Anzu:"https://www.dotabuff.com/players/1285249940",
+  itus:"https://www.dotabuff.com/players/121558916",
+  "SQueEzee-":"https://www.dotabuff.com/players/365812035",
+  BOOM:"https://www.dotabuff.com/players/1013605577",
+  Razer:"https://www.dotabuff.com/players/229284594",
+  "Dis.Traction":"https://www.dotabuff.com/players/154702794",
+  "JiMmY#":"https://www.dotabuff.com/players/374677013",
+  "vanished-":"https://www.dotabuff.com/players/153819702",
+  Muri:"https://www.dotabuff.com/players/430310179",
+  BlisS:"https://www.dotabuff.com/players/1051088379",  
+  skipper:"https://www.dotabuff.com/players/220488759",
+  "GranD_MasTeR-":"https://www.dotabuff.com/players/431696092",
+  Seedhemaut:"https://www.dotabuff.com/players/1085512934",
+  Maddened:"https://www.dotabuff.com/players/117640630",
+  "RHUM-RON":"https://www.dotabuff.com/players/195933027",
+  Zonark:"https://www.dotabuff.com/players/1259086637",
+  "07 Apple":"https://www.dotabuff.com/players/144880426",
+  J:" https://www.dotabuff.com/players/281247592",
+  Naruto:"https://www.dotabuff.com/players/391466954",
+  Markeloff:"https://www.dotabuff.com/players/1753095826",
+  "Tintin000":"https://www.dotabuff.com/players/853689421",
+  Deathgods:"https://www.dotabuff.com/players/418702567",
+  Lala:"https://www.dotabuff.com/players/362234251",
+  Mask:"https://www.dotabuff.com/players/148557053",
+  plutoski:"https://www.dotabuff.com/players/86896146",
+  "Mind_Flay3R":"https://www.dotabuff.com/players/472938610",
+  "Toji Khan":"https://www.dotabuff.com/players/284046016",
+  Vanara:"https://www.dotabuff.com/players/116092906",
+  Chinigami:"https://www.dotabuff.com/players/425856787",
+  Maddy:"https://www.dotabuff.com/players/121864564",
+  Asd:"https://www.dotabuff.com/players/253986413",
+  Rockrobin:"https://www.dotabuff.com/players/198263407",
+  Dracarys:"https://www.dotabuff.com/players/200322687",
+  shadow:"https://www.dotabuff.com/players/156762702",
+  dp:"https://www.dotabuff.com/players/970736308",
+  "Ming~ ^._.^":"https://www.dotabuff.com/players/124382725",
+  "I will bully u":"https://www.dotabuff.com/players/327582362",
+  CurserdTerror:"https://www.dotabuff.com/players/205837825",
+  Sai:"https://www.dotabuff.com/players/107781387",
+  Xcarnation:"https://www.dotabuff.com/players/86743001",
+  "Echo Salami":"https://www.dotabuff.com/players/184172590",
+  "m1p07":"https://www.dotabuff.com/players/215526091",
+  "*-*-$HAZAM-*-*":"https://www.dotabuff.com/players/870514613",
+  "Goku-Shery":"https://www.dotabuff.com/players/207362805",
+  "ome1r":"https://www.dotabuff.com/players/172798824",
+  ZukeGod:"https://www.dotabuff.com/players/93878269",
+  Vexcon:"https://www.dotabuff.com/players/226376481",
+  Sexy:"https://www.dotabuff.com/players/208488874",
+  "Munna Lisa":"https://www.dotabuff.com/players/7318030",
+  Enjoyer:"https://www.dotabuff.com/players/134590029",
+  KFP:"https://www.dotabuff.com/players/411474101",
+  "NGX|`Miracle~":"https://www.dotabuff.com/players/230041031",
+  SUBVERSION:"https://www.dotabuff.com/players/393400421",
+  "Hero for Fun!":"https://www.dotabuff.com/players/389907618",
+  "Kaisel":"https://www.dotabuff.com/players/106331186",
+  "Bomberman™":"https://www.dotabuff.com/players/232993167",
+  "Mystic_Bolt":"https://www.dotabuff.com/players/81632691",
+  "topuria enjoyer":"https://www.dotabuff.com/players/901982158",
+  "™тj-кs 凱":"https://www.dotabuff.com/players/94918319",
+  "CD.LostfromLight":"https://www.dotabuff.com/players/454161306",
+  Midas:"https://www.dotabuff.com/players/342443222",
+  "LUCIFERROCKER":"https://www.dotabuff.com/players/329458840",
+  "F(x)":"https://www.dotabuff.com/players/190131755",
+  "yt/JNJISHNU":"https://www.dotabuff.com/players/294265040",
+  DEAN:"https://www.dotabuff.com/players/99145566",
+  YOUNOOB:"https://www.dotabuff.com/players/409239873",
+  jhamkuanna:"https://www.dotabuff.com/players/117896522",
+  "✪KungFuPanda":"https://www.dotabuff.com/players/430534561",
+  "Sparrow-":"https://www.dotabuff.com/players/340052854",
+  Lily:"https://www.dotabuff.com/players/1191501978",
+  "YuRi-smurf":"https://www.dotabuff.com/players/308425117",
+  Sasuke:"https://www.dotabuff.com/players/1120695806",
+  Yoko:"https://www.dotabuff.com/players/860031298",
+  Hunter:"https://www.dotabuff.com/players/113241537",
+  ZeT:"https://www.dotabuff.com/players/358773333",
+  Impeccable:"https://www.dotabuff.com/players/139764409",
+  "tadi_uncle":"https://www.dotabuff.com/players/1235391850",
+  "U from miri":"https://www.dotabuff.com/players/368622659",
+  BTT:"https://www.dotabuff.com/players/1674825069",
+  SKOOTI:"https://www.dotabuff.com/players/346998401",
+  Juker:"https://www.dotabuff.com/players/341173745",
+  "Erza Scarlet":"https://www.dotabuff.com/players/916402063",
+  "Changing Star":"https://www.dotabuff.com/players/884882035",
+  ConFi:"https://www.dotabuff.com/players/281161372",
+  Bakabot:"https://www.dotabuff.com/players/431913975",
+  Potatobuoy:"https://www.dotabuff.com/players/171865268",
+  Hina:"https://www.dotabuff.com/players/367563618",
+  "έ_v!Ḷ₥!N_Đ":"https://www.dotabuff.com/players/400643686",
+  "--== | Ad!TyA | ==--":"https://www.dotabuff.com/players/87755658",
+  "MrBeanBag":"https://www.dotabuff.com/players/289377960",
+  humble:"https://www.dotabuff.com/players/1021695760",
+  EXe:"https://www.dotabuff.com/players/872823409",
+  SiniOmega:"https://www.dotabuff.com/players/422887260",
+  zx:"https://www.dotabuff.com/players/875101329",
+  Shrijan:"https://www.dotabuff.com/players/327562099",
+  "rizwan the fu*ker":"https://www.dotabuff.com/players/397422736",
+  Shirleythomas:"https://www.dotabuff.com/players/178229154",
+  OzEe:"https://www.dotabuff.com/players/107481382",
+  "°Kyuubi°":"https://www.dotabuff.com/players/1067923883",
+  "Miracles from heaven!":"https://www.dotabuff.com/players/109646086",
+};
+
+// ----------------- Helpers for Steam IDs -----------------
+
+// Offset used to convert accountId (friend ID) -> SteamID64
+const ACCOUNTID_OFFSET = BigInt("76561197960265728");
+
+/** Extract the friend/account ID from a Dotabuff URL. */
+export function extractFriendId(dotabuffUrl: string): string | null {
+  const trimmed = dotabuffUrl.trim();
+  const match = trimmed.match(/players\/(\d+)/);
+  return match ? match[1] : null;
+}
+
+/** Convert friend/account ID (string) to a SteamID64 profile URL. */
+export function friendIdToSteamUrl(friendId: string): string {
+  const steamId64 = (BigInt(friendId) + ACCOUNTID_OFFSET).toString();
+  return `https://steamcommunity.com/profiles/${steamId64}`;
+}
+
+// ----------------- Derived maps -----------------
+
+/** nick -> friendId (account ID / "friend id") */
+export const friendIdByNick: Record<string, string> = {};
+
+/** friendId -> Dotabuff URL */
+export const dotabuffByFriendId: Record<string, string> = {};
+
+/** friendId -> Steam profile URL */
+export const steamByFriendId: Record<string, string> = {};
+
+/** nick -> Steam profile URL */
+export const steamByNick: Record<string, string> = {};
+
+// Build all maps from dotabuffByNick
+for (const [nick, rawUrl] of Object.entries(dotabuffByNick)) {
+  const friendId = extractFriendId(rawUrl);
+  if (!friendId) continue;
+
+  const cleanUrl = rawUrl.trim();
+
+  friendIdByNick[nick] = friendId;
+  dotabuffByFriendId[friendId] = cleanUrl;
+
+  const steamUrl = friendIdToSteamUrl(friendId);
+  steamByFriendId[friendId] = steamUrl;
+  steamByNick[nick] = steamUrl;
+}
+
+// ----------------- Public helper functions -----------------
+
+/** Get Dotabuff URL from nickname (fallback "#"). */
+export const dbNick = (nick: string): string =>
+  dotabuffByNick[nick] ?? "#";
+
+/** Get Steam profile URL directly from nickname. */
+export const steamFromNick = (nick: string): string | null =>
+  steamByNick[nick] ?? null;
+
+/** Get both Dotabuff and Steam links from a friend ID. */
+export function linksFromFriendId(friendId: string): {
+  dotabuff?: string;
+  steam?: string;
+} {
+  return {
+    dotabuff: dotabuffByFriendId[friendId],
+    steam: steamByFriendId[friendId],
+  };
+}
