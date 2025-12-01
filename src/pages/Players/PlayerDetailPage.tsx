@@ -263,7 +263,7 @@ export default function PlayerDetailPage() {
                     {player.currentMedalId ? (
                       <>
                         <img
-                          src={`/medals/${player.currentMedalId}.webp`}
+                          src={`/medals/${player.currentMedalId}.png`}
                           alt={player.currentMedalLabel}
                           className="w-10 h-10 object-contain mr-3"
                         />
@@ -291,7 +291,7 @@ export default function PlayerDetailPage() {
                     {player.peakMedalId ? (
                       <>
                         <img
-                          src={`/medals/${player.peakMedalId}.webp`}
+                          src={`/medals/${player.peakMedalId}.png`}
                           alt={player.peakMedalLabel}
                           className="w-10 h-10 object-contain mr-3"
                         />

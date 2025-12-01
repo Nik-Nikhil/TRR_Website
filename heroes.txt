@@ -1,0 +1,126 @@
+Anti-Mage : https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/antimage.webm
+Axe : https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/axe.webm
+Bane : https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/bane.webm
+Bloodseeker : https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/bloodseeker.webm
+Crystal Maiden : https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/crystal_maiden.webm
+Drow Ranger : https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/drow_ranger.webm
+Earthshaker : https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/earthshaker.webm
+Juggernaut : https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/juggernaut.webm
+Mirana : https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/mirana.webm
+Morphling : https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/morphling.webm
+Shadow Fiend : https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/nevermore.webm
+Phantom Lancer : https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/phantom_lancer.webm
+Puck : https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/puck.webm
+Pudge : https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/pudge.webm
+Razor : https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/razor.webm
+Sand King : https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/sand_king.webm
+Storm Spirit : https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/storm_spirit.webm
+Sven : https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/sven.webm
+Tiny : https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/tiny.webm
+Vengeful Spirit : https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/vengefulspirit.webm
+Windranger : https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/windrunner.webm
+Zeus : https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/zuus.webm
+Kunkka : https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/kunkka.webm
+Lina : https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/lina.webm
+Lion : https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/lion.webm
+Shadow Shaman : https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/shadow_shaman.webm
+Slardar : https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/slardar.webm
+Tidehunter : https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/tidehunter.webm
+Witch Doctor : https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/witch_doctor.webm
+Lich : https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/lich.webm
+Riki : https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/riki.webm
+Enigma : https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/enigma.webm
+Tinker : https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/tinker.webm
+Sniper : https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/sniper.webm
+Necrophos : https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/necrolyte.webm
+Warlock : https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/warlock.webm
+Beastmaster : https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/beastmaster.webm
+Queen of Pain : https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/queenofpain.webm
+Venomancer : https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/venomancer.webm
+Faceless Void : https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/faceless_void.webm
+Wraith King : https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/skeleton_king.webm
+Death Prophet : https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/death_prophet.webm
+Phantom Assassin : https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/phantom_assassin.webm
+Pugna : https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/pugna.webm
+Templar Assassin : https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/templar_assassin.webm
+Viper : https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/viper.webm
+Luna : https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/luna.webm
+Dragon Knight : https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/dragon_knight.webm
+Dazzle : https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/dazzle.webm
+Clockwerk : https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/rattletrap.webm
+Leshrac : https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/leshrac.webm
+Nature's Prophet : https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/furion.webm
+Lifestealer : https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/life_stealer.webm
+Dark Seer : https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/dark_seer.webm
+Clinkz : https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/clinkz.webm
+Omniknight : https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/omniknight.webm
+Enchantress : https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/enchantress.webm
+Huskar : https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/huskar.webm
+Night Stalker : https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/night_stalker.webm
+Broodmother : https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/broodmother.webm
+Bounty Hunter : https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/bounty_hunter.webm
+Weaver : https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/weaver.webm
+Jakiro : https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/jakiro.webm
+Batrider : https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/batrider.webm
+Chen : https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/chen.webm
+Spectre : https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/spectre.webm
+Ancient Apparition : https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/ancient_apparition.webm
+Doom : https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/doom_bringer.webm
+Ursa : https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/ursa.webm
+Spirit Breaker : https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/spirit_breaker.webm
+Gyrocopter : https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/gyrocopter.webm
+Alchemist : https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/alchemist.webm
+Invoker : https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/invoker.webm
+Silencer : https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/silencer.webm
+Outworld Devourer : https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/obsidian_destroyer.webm
+Lycan : https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/lycan.webm
+Brewmaster : https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/brewmaster.webm
+Shadow Demon : https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/shadow_demon.webm
+Lone Druid : https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/lone_druid.webm
+Chaos Knight : https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/chaos_knight.webm
+Meepo : https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/meepo.webm
+Treant Protector : https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/treant.webm
+Ogre Magi : https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/ogre_magi.webm
+Undying : https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/undying.webm
+Rubick : https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/rubick.webm
+Disruptor : https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/disruptor.webm
+Nyx Assassin : https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/nyx_assassin.webm
+Naga Siren : https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/naga_siren.webm
+Keeper of the Light : https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/keeper_of_the_light.webm
+Io : https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/wisp.webm
+Visage : https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/visage.webm
+Slark : https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/slark.webm
+Medusa : https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/medusa.webm
+Troll Warlord : https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/troll_warlord.webm
+Centaur Warrunner : https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/centaur.webm
+Magnus : https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/magnataur.webm
+Timbersaw : https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/shredder.webm
+Bristleback : https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/bristleback.webm
+Tusk : https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/tusk.webm
+Skywrath Mage : https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/skywrath_mage.webm
+Abaddon : https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/abaddon.webm
+Elder Titan : https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/elder_titan.webm
+Legion Commander : https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/legion_commander.webm
+Techies : https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/techies.webm
+Ember Spirit : https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/ember_spirit.webm
+Earth Spirit : https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/earth_spirit.webm
+Underlord : https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/abyssal_underlord.webm
+Terrorblade : https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/terrorblade.webm
+Phoenix : https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/phoenix.webm
+Oracle : https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/oracle.webm
+Winter Wyvern : https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/winter_wyvern.webm
+Arc Warden : https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/arc_warden.webm
+Monkey King : https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/monkey_king.webm
+Dark Willow : https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/dark_willow.webm
+Pangolier : https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/pangolier.webm
+Grimstroke : https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/grimstroke.webm
+Hoodwink : https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/hoodwink.webm
+Void Spirit : https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/void_spirit.webm
+Snapfire : https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/snapfire.webm
+Mars : https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/mars.webm
+Ring Master : https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/ringmaster.webm
+Dawnbreaker : https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/dawnbreaker.webm
+Marci : https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/marci.webm
+Primal Beast : https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/primal_beast.webm
+Muerta : https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/muerta.webm
+Kez : https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/kez.webm
