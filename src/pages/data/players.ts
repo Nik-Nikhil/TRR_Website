@@ -73,7 +73,7 @@ export const players: Player[] = [
     id: "slowfast",
     nickname: "SlowFast",
     realName: "",
-    avatarUrl: "/avatars/default.jpg",
+    avatarUrl: "/avatars/Slowfast.jpg",
     seasonBadges: [],
     hasWonCup: false,
 
@@ -604,7 +604,7 @@ export const players: Player[] = [
     id: "banner",
     nickname: "Banner",
     realName: "",
-    avatarUrl: "/avatars/default.jpg",
+    avatarUrl: "/avatars/Banner.jpg",
     seasonBadges: [],
     hasWonCup: false,
 
