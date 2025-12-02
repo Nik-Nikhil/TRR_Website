@@ -1,51 +1,5 @@
-
-export interface PlayerRole {
-  iconSrc: string;
-  label: string;
-}
-
-export interface PlayerHero {
-  videoSrc: string;
-  name: string;
-}
-
-export type CupRank = "gold" | "silver" | "bronze";
-
-export interface Player {
-  id: string;
-  nickname: string;
-  realName?: string;
-  avatarUrl: string;
-
-  seasonBadges: number[];
-  hasWonCup: boolean;
-
-  
-  cupRank?: CupRank;
-  cupTooltip?: string;
-  cupSeason?: number;
-
-
-
-  
-  currentMedalLabel: string;
-  currentMedalId: string;
-  peakMedalLabel: string;
-  peakMedalId: string;
-
-  bio: string;
-
-  roles: PlayerRole[];
-  steamUrl: string;
-  dotabuffUrl: string;
-  favoriteHeroes: PlayerHero[];
-
-  
-  
-}
-
-export const players: Player[] = [
-  {
+export const players = [
+      {
     id: "420",
     nickname: "420",
     realName: "",
@@ -6342,9 +6296,4 @@ export const players: Player[] = [
     { videoSrc: "https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/bane.webm", name: "Bane" },
     { videoSrc: "https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/enigma.webm", name: "Enigma" },
   ],
-  }
-];
-
-export function getPlayerById(id: string): Player | undefined {
-  return players.find((p) => p.id === id);
-}
+  }]

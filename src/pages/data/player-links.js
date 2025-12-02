@@ -1,9 +1,5 @@
-// If you're on Node 18+ you already have global fetch.
-// If you're on older Node, uncomment this line after installing node-fetch:
-// import fetch from "node-fetch";
-
-const players = {
-   SlowFast: "https://www.dotabuff.com/players/101698448",
+export const playerLinks = {
+     SlowFast: "https://www.dotabuff.com/players/101698448",
   RockeR: "https://www.dotabuff.com/players/312460637",
   Narai:"https://www.dotabuff.com/players/217437998",
   Hunt: "https://www.dotabuff.com/players/161910981",
@@ -255,68 +251,5 @@ const players = {
   Shirleythomas:"https://www.dotabuff.com/players/178229154",
   OzEe:"https://www.dotabuff.com/players/107481382",
   "°Kyuubi°":"https://www.dotabuff.com/players/1067923883",
-  "Miracles from heaven!":"https://www.dotabuff.com/players/109646086",}
-
-// --------- helpers ---------
-
-function extractPlayerId(dotabuffUrl) {
-  // trim to handle extra spaces (like DJ)
-  const cleaned = dotabuffUrl.trim();
-  const parts = cleaned.split("/").filter(Boolean);
-  return parts[parts.length - 1]; // last segment is the ID
+  "Miracles from heaven!":"https://www.dotabuff.com/players/109646086",
 }
-
-async function fetchHeroesMap() {
-  const res = await fetch("https://api.opendota.com/api/heroes");
-  if (!res.ok) throw new Error("Failed to fetch heroes list");
-  const heroes = await res.json();
-
-  // Map hero_id -> localized_name
-  const map = new Map();
-  for (const h of heroes) {
-    map.set(h.id, h.localized_name);
-  }
-  return map;
-}
-
-async function getTop3HeroesForPlayer(playerId, heroesMap) {
-  const url = `https://api.opendota.com/api/players/${playerId}/heroes`;
-  const res = await fetch(url);
-  if (!res.ok) {
-    console.error(`Failed to fetch heroes for player ${playerId}`);
-    return [];
-  }
-
-  const data = await res.json();
-
-  // sort by games desc, take top 3
-  const top3 = data
-    .sort((a, b) => b.games - a.games)
-    .slice(0, 3);
-
-  // convert hero_id to hero names
-  const heroNames = top3.map((entry) => {
-    const name = heroesMap.get(entry.hero_id);
-    return name || "Unknown Hero";
-  });
-
-  return heroNames;
-}
-
-// --------- main ---------
-
-async function main() {
-  try {
-    const heroesMap = await fetchHeroesMap();
-
-    for (const [name, url] of Object.entries(players)) {
-      const id = extractPlayerId(url);
-      const heroNames = await getTop3HeroesForPlayer(id, heroesMap);
-      console.log(`${name} - ${heroNames.join(", ")}`);
-    }
-  } catch (err) {
-    console.error("Error:", err);
-  }
-}
-
-main();

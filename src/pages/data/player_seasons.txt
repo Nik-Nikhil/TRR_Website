@@ -1,0 +1,232 @@
+420: - s3
+Reyuk: - 
+RockeR: - s1, s2, s3, s4, s5
+Narai: - s1, s2, s4
+Hunt: - s1
+CLASH: - s1
+Helm: - s1, s2, s3, s4, s5
+Toby: - s1, s2
+PREDATOR: - s1
+Kolly: - s1, s2, s4
+Server: - s1, s2, s5
+Phola: - s1, s2, s3
+MaDaRa: - s1, s2, s3, s4, s5
+Machine: - s1, s2
+MVRK: - s1, s5
+Irox: - s1, s2, s3
+Slappy: - s1, s2, s3
+Atomic: - s1, s2, s3, s4
+r3ciprocal: - s1, s2, s5
+abbhY: - s1, s2
+Masara: - s1
+Irene: - s2, s4, s5
+Nikhil: - s1, s5
+Banner: - s1, s2, s5
+LordImpaler: - s1, s2
+Skyie@: - s1, s5
+Godspeed: - s1, s2, s5
+GRIMM: - s1, s2
+DeathShadow: - s1, s2, s4
+Insanekid08: - s1, s2
+Bazinga: - s1, s2, s3, s5
+AaRoN: - s1, s2, s3
+Bolt: - s1
+Billy: - s1, s2, s3, s5
+STORM4: - s1
+Nabeel: - s1, s2
+Sovan: - s1, s2
+Maliketh: - s1
+Akash: - s1
+MSlayer: - s2, s5
+Master Instinct: - s2, s3, s4, s5
+Arindam7: - s2, s4
+Farhan: - s2
+Noob CA: - s2
+Guts: - s2
+Madlad: - s2, s3, s4, s5
+Voodoo: - s2, s3, s4
+Ali Gm'Y: - s2, s3, s4, s5
+zRomep: - s2, s3, s4, s5
+Shiro: - s2, s3, s5
+Tukiyem: - s2
+shezdbest: - s2
+Prime.One: - s2, s4, s5
+Sherlocked: - s2
+Tundra.Goku: - s2, s3
+ScripTeR: - s2, s4, s5
+DRAGONEYE: - s2
+Sphere: - s2, s3
+gxnova: - s2
+Position 0: - s2
+Ryujin: - s2
+DK: - s2
+Lanson: - s2
+Jin[X]eD: - s2, s5
+Fyt: - s2, s3, s4, s5
+Flamy: - s2, s4
+LYRRAD: - s2
+hakuna_matata: - s2
+DynamoDon: - s3, s4, s5
+FOX: - s3, s4, s5
+Ov3rconfidenc3: - s3, s5
+Dr_Nemesis_X: - s3, s4, s5
+Yuno: - s3
+Shaidota: - s3, s4, s5
+BrõwÑ ẞöy: - s3, s5
+MYM|LUCKY13: - s3
+Pero: - s3
+Mr.Crystal: - s3
+Dropthebass: - s3
+Grizzly: - s3
+Penda: - s3, s4
+Shikamaru: - s3, s4, s5
+Faith: - s3, s5
+Memelord Ozai: - s3, s4, s5
+Blitzip: - s3
+cpt_flux: - s3, s4, s5
+Jinx: - s3, s5
+No One: - s3, s5
+Swaggy Brisngr: - s3
+RB: - s3, s4
+Epizeuxius: - s3
+Ultra.NoobPk: - s3, s4, s5
+Gifty: - s3
+Eric Dane: - s3, s4
+Still Panda YT: - s3
+Rinne: - s3, s4, s5
+ShabbY**: - s3
+hAz3: - s3
+Nj: - s3, s4
+pEnduUu: - s3, s4
+Setupathi: - s3, s5
+rA'V!: - s3, s4, s5
+RyuGa: - s3, s4
+Maldini: - s3, s4
+Dranzer: - s3, s4, s5
+Gorki: - s3, s5
+Bluediamond: - s3
+Uma1s: - s3, s4, s5
+Alcromido: - s3
+dante: - s3
+bull: - s3, s4, s5
+pYro: - s3, s4, s5
+Kakashi: - s3
+Puppy boss: - s3
+cigerettes after sex: - s3
+DoT: - s2, s3
+Meow Meow Madafaka: - s3
+Kakarot: - s3
+Icarus: - s3
+Roronoa Zoro: - s3, s4, s5
+SJ: - s3, s5
+Sridharocky: - s3
+DroN3: - s3
+fLabber: - s3
+Ronbawa: - s2, s3
+Future: - s4, s5
+IM still Noob: - s4
+Porthos: - s4, s5
+S1mpleO: - s4, s5
+BaPU: - s4, s5
+zai_7: - s4, s5
+TeRroRr: - s4, s5
+Kunaka: - s4, s5
+FADE: - s4, s5
+Gotatch captain: - s4
+Zombie: - s4, s5
+LightNing Goku: - s4, s5
+*Foujii: - s4, s5
+Sejlur: - s4
+Mr Pudge: - s4
+The Beast: - s4
+TamBamGOD: - s4, s5
+MGL: - s4
+Eternal_Bliz2ard: - s4
+Draco~: - s4, s5
+Anzu: - s4, s5
+itus: - s4
+BOOM: - s4, s5
+Razer: - s4, s5
+Dis.Traction: - s4
+JiMmY#: - s4
+Muri: - s4
+BlisS: - s4
+skipper: - s4, s5
+Seedhemaut: - s4
+Maddened: - s4
+Zonark: - s4
+07 Apple: - 
+Naruto: - s4
+Markeloff: - s4
+Tintin000: - s4
+Deathgods: - s4
+Lala: - s4, s5
+Mask: - s4, s5
+plutoski: - s4
+Mind_Flay3R: - s4
+Toji Khan: - s4
+Vanara: - s4
+Chinigami: - s4
+Maddy: - s4
+Asd: - s4
+Rockrobin: - s5
+Dracarys: - s5
+shadow: - s5
+dp: - s5
+Ming~ ^._.^: - s5
+I will bully u: - s5
+CurserdTerror: - s5
+Sai: - s5
+Xcarnation: - s5
+Echo Salami: - s5
+m1p07: - s5
+ome1r: - s4, s5
+ZukeGod: - s5
+Vexcon: - s5
+Sexy: - s5
+Munna Lisa: - s5
+Enjoyer: - 
+KFP: - s5
+SUBVERSION: - s5
+Hero for Fun!: - s5
+Bomberman™: - s5
+Mystic_Bolt: - s5
+topuria enjoyer: - s5
+CD.LostfromLight: - s5
+Midas: - s5
+LUCIFERROCKER: - s5
+F(x): - s5
+yt/JNJISHNU: - s5
+DEAN: - s5
+YOUNOOB: - s5
+jhamkuanna: - s5
+✪KungFuPanda: - s5
+Lily: - s5
+Sasuke: - s5
+Yoko: - s5
+Hunter: - s5
+ZeT: - s5
+Impeccable: - s5
+tadi_uncle: - s5
+U from miri: - s5
+BTT: - s5
+SKOOTI: - s4, s5
+Juker: - s5
+Erza Scarlet: - s5
+Changing Star: - s5
+ConFi: - s5
+Bakabot: - s5
+Potatobuoy: - s5
+Hina: - s5
+έ_v!Ḷ₥!N_Đ: - s5
+MrBeanBag: - s5
+humble: - s5
+EXe: - s5
+SiniOmega: - s5
+zx: - s5
+I Throw Rocks at Fat Girls: - 
+rizwan the fu*ker: - s5
+Shirleythomas: - s5
+OzEe: - s5
+°Kyuubi°: - s5
+Miracles from heaven!: - s5

@@ -18,6 +18,9 @@ import Season6Standings from "./pages/Seasons/Season6Standing";
 import AllPlayersPage from "./pages/Players/AllPlayersPage";
 import PlayerDetailPage from "./pages/Players/PlayerDetailPage";
 
+// ⬇️ NEW: import RulesPage
+import RulesPage from "./pages/Rules";
+
 function App() {
   return (
     <div className="min-h-screen flex flex-col text-gray-100">
@@ -28,6 +31,9 @@ function App() {
           <Route path="/" element={<Home />} />
           <Route path="/tournament" element={<Tournament />} />
           <Route path="/schedule" element={<SchedulePage />} />
+
+          {/* ⬇️ NEW: Rules route */}
+          <Route path="/rules" element={<RulesPage />} />
 
           <Route path="/teams" element={<Teams />} />
           <Route path="/teams/:teamId" element={<TeamDetail />} />
