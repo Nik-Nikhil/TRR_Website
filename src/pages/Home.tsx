@@ -103,7 +103,6 @@ export default function Home() {
         </div>
 
         {/* Stats row – Highest Prize Pool, Country, Admins */}
-<<<<<<< HEAD
 <div
   style={{
     marginTop: "2rem",
@@ -157,62 +156,6 @@ export default function Home() {
   })}
 </div>
 
-=======
-        <div
-          style={{
-            marginTop: "2rem",
-            display: "flex",
-            gap: "1rem",
-            flexWrap: "wrap",
-          }}
-        >
-          {stats.map((stat) => {
-            const card = (
-              <div
-                style={{
-                  flex: "1",
-                  minWidth: "180px",
-                  padding: "1rem 0.6rem",
-                  height: "90px",
-                  display: "flex",
-                  flexDirection: "column",
-                  justifyContent: "center",
-                  borderRadius: "16px",
-                  border: "1px solid rgba(255, 255, 255, 0.22)",
-                  background: "rgba(255, 255, 255, 0.05)",
-                  textAlign: "center",
-                }}
-              >
-                <p style={{ fontSize: "0.75rem", color: "#c9c9c9" }}>
-                  {stat.label}
-                </p>
-                <p
-                  style={{
-                    fontWeight: 700,
-                    marginTop: "0.3rem",
-                    color: "#e7e7e7",
-                    fontSize: "1rem",
-                  }}
-                >
-                  {stat.value}
-                </p>
-              </div>
-            );
-
-            return stat.link ? (
-              <Link
-                key={stat.label}
-                to={stat.link}
-                style={{ textDecoration: "none" }}
-              >
-                {card}
-              </Link>
-            ) : (
-              <div key={stat.label}>{card}</div>
-            );
-          })}
-        </div>
->>>>>>> origin/shr
       </motion.div>
 
       {/* RIGHT: TROPHY 3D + AEGIS LINE */}
