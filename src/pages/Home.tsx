@@ -6,26 +6,48 @@ import { primaryTournament } from "./data/mockTournaments";
 export default function Home() {
   const t = primaryTournament;
 
+  const stats = [
+    {
+      label: "Highest Prize Pool",
+      value: `₹${t.prizePool.toLocaleString()}`,
+    },
+    {
+      label: "Country",
+      value: t.location,
+    },
+    {
+      label: "Admins",
+      value: "View Admins",
+      link: "/admins",
+    },
+  ];
+
   return (
-    <div>
-      {/* Left: Hero text */}
+    <div
+      style={{
+        display: "flex",
+        justifyContent: "space-between",
+        alignItems: "center",
+        minHeight: "90vh",
+        padding: "4rem 3rem",
+        gap: "2rem",
+      }}
+    >
+      {/* LEFT: HERO TEXT */}
       <motion.div
-        initial={{ opacity: 0, y: 18 }}
+        style={{ maxWidth: "550px" }}
+        initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.6 }}
       >
-        {/* Kicker line */}
-        <p>The Roshan Rumble • {t.year}</p>
-
         {/* Main heading */}
-        <h1>
+        <h1 style={{ marginTop: "0.4rem", fontWeight: 800, fontSize: "3rem" }}>
           <span
             style={{
               display: "block",
               backgroundImage:
-                "linear-gradient(90deg, #f5f5f5, #c0c0c0, #8b8f98)",
+                "linear-gradient(90deg, #fafafa, #d7d7d7, #bfbfbf)",
               WebkitBackgroundClip: "text",
-              backgroundClip: "text",
               color: "transparent",
             }}
           >
@@ -38,113 +60,141 @@ export default function Home() {
               color: "#e5e7eb",
             }}
           >
-            Only one squad lifts the Aegis.
+            Where the battle defines you.
           </span>
         </h1>
 
         {/* Description */}
-        <p style={{ maxWidth: "32rem", marginTop: "0.5rem" }}>
+        <p
+          style={{
+            marginTop: "0.9rem",
+            lineHeight: 1.55,
+            color: "#d3d3d3",
+            maxWidth: "32rem",
+          }}
+        >
           {t.description}
         </p>
 
-        {/* CTA buttons */}
+        {/* CTA row – only Tournament Rules, centered */}
         <div
           style={{
-            marginTop: "1.25rem",
+            marginTop: "1.6rem",
             display: "flex",
-            flexWrap: "wrap",
-            gap: "0.75rem",
+            justifyContent: "center",
           }}
         >
           <Link
-            to="/tournament"
+            to="/rules"
             style={{
-              padding: "0.75rem 1.6rem",
+              padding: "0.85rem 1.9rem",
               borderRadius: "999px",
               fontSize: "0.8rem",
-              fontWeight: 600,
+              fontWeight: 700,
               textTransform: "uppercase",
-              letterSpacing: "0.18em",
-              backgroundImage:
-                "linear-gradient(120deg, #f5f5f5, #c0c0c0, #9ca3af)",
-              color: "#050608",
-              boxShadow: "0 0 25px rgba(148, 163, 184, 0.8)",
+              letterSpacing: "0.16em",
+              border: "1px solid #b7b7b7",
+              background: "rgba(255, 255, 255, 0.08)",
+              color: "#ededed",
             }}
           >
-            View Bracket
-          </Link>
-
-          <Link
-            to="/schedule"
-            style={{
-              padding: "0.75rem 1.6rem",
-              borderRadius: "999px",
-              fontSize: "0.8rem",
-              fontWeight: 600,
-              textTransform: "uppercase",
-              letterSpacing: "0.18em",
-              border: "1px solid rgba(148, 163, 184, 0.55)",
-              color: "#e5e7eb",
-              background: "rgba(15, 15, 17, 0.6)",
-            }}
-          >
-            Match Schedule
+            Tournament Rules
           </Link>
         </div>
 
-        {/* Stats row */}
+        {/* Stats row – Highest Prize Pool, Country, Admins */}
         <div
           style={{
-            marginTop: "1.75rem",
-            maxWidth: "24rem",
+            marginTop: "2rem",
             display: "flex",
+            gap: "1rem",
             flexWrap: "wrap",
-            gap: "0.75rem",
           }}
         >
-          <div
-            className="glass-panel"
-            style={{ flex: "1 1 30%", textAlign: "center" }}
-          >
-            <p>Prize Pool</p>
-            <p
-              style={{
-                fontSize: "1.1rem",
-                fontWeight: 700,
-                color: "#d4d4d4",
-              }}
-            >
-              ₹{t.prizePool.toLocaleString()}
-            </p>
-          </div>
+          {stats.map((stat) => {
+            const card = (
+              <div
+                style={{
+                  flex: "1",
+                  minWidth: "180px",
+                  padding: "1rem 0.6rem",
+                  height: "90px",
+                  display: "flex",
+                  flexDirection: "column",
+                  justifyContent: "center",
+                  borderRadius: "16px",
+                  border: "1px solid rgba(255, 255, 255, 0.22)",
+                  background: "rgba(255, 255, 255, 0.05)",
+                  textAlign: "center",
+                }}
+              >
+                <p style={{ fontSize: "0.75rem", color: "#c9c9c9" }}>
+                  {stat.label}
+                </p>
+                <p
+                  style={{
+                    fontWeight: 700,
+                    marginTop: "0.3rem",
+                    color: "#e7e7e7",
+                    fontSize: "1rem",
+                  }}
+                >
+                  {stat.value}
+                </p>
+              </div>
+            );
 
-          <div
-            className="glass-panel"
-            style={{ flex: "1 1 30%", textAlign: "center" }}
-          >
-            <p>Location</p>
-            <p style={{ fontWeight: 600 }}>{t.location}</p>
-          </div>
-
-          <div
-            className="glass-panel"
-            style={{ flex: "1 1 30%", textAlign: "center" }}
-          >
-            <p>Dates</p>
-            <p style={{ fontWeight: 600 }}>
-              {t.startDate} → {t.endDate}
-            </p>
-          </div>
+            return stat.link ? (
+              <Link
+                key={stat.label}
+                to={stat.link}
+                style={{ textDecoration: "none" }}
+              >
+                {card}
+              </Link>
+            ) : (
+              <div key={stat.label}>{card}</div>
+            );
+          })}
         </div>
       </motion.div>
 
-      {/* Right: Trophy 3D */}
+      {/* RIGHT: TROPHY 3D + AEGIS LINE */}
       <motion.div
-        initial={{ opacity: 0, x: 40 }}
+        style={{
+          flex: 1,
+          minHeight: "500px",
+          maxHeight: "80vh",
+          display: "flex",
+          flexDirection: "column",
+          justifyContent: "center",
+        }}
+        initial={{ opacity: 0, x: 35 }}
         animate={{ opacity: 1, x: 0 }}
         transition={{ duration: 0.7 }}
       >
-        <TrophyCanvas />
+        <div
+          style={{
+            transform: "scale(0.85)",
+            transformOrigin: "center",
+          }}
+        >
+          <TrophyCanvas />
+        </div>
+
+        <p
+          style={{
+            marginTop: "1rem",
+            fontSize: "0.9rem",
+            letterSpacing: "0.04em",
+            color: "#cfcfcf",
+            textAlign: "center",
+            opacity: 0.85,
+          }}
+        >
+          Every legend was unknown once — long before their name was engraved on
+          the Aegis.
+        </p>
       </motion.div>
     </div>
   );
