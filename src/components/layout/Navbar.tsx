@@ -39,7 +39,7 @@ export default function Navbar() {
 
   return (
     <nav
-      className="fixed inset-x-0 top-0 z-50 w-full backdrop-blur-[18px] border-b border-[rgba(192,192,192,0.25)] shadow-[0_18px_45px_rgba(0,0,0,0.7)]"
+      className="fixed max-h-[10vh] inset-x-0 top-0 z-50 w-full backdrop-blur-[18px] border-b border-[rgba(192,192,192,0.25)] shadow-[0_18px_45px_rgba(0,0,0,0.7)]"
       style={{
         background:
           "radial-gradient(circle at 0% 0%, rgba(192,192,192,0.12), transparent 60%), radial-gradient(circle at 100% 100%, rgba(136,144,150,0.10), transparent 60%), rgba(5,7,10,0.92)",
@@ -49,26 +49,30 @@ export default function Navbar() {
       <div className="w-full max-w-none mx-0 pl-20 pr-6">
         <div className="h-[72px] grid grid-cols-[auto_1fr] items-center w-full">
           {/* Brand / Left side */}
-          <Link to="/" className="flex items-center gap-3 no-underline group">
-            <img
-              src="/icons/Roshan.png" // ✅ root-relative path so it works on every route
-              alt="Roshan Icon"
-              className="w-10 h-10 object-contain
-                invert brightness-[8] contrast-[1.4] saturate-[0]
-                bg-linear-to-r from-[#f5f5f5] via-[#c0c0c0] to-[#8b8f98]
-                bg-clip-text text-transparent
-                drop-shadow-[0_0_10px_rgba(255,255,255,0.6)]
-                transition-all duration-300
-                group-hover:drop-shadow-[0_0_18px_rgba(255,255,255,0.95)]
-                mix-blend-screen"
-              draggable="false"
-            />
+          <Link
+            to="/"
+            className="flex items-center gap-3 no-underline group relative"
+          >
+            <span className="relative w-15 h-15 flex items-center justify-center">
+              {/* Gradient glow on hover */}
+              <span
+                className="absolute inset-0 rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none"
+                style={{
+                  background:
+                    "radial-gradient(circle, #D16500 0%, #AF1D5D 80%)",
+                  filter: "blur(8px)",
+                  zIndex: 0,
+                }}
+              />
+              <img
+                src="./src/assets/roshanIcon.png"
+                className="w-15 h-15 relative z-10"
+                alt="Roshan Icon"
+              />
+            </span>
             <div className="flex flex-col">
-              <span className="text-[0.65rem] uppercase tracking-[0.18em] text-gray-400">
-                The Roshan Rumble
-              </span>
               <span className="text-[1.35rem] font-extrabold leading-none bg-linear-to-r from-[#f5f5f5] via-[#c0c0c0] to-[#8b8f98] bg-clip-text text-transparent">
-                TRR
+                The Roshan Rumble
               </span>
             </div>
           </Link>
@@ -108,12 +112,11 @@ export default function Navbar() {
 
               {/* Players dropdown */}
               <NavItem
-  to="/players"
-  icon={<UsersRound className="w-[18px] h-[18px]" />}
-  label="Players"
-  active={pathname.startsWith("/players")}
-/>
-
+                to="/players"
+                icon={<UsersRound className="w-[18px] h-[18px]" />}
+                label="Players"
+                active={pathname.startsWith("/players")}
+              />
             </div>
           </LayoutGroup>
         </div>
@@ -170,7 +173,14 @@ type DropdownProps = {
   items: { label: string; to: string }[];
 };
 
-function Dropdown({ label, icon, open, onEnter, onLeave, items }: DropdownProps) {
+function Dropdown({
+  label,
+  icon,
+  open,
+  onEnter,
+  onLeave,
+  items,
+}: DropdownProps) {
   return (
     <div
       className="relative flex items-center"
@@ -191,9 +201,7 @@ function Dropdown({ label, icon, open, onEnter, onLeave, items }: DropdownProps)
                        group-hover:opacity-100 group-hover:scale-100 group-hover:blur-xl"
           />
           {label}
-          <span
-            className="pointer-events-none absolute left-0 right-0 -bottom-1.5 block h-0.5 rounded-full bg-linear-to-r from-[#f5f5f5] to-[#a3a3a3] origin-left scale-x-0 transition-transform duration-200 ease-out group-hover:scale-x-100"
-          />
+          <span className="pointer-events-none absolute left-0 right-0 -bottom-1.5 block h-0.5 rounded-full bg-linear-to-r from-[#f5f5f5] to-[#a3a3a3] origin-left scale-x-0 transition-transform duration-200 ease-out group-hover:scale-x-100" />
         </span>
       </button>
 

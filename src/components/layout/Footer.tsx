@@ -34,6 +34,7 @@ export default function Footer() {
         border-t border-[#2a2c30]/60
         bg-[#111216]
         relative overflow-hidden
+        max-h-[10vh]
       "
     >
       <div
