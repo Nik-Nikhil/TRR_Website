@@ -1,6 +1,7 @@
 // src/components/layout/Navbar.tsx
 import { Link, useLocation } from "react-router-dom";
 import { useState, useRef, useEffect, type ReactNode } from "react";
+import { Menu } from "lucide-react";
 import { AnimatePresence, LayoutGroup, motion } from "framer-motion";
 import { LayoutGrid, Medal, UsersRound, ScrollText } from "lucide-react";
 
@@ -9,6 +10,7 @@ const seasons = [1, 2, 3, 4, 5, 6];
 export default function Navbar() {
   const { pathname } = useLocation();
   const [open, setOpen] = useState<string | null>(null);
+  const [mobileNavOpen, setMobileNavOpen] = useState(false);
   const closeTimeout = useRef<number | null>(null);
 
   const handleEnter = (id: string) => {
@@ -45,15 +47,14 @@ export default function Navbar() {
           "radial-gradient(circle at 0% 0%, rgba(192,192,192,0.12), transparent 60%), radial-gradient(circle at 100% 100%, rgba(136,144,150,0.10), transparent 60%), rgba(5,7,10,0.92)",
       }}
     >
-      {/* slightly less side padding so logo sits closer to far left */}
-      <div className="w-full max-w-none mx-0 pl-20 pr-6">
-        <div className="h-[72px] grid grid-cols-[auto_1fr] items-center w-full">
+      <div className="w-full max-w-none mx-0 pl-6 pr-4 sm:pl-12 md:pl-20 md:pr-6">
+        <div className="h-[60px] md:h-[72px] grid grid-cols-[auto_1fr] items-center w-full">
           {/* Brand / Left side */}
           <Link
             to="/"
-            className="flex items-center gap-3 no-underline group relative"
+            className="flex items-center gap-2 sm:gap-3 no-underline group relative"
           >
-            <span className="relative w-15 h-15 flex items-center justify-center">
+            <span className="relative w-12 h-12 md:w-15 md:h-15 flex items-center justify-center">
               {/* Gradient glow on hover */}
               <span
                 className="absolute inset-0 rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none"
@@ -66,21 +67,31 @@ export default function Navbar() {
               />
               <img
                 src="./src/assets/roshanIcon.png"
-                className="w-15 h-15 relative z-10"
+                className="w-12 h-12 md:w-15 md:h-15 relative z-10"
                 alt="Roshan Icon"
               />
             </span>
             <div className="flex flex-col">
-              <span className="text-[1.35rem] font-extrabold leading-none bg-linear-to-r from-[#f5f5f5] via-[#c0c0c0] to-[#8b8f98] bg-clip-text text-transparent">
+              <span className="text-[1.1rem] md:text-[1.35rem] font-extrabold leading-none bg-linear-to-r from-[#f5f5f5] via-[#c0c0c0] to-[#8b8f98] bg-clip-text text-transparent">
                 The Roshan Rumble
               </span>
             </div>
           </Link>
 
+          {/* Hamburger for mobile */}
+          <div className="flex md:hidden justify-end w-full">
+            <button
+              className="p-2 rounded focus:outline-none focus:ring-2 focus:ring-[#D16500]"
+              onClick={() => setMobileNavOpen((v) => !v)}
+              aria-label="Open navigation menu"
+            >
+              <Menu className="w-7 h-7 text-gray-200" />
+            </button>
+          </div>
+
           {/* Middle + Right Sections */}
           <LayoutGroup id="navbar">
-            {/* ml-10 nudges the Home/Rules group slightly to the right */}
-            <div className="flex items-center justify-center gap-[2.4rem] w-full ml-10">
+            <div className="hidden md:flex items-center justify-end gap-[2.4rem] w-full ">
               {/* Home */}
               <NavItem
                 to="/"
@@ -118,6 +129,49 @@ export default function Navbar() {
                 active={pathname.startsWith("/players")}
               />
             </div>
+
+            {/* Mobile nav menu */}
+            <AnimatePresence>
+              {mobileNavOpen && (
+                <motion.div
+                  initial={{ opacity: 0, y: -10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -10 }}
+                  transition={{ duration: 0.18, ease: "easeOut" }}
+                  className="absolute top-[60px] right-4 w-max bg-[rgba(5,7,10,0.98)] border border-[rgba(192,192,192,0.18)] shadow-lg z-999 flex flex-col md:hidden rounded-xl px-2 py-2"
+                >
+                  <NavItem
+                    to="/"
+                    icon={<LayoutGrid className="w-[18px] h-[18px]" />}
+                    label="Home"
+                    active={pathname === "/"}
+                  />
+                  <NavItem
+                    to="/rules"
+                    icon={<ScrollText className="w-[18px] h-[18px]" />}
+                    label="Rules"
+                    active={pathname.startsWith("/rules")}
+                  />
+                  <Dropdown
+                    label="Standings"
+                    icon={<Medal className="w-[18px] h-[18px]" />}
+                    open={open === "standings"}
+                    onEnter={() => handleEnter("standings")}
+                    onLeave={handleLeave}
+                    items={seasons.map((s) => ({
+                      label: `Season ${s}`,
+                      to: `/seasons/${s}`,
+                    }))}
+                  />
+                  <NavItem
+                    to="/players"
+                    icon={<UsersRound className="w-[18px] h-[18px]" />}
+                    label="Players"
+                    active={pathname.startsWith("/players")}
+                  />
+                </motion.div>
+              )}
+            </AnimatePresence>
           </LayoutGroup>
         </div>
       </div>
@@ -212,7 +266,7 @@ function Dropdown({
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.96, y: -6 }}
             transition={{ duration: 0.14, ease: "easeOut" }}
-            className="absolute top-full left-1/2 -translate-x-1/2 mt-2 min-w-[200px] py-[0.45rem] grid gap-1 bg-[rgba(9,11,16,0.98)] border border-[rgba(148,163,184,0.6)] backdrop-blur-[18px] rounded-xl shadow-[0_20px_50px_rgba(0,0,0,0.85)] z-200"
+            className="absolute top-full left-1/2 -translate-x-1/2 mt-2 w-max py-[0.45rem] grid gap-1 bg-[rgba(9,11,16,0.98)] border border-[rgba(148,163,184,0.6)] backdrop-blur-[18px] rounded-xl shadow-[0_20px_50px_rgba(0,0,0,0.85)] z-200"
           >
             {items.map((item) => (
               <Link
