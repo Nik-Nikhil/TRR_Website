@@ -10,9 +10,9 @@ export type Team = {
 
 export type Match = {
   id: string;
-  round: string;              // e.g. "Upper Bracket R1"
-  stage: 'groups' | 'playoffs' | 'finals';
-  scheduledAt: string;        // ISO date string
+  round: string; // e.g. "Upper Bracket R1"
+  stage: "groups" | "playoffs" | "finals";
+  scheduledAt: string; // ISO date string
   bestOf: number;
   streamUrl?: string;
   teamA: Team;
@@ -28,7 +28,8 @@ export type Tournament = {
   location: string;
   startDate: string;
   endDate: string;
-  description: string;
+  descriptionTitle: string;
+  descriptionContent: string;
   tagline: string;
   matches: Match[];
 };
