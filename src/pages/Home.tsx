@@ -1,201 +1,78 @@
 import { Link } from "react-router-dom";
-import { motion } from "framer-motion";
 import TrophyCanvas from "../components/3d/TrophyCanvas";
 import { primaryTournament } from "./data/mockTournaments";
 
 export default function Home() {
   const t = primaryTournament;
 
-  const stats = [
-    {
-      label: "Highest Prize Pool",
-      value: `₹${t.prizePool.toLocaleString()}`,
-    },
-    {
-      label: "Country",
-      value: t.location,
-    },
-    {
-      label: "Admins",
-      value: "View Admins",
-      link: "/admins",
-    },
-  ];
-
   return (
-    <div
-      style={{
-        display: "flex",
-        justifyContent: "space-between",
-        alignItems: "center",
-        minHeight: "90vh",
-        padding: "4rem 3rem",
-        gap: "2rem",
-      }}
-    >
-      {/* LEFT: HERO TEXT */}
-      <motion.div
-        style={{ maxWidth: "550px" }}
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.6 }}
-      >
-        {/* Main heading */}
-        <h1 style={{ marginTop: "0.4rem", fontWeight: 800, fontSize: "3rem" }}>
-          <span
-            style={{
-              display: "block",
-              backgroundImage:
-                "linear-gradient(90deg, #fafafa, #d7d7d7, #bfbfbf)",
-              WebkitBackgroundClip: "text",
-              color: "transparent",
-            }}
-          >
-            Dive into the pit.
-          </span>
-          <span
-            style={{
-              display: "block",
-              marginTop: "0.5rem",
-              color: "#e5e7eb",
-            }}
-          >
-            Where the battle defines you.
-          </span>
-        </h1>
+    <main className="relative flex-grow flex flex-col items-center justify-center w-full px-6 md:px-12 pt-[10vh] pb-[10vh]">
+      {/* Background Ambient Glow */}
+      <div className="absolute inset-0 z-0 pointer-events-none overflow-hidden">
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-zinc-900/30 rounded-full blur-3xl opacity-50"></div>
+      </div>
 
-        {/* Description */}
-        <p
-          style={{
-            marginTop: "0.9rem",
-            lineHeight: 1.55,
-            color: "#d3d3d3",
-            maxWidth: "32rem",
-          }}
-        >
-          {t.description}
-        </p>
+      <div className="w-full max-w-5xl z-10 flex flex-col gap-8 md:gap-12">
+        {/* Title Section */}
+        <div className="w-full text-center space-y-2">
+          <h1 className="text-5xl md:text-5xl font-semibold tracking-tighter text-transparent bg-clip-text bg-gradient-to-b from-white via-zinc-200 to-zinc-500 pb-2">
+            {t.descriptionContent}
+          </h1>
+        </div>
 
-        {/* CTA row – only Tournament Rules, centered */}
-        <div
-          style={{
-            marginTop: "1.6rem",
-            display: "flex",
-            justifyContent: "center",
-          }}
-        >
+        {/* Middle Grid: Register | Trophy | Dates */}
+        <div className="grid grid-cols-1 md:grid-cols-12 gap-4 md:gap-6 w-full items-stretch">
+          {/* Left: Register Card */}
           <Link
-            to="/rules"
-            style={{
-              padding: "0.85rem 1.9rem",
-              borderRadius: "999px",
-              fontSize: "0.8rem",
-              fontWeight: 700,
-              textTransform: "uppercase",
-              letterSpacing: "0.16em",
-              border: "1px solid #b7b7b7",
-              background: "rgba(255, 255, 255, 0.08)",
-              color: "#ededed",
-            }}
+            to="/admins"
+            className="md:col-span-3 group relative overflow-hidden rounded-2xl border border-white/20 bg-white/5 p-6 md:p-8 flex flex-col items-center justify-center text-center transition-all duration-300 hover:bg-white/10 hover:border-zinc-700/50 hover:shadow-2xl hover:shadow-zinc-900/20"
           >
-            Tournament Rules
+            <div className="absolute inset-0 bg-gradient-to-br from-white/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+            <div className="relative z-10 flex flex-col items-center gap-3">
+              <span className="text-lg font-medium tracking-tight text-zinc-200 group-hover:text-white">
+                Register
+              </span>
+            </div>
           </Link>
-        </div>
 
-        {/* Stats row – Highest Prize Pool, Country, Admins */}
-        <div
-          style={{
-            marginTop: "2rem",
-            display: "flex",
-            gap: "1rem",
-            flexWrap: "wrap",
-          }}
-        >
-          {stats.map((stat) => {
-            const card = (
-              <div
-                style={{
-                  flex: "1",
-                  minWidth: "180px",
-                  padding: "1rem 0.6rem",
-                  height: "90px",
-                  display: "flex",
-                  flexDirection: "column",
-                  justifyContent: "center",
-                  borderRadius: "16px",
-                  border: "1px solid rgba(255, 255, 255, 0.22)",
-                  background: "rgba(255, 255, 255, 0.05)",
-                  textAlign: "center",
-                }}
-              >
-                <p style={{ fontSize: "0.75rem", color: "#c9c9c9" }}>
-                  {stat.label}
-                </p>
-                <p
-                  style={{
-                    fontWeight: 700,
-                    marginTop: "0.3rem",
-                    color: "#e7e7e7",
-                    fontSize: "1rem",
-                  }}
-                >
-                  {stat.value}
-                </p>
+          {/* Center: Trophy Canvas */}
+          <div className="md:col-span-6 relative h-64 md:h-80 flex items-center justify-center">
+            <TrophyCanvas />
+          </div>
+
+          {/* Right: Dates Card */}
+          <div className="md:col-span-3 rounded-2xl border border-white/20 bg-white/5 p-6 md:p-8 flex flex-col items-center justify-center text-center">
+            <div className="flex flex-col gap-1">
+              <span className="text-xs font-medium uppercase tracking-widest text-zinc-500">
+                Event Dates
+              </span>
+              <div className="flex items-center gap-2 mt-2 justify-center text-zinc-200">
+                <span className="text-lg font-medium tracking-tight">
+                  {t.startDate} - {t.endDate}
+                </span>
               </div>
-            );
-
-            return stat.link ? (
-              <Link
-                key={stat.label}
-                to={stat.link}
-                style={{ textDecoration: "none" }}
-              >
-                {card}
-              </Link>
-            ) : (
-              <div key={stat.label}>{card}</div>
-            );
-          })}
-        </div>
-      </motion.div>
-
-      {/* RIGHT: TROPHY 3D + AEGIS LINE */}
-      <motion.div
-        style={{
-          flex: 1,
-          minHeight: "500px",
-          maxHeight: "80vh",
-          display: "flex",
-          flexDirection: "column",
-          justifyContent: "center",
-        }}
-        initial={{ opacity: 0, x: 35 }}
-        animate={{ opacity: 1, x: 0 }}
-        transition={{ duration: 0.7 }}
-      >
-        <div
-          style={{
-            transform: "scale(0.85)",
-            transformOrigin: "center",
-          }}
-        >
-          <TrophyCanvas />
+            </div>
+          </div>
         </div>
 
-        <p
-          style={{
-            marginTop: "1rem",
-            fontSize: "0.9rem",
-            letterSpacing: "0.04em",
-            color: "#cfcfcf",
-            textAlign: "center",
-            opacity: 0.85,
-          }}
-        >
-          Every legend was unknown once — long before their name was engraved on
-          the Aegis.
-        </p>
-      </motion.div>
-    </div>
+        {/* Bottom: Prize Pool Card */}
+        <div className="w-full">
+          <div className="relative w-full rounded-2xl border border-white/20 bg-white/5 p-6 md:p-8 flex flex-col md:flex-row items-center justify-between gap-4 md:gap-8 group transition-all duration-300 hover:bg-white/10">
+            <div className="flex flex-col md:flex-row items-center gap-4 md:gap-6 text-center md:text-left w-full justify-center">
+              <div className="flex flex-col items-center gap-1">
+                <span className="text-xs font-medium uppercase tracking-widest text-zinc-500">
+                  Total Prize Pool
+                </span>
+                <span className="text-3xl md:text-4xl font-semibold tracking-tighter text-transparent bg-clip-text bg-gradient-to-r from-zinc-100 to-zinc-400">
+                  ₹{t.prizePool.toLocaleString()}
+                </span>
+              </div>
+            </div>
+            {/* Subtle decorative accent */}
+            <div className="absolute right-0 top-0 h-full w-1/3 bg-gradient-to-l from-white/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none rounded-r-2xl"></div>
+          </div>
+        </div>
+      </div>
+    </main>
   );
 }
