@@ -17,7 +17,7 @@ export interface Player {
   realName?: string;
   avatarUrl: string;
 
-  seasonBadges: number[];
+  seasonBadges: string[];
   hasWonCup: boolean;
 
   
@@ -50,13 +50,13 @@ export const players: Player[] = [
     nickname: "420",
     realName: "",
     avatarUrl: "/avatars/default.jpg",
-    seasonBadges: [],
+    seasonBadges: ["s3"],
     hasWonCup: false,
 
     
     
 
-    currentMedalLabel: "",
+    currentMedalLabel: "Divine 3",
     currentMedalId: "",
     peakMedalLabel: "",
     peakMedalId: "",
@@ -104,7 +104,7 @@ export const players: Player[] = [
     nickname: "RockeR",
     realName: "",
     avatarUrl: "/avatars/default.jpg",
-    seasonBadges: [],
+    seasonBadges: ["s1","s2","s3","s4","s5"],
     hasWonCup: false,
 
     
@@ -131,7 +131,7 @@ export const players: Player[] = [
     nickname: "Narai",
     realName: "",
     avatarUrl: "/avatars/default.jpg",
-    seasonBadges: [],
+    seasonBadges: ["s1","s2","s4"],
     hasWonCup: true,
     cupRank: "gold",
     cupTooltip: "1st place — Season 1",
@@ -161,7 +161,7 @@ export const players: Player[] = [
     nickname: "Hunt",
     realName: "",
     avatarUrl: "/avatars/default.jpg",
-    seasonBadges: [],
+    seasonBadges: ["s1"],
     hasWonCup: false,
 
     
@@ -188,7 +188,7 @@ export const players: Player[] = [
     nickname: "CLASH",
     realName: "",
     avatarUrl: "/avatars/default.jpg",
-    seasonBadges: [],
+    seasonBadges: ["s1"],
     hasWonCup: false,
 
     
@@ -216,7 +216,7 @@ export const players: Player[] = [
     nickname: "Helm",
     realName: "",
     avatarUrl: "/avatars/default.jpg",
-    seasonBadges: [],
+    seasonBadges: ["s1","s2","s3","s4","s5"],
     hasWonCup: false,
 
     
@@ -244,7 +244,7 @@ export const players: Player[] = [
     nickname: "Toby",
     realName: "",
     avatarUrl: "/avatars/default.jpg",
-    seasonBadges: [1],
+    seasonBadges: ["s1","s2"],
     hasWonCup: true,
     cupRank: "gold",
     cupTooltip: "1st place — Season 1",
@@ -274,7 +274,7 @@ export const players: Player[] = [
     nickname: "PREDATOR",
     realName: "",
     avatarUrl: "/avatars/default.jpg",
-    seasonBadges: [],
+    seasonBadges: ["s1"],
     hasWonCup: false,
 
     
@@ -302,13 +302,13 @@ export const players: Player[] = [
     nickname: "Kolly",
     realName: "",
     avatarUrl: "/avatars/default.jpg",
-    seasonBadges: [],
+    seasonBadges: ["s1","s2","s4"],
     hasWonCup: false,
 
     
     
 
-    currentMedalLabel: "",
+    currentMedalLabel: "Divine 1",
     currentMedalId: "",
     peakMedalLabel: "",
     peakMedalId: "",
@@ -330,7 +330,7 @@ export const players: Player[] = [
     nickname: "Server",
     realName: "",
     avatarUrl: "/avatars/default.jpg",
-    seasonBadges: [1,5],
+    seasonBadges: ["s1","s2","s5"],
     hasWonCup: false,
 
     
@@ -358,13 +358,13 @@ export const players: Player[] = [
     nickname: "Phola",
     realName: "",
     avatarUrl: "/avatars/Phola.png",
-    seasonBadges: [2,4],
+    seasonBadges: ["s1","s2","s3"],
     hasWonCup: false,
 
     
     
 
-    currentMedalLabel: "Legend 5",
+    currentMedalLabel: "Legend 4",
     currentMedalId: "Legend_5",
     peakMedalLabel: "",
     peakMedalId: "",
@@ -386,13 +386,13 @@ export const players: Player[] = [
     nickname: "MaDaRa",
     realName: "",
     avatarUrl: "/avatars/default.jpg",
-    seasonBadges: [],
+    seasonBadges: ["s1","s2","s3","s4","s5"],
     hasWonCup: false,
 
     
     
 
-    currentMedalLabel: "",
+    currentMedalLabel: "Ancient 4",
     currentMedalId: "",
     peakMedalLabel: "",
     peakMedalId: "",
@@ -413,13 +413,13 @@ export const players: Player[] = [
     nickname: "Machine",
     realName: "",
     avatarUrl: "/avatars/Machine.png",
-    seasonBadges: [1,5],
+    seasonBadges: ["s1","s2"],
     hasWonCup: false,
 
     
     
 
-    currentMedalLabel: "",
+    currentMedalLabel: "Legend 1",
     currentMedalId: "",
     peakMedalLabel: "",
     peakMedalId: "",
@@ -440,13 +440,13 @@ export const players: Player[] = [
     nickname: "MVRK",
     realName: "",
     avatarUrl: "/avatars/default.jpg",
-    seasonBadges: [],
+    seasonBadges: ["s1","s5"],
     hasWonCup: false,
 
     
     
 
-    currentMedalLabel: "",
+    currentMedalLabel: "Crusader 5",
     currentMedalId: "",
     peakMedalLabel: "",
     peakMedalId: "",
@@ -467,13 +467,13 @@ export const players: Player[] = [
     nickname: "Irox",
     realName: "",
     avatarUrl: "/avatars/default.jpg",
-    seasonBadges: [],
+    seasonBadges: ["s1","s2","s3"],
     hasWonCup: false,
 
     
     
 
-    currentMedalLabel: "",
+    currentMedalLabel: "Divine 3",
     currentMedalId: "",
     peakMedalLabel: "",
     peakMedalId: "",
@@ -494,13 +494,13 @@ export const players: Player[] = [
     nickname: "Slappy",
     realName: "",
     avatarUrl: "/avatars/default.jpg",
-    seasonBadges: [],
+    seasonBadges: ["s1","s2","s3"],
     hasWonCup: false,
 
     
     
 
-    currentMedalLabel: "",
+    currentMedalLabel: "Legend 3",
     currentMedalId: "",
     peakMedalLabel: "",
     peakMedalId: "",
@@ -521,7 +521,7 @@ export const players: Player[] = [
     nickname: "Atomic",
     realName: "",
     avatarUrl: "/avatars/default.jpg",
-    seasonBadges: [],
+    seasonBadges: ["s1","s2","s3","s4"],
     hasWonCup: true,
     cupRank: "gold",
     cupTooltip: "1st place — Season 1",
@@ -531,7 +531,7 @@ export const players: Player[] = [
     
     
 
-    currentMedalLabel: "",
+    currentMedalLabel: "Archon 4",
     currentMedalId: "",
     peakMedalLabel: "",
     peakMedalId: "",
@@ -552,7 +552,7 @@ export const players: Player[] = [
     nickname: "r3ciprocal",
     realName: "",
     avatarUrl: "/avatars/reci.jpg",
-    seasonBadges: [],
+    seasonBadges: ["s1","s2","s5"],
     hasWonCup: false,
 
     
@@ -579,13 +579,13 @@ export const players: Player[] = [
     nickname: "abbhY",
     realName: "",
     avatarUrl: "/avatars/default.jpg",
-    seasonBadges: [],
+    seasonBadges: ["s1","s2"],
     hasWonCup: false,
 
     
     
 
-    currentMedalLabel: "",
+    currentMedalLabel: "Legend 1",
     currentMedalId: "",
     peakMedalLabel: "",
     peakMedalId: "",
@@ -606,13 +606,13 @@ export const players: Player[] = [
     nickname: "Masara",
     realName: "",
     avatarUrl: "/avatars/default.jpg",
-    seasonBadges: [],
+    seasonBadges: ["s1"],
     hasWonCup: false,
 
     
     
 
-    currentMedalLabel: "",
+    currentMedalLabel: "Crusader 3",
     currentMedalId: "",
     peakMedalLabel: "",
     peakMedalId: "",
@@ -633,7 +633,7 @@ export const players: Player[] = [
     nickname: "Irene",
     realName: "",
     avatarUrl: "/avatars/Irene.jpg",
-    seasonBadges: [2,4,5],
+    seasonBadges: ["s2","s4","s5"],
     hasWonCup: true,
     cupRank: "silver",
     cupTooltip: "2nd place — Season 2",
@@ -664,7 +664,7 @@ export const players: Player[] = [
     nickname: "Nikhil",
     realName: "",
     avatarUrl: "/avatars/Nikhil.jpg",
-    seasonBadges: [1,5],
+    seasonBadges: ["s1","s5"],
     hasWonCup: false,
 
     
@@ -691,7 +691,7 @@ export const players: Player[] = [
     nickname: "Banner",
     realName: "",
     avatarUrl: "/avatars/Banner.jpg",
-    seasonBadges: [1,2,5],
+    seasonBadges: ["s1","s2","s5"],
     hasWonCup: true,
     cupRank: "bronze",
     cupTooltip: "3rd place — Season 1",
@@ -722,13 +722,13 @@ export const players: Player[] = [
     nickname: "LordImpaler",
     realName: "",
     avatarUrl: "/avatars/default.jpg",
-    seasonBadges: [],
+    seasonBadges: ["s1","s2"],
     hasWonCup: false,
 
     
     
 
-    currentMedalLabel: "",
+    currentMedalLabel: "Archon 3",
     currentMedalId: "",
     peakMedalLabel: "",
     peakMedalId: "",
@@ -749,13 +749,13 @@ export const players: Player[] = [
     nickname: "Skyie@",
     realName: "",
     avatarUrl: "/avatars/default.jpg",
-    seasonBadges: [],
+    seasonBadges: ["s1","s5"],
     hasWonCup: false,
 
     
     
 
-    currentMedalLabel: "",
+    currentMedalLabel: "Crusader 5",
     currentMedalId: "",
     peakMedalLabel: "",
     peakMedalId: "",
@@ -776,7 +776,7 @@ export const players: Player[] = [
     nickname: "Godspeed",
     realName: "",
     avatarUrl: "/avatars/default.jpg",
-    seasonBadges: [1,5],
+    seasonBadges: ["s1","s2","s5"],
     hasWonCup: true,
     cupRank: "gold",
     cupTooltip: "1st place — Season 1",
@@ -787,7 +787,7 @@ export const players: Player[] = [
     
     
 
-    currentMedalLabel: "",
+    currentMedalLabel: "Guardian 5",
     currentMedalId: "",
     peakMedalLabel: "",
     peakMedalId: "",
@@ -808,7 +808,7 @@ export const players: Player[] = [
     nickname: "GRIMM",
     realName: "",
     avatarUrl: "/avatars/default.jpg",
-    seasonBadges: [1],
+    seasonBadges: ["s1","s2"],
     hasWonCup: true,
     cupRank: "gold",
     cupTooltip: "1st place — Season 1",
@@ -817,7 +817,7 @@ export const players: Player[] = [
     
     
 
-    currentMedalLabel: "Legend 2",
+    currentMedalLabel: "Legend 3",
     currentMedalId: "Legend_2",
     peakMedalLabel: "",
     peakMedalId: "",
@@ -838,13 +838,13 @@ export const players: Player[] = [
     nickname: "DeathShadow",
     realName: "",
     avatarUrl: "/avatars/default.jpg",
-    seasonBadges: [],
+    seasonBadges: ["s1","s2","s4"],
     hasWonCup: false,
 
     
     
 
-    currentMedalLabel: "",
+    currentMedalLabel: "Crusader 1",
     currentMedalId: "",
     peakMedalLabel: "",
     peakMedalId: "",
@@ -865,13 +865,13 @@ export const players: Player[] = [
     nickname: "Insanekid08",
     realName: "",
     avatarUrl: "/avatars/default.jpg",
-    seasonBadges: [],
+    seasonBadges: ["s1","s2"],
     hasWonCup: false,
 
     
     
 
-    currentMedalLabel: "",
+    currentMedalLabel: "Crusader 2",
     currentMedalId: "",
     peakMedalLabel: "",
     peakMedalId: "",
@@ -892,13 +892,13 @@ export const players: Player[] = [
     nickname: "Bazinga",
     realName: "",
     avatarUrl: "/avatars/default.jpg",
-    seasonBadges: [],
+    seasonBadges: ["s1","s2","s3","s5"],
     hasWonCup: false,
 
     
     
 
-    currentMedalLabel: "",
+    currentMedalLabel: "Divine 1",
     currentMedalId: "",
     peakMedalLabel: "",
     peakMedalId: "",
@@ -919,13 +919,13 @@ export const players: Player[] = [
     nickname: "AaRoN",
     realName: "",
     avatarUrl: "/avatars/default.jpg",
-    seasonBadges: [],
+    seasonBadges: ["s1","s2","s3"],
     hasWonCup: false,
 
     
     
 
-    currentMedalLabel: "",
+    currentMedalLabel: "Archon 4",
     currentMedalId: "",
     peakMedalLabel: "",
     peakMedalId: "",
@@ -946,13 +946,13 @@ export const players: Player[] = [
     nickname: "Bolt",
     realName: "",
     avatarUrl: "/avatars/default.jpg",
-    seasonBadges: [],
+    seasonBadges: ["s1"],
     hasWonCup: false,
 
     
     
 
-    currentMedalLabel: "",
+    currentMedalLabel: "Legend 5",
     currentMedalId: "",
     peakMedalLabel: "",
     peakMedalId: "",
@@ -973,13 +973,13 @@ export const players: Player[] = [
     nickname: "Billy",
     realName: "",
     avatarUrl: "/avatars/default.jpg",
-    seasonBadges: [],
+    seasonBadges: ["s1","s2","s3","s5"],
     hasWonCup: false,
 
     
     
 
-    currentMedalLabel: "",
+    currentMedalLabel: "Crusader 2",
     currentMedalId: "",
     peakMedalLabel: "",
     peakMedalId: "",
@@ -1000,13 +1000,13 @@ export const players: Player[] = [
     nickname: "STORM4",
     realName: "",
     avatarUrl: "/avatars/default.jpg",
-    seasonBadges: [],
+    seasonBadges: ["s1"],
     hasWonCup: false,
 
     
     
 
-    currentMedalLabel: "",
+    currentMedalLabel: "Immortal",
     currentMedalId: "",
     peakMedalLabel: "",
     peakMedalId: "",
@@ -1027,13 +1027,13 @@ export const players: Player[] = [
     nickname: "Nabeel",
     realName: "",
     avatarUrl: "/avatars/default.jpg",
-    seasonBadges: [],
+    seasonBadges: ["s1","s2"],
     hasWonCup: false,
 
     
     
 
-    currentMedalLabel: "",
+    currentMedalLabel: "Archon 2",
     currentMedalId: "",
     peakMedalLabel: "",
     peakMedalId: "",
@@ -1054,13 +1054,13 @@ export const players: Player[] = [
     nickname: "Sovan",
     realName: "",
     avatarUrl: "/avatars/default.jpg",
-    seasonBadges: [],
+    seasonBadges: ["s1","s2"],
     hasWonCup: false,
 
     
     
 
-    currentMedalLabel: "",
+    currentMedalLabel: "Archon 1",
     currentMedalId: "",
     peakMedalLabel: "",
     peakMedalId: "",
@@ -1081,13 +1081,13 @@ export const players: Player[] = [
     nickname: "Maliketh",
     realName: "",
     avatarUrl: "/avatars/default.jpg",
-    seasonBadges: [],
+    seasonBadges: ["s1"],
     hasWonCup: false,
 
     
     
 
-    currentMedalLabel: "",
+    currentMedalLabel: "Crusader 5",
     currentMedalId: "",
     peakMedalLabel: "",
     peakMedalId: "",
@@ -1108,13 +1108,13 @@ export const players: Player[] = [
     nickname: "Akash",
     realName: "",
     avatarUrl: "/avatars/default.jpg",
-    seasonBadges: [],
+    seasonBadges: ["s1"],
     hasWonCup: false,
 
     
     
 
-    currentMedalLabel: "",
+    currentMedalLabel: "Archon 4",
     currentMedalId: "",
     peakMedalLabel: "",
     peakMedalId: "",
@@ -1135,13 +1135,13 @@ export const players: Player[] = [
     nickname: "MSlayer",
     realName: "",
     avatarUrl: "/avatars/default.jpg",
-    seasonBadges: [],
+    seasonBadges: ["s2","s5"],
     hasWonCup: false,
 
     
     
 
-    currentMedalLabel: "",
+    currentMedalLabel: "Ancient 2",
     currentMedalId: "",
     peakMedalLabel: "",
     peakMedalId: "",
@@ -1162,13 +1162,13 @@ export const players: Player[] = [
     nickname: "Master Instinct",
     realName: "",
     avatarUrl: "/avatars/default.jpg",
-    seasonBadges: [],
+    seasonBadges: ["s2","s3","s4","s5"],
     hasWonCup: false,
 
     
     
 
-    currentMedalLabel: "",
+    currentMedalLabel: "Immortal",
     currentMedalId: "",
     peakMedalLabel: "",
     peakMedalId: "",
@@ -1189,13 +1189,13 @@ export const players: Player[] = [
     nickname: "Arindam7",
     realName: "",
     avatarUrl: "/avatars/default.jpg",
-    seasonBadges: [],
+    seasonBadges: ["s2","s4"],
     hasWonCup: false,
 
     
     
 
-    currentMedalLabel: "",
+    currentMedalLabel: "Crusader 4",
     currentMedalId: "",
     peakMedalLabel: "",
     peakMedalId: "",
@@ -1216,13 +1216,13 @@ export const players: Player[] = [
     nickname: "Farhan",
     realName: "",
     avatarUrl: "/avatars/default.jpg",
-    seasonBadges: [],
+    seasonBadges: ["s2"],
     hasWonCup: false,
 
     
     
 
-    currentMedalLabel: "",
+    currentMedalLabel: "Crusader 5",
     currentMedalId: "",
     peakMedalLabel: "",
     peakMedalId: "",
@@ -1243,13 +1243,13 @@ export const players: Player[] = [
     nickname: "Noob CA",
     realName: "",
     avatarUrl: "/avatars/default.jpg",
-    seasonBadges: [],
+    seasonBadges: ["s2"],
     hasWonCup: false,
 
     
     
 
-    currentMedalLabel: "",
+    currentMedalLabel: "Crusader 5",
     currentMedalId: "",
     peakMedalLabel: "",
     peakMedalId: "",
@@ -1270,13 +1270,13 @@ export const players: Player[] = [
     nickname: "Guts",
     realName: "",
     avatarUrl: "/avatars/default.jpg",
-    seasonBadges: [],
+    seasonBadges: ["s2"],
     hasWonCup: false,
 
     
     
 
-    currentMedalLabel: "",
+    currentMedalLabel: "Ancient 5",
     currentMedalId: "",
     peakMedalLabel: "",
     peakMedalId: "",
@@ -1297,13 +1297,13 @@ export const players: Player[] = [
     nickname: "Madlad",
     realName: "",
     avatarUrl: "/avatars/default.jpg",
-    seasonBadges: [],
+    seasonBadges: ["s2","s3","s4","s5"],
     hasWonCup: false,
 
     
     
 
-    currentMedalLabel: "",
+    currentMedalLabel: "Crusader 3",
     currentMedalId: "",
     peakMedalLabel: "",
     peakMedalId: "",
@@ -1324,13 +1324,13 @@ export const players: Player[] = [
     nickname: "Voodoo",
     realName: "",
     avatarUrl: "/avatars/default.jpg",
-    seasonBadges: [],
+    seasonBadges: ["s2","s3","s4"],
     hasWonCup: false,
 
     
     
 
-    currentMedalLabel: "",
+    currentMedalLabel: "Immortal",
     currentMedalId: "",
     peakMedalLabel: "",
     peakMedalId: "",
@@ -1351,13 +1351,13 @@ export const players: Player[] = [
     nickname: "Ali Gm'Y",
     realName: "",
     avatarUrl: "/avatars/default.jpg",
-    seasonBadges: [],
+    seasonBadges: ["s2","s3","s4","s5"],
     hasWonCup: false,
 
     
     
 
-    currentMedalLabel: "",
+    currentMedalLabel: "Divine 1",
     currentMedalId: "",
     peakMedalLabel: "",
     peakMedalId: "",
@@ -1378,13 +1378,13 @@ export const players: Player[] = [
     nickname: "zRomep",
     realName: "",
     avatarUrl: "/avatars/default.jpg",
-    seasonBadges: [],
+    seasonBadges: ["s2","s3","s4","s5"],
     hasWonCup: false,
 
     
     
 
-    currentMedalLabel: "",
+    currentMedalLabel: "Ancient 1",
     currentMedalId: "",
     peakMedalLabel: "",
     peakMedalId: "",
@@ -1405,13 +1405,13 @@ export const players: Player[] = [
     nickname: "Shiro",
     realName: "",
     avatarUrl: "/avatars/default.jpg",
-    seasonBadges: [],
+    seasonBadges: ["s2","s3","s5"],
     hasWonCup: false,
 
     
     
 
-    currentMedalLabel: "",
+    currentMedalLabel: "Legend 4",
     currentMedalId: "",
     peakMedalLabel: "",
     peakMedalId: "",
@@ -1432,13 +1432,13 @@ export const players: Player[] = [
     nickname: "Tukiyem",
     realName: "",
     avatarUrl: "/avatars/default.jpg",
-    seasonBadges: [],
+    seasonBadges: ["s2"],
     hasWonCup: false,
 
     
     
 
-    currentMedalLabel: "",
+    currentMedalLabel: "Immortal",
     currentMedalId: "",
     peakMedalLabel: "",
     peakMedalId: "",
@@ -1459,13 +1459,13 @@ export const players: Player[] = [
     nickname: "shezdbest",
     realName: "",
     avatarUrl: "/avatars/default.jpg",
-    seasonBadges: [],
+    seasonBadges: ["s2"],
     hasWonCup: false,
 
     
     
 
-    currentMedalLabel: "",
+    currentMedalLabel: "Uncalibrated",
     currentMedalId: "",
     peakMedalLabel: "",
     peakMedalId: "",
@@ -1486,13 +1486,13 @@ export const players: Player[] = [
     nickname: "Prime.One",
     realName: "",
     avatarUrl: "/avatars/default.jpg",
-    seasonBadges: [],
+    seasonBadges: ["s2","s4","s5"],
     hasWonCup: false,
 
     
     
 
-    currentMedalLabel: "",
+    currentMedalLabel: "Divine 1",
     currentMedalId: "",
     peakMedalLabel: "",
     peakMedalId: "",
@@ -1513,13 +1513,13 @@ export const players: Player[] = [
     nickname: "Sherlocked",
     realName: "",
     avatarUrl: "/avatars/default.jpg",
-    seasonBadges: [],
+    seasonBadges: ["s2"],
     hasWonCup: false,
 
     
     
 
-    currentMedalLabel: "",
+    currentMedalLabel: "Immortal",
     currentMedalId: "",
     peakMedalLabel: "",
     peakMedalId: "",
@@ -1540,13 +1540,13 @@ export const players: Player[] = [
     nickname: "Tundra.Goku",
     realName: "",
     avatarUrl: "/avatars/default.jpg",
-    seasonBadges: [],
+    seasonBadges: ["s2","s3"],
     hasWonCup: false,
 
     
     
 
-    currentMedalLabel: "",
+    currentMedalLabel: "Archon 2",
     currentMedalId: "",
     peakMedalLabel: "",
     peakMedalId: "",
@@ -1567,13 +1567,13 @@ export const players: Player[] = [
     nickname: "ScripTeR",
     realName: "",
     avatarUrl: "/avatars/default.jpg",
-    seasonBadges: [],
+    seasonBadges: ["s2","s4","s5"],
     hasWonCup: false,
 
     
     
 
-    currentMedalLabel: "",
+    currentMedalLabel: "Archon 3",
     currentMedalId: "",
     peakMedalLabel: "",
     peakMedalId: "",
@@ -1594,13 +1594,13 @@ export const players: Player[] = [
     nickname: "DRAGONEYE",
     realName: "",
     avatarUrl: "/avatars/default.jpg",
-    seasonBadges: [],
+    seasonBadges: ["s2"],
     hasWonCup: false,
 
     
     
 
-    currentMedalLabel: "",
+    currentMedalLabel: "Legend 1",
     currentMedalId: "",
     peakMedalLabel: "",
     peakMedalId: "",
@@ -1621,13 +1621,13 @@ export const players: Player[] = [
     nickname: "Sphere",
     realName: "",
     avatarUrl: "/avatars/default.jpg",
-    seasonBadges: [],
+    seasonBadges: ["s2","s3"],
     hasWonCup: false,
 
     
     
 
-    currentMedalLabel: "",
+    currentMedalLabel: "Archon 1",
     currentMedalId: "",
     peakMedalLabel: "",
     peakMedalId: "",
@@ -1648,13 +1648,13 @@ export const players: Player[] = [
     nickname: "gxnova",
     realName: "",
     avatarUrl: "/avatars/default.jpg",
-    seasonBadges: [],
+    seasonBadges: ["s2"],
     hasWonCup: false,
 
     
     
 
-    currentMedalLabel: "",
+    currentMedalLabel: "Legend 4",
     currentMedalId: "",
     peakMedalLabel: "",
     peakMedalId: "",
@@ -1675,13 +1675,13 @@ export const players: Player[] = [
     nickname: "Position 0",
     realName: "",
     avatarUrl: "/avatars/default.jpg",
-    seasonBadges: [],
+    seasonBadges: ["s2"],
     hasWonCup: false,
 
     
     
 
-    currentMedalLabel: "",
+    currentMedalLabel: "Ancient 3",
     currentMedalId: "",
     peakMedalLabel: "",
     peakMedalId: "",
@@ -1702,13 +1702,13 @@ export const players: Player[] = [
     nickname: "Ryujin",
     realName: "",
     avatarUrl: "/avatars/default.jpg",
-    seasonBadges: [],
+    seasonBadges: ["s2"],
     hasWonCup: false,
 
     
     
 
-    currentMedalLabel: "",
+    currentMedalLabel: "Archon 3",
     currentMedalId: "",
     peakMedalLabel: "",
     peakMedalId: "",
@@ -1729,13 +1729,13 @@ export const players: Player[] = [
     nickname: "DK",
     realName: "",
     avatarUrl: "/avatars/default.jpg",
-    seasonBadges: [],
+    seasonBadges: ["s2"],
     hasWonCup: false,
 
     
     
 
-    currentMedalLabel: "",
+    currentMedalLabel: "Archon 1",
     currentMedalId: "",
     peakMedalLabel: "",
     peakMedalId: "",
@@ -1756,13 +1756,13 @@ export const players: Player[] = [
     nickname: "Lanson",
     realName: "",
     avatarUrl: "/avatars/default.jpg",
-    seasonBadges: [],
+    seasonBadges: ["s2"],
     hasWonCup: false,
 
     
     
 
-    currentMedalLabel: "",
+    currentMedalLabel: "Immortal",
     currentMedalId: "",
     peakMedalLabel: "",
     peakMedalId: "",
@@ -1783,13 +1783,13 @@ export const players: Player[] = [
     nickname: "Jin[X]eD",
     realName: "",
     avatarUrl: "/avatars/default.jpg",
-    seasonBadges: [],
+    seasonBadges: ["s2","s5"],
     hasWonCup: false,
 
     
     
 
-    currentMedalLabel: "",
+    currentMedalLabel: "Ancient 5",
     currentMedalId: "",
     peakMedalLabel: "",
     peakMedalId: "",
@@ -1810,13 +1810,13 @@ export const players: Player[] = [
     nickname: "Fyt",
     realName: "",
     avatarUrl: "/avatars/default.jpg",
-    seasonBadges: [],
+    seasonBadges: ["s2","s3","s4","s5"],
     hasWonCup: false,
 
     
     
 
-    currentMedalLabel: "",
+    currentMedalLabel: "Immortal",
     currentMedalId: "",
     peakMedalLabel: "",
     peakMedalId: "",
@@ -1837,13 +1837,13 @@ export const players: Player[] = [
     nickname: "Flamy",
     realName: "",
     avatarUrl: "/avatars/default.jpg",
-    seasonBadges: [],
+    seasonBadges: ["s2","s4"],
     hasWonCup: false,
 
     
     
 
-    currentMedalLabel: "",
+    currentMedalLabel: "Crusader 2",
     currentMedalId: "",
     peakMedalLabel: "",
     peakMedalId: "",
@@ -1864,13 +1864,13 @@ export const players: Player[] = [
     nickname: "LYRRAD",
     realName: "",
     avatarUrl: "/avatars/default.jpg",
-    seasonBadges: [],
+    seasonBadges: ["s2"],
     hasWonCup: false,
 
     
     
 
-    currentMedalLabel: "",
+    currentMedalLabel: "Guardian 3",
     currentMedalId: "",
     peakMedalLabel: "",
     peakMedalId: "",
@@ -1891,13 +1891,13 @@ export const players: Player[] = [
     nickname: "hakuna_matata",
     realName: "",
     avatarUrl: "/avatars/default.jpg",
-    seasonBadges: [],
+    seasonBadges: ["s2"],
     hasWonCup: false,
 
     
     
 
-    currentMedalLabel: "",
+    currentMedalLabel: "Crusader 1",
     currentMedalId: "",
     peakMedalLabel: "",
     peakMedalId: "",
@@ -1918,13 +1918,13 @@ export const players: Player[] = [
     nickname: "DynamoDon",
     realName: "",
     avatarUrl: "/avatars/default.jpg",
-    seasonBadges: [],
+    seasonBadges: ["s3","s4","s5"],
     hasWonCup: false,
 
     
     
 
-    currentMedalLabel: "",
+    currentMedalLabel: "Legend 2",
     currentMedalId: "",
     peakMedalLabel: "",
     peakMedalId: "",
@@ -1945,13 +1945,13 @@ export const players: Player[] = [
     nickname: "FOX",
     realName: "",
     avatarUrl: "/avatars/default.jpg",
-    seasonBadges: [],
+    seasonBadges: ["s3","s4","s5"],
     hasWonCup: false,
 
     
     
 
-    currentMedalLabel: "",
+    currentMedalLabel: "Archon 4",
     currentMedalId: "",
     peakMedalLabel: "",
     peakMedalId: "",
@@ -1972,13 +1972,13 @@ export const players: Player[] = [
     nickname: "Ov3rconfidenc3",
     realName: "",
     avatarUrl: "/avatars/default.jpg",
-    seasonBadges: [],
+    seasonBadges: ["s3","s5"],
     hasWonCup: false,
 
     
     
 
-    currentMedalLabel: "",
+    currentMedalLabel: "Legend 3",
     currentMedalId: "",
     peakMedalLabel: "",
     peakMedalId: "",
@@ -1999,13 +1999,13 @@ export const players: Player[] = [
     nickname: "Dr_Nemesis_X",
     realName: "",
     avatarUrl: "/avatars/default.jpg",
-    seasonBadges: [],
+    seasonBadges: ["s3","s4","s5"],
     hasWonCup: false,
 
     
     
 
-    currentMedalLabel: "",
+    currentMedalLabel: "Legend 4",
     currentMedalId: "",
     peakMedalLabel: "",
     peakMedalId: "",
@@ -2026,13 +2026,13 @@ export const players: Player[] = [
     nickname: "Yuno",
     realName: "",
     avatarUrl: "/avatars/default.jpg",
-    seasonBadges: [],
+    seasonBadges: ["s3"],
     hasWonCup: false,
 
     
     
 
-    currentMedalLabel: "",
+    currentMedalLabel: "Legend 3",
     currentMedalId: "",
     peakMedalLabel: "",
     peakMedalId: "",
@@ -2053,13 +2053,13 @@ export const players: Player[] = [
     nickname: "Shaidota",
     realName: "",
     avatarUrl: "/avatars/default.jpg",
-    seasonBadges: [],
+    seasonBadges: ["s3","s4","s5"],
     hasWonCup: false,
 
     
     
 
-    currentMedalLabel: "",
+    currentMedalLabel: "Legend 3",
     currentMedalId: "",
     peakMedalLabel: "",
     peakMedalId: "",
@@ -2080,13 +2080,13 @@ export const players: Player[] = [
     nickname: "BrõwÑ ẞöy",
     realName: "",
     avatarUrl: "/avatars/default.jpg",
-    seasonBadges: [],
+    seasonBadges: ["s3","s5"],
     hasWonCup: false,
 
     
     
 
-    currentMedalLabel: "",
+    currentMedalLabel: "Divine 1",
     currentMedalId: "",
     peakMedalLabel: "",
     peakMedalId: "",
@@ -2107,13 +2107,13 @@ export const players: Player[] = [
     nickname: "MYM|LUCKY13",
     realName: "",
     avatarUrl: "/avatars/default.jpg",
-    seasonBadges: [],
+    seasonBadges: ["s3"],
     hasWonCup: false,
 
     
     
 
-    currentMedalLabel: "",
+    currentMedalLabel: "Legend 1",
     currentMedalId: "",
     peakMedalLabel: "",
     peakMedalId: "",
@@ -2134,13 +2134,13 @@ export const players: Player[] = [
     nickname: "Pero",
     realName: "",
     avatarUrl: "/avatars/default.jpg",
-    seasonBadges: [],
+    seasonBadges: ["s3"],
     hasWonCup: false,
 
     
     
 
-    currentMedalLabel: "",
+    currentMedalLabel: "Legend 3",
     currentMedalId: "",
     peakMedalLabel: "",
     peakMedalId: "",
@@ -2161,13 +2161,13 @@ export const players: Player[] = [
     nickname: "Mr.Crystal",
     realName: "",
     avatarUrl: "/avatars/default.jpg",
-    seasonBadges: [],
+    seasonBadges: ["s3"],
     hasWonCup: false,
 
     
     
 
-    currentMedalLabel: "",
+    currentMedalLabel: "Immortal",
     currentMedalId: "",
     peakMedalLabel: "",
     peakMedalId: "",
@@ -2188,13 +2188,13 @@ export const players: Player[] = [
     nickname: "Dropthebass",
     realName: "",
     avatarUrl: "/avatars/default.jpg",
-    seasonBadges: [],
+    seasonBadges: ["s3"],
     hasWonCup: false,
 
     
     
 
-    currentMedalLabel: "",
+    currentMedalLabel: "Uncalibrated",
     currentMedalId: "",
     peakMedalLabel: "",
     peakMedalId: "",
@@ -2215,13 +2215,13 @@ export const players: Player[] = [
     nickname: "Grizzly",
     realName: "",
     avatarUrl: "/avatars/default.jpg",
-    seasonBadges: [],
+    seasonBadges: ["s3"],
     hasWonCup: false,
 
     
     
 
-    currentMedalLabel: "",
+    currentMedalLabel: "Immortal",
     currentMedalId: "",
     peakMedalLabel: "",
     peakMedalId: "",
@@ -2242,13 +2242,13 @@ export const players: Player[] = [
     nickname: "Penda",
     realName: "",
     avatarUrl: "/avatars/default.jpg",
-    seasonBadges: [],
+    seasonBadges: ["s3","s4"],
     hasWonCup: false,
 
     
     
 
-    currentMedalLabel: "",
+    currentMedalLabel: "Legend 4",
     currentMedalId: "",
     peakMedalLabel: "",
     peakMedalId: "",
@@ -2269,13 +2269,13 @@ export const players: Player[] = [
     nickname: "Shikamaru",
     realName: "",
     avatarUrl: "/avatars/default.jpg",
-    seasonBadges: [],
+    seasonBadges: ["s3","s4","s5"],
     hasWonCup: false,
 
     
     
 
-    currentMedalLabel: "",
+    currentMedalLabel: "Ancient 3",
     currentMedalId: "",
     peakMedalLabel: "",
     peakMedalId: "",
@@ -2296,13 +2296,13 @@ export const players: Player[] = [
     nickname: "Faith",
     realName: "",
     avatarUrl: "/avatars/default.jpg",
-    seasonBadges: [],
+    seasonBadges: ["s3","s5"],
     hasWonCup: false,
 
     
     
 
-    currentMedalLabel: "",
+    currentMedalLabel: "Legend 2",
     currentMedalId: "",
     peakMedalLabel: "",
     peakMedalId: "",
@@ -2323,7 +2323,7 @@ export const players: Player[] = [
     nickname: "Memelord Ozai",
     realName: "",
     avatarUrl: "/avatars/default.jpg",
-    seasonBadges: [],
+    seasonBadges: ["s3","s4","s5"],
     hasWonCup: false,
 
     
@@ -2350,7 +2350,7 @@ export const players: Player[] = [
     nickname: "Blitzip",
     realName: "",
     avatarUrl: "/avatars/default.jpg",
-    seasonBadges: [],
+    seasonBadges: ["s3"],
     hasWonCup: false,
 
     
@@ -2377,7 +2377,7 @@ export const players: Player[] = [
     nickname: "cpt_flux",
     realName: "",
     avatarUrl: "/avatars/default.jpg",
-    seasonBadges: [],
+    seasonBadges: ["s3","s4","s5"],
     hasWonCup: false,
 
     
@@ -2404,7 +2404,7 @@ export const players: Player[] = [
     nickname: "Jinx",
     realName: "",
     avatarUrl: "/avatars/default.jpg",
-    seasonBadges: [],
+    seasonBadges: ["s3","s5"],
     hasWonCup: false,
 
     
@@ -2431,7 +2431,7 @@ export const players: Player[] = [
     nickname: "No One",
     realName: "",
     avatarUrl: "/avatars/default.jpg",
-    seasonBadges: [],
+    seasonBadges: ["s3","s5"],
     hasWonCup: false,
 
     
@@ -2458,7 +2458,7 @@ export const players: Player[] = [
     nickname: "Swaggy Brisngr",
     realName: "",
     avatarUrl: "/avatars/default.jpg",
-    seasonBadges: [],
+    seasonBadges: ["s3"],
     hasWonCup: false,
 
     
@@ -2485,7 +2485,7 @@ export const players: Player[] = [
     nickname: "RB",
     realName: "",
     avatarUrl: "/avatars/default.jpg",
-    seasonBadges: [],
+    seasonBadges: ["s3","s4"],
     hasWonCup: false,
 
     
@@ -2512,7 +2512,7 @@ export const players: Player[] = [
     nickname: "Epizeuxius",
     realName: "",
     avatarUrl: "/avatars/default.jpg",
-    seasonBadges: [],
+    seasonBadges: ["s3"],
     hasWonCup: false,
 
     
@@ -2539,7 +2539,7 @@ export const players: Player[] = [
     nickname: "Ultra.NoobPk",
     realName: "",
     avatarUrl: "/avatars/default.jpg",
-    seasonBadges: [],
+    seasonBadges: ["s3","s4","s5"],
     hasWonCup: false,
 
     
@@ -2566,7 +2566,7 @@ export const players: Player[] = [
     nickname: "Gifty",
     realName: "",
     avatarUrl: "/avatars/default.jpg",
-    seasonBadges: [],
+    seasonBadges: ["s3"],
     hasWonCup: false,
 
     
@@ -2593,7 +2593,7 @@ export const players: Player[] = [
     nickname: "Eric Dane",
     realName: "",
     avatarUrl: "/avatars/default.jpg",
-    seasonBadges: [],
+    seasonBadges: ["s3","s4"],
     hasWonCup: false,
 
     
@@ -2620,7 +2620,7 @@ export const players: Player[] = [
     nickname: "Still Panda YT",
     realName: "",
     avatarUrl: "/avatars/default.jpg",
-    seasonBadges: [],
+    seasonBadges: ["s3"],
     hasWonCup: false,
 
     
@@ -2647,7 +2647,7 @@ export const players: Player[] = [
     nickname: "Rinne",
     realName: "",
     avatarUrl: "/avatars/default.jpg",
-    seasonBadges: [],
+    seasonBadges: ["s3","s4","s5"],
     hasWonCup: false,
 
     
@@ -2674,7 +2674,7 @@ export const players: Player[] = [
     nickname: "ShabbY**",
     realName: "",
     avatarUrl: "/avatars/default.jpg",
-    seasonBadges: [],
+    seasonBadges: ["s3"],
     hasWonCup: false,
 
     
@@ -2701,7 +2701,7 @@ export const players: Player[] = [
     nickname: "hAz3",
     realName: "",
     avatarUrl: "/avatars/default.jpg",
-    seasonBadges: [],
+    seasonBadges: ["s3"],
     hasWonCup: false,
 
     
@@ -2728,7 +2728,7 @@ export const players: Player[] = [
     nickname: "Nj",
     realName: "",
     avatarUrl: "/avatars/default.jpg",
-    seasonBadges: [],
+    seasonBadges: ["s3","s4"],
     hasWonCup: false,
 
     
@@ -2755,7 +2755,7 @@ export const players: Player[] = [
     nickname: "pEnduUu",
     realName: "",
     avatarUrl: "/avatars/default.jpg",
-    seasonBadges: [],
+    seasonBadges: ["s3","s4"],
     hasWonCup: false,
 
     
@@ -2782,7 +2782,7 @@ export const players: Player[] = [
     nickname: "Setupathi",
     realName: "",
     avatarUrl: "/avatars/default.jpg",
-    seasonBadges: [],
+    seasonBadges: ["s3","s5"],
     hasWonCup: false,
 
     
@@ -2809,7 +2809,7 @@ export const players: Player[] = [
     nickname: "rA'V!",
     realName: "",
     avatarUrl: "/avatars/default.jpg",
-    seasonBadges: [],
+    seasonBadges: ["s3","s4","s5"],
     hasWonCup: false,
 
     
@@ -2836,7 +2836,7 @@ export const players: Player[] = [
     nickname: "RyuGa",
     realName: "",
     avatarUrl: "/avatars/default.jpg",
-    seasonBadges: [],
+    seasonBadges: ["s3","s4"],
     hasWonCup: false,
 
     
@@ -2863,7 +2863,7 @@ export const players: Player[] = [
     nickname: "Maldini",
     realName: "",
     avatarUrl: "/avatars/default.jpg",
-    seasonBadges: [],
+    seasonBadges: ["s3","s4"],
     hasWonCup: false,
 
     
@@ -2890,7 +2890,7 @@ export const players: Player[] = [
     nickname: "Dranzer",
     realName: "",
     avatarUrl: "/avatars/default.jpg",
-    seasonBadges: [],
+    seasonBadges: ["s3","s4","s5"],
     hasWonCup: false,
 
     
@@ -2917,7 +2917,7 @@ export const players: Player[] = [
     nickname: "Gorki",
     realName: "",
     avatarUrl: "/avatars/default.jpg",
-    seasonBadges: [],
+    seasonBadges: ["s3","s5"],
     hasWonCup: false,
 
     
@@ -2944,7 +2944,7 @@ export const players: Player[] = [
     nickname: "Bluediamond",
     realName: "",
     avatarUrl: "/avatars/default.jpg",
-    seasonBadges: [],
+    seasonBadges: ["s3"],
     hasWonCup: false,
 
     
@@ -2971,7 +2971,7 @@ export const players: Player[] = [
     nickname: "Uma1s",
     realName: "",
     avatarUrl: "/avatars/default.jpg",
-    seasonBadges: [],
+    seasonBadges: ["s3","s4","s5"],
     hasWonCup: false,
 
     
@@ -2998,7 +2998,7 @@ export const players: Player[] = [
     nickname: "Alcromido",
     realName: "",
     avatarUrl: "/avatars/default.jpg",
-    seasonBadges: [],
+    seasonBadges: ["s3"],
     hasWonCup: false,
 
     
@@ -3025,7 +3025,7 @@ export const players: Player[] = [
     nickname: "dante",
     realName: "",
     avatarUrl: "/avatars/default.jpg",
-    seasonBadges: [],
+    seasonBadges: ["s3"],
     hasWonCup: false,
 
     
@@ -3052,7 +3052,7 @@ export const players: Player[] = [
     nickname: "bull",
     realName: "",
     avatarUrl: "/avatars/default.jpg",
-    seasonBadges: [],
+    seasonBadges: ["s3","s4","s5"],
     hasWonCup: false,
 
     
@@ -3079,7 +3079,7 @@ export const players: Player[] = [
     nickname: "pYro",
     realName: "",
     avatarUrl: "/avatars/default.jpg",
-    seasonBadges: [],
+    seasonBadges: ["s3","s4","s5"],
     hasWonCup: false,
 
     
@@ -3106,7 +3106,7 @@ export const players: Player[] = [
     nickname: "Kakashi",
     realName: "",
     avatarUrl: "/avatars/default.jpg",
-    seasonBadges: [],
+    seasonBadges: ["s3"],
     hasWonCup: false,
 
     
@@ -3133,13 +3133,13 @@ export const players: Player[] = [
     nickname: "Puppy boss",
     realName: "",
     avatarUrl: "/avatars/default.jpg",
-    seasonBadges: [],
+    seasonBadges: ["s3"],
     hasWonCup: false,
 
     
     
 
-    currentMedalLabel: "",
+    currentMedalLabel: "Legend 4",
     currentMedalId: "",
     peakMedalLabel: "",
     peakMedalId: "",
@@ -3160,13 +3160,13 @@ export const players: Player[] = [
     nickname: "cigerettes after sex",
     realName: "",
     avatarUrl: "/avatars/default.jpg",
-    seasonBadges: [],
+    seasonBadges: ["s3"],
     hasWonCup: false,
 
     
     
 
-    currentMedalLabel: "",
+    currentMedalLabel: "Immortal",
     currentMedalId: "",
     peakMedalLabel: "",
     peakMedalId: "",
@@ -3187,13 +3187,13 @@ export const players: Player[] = [
     nickname: "DoT",
     realName: "",
     avatarUrl: "/avatars/default.jpg",
-    seasonBadges: [],
+    seasonBadges: ["s2","s3"],
     hasWonCup: false,
 
     
     
 
-    currentMedalLabel: "",
+    currentMedalLabel: "Archon 5",
     currentMedalId: "",
     peakMedalLabel: "",
     peakMedalId: "",
@@ -3214,13 +3214,13 @@ export const players: Player[] = [
     nickname: "Meow Meow Madafaka",
     realName: "",
     avatarUrl: "/avatars/default.jpg",
-    seasonBadges: [],
+    seasonBadges: ["s3"],
     hasWonCup: false,
 
     
     
 
-    currentMedalLabel: "",
+    currentMedalLabel: "Immortal",
     currentMedalId: "",
     peakMedalLabel: "",
     peakMedalId: "",
@@ -3241,13 +3241,13 @@ export const players: Player[] = [
     nickname: "Kakarot",
     realName: "",
     avatarUrl: "/avatars/default.jpg",
-    seasonBadges: [],
+    seasonBadges: ["s3"],
     hasWonCup: false,
 
     
     
 
-    currentMedalLabel: "",
+    currentMedalLabel: "Ancient 5",
     currentMedalId: "",
     peakMedalLabel: "",
     peakMedalId: "",
@@ -3268,13 +3268,13 @@ export const players: Player[] = [
     nickname: "Icarus",
     realName: "",
     avatarUrl: "/avatars/default.jpg",
-    seasonBadges: [],
+    seasonBadges: ["s3"],
     hasWonCup: false,
 
     
     
 
-    currentMedalLabel: "",
+    currentMedalLabel: "Immortal",
     currentMedalId: "",
     peakMedalLabel: "",
     peakMedalId: "",
@@ -3295,13 +3295,13 @@ export const players: Player[] = [
     nickname: "Roronoa Zoro",
     realName: "",
     avatarUrl: "/avatars/default.jpg",
-    seasonBadges: [],
+    seasonBadges: ["s3","s4","s5"],
     hasWonCup: false,
 
     
     
 
-    currentMedalLabel: "",
+    currentMedalLabel: "Archon 2",
     currentMedalId: "",
     peakMedalLabel: "",
     peakMedalId: "",
@@ -3322,13 +3322,13 @@ export const players: Player[] = [
     nickname: "SJ",
     realName: "",
     avatarUrl: "/avatars/default.jpg",
-    seasonBadges: [],
+    seasonBadges: ["s3","s5"],
     hasWonCup: false,
 
     
     
 
-    currentMedalLabel: "",
+    currentMedalLabel: "Archon 1",
     currentMedalId: "",
     peakMedalLabel: "",
     peakMedalId: "",
@@ -3349,13 +3349,13 @@ export const players: Player[] = [
     nickname: "Sridharocky",
     realName: "",
     avatarUrl: "/avatars/default.jpg",
-    seasonBadges: [],
+    seasonBadges: ["s3"],
     hasWonCup: false,
 
     
     
 
-    currentMedalLabel: "",
+    currentMedalLabel: "Ancient 3",
     currentMedalId: "",
     peakMedalLabel: "",
     peakMedalId: "",
@@ -3376,13 +3376,13 @@ export const players: Player[] = [
     nickname: "DroN3",
     realName: "",
     avatarUrl: "/avatars/default.jpg",
-    seasonBadges: [],
+    seasonBadges: ["s3"],
     hasWonCup: false,
 
     
     
 
-    currentMedalLabel: "",
+    currentMedalLabel: "Crusader 5",
     currentMedalId: "",
     peakMedalLabel: "",
     peakMedalId: "",
@@ -3403,13 +3403,13 @@ export const players: Player[] = [
     nickname: "fLabber",
     realName: "",
     avatarUrl: "/avatars/default.jpg",
-    seasonBadges: [],
+    seasonBadges: ["s3"],
     hasWonCup: false,
 
     
     
 
-    currentMedalLabel: "",
+    currentMedalLabel: "Archon 3",
     currentMedalId: "",
     peakMedalLabel: "",
     peakMedalId: "",
@@ -3430,13 +3430,13 @@ export const players: Player[] = [
     nickname: "Ronbawa",
     realName: "",
     avatarUrl: "/avatars/default.jpg",
-    seasonBadges: [],
+    seasonBadges: ["s2","s3"],
     hasWonCup: false,
 
     
     
 
-    currentMedalLabel: "",
+    currentMedalLabel: "Crusader 2",
     currentMedalId: "",
     peakMedalLabel: "",
     peakMedalId: "",
@@ -3457,13 +3457,13 @@ export const players: Player[] = [
     nickname: "Future",
     realName: "",
     avatarUrl: "/avatars/default.jpg",
-    seasonBadges: [],
+    seasonBadges: ["s4","s5"],
     hasWonCup: false,
 
     
     
 
-    currentMedalLabel: "",
+    currentMedalLabel: "Divine 1",
     currentMedalId: "",
     peakMedalLabel: "",
     peakMedalId: "",
@@ -3484,13 +3484,13 @@ export const players: Player[] = [
     nickname: "IM still Noob",
     realName: "",
     avatarUrl: "/avatars/default.jpg",
-    seasonBadges: [],
+    seasonBadges: ["s4"],
     hasWonCup: false,
 
     
     
 
-    currentMedalLabel: "",
+    currentMedalLabel: "Immortal",
     currentMedalId: "",
     peakMedalLabel: "",
     peakMedalId: "",
@@ -3511,13 +3511,13 @@ export const players: Player[] = [
     nickname: "Porthos",
     realName: "",
     avatarUrl: "/avatars/default.jpg",
-    seasonBadges: [],
+    seasonBadges: ["s4","s5"],
     hasWonCup: false,
 
     
     
 
-    currentMedalLabel: "",
+    currentMedalLabel: "Crusader 4",
     currentMedalId: "",
     peakMedalLabel: "",
     peakMedalId: "",
@@ -3538,13 +3538,13 @@ export const players: Player[] = [
     nickname: "S1mpleO",
     realName: "",
     avatarUrl: "/avatars/default.jpg",
-    seasonBadges: [],
+    seasonBadges: ["s4","s5"],
     hasWonCup: false,
 
     
     
 
-    currentMedalLabel: "",
+    currentMedalLabel: "Ancient 2",
     currentMedalId: "",
     peakMedalLabel: "",
     peakMedalId: "",
@@ -3565,13 +3565,13 @@ export const players: Player[] = [
     nickname: "BaPU",
     realName: "",
     avatarUrl: "/avatars/default.jpg",
-    seasonBadges: [],
+    seasonBadges: ["s4","s5"],
     hasWonCup: false,
 
     
     
 
-    currentMedalLabel: "",
+    currentMedalLabel: "Archon 4",
     currentMedalId: "",
     peakMedalLabel: "",
     peakMedalId: "",
@@ -3592,13 +3592,13 @@ export const players: Player[] = [
     nickname: "zai_7",
     realName: "",
     avatarUrl: "/avatars/default.jpg",
-    seasonBadges: [],
+    seasonBadges: ["s4","s5"],
     hasWonCup: false,
 
     
     
 
-    currentMedalLabel: "",
+    currentMedalLabel: "Divine 3",
     currentMedalId: "",
     peakMedalLabel: "",
     peakMedalId: "",
@@ -3619,13 +3619,13 @@ export const players: Player[] = [
     nickname: "TeRroRr",
     realName: "",
     avatarUrl: "/avatars/default.jpg",
-    seasonBadges: [],
+    seasonBadges: ["s4","s5"],
     hasWonCup: false,
 
     
     
 
-    currentMedalLabel: "",
+    currentMedalLabel: "Ancient 2",
     currentMedalId: "",
     peakMedalLabel: "",
     peakMedalId: "",
@@ -3646,13 +3646,13 @@ export const players: Player[] = [
     nickname: "Kunaka",
     realName: "",
     avatarUrl: "/avatars/default.jpg",
-    seasonBadges: [],
+    seasonBadges: ["s4","s5"],
     hasWonCup: false,
 
     
     
 
-    currentMedalLabel: "",
+    currentMedalLabel: "Immortal",
     currentMedalId: "",
     peakMedalLabel: "",
     peakMedalId: "",
@@ -3673,13 +3673,13 @@ export const players: Player[] = [
     nickname: "FADE",
     realName: "",
     avatarUrl: "/avatars/default.jpg",
-    seasonBadges: [],
+    seasonBadges: ["s4","s5"],
     hasWonCup: false,
 
     
     
 
-    currentMedalLabel: "",
+    currentMedalLabel: "Divine 2",
     currentMedalId: "",
     peakMedalLabel: "",
     peakMedalId: "",
@@ -3700,13 +3700,13 @@ export const players: Player[] = [
     nickname: "Gotatch captain",
     realName: "",
     avatarUrl: "/avatars/default.jpg",
-    seasonBadges: [],
+    seasonBadges: ["s4"],
     hasWonCup: false,
 
     
     
 
-    currentMedalLabel: "",
+    currentMedalLabel: "Archon 5",
     currentMedalId: "",
     peakMedalLabel: "",
     peakMedalId: "",
@@ -3727,13 +3727,13 @@ export const players: Player[] = [
     nickname: "Zombie",
     realName: "",
     avatarUrl: "/avatars/default.jpg",
-    seasonBadges: [],
+    seasonBadges: ["s4","s5"],
     hasWonCup: false,
 
     
     
 
-    currentMedalLabel: "",
+    currentMedalLabel: "Uncalibrated",
     currentMedalId: "",
     peakMedalLabel: "",
     peakMedalId: "",
@@ -3754,13 +3754,13 @@ export const players: Player[] = [
     nickname: "LightNing Goku",
     realName: "",
     avatarUrl: "/avatars/default.jpg",
-    seasonBadges: [],
+    seasonBadges: ["s4","s5"],
     hasWonCup: false,
 
     
     
 
-    currentMedalLabel: "",
+    currentMedalLabel: "Divine 2",
     currentMedalId: "",
     peakMedalLabel: "",
     peakMedalId: "",
@@ -3781,13 +3781,13 @@ export const players: Player[] = [
     nickname: "*Foujii",
     realName: "",
     avatarUrl: "/avatars/default.jpg",
-    seasonBadges: [],
+    seasonBadges: ["s4","s5"],
     hasWonCup: false,
 
     
     
 
-    currentMedalLabel: "",
+    currentMedalLabel: "Archon 5",
     currentMedalId: "",
     peakMedalLabel: "",
     peakMedalId: "",
@@ -3808,13 +3808,13 @@ export const players: Player[] = [
     nickname: "Sejlur",
     realName: "",
     avatarUrl: "/avatars/default.jpg",
-    seasonBadges: [],
+    seasonBadges: ["s4"],
     hasWonCup: false,
 
     
     
 
-    currentMedalLabel: "",
+    currentMedalLabel: "Immortal",
     currentMedalId: "",
     peakMedalLabel: "",
     peakMedalId: "",
@@ -3835,13 +3835,13 @@ export const players: Player[] = [
     nickname: "Mr Pudge",
     realName: "",
     avatarUrl: "/avatars/default.jpg",
-    seasonBadges: [],
+    seasonBadges: ["s4"],
     hasWonCup: false,
 
     
     
 
-    currentMedalLabel: "",
+    currentMedalLabel: "Legend 1",
     currentMedalId: "",
     peakMedalLabel: "",
     peakMedalId: "",
@@ -3862,13 +3862,13 @@ export const players: Player[] = [
     nickname: "The Beast",
     realName: "",
     avatarUrl: "/avatars/default.jpg",
-    seasonBadges: [],
+    seasonBadges: ["s4"],
     hasWonCup: false,
 
     
     
 
-    currentMedalLabel: "",
+    currentMedalLabel: "Guardian 1",
     currentMedalId: "",
     peakMedalLabel: "",
     peakMedalId: "",
@@ -3889,13 +3889,13 @@ export const players: Player[] = [
     nickname: "TamBamGOD",
     realName: "",
     avatarUrl: "/avatars/default.jpg",
-    seasonBadges: [],
+    seasonBadges: ["s4","s5"],
     hasWonCup: false,
 
     
     
 
-    currentMedalLabel: "",
+    currentMedalLabel: "Divine 4",
     currentMedalId: "",
     peakMedalLabel: "",
     peakMedalId: "",
@@ -3916,13 +3916,13 @@ export const players: Player[] = [
     nickname: "MGL",
     realName: "",
     avatarUrl: "/avatars/default.jpg",
-    seasonBadges: [],
+    seasonBadges: ["s4"],
     hasWonCup: false,
 
     
     
 
-    currentMedalLabel: "",
+    currentMedalLabel: "Immortal",
     currentMedalId: "",
     peakMedalLabel: "",
     peakMedalId: "",
@@ -3943,13 +3943,13 @@ export const players: Player[] = [
     nickname: "Eternal_Bliz2ard",
     realName: "",
     avatarUrl: "/avatars/default.jpg",
-    seasonBadges: [],
+    seasonBadges: ["s4"],
     hasWonCup: false,
 
     
     
 
-    currentMedalLabel: "",
+    currentMedalLabel: "Divine 2",
     currentMedalId: "",
     peakMedalLabel: "",
     peakMedalId: "",
@@ -3970,13 +3970,13 @@ export const players: Player[] = [
     nickname: "Draco~",
     realName: "",
     avatarUrl: "/avatars/default.jpg",
-    seasonBadges: [],
+    seasonBadges: ["s4","s5"],
     hasWonCup: false,
 
     
     
 
-    currentMedalLabel: "",
+    currentMedalLabel: "Legend 1",
     currentMedalId: "",
     peakMedalLabel: "",
     peakMedalId: "",
@@ -3997,13 +3997,13 @@ export const players: Player[] = [
     nickname: "Anzu",
     realName: "",
     avatarUrl: "/avatars/default.jpg",
-    seasonBadges: [],
+    seasonBadges: ["s4","s5"],
     hasWonCup: false,
 
     
     
 
-    currentMedalLabel: "",
+    currentMedalLabel: "Immortal",
     currentMedalId: "",
     peakMedalLabel: "",
     peakMedalId: "",
@@ -4024,13 +4024,13 @@ export const players: Player[] = [
     nickname: "itus",
     realName: "",
     avatarUrl: "/avatars/default.jpg",
-    seasonBadges: [],
+    seasonBadges: ["s4"],
     hasWonCup: false,
 
     
     
 
-    currentMedalLabel: "",
+    currentMedalLabel: "Crusader 5",
     currentMedalId: "",
     peakMedalLabel: "",
     peakMedalId: "",
@@ -4051,13 +4051,13 @@ export const players: Player[] = [
     nickname: "BOOM",
     realName: "",
     avatarUrl: "/avatars/default.jpg",
-    seasonBadges: [],
+    seasonBadges: ["s4","s5"],
     hasWonCup: false,
 
     
     
 
-    currentMedalLabel: "",
+    currentMedalLabel: "Ancient 3",
     currentMedalId: "",
     peakMedalLabel: "",
     peakMedalId: "",
@@ -4078,13 +4078,13 @@ export const players: Player[] = [
     nickname: "Razer",
     realName: "",
     avatarUrl: "/avatars/default.jpg",
-    seasonBadges: [],
+    seasonBadges: ["s4","s5"],
     hasWonCup: false,
 
     
     
 
-    currentMedalLabel: "",
+    currentMedalLabel: "Immortal",
     currentMedalId: "",
     peakMedalLabel: "",
     peakMedalId: "",
@@ -4105,13 +4105,13 @@ export const players: Player[] = [
     nickname: "Dis.Traction",
     realName: "",
     avatarUrl: "/avatars/default.jpg",
-    seasonBadges: [],
+    seasonBadges: ["s4"],
     hasWonCup: false,
 
     
     
 
-    currentMedalLabel: "",
+    currentMedalLabel: "Legend 3",
     currentMedalId: "",
     peakMedalLabel: "",
     peakMedalId: "",
@@ -4132,13 +4132,13 @@ export const players: Player[] = [
     nickname: "JiMmY#",
     realName: "",
     avatarUrl: "/avatars/default.jpg",
-    seasonBadges: [],
+    seasonBadges: ["s4"],
     hasWonCup: false,
 
     
     
 
-    currentMedalLabel: "",
+    currentMedalLabel: "Divine 1",
     currentMedalId: "",
     peakMedalLabel: "",
     peakMedalId: "",
@@ -4159,13 +4159,13 @@ export const players: Player[] = [
     nickname: "Muri",
     realName: "",
     avatarUrl: "/avatars/default.jpg",
-    seasonBadges: [],
+    seasonBadges: ["s4"],
     hasWonCup: false,
 
     
     
 
-    currentMedalLabel: "",
+    currentMedalLabel: "Ancient 4",
     currentMedalId: "",
     peakMedalLabel: "",
     peakMedalId: "",
@@ -4186,13 +4186,13 @@ export const players: Player[] = [
     nickname: "BlisS",
     realName: "",
     avatarUrl: "/avatars/default.jpg",
-    seasonBadges: [],
+    seasonBadges: ["s4"],
     hasWonCup: false,
 
     
     
 
-    currentMedalLabel: "",
+    currentMedalLabel: "Divine 4",
     currentMedalId: "",
     peakMedalLabel: "",
     peakMedalId: "",
@@ -4213,13 +4213,13 @@ export const players: Player[] = [
     nickname: "skipper",
     realName: "",
     avatarUrl: "/avatars/default.jpg",
-    seasonBadges: [],
+    seasonBadges: ["s4","s5"],
     hasWonCup: false,
 
     
     
 
-    currentMedalLabel: "",
+    currentMedalLabel: "Legend 5",
     currentMedalId: "",
     peakMedalLabel: "",
     peakMedalId: "",
@@ -4240,13 +4240,13 @@ export const players: Player[] = [
     nickname: "Seedhemaut",
     realName: "",
     avatarUrl: "/avatars/default.jpg",
-    seasonBadges: [],
+    seasonBadges: ["s4"],
     hasWonCup: false,
 
     
     
 
-    currentMedalLabel: "",
+    currentMedalLabel: "Crusader 5",
     currentMedalId: "",
     peakMedalLabel: "",
     peakMedalId: "",
@@ -4267,13 +4267,13 @@ export const players: Player[] = [
     nickname: "Maddened",
     realName: "",
     avatarUrl: "/avatars/default.jpg",
-    seasonBadges: [],
+    seasonBadges: ["s4"],
     hasWonCup: false,
 
     
     
 
-    currentMedalLabel: "",
+    currentMedalLabel: "Immortal",
     currentMedalId: "",
     peakMedalLabel: "",
     peakMedalId: "",
@@ -4294,13 +4294,13 @@ export const players: Player[] = [
     nickname: "Zonark",
     realName: "",
     avatarUrl: "/avatars/default.jpg",
-    seasonBadges: [],
+    seasonBadges: ["s4"],
     hasWonCup: false,
 
     
     
 
-    currentMedalLabel: "",
+    currentMedalLabel: "Immortal",
     currentMedalId: "",
     peakMedalLabel: "",
     peakMedalId: "",
@@ -4327,7 +4327,7 @@ export const players: Player[] = [
     
     
 
-    currentMedalLabel: "",
+    currentMedalLabel: "Archon 5",
     currentMedalId: "",
     peakMedalLabel: "",
     peakMedalId: "",
@@ -4348,13 +4348,13 @@ export const players: Player[] = [
     nickname: "Naruto",
     realName: "",
     avatarUrl: "/avatars/default.jpg",
-    seasonBadges: [],
+    seasonBadges: ["s4"],
     hasWonCup: false,
 
     
     
 
-    currentMedalLabel: "",
+    currentMedalLabel: "Legend 2",
     currentMedalId: "",
     peakMedalLabel: "",
     peakMedalId: "",
@@ -4375,7 +4375,7 @@ export const players: Player[] = [
     nickname: "Markeloff",
     realName: "",
     avatarUrl: "/avatars/default.jpg",
-    seasonBadges: [],
+    seasonBadges: ["s4"],
     hasWonCup: false,
 
     
@@ -4402,13 +4402,13 @@ export const players: Player[] = [
     nickname: "Tintin000",
     realName: "",
     avatarUrl: "/avatars/default.jpg",
-    seasonBadges: [],
+    seasonBadges: ["s4"],
     hasWonCup: false,
 
     
     
 
-    currentMedalLabel: "",
+    currentMedalLabel: "Archon 5",
     currentMedalId: "",
     peakMedalLabel: "",
     peakMedalId: "",
@@ -4429,13 +4429,13 @@ export const players: Player[] = [
     nickname: "Deathgods",
     realName: "",
     avatarUrl: "/avatars/default.jpg",
-    seasonBadges: [],
+    seasonBadges: ["s4"],
     hasWonCup: false,
 
     
     
 
-    currentMedalLabel: "",
+    currentMedalLabel: "Divine 3",
     currentMedalId: "",
     peakMedalLabel: "",
     peakMedalId: "",
@@ -4456,13 +4456,13 @@ export const players: Player[] = [
     nickname: "Lala",
     realName: "",
     avatarUrl: "/avatars/default.jpg",
-    seasonBadges: [],
+    seasonBadges: ["s4","s5"],
     hasWonCup: false,
 
     
     
 
-    currentMedalLabel: "",
+    currentMedalLabel: "Immortal",
     currentMedalId: "",
     peakMedalLabel: "",
     peakMedalId: "",
@@ -4483,13 +4483,13 @@ export const players: Player[] = [
     nickname: "Mask",
     realName: "",
     avatarUrl: "/avatars/default.jpg",
-    seasonBadges: [],
+    seasonBadges: ["s4","s5"],
     hasWonCup: false,
 
     
     
 
-    currentMedalLabel: "",
+    currentMedalLabel: "Divine 1",
     currentMedalId: "",
     peakMedalLabel: "",
     peakMedalId: "",
@@ -4510,13 +4510,13 @@ export const players: Player[] = [
     nickname: "plutoski",
     realName: "",
     avatarUrl: "/avatars/default.jpg",
-    seasonBadges: [],
+    seasonBadges: ["s4"],
     hasWonCup: false,
 
     
     
 
-    currentMedalLabel: "",
+    currentMedalLabel: "Divine 1",
     currentMedalId: "",
     peakMedalLabel: "",
     peakMedalId: "",
@@ -4537,7 +4537,7 @@ export const players: Player[] = [
     nickname: "Mind_Flay3R",
     realName: "",
     avatarUrl: "/avatars/default.jpg",
-    seasonBadges: [],
+    seasonBadges: ["s4"],
     hasWonCup: false,
 
     
@@ -4564,7 +4564,7 @@ export const players: Player[] = [
     nickname: "Toji Khan",
     realName: "",
     avatarUrl: "/avatars/default.jpg",
-    seasonBadges: [],
+    seasonBadges: ["s4"],
     hasWonCup: false,
 
     
@@ -4591,7 +4591,7 @@ export const players: Player[] = [
     nickname: "Vanara",
     realName: "",
     avatarUrl: "/avatars/default.jpg",
-    seasonBadges: [],
+    seasonBadges: ["s4"],
     hasWonCup: false,
 
     
@@ -4618,7 +4618,7 @@ export const players: Player[] = [
     nickname: "Chinigami",
     realName: "",
     avatarUrl: "/avatars/default.jpg",
-    seasonBadges: [],
+    seasonBadges: ["s4"],
     hasWonCup: false,
 
     
@@ -4645,7 +4645,7 @@ export const players: Player[] = [
     nickname: "Maddy",
     realName: "",
     avatarUrl: "/avatars/default.jpg",
-    seasonBadges: [],
+    seasonBadges: ["s4"],
     hasWonCup: false,
 
     
@@ -4672,7 +4672,7 @@ export const players: Player[] = [
     nickname: "Asd",
     realName: "",
     avatarUrl: "/avatars/default.jpg",
-    seasonBadges: [],
+    seasonBadges: ["s4"],
     hasWonCup: false,
 
     
@@ -4699,7 +4699,7 @@ export const players: Player[] = [
     nickname: "Rockrobin",
     realName: "",
     avatarUrl: "/avatars/default.jpg",
-    seasonBadges: [],
+    seasonBadges: ["s5"],
     hasWonCup: false,
 
     
@@ -4726,7 +4726,7 @@ export const players: Player[] = [
     nickname: "Dracarys",
     realName: "",
     avatarUrl: "/avatars/default.jpg",
-    seasonBadges: [],
+    seasonBadges: ["s5"],
     hasWonCup: false,
 
     
@@ -4753,7 +4753,7 @@ export const players: Player[] = [
     nickname: "shadow",
     realName: "",
     avatarUrl: "/avatars/default.jpg",
-    seasonBadges: [],
+    seasonBadges: ["s5"],
     hasWonCup: false,
 
     
@@ -4780,7 +4780,7 @@ export const players: Player[] = [
     nickname: "dp",
     realName: "",
     avatarUrl: "/avatars/default.jpg",
-    seasonBadges: [],
+    seasonBadges: ["s5"],
     hasWonCup: false,
 
     
@@ -4807,7 +4807,7 @@ export const players: Player[] = [
     nickname: "Ming~ ^._.^",
     realName: "",
     avatarUrl: "/avatars/default.jpg",
-    seasonBadges: [],
+    seasonBadges: ["s5"],
     hasWonCup: false,
 
     
@@ -4834,7 +4834,7 @@ export const players: Player[] = [
     nickname: "I will bully u",
     realName: "",
     avatarUrl: "/avatars/default.jpg",
-    seasonBadges: [],
+    seasonBadges: ["s5"],
     hasWonCup: false,
 
     
@@ -4861,7 +4861,7 @@ export const players: Player[] = [
     nickname: "CurserdTerror",
     realName: "",
     avatarUrl: "/avatars/default.jpg",
-    seasonBadges: [],
+    seasonBadges: ["s5"],
     hasWonCup: false,
 
     
@@ -4888,7 +4888,7 @@ export const players: Player[] = [
     nickname: "Sai",
     realName: "",
     avatarUrl: "/avatars/default.jpg",
-    seasonBadges: [],
+    seasonBadges: ["s5"],
     hasWonCup: false,
 
     
@@ -4915,7 +4915,7 @@ export const players: Player[] = [
     nickname: "Xcarnation",
     realName: "",
     avatarUrl: "/avatars/default.jpg",
-    seasonBadges: [],
+    seasonBadges: ["s5"],
     hasWonCup: false,
 
     
@@ -4942,7 +4942,7 @@ export const players: Player[] = [
     nickname: "Echo Salami",
     realName: "",
     avatarUrl: "/avatars/default.jpg",
-    seasonBadges: [],
+    seasonBadges: ["s5"],
     hasWonCup: false,
 
     
@@ -4969,7 +4969,7 @@ export const players: Player[] = [
     nickname: "m1p07",
     realName: "",
     avatarUrl: "/avatars/default.jpg",
-    seasonBadges: [],
+    seasonBadges: ["s5"],
     hasWonCup: false,
 
     
@@ -4996,7 +4996,7 @@ export const players: Player[] = [
     nickname: "ome1r",
     realName: "",
     avatarUrl: "/avatars/default.jpg",
-    seasonBadges: [],
+    seasonBadges: ["s4","s5"],
     hasWonCup: false,
 
     
@@ -5023,7 +5023,7 @@ export const players: Player[] = [
     nickname: "ZukeGod",
     realName: "",
     avatarUrl: "/avatars/default.jpg",
-    seasonBadges: [],
+    seasonBadges: ["s5"],
     hasWonCup: false,
 
     
@@ -5050,7 +5050,7 @@ export const players: Player[] = [
     nickname: "Vexcon",
     realName: "",
     avatarUrl: "/avatars/default.jpg",
-    seasonBadges: [],
+    seasonBadges: ["s5"],
     hasWonCup: false,
 
     
@@ -5077,7 +5077,7 @@ export const players: Player[] = [
     nickname: "Sexy",
     realName: "",
     avatarUrl: "/avatars/default.jpg",
-    seasonBadges: [],
+    seasonBadges: ["s5"],
     hasWonCup: false,
 
     
@@ -5104,7 +5104,7 @@ export const players: Player[] = [
     nickname: "Munna Lisa",
     realName: "",
     avatarUrl: "/avatars/default.jpg",
-    seasonBadges: [],
+    seasonBadges: ["s5"],
     hasWonCup: false,
 
     
@@ -5158,7 +5158,7 @@ export const players: Player[] = [
     nickname: "KFP",
     realName: "",
     avatarUrl: "/avatars/default.jpg",
-    seasonBadges: [],
+    seasonBadges: ["s5"],
     hasWonCup: false,
 
     
@@ -5185,7 +5185,7 @@ export const players: Player[] = [
     nickname: "SUBVERSION",
     realName: "",
     avatarUrl: "/avatars/default.jpg",
-    seasonBadges: [],
+    seasonBadges: ["s5"],
     hasWonCup: false,
 
     
@@ -5212,7 +5212,7 @@ export const players: Player[] = [
     nickname: "Hero for Fun!",
     realName: "",
     avatarUrl: "/avatars/default.jpg",
-    seasonBadges: [],
+    seasonBadges: ["s5"],
     hasWonCup: false,
 
     
@@ -5239,7 +5239,7 @@ export const players: Player[] = [
     nickname: "Bomberman™",
     realName: "",
     avatarUrl: "/avatars/default.jpg",
-    seasonBadges: [],
+    seasonBadges: ["s5"],
     hasWonCup: false,
 
     
@@ -5266,7 +5266,7 @@ export const players: Player[] = [
     nickname: "Mystic_Bolt",
     realName: "",
     avatarUrl: "/avatars/default.jpg",
-    seasonBadges: [],
+    seasonBadges: ["s5"],
     hasWonCup: false,
 
     
@@ -5293,13 +5293,13 @@ export const players: Player[] = [
     nickname: "topuria enjoyer",
     realName: "",
     avatarUrl: "/avatars/default.jpg",
-    seasonBadges: [],
+    seasonBadges: ["s5"],
     hasWonCup: false,
 
     
     
 
-    currentMedalLabel: "",
+    currentMedalLabel: "Immortal",
     currentMedalId: "",
     peakMedalLabel: "",
     peakMedalId: "",
@@ -5320,13 +5320,13 @@ export const players: Player[] = [
     nickname: "CD.LostfromLight",
     realName: "",
     avatarUrl: "/avatars/default.jpg",
-    seasonBadges: [],
+    seasonBadges: ["s5"],
     hasWonCup: false,
 
     
     
 
-    currentMedalLabel: "",
+    currentMedalLabel: "Ancient 5",
     currentMedalId: "",
     peakMedalLabel: "",
     peakMedalId: "",
@@ -5347,13 +5347,13 @@ export const players: Player[] = [
     nickname: "Midas",
     realName: "",
     avatarUrl: "/avatars/default.jpg",
-    seasonBadges: [],
+    seasonBadges: ["s5"],
     hasWonCup: false,
 
     
     
 
-    currentMedalLabel: "",
+    currentMedalLabel: "Immortal",
     currentMedalId: "",
     peakMedalLabel: "",
     peakMedalId: "",
@@ -5374,13 +5374,13 @@ export const players: Player[] = [
     nickname: "LUCIFERROCKER",
     realName: "",
     avatarUrl: "/avatars/default.jpg",
-    seasonBadges: [],
+    seasonBadges: ["s5"],
     hasWonCup: false,
 
     
     
 
-    currentMedalLabel: "",
+    currentMedalLabel: "Crusader 5",
     currentMedalId: "",
     peakMedalLabel: "",
     peakMedalId: "",
@@ -5401,13 +5401,13 @@ export const players: Player[] = [
     nickname: "F(x)",
     realName: "",
     avatarUrl: "/avatars/default.jpg",
-    seasonBadges: [],
+    seasonBadges: ["s5"],
     hasWonCup: false,
 
     
     
 
-    currentMedalLabel: "",
+    currentMedalLabel: "Legend 2",
     currentMedalId: "",
     peakMedalLabel: "",
     peakMedalId: "",
@@ -5428,13 +5428,13 @@ export const players: Player[] = [
     nickname: "yt/JNJISHNU",
     realName: "",
     avatarUrl: "/avatars/default.jpg",
-    seasonBadges: [],
+    seasonBadges: ["s5"],
     hasWonCup: false,
 
     
     
 
-    currentMedalLabel: "",
+    currentMedalLabel: "Immortal",
     currentMedalId: "",
     peakMedalLabel: "",
     peakMedalId: "",
@@ -5455,13 +5455,13 @@ export const players: Player[] = [
     nickname: "DEAN",
     realName: "",
     avatarUrl: "/avatars/default.jpg",
-    seasonBadges: [],
+    seasonBadges: ["s5"],
     hasWonCup: false,
 
     
     
 
-    currentMedalLabel: "",
+    currentMedalLabel: "Crusader 2",
     currentMedalId: "",
     peakMedalLabel: "",
     peakMedalId: "",
@@ -5482,13 +5482,13 @@ export const players: Player[] = [
     nickname: "YOUNOOB",
     realName: "",
     avatarUrl: "/avatars/default.jpg",
-    seasonBadges: [],
+    seasonBadges: ["s5"],
     hasWonCup: false,
 
     
     
 
-    currentMedalLabel: "",
+    currentMedalLabel: "Legend 4",
     currentMedalId: "",
     peakMedalLabel: "",
     peakMedalId: "",
@@ -5509,13 +5509,13 @@ export const players: Player[] = [
     nickname: "jhamkuanna",
     realName: "",
     avatarUrl: "/avatars/default.jpg",
-    seasonBadges: [],
+    seasonBadges: ["s5"],
     hasWonCup: false,
 
     
     
 
-    currentMedalLabel: "",
+    currentMedalLabel: "Archon 3",
     currentMedalId: "",
     peakMedalLabel: "",
     peakMedalId: "",
@@ -5536,13 +5536,13 @@ export const players: Player[] = [
     nickname: "✪KungFuPanda",
     realName: "",
     avatarUrl: "/avatars/default.jpg",
-    seasonBadges: [],
+    seasonBadges: ["s5"],
     hasWonCup: false,
 
     
     
 
-    currentMedalLabel: "",
+    currentMedalLabel: "Divine 3",
     currentMedalId: "",
     peakMedalLabel: "",
     peakMedalId: "",
@@ -5563,13 +5563,13 @@ export const players: Player[] = [
     nickname: "Lily",
     realName: "",
     avatarUrl: "/avatars/default.jpg",
-    seasonBadges: [],
+    seasonBadges: ["s5"],
     hasWonCup: false,
 
     
     
 
-    currentMedalLabel: "",
+    currentMedalLabel: "Crusader 3",
     currentMedalId: "",
     peakMedalLabel: "",
     peakMedalId: "",
@@ -5590,13 +5590,13 @@ export const players: Player[] = [
     nickname: "Sasuke",
     realName: "",
     avatarUrl: "/avatars/default.jpg",
-    seasonBadges: [],
+    seasonBadges: ["s5"],
     hasWonCup: false,
 
     
     
 
-    currentMedalLabel: "",
+    currentMedalLabel: "Immortal",
     currentMedalId: "",
     peakMedalLabel: "",
     peakMedalId: "",
@@ -5617,13 +5617,13 @@ export const players: Player[] = [
     nickname: "Yoko",
     realName: "",
     avatarUrl: "/avatars/default.jpg",
-    seasonBadges: [],
+    seasonBadges: ["s5"],
     hasWonCup: false,
 
     
     
 
-    currentMedalLabel: "",
+    currentMedalLabel: "Immortal",
     currentMedalId: "",
     peakMedalLabel: "",
     peakMedalId: "",
@@ -5644,13 +5644,13 @@ export const players: Player[] = [
     nickname: "Hunter",
     realName: "",
     avatarUrl: "/avatars/default.jpg",
-    seasonBadges: [],
+    seasonBadges: ["s5"],
     hasWonCup: false,
 
     
     
 
-    currentMedalLabel: "",
+    currentMedalLabel: "Legend 4",
     currentMedalId: "",
     peakMedalLabel: "",
     peakMedalId: "",
@@ -5671,13 +5671,13 @@ export const players: Player[] = [
     nickname: "ZeT",
     realName: "",
     avatarUrl: "/avatars/default.jpg",
-    seasonBadges: [],
+    seasonBadges: ["s5"],
     hasWonCup: false,
 
     
     
 
-    currentMedalLabel: "",
+    currentMedalLabel: "Immortal",
     currentMedalId: "",
     peakMedalLabel: "",
     peakMedalId: "",
@@ -5698,13 +5698,13 @@ export const players: Player[] = [
     nickname: "Impeccable",
     realName: "",
     avatarUrl: "/avatars/default.jpg",
-    seasonBadges: [],
+    seasonBadges: ["s5"],
     hasWonCup: false,
 
     
     
 
-    currentMedalLabel: "",
+    currentMedalLabel: "Immortal",
     currentMedalId: "",
     peakMedalLabel: "",
     peakMedalId: "",
@@ -5725,13 +5725,13 @@ export const players: Player[] = [
     nickname: "tadi_uncle",
     realName: "",
     avatarUrl: "/avatars/default.jpg",
-    seasonBadges: [],
+    seasonBadges: ["s5"],
     hasWonCup: false,
 
     
     
 
-    currentMedalLabel: "",
+    currentMedalLabel: "Legend 2",
     currentMedalId: "",
     peakMedalLabel: "",
     peakMedalId: "",
@@ -5752,13 +5752,13 @@ export const players: Player[] = [
     nickname: "U from miri",
     realName: "",
     avatarUrl: "/avatars/default.jpg",
-    seasonBadges: [],
+    seasonBadges: ["s5"],
     hasWonCup: false,
 
     
     
 
-    currentMedalLabel: "",
+    currentMedalLabel: "Legend 1",
     currentMedalId: "",
     peakMedalLabel: "",
     peakMedalId: "",
@@ -5779,13 +5779,13 @@ export const players: Player[] = [
     nickname: "BTT",
     realName: "",
     avatarUrl: "/avatars/default.jpg",
-    seasonBadges: [],
+    seasonBadges: ["s5"],
     hasWonCup: false,
 
     
     
 
-    currentMedalLabel: "",
+    currentMedalLabel: "Guardian 5",
     currentMedalId: "",
     peakMedalLabel: "",
     peakMedalId: "",
@@ -5806,13 +5806,13 @@ export const players: Player[] = [
     nickname: "SKOOTI",
     realName: "",
     avatarUrl: "/avatars/default.jpg",
-    seasonBadges: [],
+    seasonBadges: ["s4","s5"],
     hasWonCup: false,
 
     
     
 
-    currentMedalLabel: "",
+    currentMedalLabel: "Immortal",
     currentMedalId: "",
     peakMedalLabel: "",
     peakMedalId: "",
@@ -5833,13 +5833,13 @@ export const players: Player[] = [
     nickname: "Juker",
     realName: "",
     avatarUrl: "/avatars/default.jpg",
-    seasonBadges: [],
+    seasonBadges: ["s5"],
     hasWonCup: false,
 
     
     
 
-    currentMedalLabel: "",
+    currentMedalLabel: "Divine 2",
     currentMedalId: "",
     peakMedalLabel: "",
     peakMedalId: "",
@@ -5860,13 +5860,13 @@ export const players: Player[] = [
     nickname: "Erza Scarlet",
     realName: "",
     avatarUrl: "/avatars/default.jpg",
-    seasonBadges: [],
+    seasonBadges: ["s5"],
     hasWonCup: false,
 
     
     
 
-    currentMedalLabel: "",
+    currentMedalLabel: "Immortal",
     currentMedalId: "",
     peakMedalLabel: "",
     peakMedalId: "",
@@ -5887,13 +5887,13 @@ export const players: Player[] = [
     nickname: "Changing Star",
     realName: "",
     avatarUrl: "/avatars/default.jpg",
-    seasonBadges: [],
+    seasonBadges: ["s5"],
     hasWonCup: false,
 
     
     
 
-    currentMedalLabel: "",
+    currentMedalLabel: "Divine 2",
     currentMedalId: "",
     peakMedalLabel: "",
     peakMedalId: "",
@@ -5914,13 +5914,13 @@ export const players: Player[] = [
     nickname: "ConFi",
     realName: "",
     avatarUrl: "/avatars/default.jpg",
-    seasonBadges: [],
+    seasonBadges: ["s5"],
     hasWonCup: false,
 
     
     
 
-    currentMedalLabel: "",
+    currentMedalLabel: "Guardian 5",
     currentMedalId: "",
     peakMedalLabel: "",
     peakMedalId: "",
@@ -5941,13 +5941,13 @@ export const players: Player[] = [
     nickname: "Bakabot",
     realName: "",
     avatarUrl: "/avatars/default.jpg",
-    seasonBadges: [],
+    seasonBadges: ["s5"],
     hasWonCup: false,
 
     
     
 
-    currentMedalLabel: "",
+    currentMedalLabel: "Immortal",
     currentMedalId: "",
     peakMedalLabel: "",
     peakMedalId: "",
@@ -5968,13 +5968,13 @@ export const players: Player[] = [
     nickname: "Potatobuoy",
     realName: "",
     avatarUrl: "/avatars/default.jpg",
-    seasonBadges: [],
+    seasonBadges: ["s5"],
     hasWonCup: false,
 
     
     
 
-    currentMedalLabel: "",
+    currentMedalLabel: "Archon 1",
     currentMedalId: "",
     peakMedalLabel: "",
     peakMedalId: "",
@@ -5995,13 +5995,13 @@ export const players: Player[] = [
     nickname: "Hina",
     realName: "",
     avatarUrl: "/avatars/default.jpg",
-    seasonBadges: [],
+    seasonBadges: ["s5"],
     hasWonCup: false,
 
     
     
 
-    currentMedalLabel: "",
+    currentMedalLabel: "Divine 3",
     currentMedalId: "",
     peakMedalLabel: "",
     peakMedalId: "",
@@ -6022,13 +6022,13 @@ export const players: Player[] = [
     nickname: "έ_v!Ḷ₥!N_Đ",
     realName: "",
     avatarUrl: "/avatars/default.jpg",
-    seasonBadges: [],
+    seasonBadges: ["s5"],
     hasWonCup: false,
 
     
     
 
-    currentMedalLabel: "",
+    currentMedalLabel: "Ancient 1",
     currentMedalId: "",
     peakMedalLabel: "",
     peakMedalId: "",
@@ -6049,13 +6049,13 @@ export const players: Player[] = [
     nickname: "MrBeanBag",
     realName: "",
     avatarUrl: "/avatars/default.jpg",
-    seasonBadges: [],
+    seasonBadges: ["s5"],
     hasWonCup: false,
 
     
     
 
-    currentMedalLabel: "",
+    currentMedalLabel: "Divine 2",
     currentMedalId: "",
     peakMedalLabel: "",
     peakMedalId: "",
@@ -6076,13 +6076,13 @@ export const players: Player[] = [
     nickname: "humble",
     realName: "",
     avatarUrl: "/avatars/default.jpg",
-    seasonBadges: [],
+    seasonBadges: ["s5"],
     hasWonCup: false,
 
     
     
 
-    currentMedalLabel: "",
+    currentMedalLabel: "Immortal",
     currentMedalId: "",
     peakMedalLabel: "",
     peakMedalId: "",
@@ -6103,13 +6103,13 @@ export const players: Player[] = [
     nickname: "EXe",
     realName: "",
     avatarUrl: "/avatars/default.jpg",
-    seasonBadges: [],
+    seasonBadges: ["s5"],
     hasWonCup: false,
 
     
     
 
-    currentMedalLabel: "",
+    currentMedalLabel: "Immortal",
     currentMedalId: "",
     peakMedalLabel: "",
     peakMedalId: "",
@@ -6130,13 +6130,13 @@ export const players: Player[] = [
     nickname: "SiniOmega",
     realName: "",
     avatarUrl: "/avatars/default.jpg",
-    seasonBadges: [],
+    seasonBadges: ["s5"],
     hasWonCup: false,
 
     
     
 
-    currentMedalLabel: "",
+    currentMedalLabel: "Legend 1",
     currentMedalId: "",
     peakMedalLabel: "",
     peakMedalId: "",
@@ -6157,13 +6157,13 @@ export const players: Player[] = [
     nickname: "zx",
     realName: "",
     avatarUrl: "/avatars/default.jpg",
-    seasonBadges: [],
+    seasonBadges: ["s5"],
     hasWonCup: false,
 
     
     
 
-    currentMedalLabel: "",
+    currentMedalLabel: "Legend 2",
     currentMedalId: "",
     peakMedalLabel: "",
     peakMedalId: "",
@@ -6212,13 +6212,13 @@ export const players: Player[] = [
     nickname: "rizwan the fu*ker",
     realName: "",
     avatarUrl: "/avatars/default.jpg",
-    seasonBadges: [],
+    seasonBadges: ["s5"],
     hasWonCup: false,
 
     
     
 
-    currentMedalLabel: "",
+    currentMedalLabel: "Divine 2",
     currentMedalId: "",
     peakMedalLabel: "",
     peakMedalId: "",
@@ -6239,13 +6239,13 @@ export const players: Player[] = [
     nickname: "Shirleythomas",
     realName: "",
     avatarUrl: "/avatars/default.jpg",
-    seasonBadges: [],
+    seasonBadges: ["s5"],
     hasWonCup: false,
 
     
     
 
-    currentMedalLabel: "",
+    currentMedalLabel: "Legend 5",
     currentMedalId: "",
     peakMedalLabel: "",
     peakMedalId: "",
@@ -6266,13 +6266,13 @@ export const players: Player[] = [
     nickname: "OzEe",
     realName: "",
     avatarUrl: "/avatars/default.jpg",
-    seasonBadges: [],
+    seasonBadges: ["s5"],
     hasWonCup: false,
 
     
     
 
-    currentMedalLabel: "",
+    currentMedalLabel: "Immortal",
     currentMedalId: "",
     peakMedalLabel: "",
     peakMedalId: "",
@@ -6293,13 +6293,13 @@ export const players: Player[] = [
     nickname: "°Kyuubi°",
     realName: "",
     avatarUrl: "/avatars/default.jpg",
-    seasonBadges: [],
+    seasonBadges: ["s5"],
     hasWonCup: false,
 
     
     
 
-    currentMedalLabel: "",
+    currentMedalLabel: "Archon 5",
     currentMedalId: "",
     peakMedalLabel: "",
     peakMedalId: "",
@@ -6321,13 +6321,13 @@ export const players: Player[] = [
     nickname: "Miracles from heaven!",
     realName: "",
     avatarUrl: "/avatars/default.jpg",
-    seasonBadges: [],
+    seasonBadges: ["s5"],
     hasWonCup: false,
 
     
     
 
-    currentMedalLabel: "",
+    currentMedalLabel: "Crusader 3",
     currentMedalId: "",
     peakMedalLabel: "",
     peakMedalId: "",
