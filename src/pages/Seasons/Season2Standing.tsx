@@ -10,29 +10,30 @@ export default function Season2Standings() {
     return a.losses - b.losses;
   });
 
-  const championId = "mslayer-s2";
-  const runnerUpId = "bazinga-s2";
-  const dqId = "grimm-s2";
+  const championId: Team["id"] = "mslayer-s2";
+  const runnerUpId: Team["id"] = "bazinga-s2";
+  const thirdId: Team["id"] = "ngx-savage-s2";
+  const dqId: Team["id"] = "grimm-s2";
 
   const champion = orderedByRecord.find((t) => t.id === championId);
   const runnerUp = orderedByRecord.find((t) => t.id === runnerUpId);
+  const third = orderedByRecord.find((t) => t.id === thirdId);
   const dqTeam = orderedByRecord.find((t) => t.id === dqId);
 
   const remaining: Team[] = orderedByRecord.filter(
-    (t) => ![championId, runnerUpId, dqId].includes(t.id)
+    (t) => ![championId, runnerUpId, thirdId, dqId].includes(t.id)
   );
 
+  // after top 3 (and excluding DQ)
   const placementOrderAfterTop3: Team["id"][] = [
-    "ngx-savage-s2",
     "madlad-s2",
     "tom1c-s2",
     "machine-s2",
     "madara-s2",
     "r3ciprocal-s2",
     "banner-s2",
-    "gxnova-s2", 
+    "gxnova-s2",
     "xj-s2",
-    
   ];
 
   const orderedOthers: Team[] = [
@@ -49,110 +50,38 @@ export default function Season2Standings() {
   const ordered: Team[] = [
     champion,
     runnerUp,
-
+    third,
     ...orderedOthers,
     dqTeam,
   ].filter((t): t is Team => Boolean(t));
 
   return (
-    // solid dark bg so the strip between table & footer disappears
-    <main className="w-full flex justify-center pt-24 pb-4 bg-[#050608]">
+    <main className="w-full flex justify-center pt-10 pb-4 bg-[#050608]">
       <div className="w-full max-w-[880px] px-6">
-        {/* TITLE + CTA BLOCK */}
-        <header className="mb-8">
-          {/* FIRST ROW: Season title + Bracket on same line */}
-          <div className="flex items-center justify-between mb-3">
-            <h1
-              className="text-[clamp(2rem,3vw,2.4rem)] leading-tight font-semibold tracking-[0.18em]
-              bg-linear-to-b from-white to-[#c2c2c2] text-transparent bg-clip-text
-              drop-shadow-[0_3px_6px_rgba(255,255,255,0.35)]"
-            >
-              Season Ⅱ
-            </h1>
+        {/* === CENTERED BRACKET BUTTON === */}
+        <div className="flex justify-center mb-6">
+          <Link
+            to="/tournament"
+            className="px-8 py-2 rounded-full text-[0.8rem] font-semibold uppercase tracking-[0.18em]
+            bg-linear-to-tr from-[#f5f5f5] via-[#c0c0c0] to-[#9ca3af] text-[#050608]
+            shadow-[0_0_25px_rgba(148,163,184,0.85)] hover:brightness-110 transition"
+          >
+            VIEW BRACKET
+          </Link>
+        </div>
 
-            <Link
-              to="/tournament"
-              className="px-6 py-2 rounded-full text-[0.8rem] font-semibold uppercase tracking-[0.18em]
-              bg-linear-to-tr from-[#f5f5f5] via-[#c0c0c0] to-[#9ca3af] text-[#050608]
-              shadow-[0_0_25px_rgba(148,163,184,0.85)] hover:brightness-110
-              transition whitespace-nowrap"
-            >
-              VIEW BRACKET
-            </Link>
-          </div>
-
-          {/* SECOND ROW: Season Pills */}
-          <div className="flex flex-wrap items-center gap-2 text-[0.7rem] font-semibold uppercase tracking-[0.18em]">
-            <Link
-              to="/seasons/1"
-              className="inline-flex items-center gap-2 px-3 py-1 rounded-full
-              bg-white/5 text-gray-200 hover:bg-white/10
-              shadow-[0_0_12px_rgba(148,163,184,0.5)] transition"
-            >
-              Season Ⅰ →
-            </Link>
-
-            {/* Season 2 - current */}
-            <Link
-              to="/seasons/2"
-              className="inline-flex items-center px-4 py-1 rounded-full
-              bg-linear-to-r from-[#f5f5f5] via-[#d4d4d8] to-[#9ca3af]
-              text-[#050608] shadow-[0_0_16px_rgba(148,163,184,0.85)] transition"
-            >
-              Season Ⅱ
-            </Link>
-
-            <Link
-              to="/seasons/3"
-              className="inline-flex items-center gap-2 px-3 py-1 rounded-full
-              bg-white/5 text-gray-200 hover:bg-white/10
-              shadow-[0_0_12px_rgba(148,163,184,0.5)] transition"
-            >
-              Season Ⅲ →
-            </Link>
-            <Link
-              to="/seasons/4"
-              className="inline-flex items-center gap-2 px-3 py-1 rounded-full
-              bg-white/5 text-gray-200 hover:bg-white/10
-              shadow-[0_0_12px_rgba(148,163,184,0.5)] transition"
-            >
-              Season Ⅳ →
-            </Link>
-            <Link
-              to="/seasons/5"
-              className="inline-flex items-center gap-2 px-3 py-1 rounded-full
-              bg-white/5 text-gray-200 hover:bg-white/10
-              shadow-[0_0_12px_rgba(148,163,184,0.5)] transition"
-            >
-              Season Ⅴ →
-            </Link>
-            <Link
-              to="/seasons/6"
-              className="inline-flex items-center gap-2 px-3 py-1 rounded-full
-              bg-white/5 text-gray-200 hover:bg-white/10
-              shadow-[0_0_12px_rgba(148,163,184,0.5)] transition"
-            >
-              Season Ⅵ →
-            </Link>
-          </div>
-        </header>
-
-        {/* TABLE */}
+        {/* === TABLE === */}
         <div className="w-full overflow-x-auto rounded-3xl border border-white/10 bg-[#050608] shadow-[0_18px_50px_rgba(0,0,0,0.8)]">
           <table className="w-full border-spacing-0 text-sm">
             <thead className="text-left text-[0.7rem] uppercase tracking-[0.22em] text-gray-300">
               <tr className="border-none bg-white/0.05 backdrop-blur-sm">
-                <th className="py-3 pl-5 first:rounded-tl-3xl text-[0.68rem] text-gray-300">
-                  Captain
-                </th>
+                <th className="py-3 pl-5 text-[0.68rem] text-gray-300">Captain</th>
                 <th className="py-3 text-[0.68rem] text-gray-300">Team Name</th>
-                <th className="py-3 text-center w-[72px] text-[0.68rem] text-gray-300">
-                  {/* medal column */}
-                </th>
+                <th className="py-3 text-center w-[72px] text-[0.68rem] text-gray-300"></th>
                 <th className="py-3 text-right text-[0.68rem] text-gray-300">
                   Avg MMR
                 </th>
-                <th className="py-3 pr-5 text-right last:rounded-tr-3xl text-[0.68rem] text-gray-300">
+                <th className="py-3 pr-5 text-right text-[0.68rem] text-gray-300">
                   Gold Allocated
                 </th>
               </tr>
@@ -165,12 +94,11 @@ export default function Season2Standings() {
 
                 const isChampion = team.id === championId;
                 const isRunnerUp = team.id === runnerUpId;
-                ;
+                const isThird = team.id === thirdId;
                 const isDQ = team.id === dqId;
 
-                // slightly smaller rows (h-12) so table doesn't run into footer
                 const baseRow =
-                   "relative h-10 border-none overflow-hidden hover:bg-white/[0.04] transition-colors duration-300 text-[0.78rem]";
+                  "relative h-10 border-none overflow-hidden hover:bg-white/[0.04] transition-colors duration-300 text-[0.78rem]";
 
                 let rowClass = baseRow;
 
@@ -180,11 +108,12 @@ export default function Season2Standings() {
                 } else if (isRunnerUp) {
                   rowClass +=
                     " bg-[rgba(192,192,192,0.22)] shadow-[0_0_20px_rgba(148,163,184,0.35)]";
+                } else if (isThird) {
+                  rowClass +=
+                    " bg-[rgba(205,127,50,0.22)] shadow-[0_0_20px_rgba(248,153,102,0.35)]";
                 } else if (isDQ) {
-                  // solid deep red row (DQ)
                   rowClass += " bg-[#7f1d1d]";
                 } else {
-                  // opaque dark background to avoid silver gradient bleed
                   rowClass += " bg-[#020617]";
                 }
 
@@ -193,12 +122,11 @@ export default function Season2Standings() {
                     key={team.id}
                     className={rowClass}
                     style={
-                      !isChampion && !isRunnerUp &&  !isDQ
+                      !isChampion && !isRunnerUp && !isThird && !isDQ
                         ? { boxShadow: `0 0 14px ${team.logoColor}40` }
                         : undefined
                     }
                   >
-                    {/* CAPTAIN */}
                     <td className="pl-5">
                       <div className="flex items-center gap-3 font-semibold">
                         <span
@@ -211,7 +139,6 @@ export default function Season2Standings() {
                       </div>
                     </td>
 
-                    {/* TEAM NAME (with DQ strike) */}
                     <td>
                       <div className="flex items-center gap-2 font-semibold">
                         <Link
@@ -229,7 +156,6 @@ export default function Season2Standings() {
                       </div>
                     </td>
 
-                    {/* TROPHY / MEDAL / DQ CIRCLE */}
                     <td>
                       <div className="flex items-center justify-center">
                         {isChampion && (
@@ -242,8 +168,12 @@ export default function Season2Standings() {
                             <span className="text-lg">🥈</span>
                           </div>
                         )}
-                        
-                        {isDQ && !isChampion && !isRunnerUp  && (
+                        {isThird && (
+                          <div className="inline-flex h-9 w-9 items-center justify-center rounded-full bg-[#d97706] shadow-[0_0_18px_rgba(234,179,8,0.95)]">
+                            <span className="text-lg">🥉</span>
+                          </div>
+                        )}
+                        {isDQ && !isChampion && !isRunnerUp && !isThird && (
                           <div className="inline-flex h-9 w-9 items-center justify-center rounded-full bg-[#b91c1c]">
                             <span className="text-[0.65rem] font-extrabold tracking-[0.18em] uppercase">
                               DQ
@@ -253,14 +183,12 @@ export default function Season2Standings() {
                       </div>
                     </td>
 
-                    {/* AVG MMR */}
                     <td className="text-right">
                       <span className="tabular-nums text-sm text-gray-100">
                         {team.averageMMR}
                       </span>
                     </td>
 
-                    {/* GOLD */}
                     <td className="pr-5 text-right">
                       <span className="tabular-nums font-semibold text-gray-200">
                         {gold}

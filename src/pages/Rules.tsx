@@ -151,184 +151,312 @@ export default function RulesPage() {
     },
   ];
 
-  // different colors for every numbered badge
   const numberColors = [
-    "radial-gradient(circle at 30% 20%, #ffefad, #facc15)", // 1 - gold
-    "radial-gradient(circle at 30% 20%, #ffefad, #facc15)", // 1 - gold
-    "radial-gradient(circle at 30% 20%, #ffefad, #facc15)", // 1 - gold
-    "radial-gradient(circle at 30% 20%, #ffefad, #facc15)", // 1 - gold
-    "radial-gradient(circle at 30% 20%, #ffefad, #facc15)", // 1 - gold
-    "radial-gradient(circle at 30% 20%, #ffefad, #facc15)", // 1 - gold
-    "radial-gradient(circle at 30% 20%, #ffefad, #facc15)", // 1 - gold
-    "radial-gradient(circle at 30% 20%, #ffefad, #facc15)", // 1 - gold
-    "radial-gradient(circle at 30% 20%, #ffefad, #facc15)", // 1 - gold
-    "radial-gradient(circle at 30% 20%, #ffefad, #facc15)", // 1 - gold
-    "radial-gradient(circle at 30% 20%, #ffefad, #facc15)", // 1 - gold
-    "radial-gradient(circle at 30% 20%, #ffefad, #facc15)", // 1 - gold
-    "radial-gradient(circle at 30% 20%, #ffefad, #facc15)", // 1 - gold
-    
+    "radial-gradient(circle at 30% 20%, #ffefad, #facc15)",
+    "radial-gradient(circle at 30% 20%, #ffefad, #facc15)",
+    "radial-gradient(circle at 30% 20%, #ffefad, #facc15)",
+    "radial-gradient(circle at 30% 20%, #ffefad, #facc15)",
+    "radial-gradient(circle at 30% 20%, #ffefad, #facc15)",
+    "radial-gradient(circle at 30% 20%, #ffefad, #facc15)",
+    "radial-gradient(circle at 30% 20%, #ffefad, #facc15)",
+    "radial-gradient(circle at 30% 20%, #ffefad, #facc15)",
+    "radial-gradient(circle at 30% 20%, #ffefad, #facc15)",
+    "radial-gradient(circle at 30% 20%, #ffefad, #facc15)",
+    "radial-gradient(circle at 30% 20%, #ffefad, #facc15)",
+    "radial-gradient(circle at 30% 20%, #ffefad, #facc15)",
   ];
 
   return (
-    <main
-      style={{
-        width: "100%",
-        maxWidth: "1000px",
-        margin: "0 auto",
-        padding: "3rem 1.25rem 4rem",
-        color: "#e5e5e5",
-      }}
-    >
-      {/* Scroll-like container */}
-      <div
-        style={{
-          position: "relative",
-          borderRadius: "28px",
-          border: "1px solid rgba(209,213,219,0.2)",
-          background:
-            "radial-gradient(circle at top, rgba(250,250,250,0.06), rgba(5,5,7,0.98))",
-          boxShadow: "0 30px 90px rgba(0,0,0,0.85)",
-          padding: "2.5rem 1.6rem 3.2rem",
-          overflow: "hidden",
-        }}
-      >
-        {/* subtle glow */}
+    <main className="relative min-h-screen overflow-hidden">
+      {/* background glows matching navbar theme */}
+      <div className="pointer-events-none absolute inset-0 -z-10">
         <div
           style={{
             position: "absolute",
-            inset: "-40%",
+            inset: 0,
             background:
-              "radial-gradient(circle at 20% 0%, rgba(250,250,210,0.14), transparent 60%)",
+              "radial-gradient(circle at 0% 0%, rgba(192,192,192,0.10), transparent 55%)",
             opacity: 0.7,
-            pointerEvents: "none",
           }}
         />
-
-        <motion.h1
-          initial={{ opacity: 0, y: 18 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6 }}
+        <div
           style={{
-            fontSize: "clamp(2rem, 4vw, 2.6rem)",
-            fontWeight: 800,
-            marginBottom: "0.4rem",
-            backgroundImage:
-              "linear-gradient(90deg, #fafafa, #e5d39f, #d0b46a)",
-            WebkitBackgroundClip: "text",
-            color: "transparent",
-            textAlign: "center",
+            position: "absolute",
+            inset: 0,
+            background:
+              "radial-gradient(circle at 100% 100%, rgba(136,144,150,0.18), transparent 60%)",
+            opacity: 0.5,
+          }}
+        />
+        {/* subtle animated light sweep behind the scroll */}
+        <motion.div
+          style={{
+            position: "absolute",
+            top: "20%",
+            left: "-20%",
+            width: "60%",
+            height: "35%",
+            background:
+              "linear-gradient(120deg, rgba(248,250,252,0.12), transparent)",
+            filter: "blur(28px)",
+          }}
+          animate={{ x: ["0%", "60%", "0%"], opacity: [0, 0.8, 0] }}
+          transition={{ duration: 9, repeat: Infinity, ease: "easeInOut" }}
+        />
+      </div>
+
+      <div
+        style={{
+          width: "100%",
+          maxWidth: "1000px",
+          margin: "0 auto",
+          padding: "3rem 1.25rem 4rem",
+          color: "#e5e5e5",
+          position: "relative",
+          zIndex: 1,
+        }}
+      >
+        {/* Scroll-like container */}
+        <div
+          style={{
+            position: "relative",
+            borderRadius: "28px",
+            border: "1px solid rgba(209,213,219,0.28)",
+            background:
+              // same family as navbar: dark base + soft silvers
+              "radial-gradient(circle at 0% 0%, rgba(192,192,192,0.16), transparent 60%), radial-gradient(circle at 100% 100%, rgba(148,163,184,0.14), transparent 60%), rgba(5,7,10,0.96)",
+            boxShadow:
+              "0 28px 80px rgba(0,0,0,0.9), 0 0 0 1px rgba(15,23,42,0.8)",
+            padding: "2.6rem 1.8rem 3.4rem",
+            overflow: "hidden",
           }}
         >
-          The Roshan Rumble
-        </motion.h1>
-
-        <p
-          style={{
-            textAlign: "center",
-            marginBottom: "2.2rem",
-            fontSize: "clamp(1.4rem, 2.5vw, 1.9rem)",
-            letterSpacing: "0.18em",
-            textTransform: "uppercase",
-            color: "#CD7F32",
-          }}
-        >
-          Rules
-        </p>
-
-        {sections.map((sec, index) => (
-          <motion.section
-            key={sec.title}
-            initial={{ opacity: 0, y: 14 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.4, delay: index * 0.04 }}
+          {/* inner top glow */}
+          <div
             style={{
-              marginBottom: index === sections.length - 1 ? 0 : "2.4rem",
-              position: "relative",
-              zIndex: 1,
+              position: "absolute",
+              inset: "-40% -40% auto -40%",
+              background:
+                "radial-gradient(circle at 20% 0%, rgba(250,250,210,0.16), transparent 60%)",
+              opacity: 0.65,
+              pointerEvents: "none",
+            }}
+          />
+
+          {/* animated outline glow */}
+          <motion.div
+            style={{
+              position: "absolute",
+              inset: 0,
+              borderRadius: "28px",
+              border: "1px solid rgba(250,250,250,0.06)",
+              boxShadow: "0 0 35px rgba(250,250,250,0.08)",
+              pointerEvents: "none",
+            }}
+            animate={{ opacity: [0.2, 0.6, 0.2] }}
+            transition={{ duration: 5, repeat: Infinity, ease: "easeInOut" }}
+          />
+
+          <motion.h1
+            initial={{ opacity: 0, y: 18 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6 }}
+            style={{
+              fontSize: "clamp(2rem, 4vw, 2.6rem)",
+              fontWeight: 800,
+              marginBottom: "0.4rem",
+              backgroundImage:
+                "linear-gradient(90deg, #fafafa, #e5d39f, #d0b46a)",
+              WebkitBackgroundClip: "text",
+              color: "transparent",
+              textAlign: "center",
             }}
           >
-            {/* Header with numbered badge */}
-            <div
+            The Roshan Rumble
+          </motion.h1>
+
+          <p
+            style={{
+              textAlign: "center",
+              marginBottom: "0.4rem",
+              fontSize: "clamp(1.1rem, 2.4vw, 1.5rem)",
+              letterSpacing: "0.22em",
+              textTransform: "uppercase",
+              color: "#fbbf24",
+            }}
+          >
+            Tournament Rules
+          </p>
+
+          <p
+            style={{
+              textAlign: "center",
+              marginBottom: "2.3rem",
+              fontSize: "0.9rem",
+              color: "#9ca3af",
+            }}
+          >
+            Please read carefully. Playing in the event means you agree to all
+            rules listed below.
+          </p>
+
+          {sections.map((sec, index) => (
+            <motion.section
+              key={sec.title}
+              initial={{ opacity: 0, y: 14 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.4, delay: index * 0.05 }}
               style={{
-                display: "flex",
-                alignItems: "center",
-                gap: "0.9rem",
-                marginBottom: "0.9rem",
+                marginBottom: index === sections.length - 1 ? 0 : "1.9rem",
+                position: "relative",
+                zIndex: 1,
+                padding: "1.1rem 1.1rem 1.1rem",
+                borderRadius: "18px",
+                background:
+                  "linear-gradient(120deg, rgba(10,12,18,0.9), rgba(12,18,26,0.98))",
+                border: "1px solid rgba(148,163,184,0.45)",
+                boxShadow: "0 18px 45px rgba(0,0,0,0.65)",
               }}
             >
+              {/* Header with numbered badge */}
               <div
                 style={{
-                  width: "42px",
-                  height: "42px",
-                  borderRadius: "999px",
-                  background:
-                    numberColors[index % numberColors.length],
                   display: "flex",
                   alignItems: "center",
-                  justifyContent: "center",
-                  fontWeight: 800,
-                  fontSize: "1.1rem",
-                  color: "#111827",
-                  boxShadow:
-                    "0 0 18px rgba(250, 204, 21, 0.25), 0 10px 26px rgba(0,0,0,0.8)",
-                  flexShrink: 0,
+                  gap: "0.9rem",
+                  marginBottom: "0.8rem",
                 }}
               >
-                {String(index + 1).padStart(2, "0")}
-              </div>
-
-              <h2
-                style={{
-                  fontSize: "clamp(1.1rem, 2.1vw, 1.45rem)",
-                  fontWeight: 700,
-                  color: "#CD7F32",
-                }}
-              >
-                {sec.title}
-              </h2>
-            </div>
-
-            {/* Rules list */}
-            <ol
-              style={{
-                marginLeft: "1.4rem",
-                paddingLeft: "0.4rem",
-                marginTop: "0.25rem",
-              }}
-            >
-              {sec.items.map((item, i) => (
-                <li
-                  key={i}
+                <div
                   style={{
-                    marginBottom: "0.45rem",
-                    color: "#e5e7eb",
-                    fontSize: "0.95rem",
+                    width: "42px",
+                    height: "42px",
+                    borderRadius: "999px",
+                    background: numberColors[index % numberColors.length],
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    fontWeight: 800,
+                    fontSize: "1.1rem",
+                    color: "#111827",
+                    boxShadow:
+                      "0 0 18px rgba(250, 204, 21, 0.25), 0 10px 26px rgba(0,0,0,0.9)",
+                    flexShrink: 0,
                   }}
                 >
-                  {item}
-                </li>
-              ))}
-            </ol>
+                  {String(index + 1).padStart(2, "0")}
+                </div>
 
-            {sec.extras && (
-              <ol
+                <div style={{ display: "flex", flexDirection: "column" }}>
+                  <h2
+                    style={{
+                      fontSize: "clamp(1.05rem, 2.1vw, 1.35rem)",
+                      fontWeight: 700,
+                      color: "#fbbf24",
+                      letterSpacing: "0.04em",
+                      textTransform: "uppercase",
+                    }}
+                  >
+                    {sec.title}
+                  </h2>
+                  <span
+                    style={{
+                      marginTop: "0.15rem",
+                      height: "2px",
+                      width: "60px",
+                      borderRadius: "999px",
+                      background:
+                        "linear-gradient(90deg, rgba(251,191,36,0.9), transparent)",
+                    }}
+                  />
+                </div>
+              </div>
+
+              {/* Rules list */}
+              <ul
                 style={{
-                  marginLeft: "1.4rem",
-                  paddingLeft: "0.4rem",
-                  marginTop: "0.7rem",
-                  fontSize: "0.9rem",
-                  color: "#d1d5db",
-                  opacity: 0.9,
-                  fontStyle: "italic",
+                  marginLeft: "0.2rem",
+                  paddingLeft: 0,
+                  marginTop: "0.35rem",
+                  listStyle: "none",
+                  display: "flex",
+                  flexDirection: "column",
+                  gap: "0.35rem",
                 }}
               >
-                {sec.extras.map((e, i) => (
-                  <li key={i}>{e}</li>
+                {sec.items.map((item, i) => (
+                  <li
+                    key={i}
+                    style={{
+                      display: "flex",
+                      alignItems: "flex-start",
+                      gap: "0.55rem",
+                      fontSize: "0.95rem",
+                      color: "#e5e7eb",
+                      lineHeight: 1.45,
+                    }}
+                  >
+                    <span
+                      style={{
+                        marginTop: "0.45rem",
+                        width: "7px",
+                        height: "7px",
+                        borderRadius: "999px",
+                        flexShrink: 0,
+                        background: "rgba(252,211,77,0.95)",
+                        boxShadow:
+                          "0 0 0 3px rgba(251,191,36,0.15), 0 0 12px rgba(252,211,77,0.6)",
+                      }}
+                    />
+                    <span style={{ flex: 1 }}>{item}</span>
+                  </li>
                 ))}
-              </ol>
-            )}
-          </motion.section>
-        ))}
+              </ul>
+
+              {sec.extras && (
+                <ul
+                  style={{
+                    marginLeft: "0.2rem",
+                    paddingLeft: 0,
+                    marginTop: "0.7rem",
+                    listStyle: "none",
+                    display: "flex",
+                    flexDirection: "column",
+                    gap: "0.3rem",
+                    fontSize: "0.88rem",
+                    color: "#d1d5db",
+                    opacity: 0.9,
+                    fontStyle: "italic",
+                  }}
+                >
+                  {sec.extras.map((e, i) => (
+                    <li
+                      key={i}
+                      style={{
+                        display: "flex",
+                        alignItems: "flex-start",
+                        gap: "0.5rem",
+                      }}
+                    >
+                      <span
+                        style={{
+                          marginTop: "0.45rem",
+                          width: "6px",
+                          height: "6px",
+                          borderRadius: "2px",
+                          flexShrink: 0,
+                          border: "1px solid rgba(156,163,175,0.9)",
+                          boxShadow: "0 0 8px rgba(148,163,184,0.5)",
+                        }}
+                      />
+                      <span style={{ flex: 1 }}>{e}</span>
+                    </li>
+                  ))}
+                </ul>
+              )}
+            </motion.section>
+          ))}
+        </div>
       </div>
     </main>
   );
