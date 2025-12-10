@@ -19,7 +19,7 @@ export default function Home() {
           <p className="text-[10px] md:text-xs tracking-[0.35em] uppercase text-zinc-400 mb-2">
             The Roshan Rumble
           </p>
-          <h1 className="text-3xl md:text-4xl lg:text-5xl font-semibold tracking-tight text-transparent bg-clip-text bg-linear-to-b from-white via-zinc-200 to-zinc-500">
+          <h1 className="text-3xl md:text-4xl lg:text-5xl font-semibold tracking-tight text-transparent bg-clip-text bg-linear-to-b from-white via-zinc-200 to-zinc-500 pt-2 pb-2 pr-2">
             {t.descriptionContent}
           </h1>
         </header>
@@ -29,50 +29,51 @@ export default function Home() {
           {/* LEFT: stacked subsections */}
           <section className="flex flex-col gap-4">
             {/* Registration */}
-            <div className="rounded-2xl border border-white/15 bg-white/3 px-5 py-4 md:px-6 md:py-5 shadow-[0_18px_45px_rgba(0,0,0,0.7)] backdrop-blur-sm">
-              <h2 className="text-xs md:text-sm font-semibold tracking-[0.28em] uppercase text-zinc-400 mb-2">
+            <div className="rounded-2xl border border-white/15 bg-white/3 px-5 py-4 md:px-6 md:py-5 shadow-[0_18px_45px_rgba(0,0,0,0.7)] backdrop-blur-sm hover:shadow-[0_24px_60px_rgba(0,0,0,0.9)] hover:border-white/25 hover:bg-white/5 transition-all duration-300 cursor-pointer">
+              <h2 className="text-sm md:text-lg font-bold tracking-[0.28em] uppercase text-zinc-400 mb-2">
                 Registration
               </h2>
-              <p className="text-sm md:text-base text-zinc-200/90 mb-4">
+              <p className="text-[0.8rem] md:text-[0.85rem] text-zinc-200/90 mb-6">
                 Gather your squad, lock in your roles, and enter the next
                 chapter of TRR. Registration happens through the admins panel.
               </p>
               <Link
                 to="/admins"
-                className="inline-flex items-center justify-center rounded-full px-5 py-2 text-[0.78rem] font-semibold uppercase tracking-[0.2em] bg-linear-to-r from-zinc-50 via-zinc-300 to-zinc-100 text-[#050608] shadow-[0_0_22px_rgba(148,163,184,0.85)] hover:brightness-110 transition"
+                className="inline-flex items-center justify-center rounded-full px-5 py-2 text-sm font-bold uppercase tracking-[0.2em] bg-linear-to-r from-zinc-50 via-zinc-300 to-zinc-100 text-[#050608] shadow-[0_0_22px_rgba(148,163,184,0.85)] hover:brightness-110 transition"
               >
                 Register Your Team
               </Link>
             </div>
 
             {/* Schedule / Dates */}
-            <div className="rounded-2xl border border-white/10 bg-white/2 px-5 py-4 md:px-6 md:py-5 shadow-[0_16px_40px_rgba(0,0,0,0.65)]">
-              <h2 className="text-xs md:text-sm font-semibold tracking-[0.28em] uppercase text-zinc-400 mb-2">
+            <div className="rounded-2xl border border-white/10 bg-white/2 px-5 py-4 md:px-6 md:py-5 shadow-[0_16px_40px_rgba(0,0,0,0.65)] hover:shadow-[0_22px_55px_rgba(0,0,0,0.8)] hover:border-white/20 hover:bg-white/4 transition-all duration-300 cursor-pointer">
+              {/* <h2 className="text-sm md:text-lg font-bold tracking-[0.28em] uppercase text-zinc-400 mb-2">
                 Schedule
-              </h2>
+              </h2> */}
               <div className="flex flex-col gap-2 text-sm md:text-base text-zinc-100">
                 <div className="flex items-center justify-between gap-3">
-                  <span className="text-zinc-400 text-xs uppercase tracking-[0.22em]">
+                  <span className="text-zinc-400 text- uppercase tracking-[0.22em] text-sm md:text-lg font-bold  mb-2">
                     Event Dates
                   </span>
-                  <span className="text-sm md:text-base font-medium">
+                  <span className="text-sm md:text-base font-medium mb-2">
                     {t.startDate} — {t.endDate}
                   </span>
                 </div>
-                <p className="text-[0.8rem] md:text-[0.85rem] text-zinc-400">
-                  Match schedules, lobbies, and vetoes will be posted on the
-                  TRR Discord and updated live.
+                <p className="text-[0.8rem] md:text-[0.85rem] text-zinc-200">
+                  Match schedules, lobbies, and vetoes will be posted on the TRR
+                  Discord and updated live.
                 </p>
               </div>
             </div>
 
             {/* Prize Pool */}
-            <div className="rounded-2xl border border-yellow-400/20 bg-[radial-gradient(circle_at_top,rgba(250,204,21,0.18),transparent_55%),rgba(15,23,42,0.85)] px-5 py-4 md:px-6 md:py-5 shadow-[0_20px_55px_rgba(0,0,0,0.85)]">
-              <h2 className="text-xs md:text-sm font-semibold tracking-[0.28em] uppercase text-yellow-200/80 mb-1">
+            <div className="rounded-2xl border border-yellow-400/20 bg-[radial-gradient(circle_at_top,rgba(250,204,21,0.18),transparent_55%),rgba(15,23,42,0.85)] px-5 py-4 md:px-6 md:py-5 shadow-[0_20px_55px_rgba(0,0,0,0.85)] hover:shadow-[0_28px_70px_rgba(0,0,0,0.95)] hover:border-yellow-400/30 hover:bg-[radial-gradient(circle_at_top,rgba(250,204,21,0.25),transparent_55%),rgba(15,23,42,0.9)] transition-all duration-300 cursor-pointer">
+              <h2 className="text-sm md:text-lg font-bold tracking-[0.28em] uppercase text-yellow-200/80 mb-2">
                 Prize Pool
               </h2>
               <p className="text-[0.8rem] md:text-[0.85rem] text-zinc-200/90 mb-3">
-                Champions take the Aegis, glory, and the lion’s share of the pot.
+                Champions take the Aegis, glory, and the lion’s share of the
+                pot.
               </p>
               <div className="flex items-end gap-3">
                 <span className="text-3xl md:text-4xl font-semibold tracking-tight text-transparent bg-clip-text bg-linear-to-r from-yellow-200 via-amber-300 to-orange-400">
@@ -82,13 +83,13 @@ export default function Home() {
             </div>
 
             {/* Admins (last section) */}
-            <div className="mt-1 rounded-2xl border border-white/10 bg-white/2 px-5 py-4 md:px-6 md:py-5 shadow-[0_14px_38px_rgba(0,0,0,0.7)]">
-              <h2 className="text-xs md:text-sm font-semibold tracking-[0.28em] uppercase text-zinc-400 mb-2">
+            <div className="mt-1 rounded-2xl border border-white/10 bg-white/2 px-5 py-4 md:px-6 md:py-5 shadow-[0_14px_38px_rgba(0,0,0,0.7)] hover:shadow-[0_20px_50px_rgba(0,0,0,0.85)] hover:border-white/20 hover:bg-white/4 transition-all duration-300 cursor-pointer">
+              <h2 className="text-sm md:text-lg font-bold tracking-[0.28em] uppercase text-zinc-400 mb-2">
                 Admins
               </h2>
-              <p className="text-[0.8rem] md:text-[0.85rem] text-zinc-300 mb-3">
-                Need help with rules, rosters, or disputes? Reach out to the
-                TRR admin team from the panel.
+              <p className="text-[0.8rem] md:text-[0.85rem] text-zinc-200 mb-6">
+                Need help with rules, rosters, or disputes? Reach out to the TRR
+                admin team from the panel.
               </p>
               <Link
                 to="/admins"
@@ -101,8 +102,8 @@ export default function Home() {
           </section>
 
           {/* RIGHT: Aegis Trophy Scene */}
-          <aside className="relative flex items-center justify-center">
-            <div className="group relative w-full max-w-md h-[360px] md:h-[420px] lg:h-[460px] mx-auto rounded-4xl border border-yellow-100/25 bg-[radial-gradient(circle_at_top,rgba(250,250,250,0.06),transparent_55%),radial-gradient(circle_at_bottom,rgba(30,64,175,0.65),rgba(3,7,18,0.98))] shadow-[0_32px_90px_rgba(0,0,0,0.9)] overflow-hidden">
+          <aside className="relative hidden lg:flex items-stretch justify-center">
+            <div className="group relative w-full h-[calc(100%-30px)] mx-auto rounded-4xl border border-yellow-100/25 bg-[radial-gradient(circle_at_top,rgba(250,250,250,0.06),transparent_55%),radial-gradient(circle_at_bottom,rgba(30,64,175,0.65),rgba(3,7,18,0.98))] shadow-[0_32px_90px_rgba(0,0,0,0.9)] overflow-hidden">
               {/* rotating halo ring */}
               <div className="absolute inset-0 flex items-center justify-center -z-10">
                 <div className="w-[420px] h-[420px] rounded-full border-[5px] border-yellow-300/25 animate-[spin_16s_linear_infinite] blur-md" />
@@ -126,7 +127,7 @@ export default function Home() {
               </div>
 
               {/* Caption */}
-              <div className="pointer-events-none absolute bottom-4 inset-x-0 flex justify-center">
+              <div className="pointer-events-none absolute inset-0 flex items-end justify-center mb-6">
                 <p className="px-4 py-1 rounded-full text-[0.7rem] font-semibold tracking-[0.28em] uppercase bg-black/45 text-zinc-200 border border-white/10 backdrop-blur-md">
                   Aegis of Champions
                 </p>
