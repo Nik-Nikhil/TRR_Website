@@ -1,15 +1,6 @@
-// src/pages/SeasonShowcase.tsx  (or seasonsshowcase.tsx)
-
-import {
-  useRef,
-  useState,
-  type UIEvent,
-  type PointerEvent,
-  type JSX,
-} from "react";
-import { motion } from "framer-motion";
-import { Link } from "react-router-dom";
-
+import { useRef, useState, useEffect, type UIEvent, type PointerEvent, type JSX } from "react";
+import { motion, AnimatePresence, type Variants } from "framer-motion";
+import { Link, useNavigate } from "react-router-dom";
 import {
   teams,
   season2Teams,
@@ -17,1144 +8,380 @@ import {
   season4Teams,
   season5Teams,
 } from "./data/teams";
-
 import Season6Standings from "./Seasons/Season6Standing";
-
-
-type Team = (typeof teams)[number];
-type Season2Team = (typeof season2Teams)[number];
-type Season3Team = (typeof season3Teams)[number];
-type Season4Team = (typeof season4Teams)[number];
-type Season5Team = (typeof season5Teams)[number];
-
-
-
-
-
-
-
-
-
-
-
-/* ---------- Season 1 table (inline) ---------- */
-
-
-function Season1Standings() {
-  const orderedByRecord = [...teams].sort((a, b) => {
-    if (b.wins !== a.wins) return b.wins - a.wins;
-    return a.losses - b.losses;
-  });
-
-  const championId = "godspeed";
-  const runnerUpId = "reciprocal";
-  const thirdId = "banner";
-  const dqId = "kolly";
-
-  const champion = orderedByRecord.find((t) => t.id === championId);
-  const runnerUp = orderedByRecord.find((t) => t.id === runnerUpId);
-  const third = orderedByRecord.find((t) => t.id === thirdId);
-  const dqTeam = orderedByRecord.find((t) => t.id === dqId);
-
-  const remaining: Team[] = orderedByRecord.filter(
-    (t) => ![championId, runnerUpId, thirdId, dqId].includes(t.id)
-  );
-
-  const placementOrderAfterTop3: Team["id"][] = [
-    "helm",
-    "bazinga",
-    "billy",
-    "nabeel",
-  ];
-
-  const orderedOthers: Team[] = [
-    ...placementOrderAfterTop3
-      .map((id) => remaining.find((t) => t.id === id))
-      .filter((t): t is Team => Boolean(t)),
-    ...remaining.filter((t) => !placementOrderAfterTop3.includes(t.id)),
-  ];
-
-  function teamGold(team: Team): number {
-    return team.players.reduce((sum, p) => sum + (p.gold || 0), 0);
-  }
-
-  const ordered: Team[] = [
-    champion,
-    runnerUp,
-    third,
-    ...orderedOthers,
-    dqTeam,
-  ].filter((t): t is Team => Boolean(t));
-
-  return (
-    <div className="w-full flex justify-center pb-4">
-      <div className="w-full max-w-[1000px] px-4 sm:px-6">
-        {/* BRACKET BUTTON */}
-        <div className="flex justify-center mb-6">
-          <Link
-            to="/tournament"
-            className="px-8 py-2 rounded-full text-[0.8rem] font-semibold uppercase tracking-[0.18em]
-              bg-linear-to-tr from-[#f5f5f5] via-[#c0c0c0] to-[#9ca3af] text-[#050608]
-              shadow-[0_0_25px_rgba(148,163,184,0.85)] hover:brightness-110 transition"
-          >
-            VIEW BRACKET
-          </Link>
-        </div>
-
-        {/* TABLE CARD */}
-        <div className="rounded-4xl border border-white/10 bg-[#050608] shadow-[0_18px_60px_rgba(0,0,0,0.9)] overflow-hidden transition-transform duration-500 hover:scale-[1.01]">
-
-          {/* internal scroll – only the table scrolls vertically */}
-          <div
-  className="w-full overflow-x-auto max-h-[340px] overflow-y-auto"
-  data-vertical-scroll="true"
-  style={{ scrollbarWidth: "thin", msOverflowStyle: "none" }}
->
-
-            <table className="w-full border-spacing-0 text-sm">
-              <thead className="sticky top-0 z-20 text-left text-[0.7rem] uppercase tracking-[0.22em] text-gray-300 bg-[#050608]/95 backdrop-blur-sm">
-                <tr className="border-none">
-                  <th className="py-3 pl-6 text-[0.68rem] text-gray-300">
-                    Captain
-                  </th>
-                  <th className="py-3 text-[0.68rem] text-gray-300">
-                    Team Name
-                  </th>
-                  <th className="py-3 text-center w-[72px] text-[0.68rem] text-gray-300" />
-                  <th className="py-3 text-right text-[0.68rem] text-gray-300">
-                    Avg MMR
-                  </th>
-                  <th className="py-3 pr-6 text-right text-[0.68rem] text-gray-300">
-                    Gold Allocated
-                  </th>
-                </tr>
-              </thead>
-
-              <tbody>
-                {ordered.map((team) => {
-                  const captain = team.players[0]?.nickname ?? "Captain";
-                  const gold = teamGold(team);
-
-                  const isChampion = team.id === championId;
-                  const isRunnerUp = team.id === runnerUpId;
-                  const isThird = team.id === thirdId;
-                  const isDQ = team.id === dqId;
-
-                  const baseRow =
-                  "group relative h-10 border-none overflow-hidden hover:bg-white/[0.04] transition-colors duration-300 text-[0.78rem]";
-
-
-                  let rowClass = baseRow;
-
-                  // base navy row
-                  rowClass += " bg-[#020617]";
-
-                  // GOLD / SILVER / BRONZE / DQ tints + hover
-                  if (isChampion) {
-                    rowClass +=
-                      " bg-[rgba(250,204,21,0.25)] hover:bg-[rgba(250,204,21,0.38)]";
-                  } else if (isRunnerUp) {
-                    rowClass +=
-                      " bg-[rgba(148,163,184,0.25)] hover:bg-[rgba(148,163,184,0.38)]";
-                  } else if (isThird) {
-                    rowClass +=
-                      " bg-[rgba(248,153,102,0.25)] hover:bg-[rgba(248,153,102,0.4)]";
-                } else if (isDQ) {
-  // solid red strip at bottom + slightly lighter on hover (same as other table)
-  rowClass += " bg-[#b91c1c] hover:bg-[#dc2626]";
-} else {
-  rowClass += " bg-[#020617]";
-}
-
-
-                  return (
-                    <tr
-                      key={team.id}
-                      className={rowClass}
-                      style={
-                        !isChampion && !isRunnerUp && !isThird && !isDQ
-                          ? { boxShadow: `0 0 14px ${team.logoColor}40` }
-                          : undefined
-                      }
-                    >
-                      {/* CAPTAIN */}
-                      <td className="pl-6">
-                        <div className="flex items-center gap-3 font-semibold">
-                          <span
-                            className="h-3 w-3 rounded-full"
-                            style={{ backgroundColor: team.logoColor }}
-                          />
-                          <span className="px-3 py-1 rounded-full bg-white/10 text-[0.7rem] uppercase tracking-[0.16em] text-gray-200 shadow-[0_0_12px_rgba(255,255,255,0.2)]">
-                            {captain}
-                          </span>
-                        </div>
-                      </td>
-
-                      {/* TEAM NAME */}
-                      <td>
-                        <div className="flex items-center gap-2 font-semibold">
-                          <Link
-                            to={`/teams/${team.id}`}
-                            className="hover:text-[#e5e7eb] transition text-sm max-w-[260px]"
-                          >
-                            <span
-                              className={`block whitespace-nowrap overflow-hidden text-ellipsis ${
-                                isDQ ? "line-through opacity-80" : ""
-                              }`}
-                            >
-                              {team.name}
-                            </span>
-                          </Link>
-                        </div>
-                      </td>
-
-                      {/* MEDAL / DQ ICON */}
-                      <td>
-                        <div className="flex items-center justify-center">
-                          {isChampion && (
-                            <div className="inline-flex h-9 w-9 items-center justify-center rounded-full bg-[#facc15] shadow-[0_0_18px_rgba(250,204,21,0.9)] group-hover:scale-105 transition-transform">
-                              <span className="text-lg">🏆</span>
-                            </div>
-                          )}
-                          {isRunnerUp && (
-                            <div className="inline-flex h-9 w-9 items-center justify-center rounded-full bg-[#9ca3af] shadow-[0_0_18px_rgba(148,163,184,0.9)] group-hover:scale-105 transition-transform">
-                              <span className="text-lg">🥈</span>
-                            </div>
-                          )}
-                          {isThird && (
-                            <div className="inline-flex h-9 w-9 items-center justify-center rounded-full bg-[#d97706] shadow-[0_0_18px_rgba(234,179,8,0.95)] group-hover:scale-105 transition-transform">
-                              <span className="text-lg">🥉</span>
-                            </div>
-                          )}
-                       {isDQ && !isChampion && !isRunnerUp && !isThird && (
-  <div className="inline-flex h-9 w-9 items-center justify-center rounded-full bg-[#dc2626] shadow-[0_0_18px_rgba(220,38,38,0.85)] group-hover:scale-105 transition-transform">
-    <span className="text-[0.65rem] font-extrabold tracking-[0.18em] uppercase">
-      DQ
-    </span>
-  </div>
-)}
-
-
-                        </div>
-                      </td>
-
-                      {/* AVG MMR */}
-                      <td className="text-right">
-                        <span className="tabular-nums text-sm text-gray-100">
-                          {team.averageMMR}
-                        </span>
-                      </td>
-
-                      {/* GOLD */}
-                      <td className="pr-6 text-right">
-                        <span className="tabular-nums font-semibold text-gray-200">
-                          {gold}
-                        </span>
-                      </td>
-                    </tr>
-                  );
-                })}
-              </tbody>
-            </table>
-          </div>
-        </div>
-      </div>
-    </div>
-  );
-}
-
-
-/* ---------- Season 2 table (inline) ---------- */
-
-function Season2Standings() {
-  const orderedByRecord = [...season2Teams].sort((a, b) => {
-    if (b.wins !== a.wins) return b.wins - a.wins;
-    return a.losses - b.losses;
-  });
-
-  const championId: Season2Team["id"] = "mslayer-s2";
-  const runnerUpId: Season2Team["id"] = "bazinga-s2";
-  const thirdId: Season2Team["id"] = "ngx-savage-s2";
-  const dqId: Season2Team["id"] = "grimm-s2";
-
-  const champion = orderedByRecord.find((t) => t.id === championId);
-  const runnerUp = orderedByRecord.find((t) => t.id === runnerUpId);
-  const third = orderedByRecord.find((t) => t.id === thirdId);
-  const dqTeam = orderedByRecord.find((t) => t.id === dqId);
-
-  const remaining: Season2Team[] = orderedByRecord.filter(
-    (t) => ![championId, runnerUpId, thirdId, dqId].includes(t.id)
-  );
-
-  const placementOrderAfterTop3: Season2Team["id"][] = [
-    "madlad-s2",
-    "tom1c-s2",
-    "machine-s2",
-    "madara-s2",
-    "r3ciprocal-s2",
-    "banner-s2",
-    "gxnova-s2",
-    "xj-s2",
-  ];
-
-  const orderedOthers: Season2Team[] = [
-    ...placementOrderAfterTop3
-      .map((id) => remaining.find((t) => t.id === id))
-      .filter((t): t is Season2Team => Boolean(t)),
-    ...remaining.filter((t) => !placementOrderAfterTop3.includes(t.id)),
-  ];
-
-  function teamGold(team: Season2Team): number {
-    return team.players.reduce((sum, p) => sum + (p.gold || 0), 0);
-  }
-
-  const ordered: Season2Team[] = [
-    champion,
-    runnerUp,
-    third,
-    ...orderedOthers,
-    dqTeam,
-  ].filter((t): t is Season2Team => Boolean(t));
-
-  return (
-    <div className="w-full flex justify-center pb-4">
-      <div className="w-full max-w-[1000px] px-4 sm:px-6">
-        {/* BRACKET BUTTON (same style as S1) */}
-        <div className="flex justify-center mb-6">
-          <Link
-            to="/tournament"
-            className="px-8 py-2 rounded-full text-[0.8rem] font-semibold uppercase tracking-[0.18em]
-              bg-linear-to-tr from-[#f5f5f5] via-[#c0c0c0] to-[#9ca3af] text-[#050608]
-              shadow-[0_0_25px_rgba(148,163,184,0.85)] hover:brightness-110 transition"
-          >
-            VIEW BRACKET
-          </Link>
-        </div>
-
-        {/* TABLE CARD – matches S1 + vertical scroll flag */}
-        <div className="rounded-4xl border border-white/10 bg-[#050608] shadow-[0_18px_60px_rgba(0,0,0,0.9)] overflow-hidden transition-transform duration-500 hover:scale-[1.01]">
-          <div
-  className="w-full overflow-x-auto max-h-[340px] overflow-y-auto"
-  data-vertical-scroll="true"
-  style={{ scrollbarWidth: "thin", msOverflowStyle: "none" }}
->
-
-            <table className="w-full border-spacing-0 text-sm">
-              <thead className="sticky top-0 z-20 text-left text-[0.7rem] uppercase tracking-[0.22em] text-gray-300 bg-[#050608]/95 backdrop-blur-sm">
-               <tr className="border-none">
-                  <th className="py-3 pl-6 text-[0.68rem] text-gray-300">
-                    Captain
-                  </th>
-                  <th className="py-3 text-[0.68rem] text-gray-300">
-                    Team Name
-                  </th>
-                  <th className="py-3 text-center w-[72px] text-[0.68rem] text-gray-300" />
-                  <th className="py-3 text-right text-[0.68rem] text-gray-300">
-                    Avg MMR
-                  </th>
-                  <th className="py-3 pr-6 text-right text-[0.68rem] text-gray-300">
-                    Gold Allocated
-                  </th>
-                </tr>
-              </thead>
-
-              <tbody>
-                {ordered.map((team) => {
-                  const captain = team.players[0]?.nickname ?? "Captain";
-                  const gold = teamGold(team);
-
-                  const isChampion = team.id === championId;
-                  const isRunnerUp = team.id === runnerUpId;
-                  const isThird = team.id === thirdId;
-                  const isDQ = team.id === dqId;
-
-                 const baseRow =
-  "group relative h-10 border-none overflow-hidden transition-colors duration-300 text-[0.78rem]";
-
-let rowClass = baseRow;
-
-if (isChampion) {
-  rowClass +=
-    " bg-[rgba(250,204,21,0.25)] hover:bg-[rgba(250,204,21,0.38)]";
-} else if (isRunnerUp) {
-  rowClass +=
-    " bg-[rgba(148,163,184,0.25)] hover:bg-[rgba(148,163,184,0.38)]";
-} else if (isThird) {
-  rowClass +=
-    " bg-[rgba(248,153,102,0.25)] hover:bg-[rgba(248,153,102,0.4)]";
-} else if (isDQ) {
-  // same solid red strip + hover as Season 1
-  rowClass += " bg-[#b91c1c] hover:bg-[#dc2626]";
-} else {
-  rowClass += " bg-[#020617] hover:bg-white/[0.04]";
-}
-
-
-                  return (
-                    <tr
-                      key={team.id}
-                      className={rowClass}
-                      style={
-                        !isChampion && !isRunnerUp && !isThird && !isDQ
-                          ? { boxShadow: `0 0 14px ${team.logoColor}40` }
-                          : undefined
-                      }
-                    >
-                      {/* CAPTAIN */}
-                      <td className="pl-6">
-                        <div className="flex items-center gap-3 font-semibold">
-                          <span
-                            className="h-3 w-3 rounded-full"
-                            style={{ backgroundColor: team.logoColor }}
-                          />
-                          <span className="px-3 py-1 rounded-full bg-white/10 text-[0.7rem] uppercase tracking-[0.16em] text-gray-200 shadow-[0_0_12px_rgba(255,255,255,0.2)]">
-                            {captain}
-                          </span>
-                        </div>
-                      </td>
-
-                      {/* TEAM NAME */}
-                      <td>
-                        <div className="flex items-center gap-2 font-semibold">
-                          <Link
-                            to={`/teams/${team.id}`}
-                            className="hover:text-[#e5e7eb] transition text-sm max-w-[260px]"
-                          >
-                            <span
-                              className={`block whitespace-nowrap overflow-hidden text-ellipsis ${
-                                isDQ ? "line-through opacity-80" : ""
-                              }`}
-                            >
-                              {team.name}
-                            </span>
-                          </Link>
-                        </div>
-                      </td>
-
-                      {/* MEDAL / DQ ICON */}
-                      <td>
-                        <div className="flex items-center justify-center">
-                          {isChampion && (
-                            <div className="inline-flex h-9 w-9 items-center justify-center rounded-full bg-[#facc15] shadow-[0_0_18px_rgba(250,204,21,0.9)] group-hover:scale-105 transition-transform">
-                              <span className="text-lg">🏆</span>
-                            </div>
-                          )}
-                          {isRunnerUp && (
-                            <div className="inline-flex h-9 w-9 items-center justify-center rounded-full bg-[#9ca3af] shadow-[0_0_18px_rgba(148,163,184,0.9)] group-hover:scale-105 transition-transform">
-                              <span className="text-lg">🥈</span>
-                            </div>
-                          )}
-                          {isThird && (
-                            <div className="inline-flex h-9 w-9 items-center justify-center rounded-full bg-[#d97706] shadow-[0_0_18px_rgba(234,179,8,0.95)] group-hover:scale-105 transition-transform">
-                              <span className="text-lg">🥉</span>
-                            </div>
-                          )}
-                         {isDQ && !isChampion && !isRunnerUp && !isThird && (
-  <div className="inline-flex h-9 w-9 items-center justify-center rounded-full bg-[#b91c1c] shadow-[0_0_18px_rgba(220,38,38,0.85)] group-hover:scale-105 transition-transform">
-    <span className="text-[0.65rem] font-extrabold tracking-[0.18em] uppercase">
-      DQ
-    </span>
-  </div>
-)}
-
-
-                        </div>
-                      </td>
-
-                      {/* AVG MMR */}
-                      <td className="text-right">
-                        <span className="tabular-nums text-sm text-gray-100">
-                          {team.averageMMR}
-                        </span>
-                      </td>
-
-                      {/* GOLD */}
-                      <td className="pr-6 text-right">
-                        <span className="tabular-nums font-semibold text-gray-200">
-                          {gold}
-                        </span>
-                      </td>
-                    </tr>
-                  );
-                })}
-              </tbody>
-            </table>
-          </div>
-        </div>
-      </div>
-    </div>
-  );
-}
-
-/* ---------- Season 3 table (inline) ---------- */
-function Season3Standings() {
-  const orderedByRecord = [...season3Teams].sort((a, b) => {
-    if (b.wins !== a.wins) return b.wins - a.wins;
-    return a.losses - b.losses;
-  });
-
-  const championId: Season3Team["id"] = "dynamodon-s3";
-  const runnerUpId: Season3Team["id"] = "nemesisx001-s3";
-  const thirdId: Season3Team["id"] = "shaidota-s3";
-  const dqId: Season3Team["id"] = "none-s3"; // no DQ but logic stays
-
-  const champion = orderedByRecord.find((t) => t.id === championId);
-  const runnerUp = orderedByRecord.find((t) => t.id === runnerUpId);
-  const third = orderedByRecord.find((t) => t.id === thirdId);
-  const dqTeam = orderedByRecord.find((t) => t.id === dqId);
-
-  const remaining: Season3Team[] = orderedByRecord.filter(
-    (t) => ![championId, runnerUpId, thirdId, dqId].includes(t.id)
-  );
-
-  const placementOrderAfterTop3: Season3Team["id"][] = [
-    "pero-s3",
-    "shikamaru-s3",
-    "jinx-s3",
-    "helm-s3",
-    "epizeuxius-s3",
-    "rinne-s3",
-    "nj-s3",
-    "maldini-s3",
-    "rut-s3",
-    "alcromido-s3",
-    "puppyboss-s3",
-    "kakarot-s3",
-    "sridharocky-s3",
-  ];
-
-  const orderedOthers: Season3Team[] = [
-    ...placementOrderAfterTop3
-      .map((id) => remaining.find((t) => t.id === id))
-      .filter((t): t is Season3Team => Boolean(t)),
-    ...remaining.filter((t) => !placementOrderAfterTop3.includes(t.id)),
-  ];
-
-  const ordered: Season3Team[] = [
-    champion,
-    runnerUp,
-    third,
-    ...orderedOthers,
-    dqTeam,
-  ].filter((t): t is Season3Team => Boolean(t));
-
-  function teamGold(team: Season3Team): number {
-    return team.players.reduce((sum, p) => sum + (p.gold || 0), 0);
-  }
-
-  return (
-    <div className="w-full flex justify-center pb-4">
-      <div className="w-full max-w-[1000px] px-4 sm:px-6">
-        {/* BRACKET BUTTON */}
-        <div className="flex justify-center mb-6">
-          <Link
-            to="/tournament"
-            className="px-8 py-2 rounded-full text-[0.8rem] font-semibold uppercase tracking-[0.18em]
-              bg-linear-to-tr from-[#f5f5f5] via-[#c0c0c0] to-[#9ca3af] text-[#050608]
-              shadow-[0_0_25px_rgba(148,163,184,0.85)] hover:brightness-110 transition"
-          >
-            VIEW BRACKET
-          </Link>
-        </div>
-
-        {/* TABLE CARD — MATCHES S1 & S2 STYLES */}
-        <div className="rounded-4xl border border-white/10 bg-[#050608] shadow-[0_18px_60px_rgba(0,0,0,0.9)] overflow-hidden transition-transform duration-500 hover:scale-[1.01]">
-          <div
-  className="w-full overflow-x-auto max-h-[340px] overflow-y-auto"
-  data-vertical-scroll="true"
-  style={{ scrollbarWidth: "thin", msOverflowStyle: "none" }}
->
-
-            <table className="w-full border-spacing-0 text-sm">
-              <thead className="sticky top-0 z-20 text-left text-[0.7rem] uppercase tracking-[0.22em] text-gray-300 bg-[#050608]/95 backdrop-blur-sm">
-                <tr className="border-none">
-
-                  <th className="py-3 pl-6 text-[0.68rem] text-gray-300">
-                    Captain
-                  </th>
-                  <th className="py-3 text-[0.68rem] text-gray-300">
-                    Team Name
-                  </th>
-                  <th className="py-3 text-center w-[72px] text-[0.68rem] text-gray-300" />
-                  <th className="py-3 text-right text-[0.68rem] text-gray-300">
-                    Avg MMR
-                  </th>
-                  <th className="py-3 pr-6 text-right text-[0.68rem] text-gray-300">
-                    Gold Allocated
-                  </th>
-                </tr>
-              </thead>
-
-              <tbody>
-                {ordered.map((team) => {
-                  const captain = team.players[0]?.nickname ?? "Captain";
-                  const gold = teamGold(team);
-
-                  const isChampion = team.id === championId;
-                  const isRunnerUp = team.id === runnerUpId;
-                  const isThird = team.id === thirdId;
-                  const isDQ = team.id === dqId;
-
-                  const baseRow =
-                    "group relative h-12 border-none overflow-hidden text-[0.78rem] transition-colors duration-300";
-
-                  let rowClass = "bg-[#020617] " + baseRow;
-
-                  if (isChampion) rowClass += " bg-[rgba(250,204,21,0.25)] hover:bg-[rgba(250,204,21,0.38)]";
-                  else if (isRunnerUp) rowClass += " bg-[rgba(148,163,184,0.25)] hover:bg-[rgba(148,163,184,0.38)]";
-                  else if (isThird) rowClass += " bg-[rgba(248,153,102,0.25)] hover:bg-[rgba(248,153,102,0.4)]";
-                  else if (isDQ) rowClass += " bg-[#9b1115] hover:bg-[#af161a]";
-                  else rowClass += " hover:bg-white/[0.04]";
-
-                  return (
-                    <tr
-                      key={team.id}
-                      className={rowClass}
-                      style={
-                        !isChampion && !isRunnerUp && !isThird && !isDQ
-                          ? { boxShadow: `0 0 14px ${team.logoColor}40` }
-                          : undefined
-                      }
-                    >
-                      {/* CAPTAIN */}
-                      <td className="pl-6">
-                        <div className="flex items-center gap-3 font-semibold">
-                          <span className="h-3 w-3 rounded-full" style={{ backgroundColor: team.logoColor }} />
-                          <span className="px-3 py-1 rounded-full bg-white/10 text-[0.7rem] uppercase tracking-[0.16em] text-gray-200 shadow-[0_0_12px_rgba(255,255,255,0.2)]">
-                            {captain}
-                          </span>
-                        </div>
-                      </td>
-
-                      {/* TEAM NAME */}
-                      <td>
-                        <div className="flex items-center gap-2 font-semibold">
-                          <Link
-                            to={`/teams/${team.id}`}
-                            className="hover:text-[#e5e7eb] transition text-sm max-w-[260px]"
-                          >
-                            <span className="block whitespace-nowrap overflow-hidden text-ellipsis">
-                              {team.name}
-                            </span>
-                          </Link>
-                        </div>
-                      </td>
-
-                      {/* MEDAL / DQ */}
-                      <td>
-                        <div className="flex items-center justify-center">
-                          {isChampion && (
-                            <div className="inline-flex h-9 w-9 items-center justify-center rounded-full bg-[#facc15] shadow-[0_0_18px_rgba(250,204,21,0.9)] group-hover:scale-105 transition-transform">
-                              <span className="text-lg">🏆</span>
-                            </div>
-                          )}
-                          {isRunnerUp && (
-                            <div className="inline-flex h-9 w-9 items-center justify-center rounded-full bg-[#9ca3af] shadow-[0_0_18px_rgba(148,163,184,0.9)] group-hover:scale-105 transition-transform">
-                              <span className="text-lg">🥈</span>
-                            </div>
-                          )}
-                          {isThird && (
-                            <div className="inline-flex h-9 w-9 items-center justify-center rounded-full bg-[#d97706] shadow-[0_0_18px_rgba(234,179,8,0.95)] group-hover:scale-105 transition-transform">
-                              <span className="text-lg">🥉</span>
-                            </div>
-                          )}
-                          {isDQ && !isChampion && !isRunnerUp && !isThird && (
-                            <div className="inline-flex h-9 w-9 items-center justify-center rounded-full bg-[#9b1115] group-hover:scale-105 transition-transform">
-                              <span className="text-[0.65rem] font-extrabold tracking-[0.18em] uppercase">
-                                DQ
-                              </span>
-                            </div>
-                          )}
-                        </div>
-                      </td>
-
-                      {/* Avg MMR */}
-                      <td className="text-right">
-                        <span className="tabular-nums text-sm text-gray-100">
-                          {team.averageMMR}
-                        </span>
-                      </td>
-
-                      {/* Gold */}
-                      <td className="pr-6 text-right">
-                        <span className="tabular-nums font-semibold text-gray-200">
-                          {gold}
-                        </span>
-                      </td>
-                    </tr>
-                  );
-                })}
-              </tbody>
-            </table>
-          </div>
-        </div>
-      </div>
-    </div>
-  );
-}
-
-/* ---------- Season 4 table (inline) ---------- */
-function Season4Standings() {
-  const orderedByRecord = [...season4Teams].sort((a, b) => {
-    if (b.wins !== a.wins) return b.wins - a.wins;
-    return a.losses - b.losses;
-  });
-
-  const championId: Season4Team["id"] = "future-s4";
-  const runnerUpId: Season4Team["id"] = "s1mpleo-s4";
-  const thirdId: Season4Team["id"] = "helm-s4";
-  const dqId: Season4Team["id"] = "none-s4"; // no real DQ, logic preserved
-
-  const champion = orderedByRecord.find((t) => t.id === championId);
-  const runnerUp = orderedByRecord.find((t) => t.id === runnerUpId);
-  const third = orderedByRecord.find((t) => t.id === thirdId);
-  const dqTeam = orderedByRecord.find((t) => t.id === dqId);
-
-  const remaining: Season4Team[] = orderedByRecord.filter(
-    (t) => ![championId, runnerUpId, thirdId, dqId].includes(t.id)
-  );
-
-  const placementOrderAfterTop3: Season4Team["id"][] = [
-    "pyro-s4",
-    "lightninggoku-s4",
-    "rinne-s4",
-    "tambamgod-s4",
-    "draco-s4",
-    "primeone-s4",
-    "penda-s4",
-    "muri-s4",
-    "shaidota-s4",
-    "drnemesis-s4",
-    "rav-s4",
-    "nj-s4",
-    "ericdane-s4",
-    "plutoski-s4",
-    "vanara-s4",
-    "shikamaru-s4",
-    "zromep-s4",
-  ];
-
-  const orderedOthers: Season4Team[] = [
-    ...placementOrderAfterTop3
-      .map((id) => remaining.find((t) => t.id === id))
-      .filter((t): t is Season4Team => Boolean(t)),
-    ...remaining.filter((t) => !placementOrderAfterTop3.includes(t.id)),
-  ];
-
-  const ordered: Season4Team[] = [
-    champion,
-    runnerUp,
-    third,
-    ...orderedOthers,
-    dqTeam,
-  ].filter((t): t is Season4Team => Boolean(t));
-
-  function teamGold(team: Season4Team): number {
-    return team.players.reduce((sum, p) => sum + (p.gold || 0), 0);
-  }
-
-  return (
-    <div className="w-full flex justify-center pb-4">
-      <div className="w-full max-w-[1000px] px-4 sm:px-6">
-        {/* BRACKET BUTTON */}
-        <div className="flex justify-center mb-6">
-          <Link
-            to="/tournament"
-            className="px-8 py-2 rounded-full text-[0.8rem] font-semibold uppercase tracking-[0.18em]
-              bg-linear-to-tr from-[#f5f5f5] via-[#c0c0c0] to-[#9ca3af] text-[#050608]
-              shadow-[0_0_25px_rgba(148,163,184,0.85)] hover:brightness-110 transition"
-          >
-            VIEW BRACKET
-          </Link>
-        </div>
-
-        {/* TABLE CARD */}
-        <div className="rounded-4xl border border-white/10 bg-[#050608] shadow-[0_18px_60px_rgba(0,0,0,0.9)] overflow-hidden transition-transform duration-500 hover:scale-[1.01]">
-          <div
-  className="w-full overflow-x-auto max-h-[340px] overflow-y-auto"
-  data-vertical-scroll="true"
-  style={{ scrollbarWidth: "thin", msOverflowStyle: "none" }}
->
-
-            <table className="w-full border-spacing-0 text-sm">
-              <thead className="sticky top-0 z-20 text-left text-[0.7rem] uppercase tracking-[0.22em] text-gray-300 bg-[#050608]/95 backdrop-blur-sm">
-                <tr className="border-none">
-
-                  <th className="py-3 pl-6 text-[0.68rem] text-gray-300">
-                    Captain
-                  </th>
-                  <th className="py-3 text-[0.68rem] text-gray-300">
-                    Team Name
-                  </th>
-                  <th className="py-3 text-center w-[72px] text-[0.68rem] text-gray-300" />
-                  <th className="py-3 text-right text-[0.68rem] text-gray-300">
-                    Avg MMR
-                  </th>
-                  <th className="py-3 pr-6 text-right text-[0.68rem] text-gray-300">
-                    Gold Allocated
-                  </th>
-                </tr>
-              </thead>
-
-              <tbody>
-                {ordered.map((team) => {
-                  const captain = team.players[0]?.nickname ?? "Captain";
-                  const gold = teamGold(team);
-
-                  const isChampion = team.id === championId;
-                  const isRunnerUp = team.id === runnerUpId;
-                  const isThird = team.id === thirdId;
-                  const isDQ = team.id === dqId;
-
-                  const baseRow =
-                    "group relative h-12 border-none overflow-hidden text-[0.78rem] transition-colors duration-300";
-
-                  let rowClass = "bg-[#020617] " + baseRow;
-
-                  if (isChampion) rowClass += " bg-[rgba(250,204,21,0.25)] hover:bg-[rgba(250,204,21,0.38)]";
-                  else if (isRunnerUp) rowClass += " bg-[rgba(148,163,184,0.25)] hover:bg-[rgba(148,163,184,0.38)]";
-                  else if (isThird) rowClass += " bg-[rgba(248,153,102,0.25)] hover:bg-[rgba(248,153,102,0.4)]";
-                  else if (isDQ) rowClass += " bg-[#9b1115] hover:bg-[#af161a]";
-                  else rowClass += " hover:bg-white/[0.04]";
-
-                  return (
-                    <tr
-                      key={team.id}
-                      className={rowClass}
-                      style={
-                        !isChampion && !isRunnerUp && !isThird && !isDQ
-                          ? { boxShadow: `0 0 14px ${team.logoColor}40` }
-                          : undefined
-                      }
-                    >
-                      {/* CAPTAIN */}
-                      <td className="pl-6">
-                        <div className="flex items-center gap-3 font-semibold">
-                          <span className="h-3 w-3 rounded-full" style={{ backgroundColor: team.logoColor }} />
-                          <span className="px-3 py-1 rounded-full bg-white/10 text-[0.7rem] uppercase tracking-[0.16em] text-gray-200 shadow-[0_0_12px_rgba(255,255,255,0.2)]">
-                            {captain}
-                          </span>
-                        </div>
-                      </td>
-
-                      {/* TEAM NAME */}
-                      <td>
-                        <div className="flex items-center gap-2 font-semibold">
-                          <Link
-                            to={`/teams/${team.id}`}
-                            className="hover:text-[#e5e7eb] transition text-sm max-w-[260px]"
-                          >
-                            <span className="block whitespace-nowrap overflow-hidden text-ellipsis">
-                              {team.name}
-                            </span>
-                          </Link>
-                        </div>
-                      </td>
-
-                      {/* MEDAL / DQ */}
-                      <td>
-                        <div className="flex items-center justify-center">
-                          {isChampion && (
-                            <div className="inline-flex h-9 w-9 items-center justify-center rounded-full bg-[#facc15] shadow-[0_0_18px_rgba(250,204,21,0.9)] group-hover:scale-105 transition-transform">
-                              <span className="text-lg">🏆</span>
-                            </div>
-                          )}
-                          {isRunnerUp && (
-                            <div className="inline-flex h-9 w-9 items-center justify-center rounded-full bg-[#9ca3af] shadow-[0_0_18px_rgba(148,163,184,0.9)] group-hover:scale-105 transition-transform">
-                              <span className="text-lg">🥈</span>
-                            </div>
-                          )}
-                          {isThird && (
-                            <div className="inline-flex h-9 w-9 items-center justify-center rounded-full bg-[#d97706] shadow-[0_0_18px_rgba(234,179,8,0.95)] group-hover:scale-105 transition-transform">
-                              <span className="text-lg">🥉</span>
-                            </div>
-                          )}
-                          {isDQ && !isChampion && !isRunnerUp && !isThird && (
-                            <div className="inline-flex h-9 w-9 items-center justify-center rounded-full bg-[#9b1115] group-hover:scale-105 transition-transform">
-                              <span className="text-[0.65rem] font-extrabold tracking-[0.18em] uppercase">
-                                DQ
-                              </span>
-                            </div>
-                          )}
-                        </div>
-                      </td>
-
-                      {/* Avg MMR */}
-                      <td className="text-right">
-                        <span className="tabular-nums text-sm text-gray-100">
-                          {team.averageMMR}
-                        </span>
-                      </td>
-
-                      {/* Gold */}
-                      <td className="pr-6 text-right">
-                        <span className="tabular-nums font-semibold text-gray-200">
-                          {gold}
-                        </span>
-                      </td>
-                    </tr>
-                  );
-                })}
-              </tbody>
-            </table>
-          </div>
-        </div>
-      </div>
-    </div>
-  );
-}
-
-/* ---------- Season 5 table (inline) ---------- */
-function Season5Standings() {
-  const orderedByRecord = [...season5Teams].sort((a, b) => {
-    if (b.wins !== a.wins) return b.wins - a.wins;
-    return a.losses - b.losses;
-  });
-
-  // FINAL SEASON 5 RESULTS
-  const championId: Season5Team["id"] = "bull-s5"; // 1st
-  const runnerUpId: Season5Team["id"] = "shadow-s5"; // 2nd
-  const thirdId: Season5Team["id"] = "sai-s5"; // 3rd
-
-  // DISQUALIFIED TEAMS
-  const dqId1: Season5Team["id"] = "sasuke-s5";
-  const dqId2: Season5Team["id"] = "smurfpandas-s5";
-
-  const champion = orderedByRecord.find((t) => t.id === championId);
-  const runnerUp = orderedByRecord.find((t) => t.id === runnerUpId);
-  const third = orderedByRecord.find((t) => t.id === thirdId);
-  const dqTeam1 = orderedByRecord.find((t) => t.id === dqId1);
-  const dqTeam2 = orderedByRecord.find((t) => t.id === dqId2);
-
-  const remaining: Season5Team[] = orderedByRecord.filter(
-    (t) => ![championId, runnerUpId, thirdId, dqId1, dqId2].includes(t.id)
-  );
-
-  const placementOrderAfterTop3: Season5Team["id"][] = [
-    "helm-s5",
-    "gokushery-s5",
-    "sexy-s5",
-    "ezlng-s5",
-    "razer-s5",
-    "drnemesis-s5",
-    "s1mple0-s5",
-    "flux-s5",
-    "midas-s5",
-    "shirley-s5",
-    "roronoa-s5",
-    "banner-s5",
-    "n1khil-s5",
-    "exe-s5",
-    "rav-s5",
-    "hina-s5",
-    "bakabot-s5",
-    "shikamaru-s5",
-    "killua-s5",
-    "future-s5",
-    "billy-s5",
-    "zromep-s5",
-    "fyt-s5",
-  ];
-
-  const orderedOthers: Season5Team[] = [
-    ...placementOrderAfterTop3
-      .map((id) => remaining.find((t) => t.id === id))
-      .filter((t): t is Season5Team => Boolean(t)),
-    ...remaining.filter((t) => !placementOrderAfterTop3.includes(t.id)),
-  ];
-
-  function teamGold(team: Season5Team): number {
-    return team.players.reduce((sum, p) => sum + (p.gold || 0), 0);
-  }
-
-  const ordered: Season5Team[] = [
-    champion,
-    runnerUp,
-    third,
-    ...orderedOthers,
-    dqTeam1,
-    dqTeam2,
-  ].filter((t): t is Season5Team => Boolean(t));
-
-  return (
-    <div className="w-full flex justify-center pb-4">
-      <div className="w-full max-w-[1000px] px-4 sm:px-6">
-        {/* BRACKET BUTTON */}
-        <div className="flex justify-center mb-6">
-          <Link
-            to="/tournament"
-            className="px-8 py-2 rounded-full text-[0.8rem] font-semibold uppercase tracking-[0.18em]
-              bg-linear-to-tr from-[#f5f5f5] via-[#c0c0c0] to-[#9ca3af] text-[#050608]
-              shadow-[0_0_25px_rgba(148,163,184,0.85)] hover:brightness-110 transition"
-          >
-            VIEW BRACKET
-          </Link>
-        </div>
-
-        {/* TABLE CARD (same shell as S1–S4 with vertical scroll) */}
-        <div className="rounded-4xl border border-white/10 bg-[#050608] shadow-[0_18px_60px_rgba(0,0,0,0.9)] overflow-hidden transition-transform duration-500 hover:scale-[1.01]">
-          <div
-  className="w-full overflow-x-auto max-h-[340px] overflow-y-auto"
-  data-vertical-scroll="true"
-  style={{ scrollbarWidth: "thin", msOverflowStyle: "none" }}
->
-
-            <table className="w-full border-spacing-0 text-sm">
-              <thead className="sticky top-0 z-20 text-left text-[0.7rem] uppercase tracking-[0.22em] text-gray-300 bg-[#050608]/95 backdrop-blur-sm">
-                <tr className="border-none">
-
-                  <th className="py-3 pl-6 text-[0.68rem] text-gray-300">
-                    Captain
-                  </th>
-                  <th className="py-3 text-[0.68rem] text-gray-300">
-                    Team Name
-                  </th>
-                  <th className="py-3 text-center w-[72px] text-[0.68rem] text-gray-300" />
-                  <th className="py-3 text-right text-[0.68rem] text-gray-300">
-                    Avg MMR
-                  </th>
-                  <th className="py-3 pr-6 text-right text-[0.68rem] text-gray-300">
-                    Gold Allocated
-                  </th>
-                </tr>
-              </thead>
-
-              <tbody>
-                {ordered.map((team) => {
-                  const captain = team.players[0]?.nickname ?? "Captain";
-                  const gold = teamGold(team);
-
-                  const isChampion = team.id === championId;
-                  const isRunnerUp = team.id === runnerUpId;
-                  const isThird = team.id === thirdId;
-                  const isDQ = team.id === dqId1 || team.id === dqId2;
-
-                  const baseRow =
-                    "group relative h-12 border-none overflow-hidden text-[0.78rem] transition-colors duration-300";
-
-                  let rowClass = baseRow;
-
-                  // base navy row
-                  rowClass += " bg-[#020617]";
-
-                  if (isChampion) {
-                    rowClass +=
-                      " bg-[rgba(250,204,21,0.25)] hover:bg-[rgba(250,204,21,0.38)]";
-                  } else if (isRunnerUp) {
-                    rowClass +=
-                      " bg-[rgba(148,163,184,0.25)] hover:bg-[rgba(148,163,184,0.38)]";
-                  } else if (isThird) {
-                    rowClass +=
-                      " bg-[rgba(248,153,102,0.25)] hover:bg-[rgba(248,153,102,0.4)]";
-                  } else if (isDQ) {
-                    rowClass += " bg-[#9b1115] hover:bg-[#af161a]";
-                  } else {
-                    rowClass += " hover:bg-white/[0.04]";
-                  }
-
-                  return (
-                    <tr
-                      key={team.id}
-                      className={rowClass}
-                      style={
-                        !isChampion && !isRunnerUp && !isThird && !isDQ
-                          ? { boxShadow: `0 0 14px ${team.logoColor}40` }
-                          : undefined
-                      }
-                    >
-                      {/* CAPTAIN */}
-                      <td className="pl-6">
-                        <div className="flex items-center gap-3 font-semibold">
-                          <span
-                            className="h-3 w-3 rounded-full"
-                            style={{ backgroundColor: team.logoColor }}
-                          />
-                          <span className="px-3 py-1 rounded-full bg-white/10 text-[0.7rem] uppercase tracking-[0.16em] text-gray-200 shadow-[0_0_12px_rgba(255,255,255,0.2)]">
-                            {captain}
-                          </span>
-                        </div>
-                      </td>
-
-                      {/* TEAM NAME */}
-                      <td>
-                        <div className="flex items-center gap-2 font-semibold">
-                          <Link
-                            to={`/teams/${team.id}`}
-                            className="hover:text-[#e5e7eb] transition text-sm max-w-[260px]"
-                          >
-                            <span
-                              className={`block whitespace-nowrap overflow-hidden text-ellipsis ${
-                                isDQ ? "line-through opacity-80" : ""
-                              }`}
-                            >
-                              {team.name}
-                            </span>
-                          </Link>
-                        </div>
-                      </td>
-
-                      {/* TROPHIES / MEDALS / DQ */}
-                      <td>
-                        <div className="flex items-center justify-center">
-                          {isChampion && (
-                            <div className="inline-flex h-9 w-9 items-center justify-center rounded-full bg-[#facc15] shadow-[0_0_18px_rgba(250,204,21,0.9)] group-hover:scale-105 transition-transform">
-                              <span className="text-lg">🏆</span>
-                            </div>
-                          )}
-                          {isRunnerUp && (
-                            <div className="inline-flex h-9 w-9 items-center justify-center rounded-full bg-[#9ca3af] shadow-[0_0_18px_rgba(148,163,184,0.9)] group-hover:scale-105 transition-transform">
-                              <span className="text-lg">🥈</span>
-                            </div>
-                          )}
-                          {isThird && (
-                            <div className="inline-flex h-9 w-9 items-center justify-center rounded-full bg-[#d97706] shadow-[0_0_18px_rgba(234,179,8,0.95)] group-hover:scale-105 transition-transform">
-                              <span className="text-lg">🥉</span>
-                            </div>
-                          )}
-                          {isDQ && !isChampion && !isRunnerUp && !isThird && (
-                            <div className="inline-flex h-9 w-9 items-center justify-center rounded-full bg-[#9b1115] group-hover:scale-105 transition-transform">
-                              <span className="text-[0.65rem] font-extrabold tracking-[0.18em] uppercase">
-                                DQ
-                              </span>
-                            </div>
-                          )}
-                        </div>
-                      </td>
-
-                      {/* AVG MMR */}
-                      <td className="text-right">
-                        <span className="tabular-nums text-sm text-gray-100">
-                          {team.averageMMR}
-                        </span>
-                      </td>
-
-                      {/* GOLD */}
-                      <td className="pr-6 text-right">
-                        <span className="tabular-nums font-semibold text-gray-200">
-                          {gold}
-                        </span>
-                      </td>
-                    </tr>
-                  );
-                })}
-              </tbody>
-            </table>
-          </div>
-        </div>
-      </div>
-    </div>
-  );
-}
-
-
-/* ---------- Seasons Timeline + Carousel ---------- */
-
-type SeasonConfig = {
-  id: number;
-  render: () => JSX.Element;
+import SeasonsBackgroundEffect from "./Seasons/Effect";
+
+/* --------- Stronger types --------- */
+type Player = { nickname?: string; gold?: number };
+type SeasonItem = {
+  id: string;
+  players: Player[];
+  wins?: number;
+  losses?: number;
+  averageMMR?: number;
+  logoColor?: string;
+  name?: string;
 };
 
-const seasons: SeasonConfig[] = [
+/* ----------------------------- Stage buttons ------------------ */
+function StageLinkButton({
+  season,
+  stage,
+}: {
+  season: number;
+  stage: "group" | "playoff";
+}) {
+  const navigate = useNavigate();
+  const label = stage === "group" ? "Group Stage" : "Playoffs";
+  const btnClasses =
+    "px-4 py-2 rounded-full text-[0.72rem] font-semibold uppercase tracking-[0.12em] " +
+    "bg-gradient-to-tr from-white/90 via-zinc-200 to-zinc-300 text-[#050608] " +
+    "shadow-[0_8px_26px_rgba(2,6,23,0.55)] hover:brightness-105 transition-all duration-200 " +
+    "backdrop-blur-sm border border-white/10 pointer-events-auto cursor-pointer";
+
+  return (
+    <button
+      onClick={(e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        navigate(
+          stage === "group" ? `/group-stage/${season}` : `/playoff/${season}`
+        );
+      }}
+      className={btnClasses}
+      aria-label={`${label} for season ${season}`}
+      data-no-drag
+      type="button"
+    >
+      {label}
+    </button>
+  );
+}
+
+/**
+ * CenteredStageButtonsInline now accepts optional flags to show/hide
+ * the Group and Playoff buttons. This lets us render only the Playoffs
+ * button for Season 1 (as requested) while keeping the layout centered.
+ */
+function CenteredStageButtonsInline({
+  season,
+  showGroup = true,
+  showPlayoff = true,
+}: {
+  season: number;
+  showGroup?: boolean;
+  showPlayoff?: boolean;
+}) {
+  // if only one button is visible we keep centering the button
+  if (!showGroup && !showPlayoff) return null;
+  return (
+    <div className="w-full flex justify-center mt-2 pointer-events-none">
+      <div className="flex gap-3 pointer-events-auto">
+        {showGroup && <StageLinkButton season={season} stage="group" />}
+        {showPlayoff && <StageLinkButton season={season} stage="playoff" />}
+      </div>
+    </div>
+  );
+}
+
+/* ----------------------------- Utilities --------------------- */
+/* row animation slightly slower + gentler */
+const rowVariants: Variants = {
+  hidden: { opacity: 0, y: 6 },
+  visible: (i = 0) => ({
+    opacity: 1,
+    y: 0,
+    transition: { delay: i * 0.03, ease: [0.22, 0.61, 0.36, 1] },
+  }),
+  hover: { scale: 1.003, translateY: -2 },
+};
+/* medal variants (used) - kept neutral */
+const medalVariants: Variants = { hover: { scale: 1.0 } };
+
+function buildOrdered<T extends SeasonItem>(
+  list: T[],
+  topIds: (string | undefined)[],
+  placementOrderAfterTop3: string[] = [],
+  dqIds: string[] = []
+) {
+  const orderedByRecord = [...list].sort((a, b) => {
+    const aw = a.wins ?? null;
+    const bw = b.wins ?? null;
+    if (aw !== null && bw !== null && aw !== bw) return bw - aw;
+
+    const al = a.losses ?? null;
+    const bl = b.losses ?? null;
+    if (al !== null && bl !== null && al !== bl) return al - bl;
+
+    return 0;
+  });
+
+  const champion = orderedByRecord.find((t) => t.id === topIds[0]);
+  const runnerUp = orderedByRecord.find((t) => t.id === topIds[1]);
+  const third = orderedByRecord.find((t) => t.id === topIds[2]);
+  const dqTeams = dqIds
+    .map((d) => orderedByRecord.find((t) => t.id === d))
+    .filter(Boolean) as T[];
+
+  const remaining = orderedByRecord.filter(
+    (t) => ![...topIds, ...dqIds].includes(t.id)
+  );
+
+  const orderedOthers: T[] = [
+    ...placementOrderAfterTop3
+      .map((id) => remaining.find((t) => t.id === id))
+      .filter(Boolean) as T[],
+    ...remaining.filter((t) => !placementOrderAfterTop3.includes(t.id)),
+  ];
+
+  const result = [champion, runnerUp, third, ...orderedOthers, ...dqTeams].filter(
+    Boolean
+  ) as T[];
+
+  return { result, champion, runnerUp, third, dqTeams };
+}
+
+function makeTeamGold(players: Player[]) {
+  return players.reduce((s, p) => s + (p.gold ?? 0), 0);
+}
+
+/* ----------------------------- Season card template ------------------ */
+function SeasonCard<T extends SeasonItem>({
+  list,
+  topIds,
+  placementOrderAfterTop3 = [],
+  dqIds = [],
+  seasonNumber = 0,
+  title = "",
+}: {
+  list: T[];
+  topIds: (string | undefined)[];
+  placementOrderAfterTop3?: string[];
+  dqIds?: string[];
+  seasonNumber?: number;
+  title?: string;
+}) {
+  const { result: ordered, champion, runnerUp, third, dqTeams } = buildOrdered<T>(
+    list,
+    topIds,
+    placementOrderAfterTop3,
+    dqIds
+  );
+  const championId = champion?.id,
+    runnerUpId = runnerUp?.id,
+    thirdId = third?.id;
+  const dqMap = new Set(dqTeams.map((d) => d.id));
+
+  // small visual padding so the table ends close to last row
+  const bottomPaddingPx = 8; // small padding so the table ends right after last row
+  const bottomCoverHeight = 8; // minimal decorative cover
+
+  const tableInnerRef = useRef<HTMLDivElement | null>(null);
+
+  return (
+    <div className="w-full flex justify-center pb-4">
+      <div className="w-full max-w-[1100px] px-4 sm:px-6 relative pt-2">
+        {/* outer card — overflow-hidden maintains rounded corners */}
+        <div className="rounded-3xl border border-white/6 bg-[#050608] shadow-[0_24px_60px_rgba(0,0,0,0.85)] overflow-hidden relative group">
+          {/* card header */}
+          <div className="px-6 py-5 flex flex-col items-center justify-center border-b border-white/6 bg-[linear-gradient(90deg,rgba(8,13,25,0.85),rgba(8,12,18,0.65))]">
+            <h3 className="text-base md:text-lg text-center uppercase tracking-[0.18em] text-slate-200 font-semibold">{title || `Season ${seasonNumber}`}</h3>
+            {/* center buttons: show only Playoffs for Season 1 */}
+            <CenteredStageButtonsInline
+              season={seasonNumber}
+              showGroup={seasonNumber !== 1}
+              showPlayoff={true}
+            />
+          </div>
+
+          {/* NEW: table container is vertically scrollable, not the page */}
+          <div
+            ref={tableInnerRef}
+            className="table-scroll-wrapper custom-standings-scroll"
+            style={{
+              /* read the JS-set CSS variable for exact available height, fallback to a calc */
+              maxHeight: 'var(--seasons-table-max-h, calc(100vh - 260px))',
+              paddingBottom: `${bottomPaddingPx}px`,
+              background: 'transparent',
+            }}
+            data-vertical-scroll="true"
+          >
+            <div className="relative season-card-inner">
+              <table className="w-full border-collapse text-sm bg-transparent" style={{ width: '100%', tableLayout: 'fixed' }}>
+                <thead className="sticky top-0 z-40 bg-[#050608]/90 backdrop-blur-sm">
+                  <tr>
+                    <th className="text-left py-3 pl-6 text-[0.68rem] uppercase tracking-[0.2em] text-slate-300">Captain</th>
+                    <th className="text-left py-3 text-[0.68rem] uppercase tracking-[0.2em] text-slate-300">Team</th>
+                    <th className="py-3 text-center w-[72px]" />
+                    <th className="py-3 text-right text-[0.68rem] uppercase tracking-[0.12em] text-slate-300">Avg MMR</th>
+                    <th className="py-3 pr-6 text-right text-[0.68rem] uppercase tracking-[0.12em] text-slate-300">Gold</th>
+                  </tr>
+                </thead>
+
+                <tbody>
+                  <AnimatePresence initial={false}>
+                    {ordered.map((team, idx) => {
+                      const captain = team.players?.[0]?.nickname ?? 'Captain';
+                      const gold = makeTeamGold(team.players ?? []);
+                      const isChampion = team.id === championId;
+                      const isRunnerUp = team.id === runnerUpId;
+                      const isThird = team.id === thirdId;
+                      const isDQ = dqMap.has(team.id);
+
+                      const rowBg = isChampion
+                        ? 'bg-[rgba(250,204,21,0.12)]'
+                        : isRunnerUp
+                        ? 'bg-[rgba(148,163,184,0.06)]'
+                        : isThird
+                        ? 'bg-[rgba(248,153,102,0.06)]'
+                        : isDQ
+                        ? 'bg-[#5a1717]'
+                        : 'bg-[#020617]';
+
+                      const rowTextClass = isDQ ? 'text-white' : 'text-gray-200';
+
+                      return (
+                        <motion.tr
+                          key={team.id}
+                          custom={idx}
+                          initial="hidden"
+                          animate="visible"
+                          exit={{ opacity: 0, y: 6 }}
+                          variants={rowVariants}
+                          whileHover="hover"
+                          className={`group relative h-12 border-b border-white/3 transition-transform duration-150 text-[0.86rem] ${rowBg} ${rowTextClass}`}
+                          style={(!isChampion && !isRunnerUp && !isThird && !isDQ && team.logoColor) ? { boxShadow: `0 0 16px ${team.logoColor}40` } : undefined}
+                        >
+                          <td className="pl-6">
+                            <div className="flex items-center gap-3 font-semibold min-w-0">
+                              <span className="h-3 w-3 rounded-full shrink-0" style={{ backgroundColor: team.logoColor || '#334' }} />
+                              <span className={`px-3 py-1 rounded-full bg-white/6 text-[0.72rem] uppercase tracking-[0.12em] truncate`} style={{ maxWidth: 220 }}>
+                                {captain}
+                              </span>
+                            </div>
+                          </td>
+
+                          <td className="pr-3">
+                            <Link to={`/teams/${team.id}`} className="text-sm hover:text-white transition block truncate" style={{ maxWidth: 420 }}>
+                              {team.name ?? team.id}
+                            </Link>
+                          </td>
+
+                          <td className="text-center">
+                            <motion.div whileHover="hover" variants={medalVariants} className="inline-flex h-9 w-9 items-center justify-center rounded-full pointer-events-none">
+                              {isChampion && <div className="h-9 w-9 rounded-full bg-[#facc15] shadow-[0_0_18px_rgba(250,204,21,0.9)] flex items-center justify-center">🏆</div>}
+                              {isRunnerUp && <div className="h-9 w-9 rounded-full bg-[#9ca3af] shadow-[0_0_12px_rgba(148,163,184,0.6)] flex items-center justify-center">🥈</div>}
+                              {isThird && <div className="h-9 w-9 rounded-full bg-[#d97706] shadow-[0_0_12px_rgba(234,179,8,0.7)] flex items-center justify-center">🥉</div>}
+                              {isDQ && <div className="h-9 w-9 rounded-full bg-[#a62a2a] flex items-center justify-center">DQ</div>}
+                            </motion.div>
+                          </td>
+
+                          <td className="text-right pr-4"><span className="tabular-nums text-sm">{team.averageMMR ?? '-'}</span></td>
+                          <td className="pr-6 text-right"><span className="tabular-nums font-semibold">{gold}</span></td>
+                        </motion.tr>
+                      );
+                    })}
+                  </AnimatePresence>
+                </tbody>
+
+                {/* footer spacer is tiny so table visually ends right after last row */}
+                <tfoot>
+                  <tr style={{ height: `${bottomPaddingPx}px` }}>
+                    <td colSpan={5} />
+                  </tr>
+                </tfoot>
+              </table>
+
+              {/* small fade purely decorative, won't add space */}
+              <div
+                aria-hidden
+                className="absolute bottom-0 left-0 right-0 pointer-events-none"
+                style={{
+                  height: 8,
+                  background: 'linear-gradient(to top, rgba(5,6,8,0.95) 0%, rgba(5,6,8,0.45) 60%, transparent 100%)',
+                  zIndex: 30,
+                }}
+              />
+            </div>
+          </div>
+
+          {/* minimal decorative bottom cover (doesn't add spacing) */}
+          <div
+            aria-hidden
+            style={{
+              position: 'absolute',
+              left: 8,
+              right: 8,
+              bottom: 8,
+              height: bottomCoverHeight,
+              pointerEvents: 'none',
+              borderBottomLeftRadius: 8,
+              borderBottomRightRadius: 8,
+              background: 'linear-gradient(90deg,rgba(8,13,25,0.85),rgba(8,12,18,0.65))',
+              boxShadow: '0 6px 24px rgba(0,0,0,0.55) inset',
+              zIndex: 40,
+            }}
+          />
+        </div>
+      </div>
+    </div>
+  );
+}
+
+/* ----------------------------- Season wrappers using SeasonCard ------------------ */
+function Season1Standings() {
+  return SeasonCard<SeasonItem>({
+    list: teams as unknown as SeasonItem[],
+    topIds: ['godspeed', 'r3ciprocal', 'banner'],
+    placementOrderAfterTop3: ['helm', 'bazinga', 'billy', 'nabeel'],
+    dqIds: ['kolly'],
+    seasonNumber: 1,
+    title: 'Season I',
+  });
+}
+function Season2Standings() {
+  return SeasonCard<SeasonItem>({
+    list: season2Teams as unknown as SeasonItem[],
+    topIds: ['mslayer-s2', 'bazinga-s2', 'ngx-savage-s2'],
+    placementOrderAfterTop3: ['madlad-s2', 'tom1c-s2', 'machine-s2', 'madara-s2'],
+    dqIds: ['grimm-s2'],
+    seasonNumber: 2,
+    title: 'Season II',
+  });
+}
+function Season3Standings() {
+  return SeasonCard<SeasonItem>({
+    list: season3Teams as unknown as SeasonItem[],
+    topIds: ['dynamodon-s3', 'nemesisx001-s3', 'shaidota-s3'],
+    placementOrderAfterTop3: ['pero-s3', 'shikamaru-s3', 'jinx-s3'],
+    dqIds: ['none-s3'],
+    seasonNumber: 3,
+    title: 'Season III',
+  });
+}
+function Season4Standings() {
+  return SeasonCard<SeasonItem>({
+    list: season4Teams as unknown as SeasonItem[],
+    topIds: ['future-s4', 's1mpleo-s4', 'helm-s4'],
+    placementOrderAfterTop3: ['pyro-s4', 'lightninggoku-s4'],
+    dqIds: ['none-s4'],
+    seasonNumber: 4,
+    title: 'Season IV',
+  });
+}
+function Season5Standings() {
+  return SeasonCard<SeasonItem>({
+    list: season5Teams as unknown as SeasonItem[],
+    topIds: ['bull-s5', 'shadow-s5', 'sai-s5'],
+    placementOrderAfterTop3: ['helm-s5', 'gokushery-s5'],
+    dqIds: ['sasuke-s5', 'smurfpandas-s5'],
+    seasonNumber: 5,
+    title: 'Season V',
+  });
+}
+
+/* ----------------------------- Main carousel ----------------------------- */
+const seasonsConfig: { id: number; render: () => JSX.Element }[] = [
   { id: 1, render: () => <Season1Standings /> },
   { id: 2, render: () => <Season2Standings /> },
   { id: 3, render: () => <Season3Standings /> },
@@ -1171,6 +398,24 @@ export default function SeasonShowCase() {
   const dragStartXRef = useRef(0);
   const dragStartScrollRef = useRef(0);
 
+  useEffect(() => window.scrollTo({ top: 0, behavior: 'instant' as ScrollBehavior }), []);
+
+  // --- set a responsive CSS var for inner table maxHeight so table scroll fits viewport
+  useEffect(() => {
+    const setMax = () => {
+      // measure header/timeline area so we leave enough top space
+      // prefer measuring actual header element if present, otherwise fallback to constants
+      const headerEl = document.querySelector('.max-w-7xl');
+      const headerRect = headerEl ? headerEl.getBoundingClientRect() : { height: 160 };
+      const topReserved = Math.max(headerRect.height + 120, 160); // header + timeline + small buffer
+      const available = Math.max(window.innerHeight - topReserved, 360); // never too small
+      document.documentElement.style.setProperty('--seasons-table-max-h', `${available}px`);
+    };
+    setMax();
+    window.addEventListener('resize', setMax);
+    return () => window.removeEventListener('resize', setMax);
+  }, []);
+
   const handleScroll = (e: UIEvent<HTMLDivElement>) => {
     const el = e.currentTarget;
     const width = el.clientWidth || 1;
@@ -1182,26 +427,24 @@ export default function SeasonShowCase() {
     const el = containerRef.current;
     if (!el) return;
     const width = el.clientWidth;
-    el.scrollTo({
-      left: width * index,
-      behavior: "smooth",
-    });
+    el.scrollTo({ left: width * index, behavior: 'smooth' });
   };
 
   const handlePointerDown = (e: PointerEvent<HTMLDivElement>) => {
     const el = containerRef.current;
     if (!el) return;
-
-    // if drag starts inside a vertically scrollable table, don't start horizontal drag
     const target = e.target as HTMLElement | null;
-    if (target && target.closest("[data-vertical-scroll='true']")) {
-      return;
-    }
-
+    // if pointer started inside a vertical scroll (table), don't start the carousel drag
+    if (target && target.closest("[data-vertical-scroll='true']")) return;
+    if (target && target.closest("a, button, input, textarea, select, label, [role='button'], [role='link'], [data-no-drag]")) return;
     isDraggingRef.current = true;
     dragStartXRef.current = e.clientX;
     dragStartScrollRef.current = el.scrollLeft;
-    el.setPointerCapture(e.pointerId);
+    try {
+      el.setPointerCapture(e.pointerId);
+    } catch (err) {
+      void err;
+    }
   };
 
   const handlePointerMove = (e: PointerEvent<HTMLDivElement>) => {
@@ -1214,112 +457,60 @@ export default function SeasonShowCase() {
 
   const endDrag = (e?: PointerEvent<HTMLDivElement>) => {
     isDraggingRef.current = false;
-    if (e && containerRef.current) {
-      containerRef.current.releasePointerCapture(e.pointerId);
-    }
+    if (e && containerRef.current)
+      try {
+        containerRef.current.releasePointerCapture(e.pointerId);
+      } catch (err) {
+        void err;
+      }
   };
 
   return (
-    <main className="relative overflow-hidden pt-4 pb-6">
-
-      {/* soft background glows only (transparent over body gradient) */}
-      <div className="pointer-events-none fixed inset-0 -z-10">
-        <div className="absolute inset-0 opacity-60 [background:radial-gradient(circle_at_top,rgba(255,255,255,0.12),transparent_55%)]" />
-        <div className="absolute inset-0 opacity-45 [background:radial-gradient(circle_at_bottom,rgba(88,28,135,0.45),transparent_55%)]" />
-      </div>
+    /* NOTE: page scroll is intentionally not used for the seasons area;
+       the table gets its own scrollbar so the rounded bottom stays visible. */
+    <main className="seasons-page relative pt-4 pb-8">
+      <SeasonsBackgroundEffect />
 
       <div className="relative z-10 pt-0 pb-8">
         <div className="max-w-7xl mx-auto px-6 lg:px-8">
           {/* HEADER */}
-          <motion.div
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6, ease: "easeOut" }}
-            className="text-center mb-2"
-          >
-            <h1 className="relative inline-block">
-              <span className="text-xl md:text-2xl lg:text-3xl font-extrabold tracking-tight text-transparent bg-clip-text bg-linear-to-r from-zinc-200 via-slate-100 to-white">
-                SEASONS
-              </span>
-
-              <span
-                className="pointer-events-none absolute inset-0 text-xl md:text-2xl lg:text-3xl font-extrabold tracking-tight text-zinc-300 blur-lg opacity-30"
-                style={{ transform: "translate(-1px, -1px)" }}
-              >
-                SEASONS
-              </span>
-
-              <motion.div
-                animate={{ x: [-30, 300], opacity: [0, 0.4, 0] }}
-                transition={{ duration: 6, repeat: Infinity, ease: "linear" }}
-                className="pointer-events-none absolute -top-3 -left-14 w-28 h-28 bg-linear-to-r from-transparent via-zinc-300 to-transparent blur-2xl"
-              />
-            </h1>
-
-            <p className="mt-1 text-[9px] md:text-[10px] lg:text-xs text-slate-300/80 font-light tracking-[0.35em] uppercase">
-              Drag to journey through time
-            </p>
+          <motion.div initial={{ opacity: 0, y: 6 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.7 }} className="text-center mb-1 relative">
+            <h1 className="relative inline-block font-extrabold tracking-tight text-transparent bg-clip-text bg-linear-to-r from-zinc-200 via-slate-100 to-white text-2xl md:text-3xl">SEASONS</h1>
+            <span className="pointer-events-none absolute inset-0 text-2xl md:text-3xl font-extrabold tracking-tight text-zinc-300 blur-lg opacity-20" style={{ transform: "translate(-1px, -1px)" }}>SEASONS</span>
+            <motion.div
+              animate={{ x: [-40, 160], opacity: [0, 0.6, 0] }}
+              transition={{ duration: 12, repeat: Infinity, ease: "linear" }}
+              className="pointer-events-none absolute -top-4 -left-20 w-40 h-32 bg-linear-to-r from-transparent via-zinc-200/70 to-transparent blur-2xl"
+            />
+            <p className="mt-1 text-[10px] text-slate-300/80 font-light tracking-[0.35em] uppercase">Drag / Click to journey through time</p>
           </motion.div>
 
-          {/* TIMELINE */}
-          <div className="flex justify-center mb-4">
-            <div className="relative w-full max-w-xl">
-              <div className="absolute left-0 right-0 top-1/2 -translate-y-1/2 h-px bg-linear-to-r from-transparent via-zinc-400 to-transparent opacity-40 blur-[1px]" />
-              <div className="absolute left-0 right-0 top-1/2 -translate-y-1/2 h-px bg-zinc-400/70" />
+          {/* timeline */}
+          <div className="flex justify-center">
+            <div className="relative w-full max-w-xl px-2 mt-3" style={{ height: 64 }}>
+              <div className="absolute left-6 right-6 top-1/2 -translate-y-1/2 z-20 pointer-events-none">
+                <div className="timeline-line" />
+              </div>
 
-              <div className="relative flex justify-between items-center px-2">
-                {seasons.map((season, index) => {
+              <div className="relative z-30 flex justify-between items-center h-8 px-2" style={{ top: '50%', transform: 'translateY(-50%)' }}>
+                {seasonsConfig.map((season, index) => {
                   const isActive = index === activeIndex;
-
                   return (
-                    <motion.button
-                      key={season.id}
-                      onClick={() => scrollToIndex(index)}
-                      className="relative group"
-                      whileTap={{ scale: 0.92 }}
-                    >
-                      {isActive && (
-                        <motion.div
-                          layoutId="timeline-glow"
-                          className="absolute -inset-2 rounded-full bg-zinc-200/15 blur-md"
-                          transition={{
-                            type: "spring",
-                            stiffness: 260,
-                            damping: 24,
-                          }}
-                        />
-                      )}
-
-                      {isActive && (
-                        <motion.div
-                          animate={{ scale: [1, 1.15, 1] }}
-                          transition={{ duration: 1.4, repeat: Infinity }}
-                          className="absolute inset-0 rounded-full bg-linear-to-br from-zinc-200 to-white shadow-[0_0_16px_rgba(250,250,250,0.8)]"
-                        />
-                      )}
-
-                      <motion.span
-                        className={`relative z-10 flex w-8 h-8 items-center justify-center rounded-full
-                          text-xs md:text-sm font-semibold
-                          bg-linear-to-br from-[#050608] to-black/80
-                          border ${
-                            isActive
-                              ? "border-zinc-200 text-zinc-100 shadow-[0_0_8px_rgba(250,250,250,0.7)]"
-                              : "border-slate-700 text-slate-400"
-                          } transition-all duration-300`}
-                        animate={{ scale: isActive ? 1.05 : 1 }}
-                        whileHover={{ scale: 1.08, borderColor: "#e5e5e5" }}
-                      >
-                        {season.id}
-                      </motion.span>
-                    </motion.button>
+                    <button key={season.id} onClick={() => scrollToIndex(index)} className={`timeline-bullet ${isActive ? 'active' : ''}`} type="button" aria-label={`Go to season ${season.id}`}>
+                      <span className="timeline-dot">{season.id}</span>
+                      <span className="timeline-ring" aria-hidden />
+                    </button>
                   );
                 })}
+              </div>
+
+              <div className="absolute left-1/2 z-10 pointer-events-none" style={{ top: '100%', transform: 'translate(-50%, 10px)' }}>
+                <div className="timeline-label px-3">Drag / Click to journey through time</div>
               </div>
             </div>
           </div>
 
-          {/* SEASON CONTENT (horizontal drag) */}
+          {/* Carousel */}
           <div
             ref={containerRef}
             onScroll={handleScroll}
@@ -1327,24 +518,13 @@ export default function SeasonShowCase() {
             onPointerMove={handlePointerMove}
             onPointerUp={endDrag}
             onPointerLeave={endDrag}
-            className="flex overflow-x-auto snap-x snap-mandatory scroll-smooth no-scrollbar cursor-grab active:cursor-grabbing select-none"
-            style={{ scrollbarWidth: "none", msOverflowStyle: "none" }}
+            className="seasons-carousel flex overflow-x-auto snap-x snap-mandatory scroll-smooth cursor-grab active:cursor-grabbing select-none mt-6 items-start"
+            style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
+            aria-label="Seasons carousel"
           >
-            {seasons.map(({ id, render }, index) => (
-              <section
-                key={id}
-                className="snap-start shrink-0 w-full flex justify-center items-start px-2"
-              >
-                <motion.div
-                  initial={{ opacity: 0, scale: 0.98 }}
-                  animate={{
-                    opacity: activeIndex === index ? 1 : 0.85,
-                    scale: activeIndex === index ? 1 : 0.97,
-                  }}
-                  transition={{ duration: 0.4 }}
-                  className="w-full max-w-[1300px] origin-top pt-2"
-                  style={{ transformOrigin: "top center" }}
-                >
+            {seasonsConfig.map(({ id, render }, index) => (
+              <section key={id} className="snap-start shrink-0 w-full flex justify-center items-start px-2 pt-1" role="group" aria-roledescription="season">
+                <motion.div initial={{ opacity: 0.98, scale: 0.998 }} animate={{ opacity: activeIndex === index ? 1 : 0.92, scale: activeIndex === index ? 1 : 0.997 }} transition={{ duration: 0.28 }} className="w-full max-w-[1300px] origin-top pt-1 pb-6">
                   {render()}
                 </motion.div>
               </section>

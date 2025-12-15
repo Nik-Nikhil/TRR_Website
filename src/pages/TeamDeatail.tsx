@@ -42,14 +42,7 @@ export default function TeamDetail() {
               ← Back
             </button>
 
-            <Link
-              to="/tournament"
-              className="px-5 py-2 rounded-full text-[0.8rem] font-semibold uppercase tracking-[0.18em]
-              bg-linear-to-tr from-[#f5f5f5] via-[#c0c0c0] to-[#9ca3af] text-[#050608]
-              shadow-[0_0_25px_rgba(148,163,184,0.85)] hover:brightness-110 transition whitespace-nowrap"
-            >
-              VIEW BRACKET
-            </Link>
+           
           </div>
         </header>
 

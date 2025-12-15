@@ -1,0 +1,368 @@
+/* globals.css (cleaned & fixed) */
+
+/* Google Font */
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;900&display=swap');
+
+/* Tailwind entry (keep this if your build expects it) */
+@import "tailwindcss";
+
+/* ============================================================================
+   BASE GLOBAL STYLES (navbar / roshan theme)
+   ==========================================================================*/
+@layer base {
+  /* reset / box-sizing */
+  *, *::before, *::after {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+  }
+
+  /* full-height root */
+  html, body, #root {
+    height: 100%;
+  }
+
+  html {
+    /* smooth scrolling */
+    scroll-behavior: smooth;
+  }
+
+  /* BODY: use direct color instead of @apply to avoid PostCSS @apply issues */
+  body {
+    font-family: 'Poppins', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    color: #e5e7eb; /* tailwind text-gray-200 */
+    overflow-x: hidden;
+    background:
+      radial-gradient(circle at 0% 0%, rgba(192,192,192,0.12), transparent 60%),
+      radial-gradient(circle at 100% 100%, rgba(136,144,150,0.10), transparent 60%),
+      rgba(5,7,10,0.92);
+  }
+
+  /* TYPOGRAPHY */
+  h1, h2, h3, h4 {
+    font-weight: 700;
+    letter-spacing: 0.03em;
+    color: #f9fafb;
+  }
+  h1 { font-size: clamp(2.4rem, 4vw, 3.4rem); line-height: 1.1; }
+  h2 { font-size: clamp(1.8rem, 3vw, 2.4rem); }
+  h3 { font-size: 1.2rem; }
+
+  p {
+    line-height: 1.6;
+    color: #d1d5db;
+    font-size: 0.95rem;
+  }
+
+  /* LINKS */
+  a {
+    color: #c0c0c0;
+    text-decoration: none;
+    transition: color 0.2s ease, opacity 0.2s ease;
+  }
+  a:hover { color: #f5f5f5; }
+
+  /* LAYOUT SHELL (actual flex in App.tsx) */
+  #root { min-height: 100vh; }
+  main { padding-top: 88px; /* space for navbar */ }
+
+  main > div, header, section {
+    max-width: 1120px;
+    margin: 0 auto;
+    padding-inline: 1.5rem;
+  }
+
+  /* ensure footer participates in flow (not fixed) so it sits after content */
+  footer { margin-top: 0; position: static; }
+
+  /* small utilities for hiding scrollbars where needed */
+  .no-scrollbar {
+    -ms-overflow-style: none;  /* IE and Edge */
+    scrollbar-width: none;     /* Firefox */
+  }
+  .no-scrollbar::-webkit-scrollbar {
+    display: none;             /* Chrome, Safari, Opera */
+  }
+}
+
+/* ============================================================================
+   ANIMATIONS & UTILITIES
+   ==========================================================================*/
+
+/* roshan glow keyframes */
+@keyframes roshanGlow {
+  0%, 100% { filter: drop-shadow(0 0 8px rgba(212,212,212,0.45)); }
+  50%     { filter: drop-shadow(0 0 13px rgba(212,212,212,0.75)); }
+}
+
+@layer utilities {
+  .roshan-glow { animation: roshanGlow 2.4s ease-in-out infinite; }
+
+  .roshan-bg {
+    background:
+      radial-gradient(circle at 0% 0%, rgba(192,192,192,0.12), transparent 60%),
+      radial-gradient(circle at 100% 100%, rgba(136,144,150,0.10), transparent 60%),
+      rgba(5,7,10,0.92);
+  }
+
+  /* decorative sweep shouldn't block pointer events */
+  .timeline-sweep { pointer-events: none; }
+}
+
+/* ============================================================================
+   SCROLLBAR STYLES (consolidated)
+   - used for the inner table scroller (.custom-standings-scroll / .table-scroll-wrapper)
+   ==========================================================================*/
+
+/* generic thin scrollbar style (Firefox) */
+.custom-standings-scroll {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(255,255,255,0.06) transparent;
+  -webkit-overflow-scrolling: touch;
+}
+
+/* webkit track/thumb styling (Chrome, Safari, Edge) */
+.custom-standings-scroll::-webkit-scrollbar { width: 8px; height: 0; }
+.custom-standings-scroll::-webkit-scrollbar-track { background: transparent; border-radius: 9999px; }
+.custom-standings-scroll::-webkit-scrollbar-thumb {
+  background: linear-gradient(to bottom, rgba(255,255,255,0.10), rgba(148,163,184,0.12));
+  border-radius: 9999px;
+  border: 2px solid transparent;
+  background-clip: padding-box;
+}
+
+/* small alternate scrollbar (other components) */
+.custom-scrollbar::-webkit-scrollbar { width: 8px; }
+.custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background: rgba(255,255,255,0.15);
+  border-radius: 6px;
+}
+.custom-scrollbar::-webkit-scrollbar-thumb:hover { background: rgba(255,255,255,0.3); }
+
+/* ============================================================================
+   PAGE / SEASONS LAYOUT HELPERS
+   - The seasons page will use an inner table scroller so the footer stays visible
+   ==========================================================================*/
+
+/* By default allow page scrolling; the seasons page class overrides it */
+.seasons-page {
+  min-height: 0;
+  overflow-y: auto;
+  overflow-x: hidden;
+  padding-bottom: 8px;
+}
+
+/* JS may set inline min-height on the carousel; keep permissive */
+.seasons-carousel {
+  min-height: 0;
+  transition: min-height 220ms ease;
+  width: 100%;
+}
+
+/* If you want the seasons page to use a full-viewport layout where the table scrolls
+   instead of the page, apply the .seasons-page--fixed rule to the page wrapper. */
+.seasons-page--fixed {
+  height: 100vh;
+  overflow: hidden;
+  padding-bottom: 8px;
+}
+
+/* Scrollable wrapper for the table area (used in SeasonCard) */
+.table-scroll-wrapper {
+  width: 100%;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  max-height: var(--seasons-table-max-h, calc(100vh - 260px));
+  padding-bottom: 8px;
+}
+
+/* ============================================================================
+   TIMELINE / BULLETS
+   ==========================================================================*/
+
+.timeline-line {
+  height: 2px;
+  width: 100%;
+  border-radius: 999px;
+  background: linear-gradient(90deg,
+    rgba(255,255,255,0.02) 0%,
+    rgba(170,170,255,0.035) 30%,
+    rgba(255,255,255,0.04) 50%,
+    rgba(170,170,255,0.02) 70%,
+    rgba(255,255,255,0.01) 100%);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.02), 0 6px 18px rgba(0,0,0,0.45);
+  position: relative;
+}
+.timeline-sweep {
+  width: 18%;
+  height: 40px;
+  margin-left: -9%;
+  border-radius: 9999px;
+  filter: blur(14px);
+  background: linear-gradient(90deg, rgba(255,255,255,0), rgba(255,255,255,0.12), rgba(160,170,255,0.10), rgba(255,255,255,0));
+  mix-blend-mode: screen;
+  opacity: 0.95;
+  transform: translateY(-50%);
+}
+
+.timeline-bullet { display: inline-grid; place-items: center; width: 2.1rem; height: 2.1rem; background: transparent; border: 0; padding: 0; cursor: pointer; -webkit-tap-highlight-color: transparent; transition: transform 180ms cubic-bezier(.2,.9,.3,1), filter 160ms ease; position: relative; }
+.timeline-dot { display: inline-flex; align-items: center; justify-content: center; width: 2.1rem; height: 2.1rem; border-radius: 9999px; font-weight: 700; font-size: 0.78rem; color: rgba(210,215,223,0.9); border: 1px solid rgba(148,163,184,0.14); background: rgba(13,15,18,0.14); transition: transform 160ms ease, box-shadow 160ms ease, background 160ms ease, color 160ms ease; z-index: 5; }
+.timeline-bullet:hover .timeline-dot { transform: translateY(6%) scale(1.06); box-shadow: 0 10px 30px rgba(0,0,0,0.55), 0 6px 18px rgba(160,170,255,0.06); background: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(7,9,12,0.24)); color: #fff; }
+.timeline-bullet.active .timeline-dot { border-color: rgba(255,255,255,0.9); background: linear-gradient(180deg,#0b0d10,#05060a); color: #fff; transform: translateY(2%) scale(1.08); box-shadow: 0 12px 36px rgba(160,170,255,0.12), 0 4px 14px rgba(0,0,0,0.6); }
+.timeline-ring { position: absolute; inset: -6px; border-radius: 9999px; pointer-events: none; opacity: 0; transition: opacity 160ms ease, transform 160ms ease; box-shadow: 0 10px 30px rgba(160,170,255,0.06); z-index: 2; }
+.timeline-bullet:hover .timeline-ring, .timeline-bullet:focus .timeline-ring, .timeline-bullet.active .timeline-ring { opacity: 1; transform: scale(1.02); }
+
+/* centered label that sits on the line (not below) */
+.timeline-label {
+  font-size: 0.82rem;
+  color: rgba(215,220,228,0.95);
+  background: linear-gradient(180deg, rgba(10,12,14,0.7), rgba(6,8,10,0.45));
+  padding: 6px 14px;
+  border-radius: 999px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  font-weight: 700;
+  border: 1px solid rgba(255,255,255,0.04);
+  backdrop-filter: blur(6px);
+  box-shadow: 0 10px 28px rgba(3,6,12,0.6);
+  transform: none;
+  pointer-events: none;
+  display: inline-block;
+  white-space: nowrap;
+}
+
+/* neon pseudo elements & hover states */
+.timeline-dot {
+  position: relative;
+  transition: transform 160ms ease, box-shadow 160ms ease, color 160ms ease;
+  will-change: transform, box-shadow;
+}
+.timeline-dot::after {
+  content: "";
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%) scale(0.6);
+  width: 110%;
+  height: 110%;
+  border-radius: 9999px;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 220ms cubic-bezier(.2,.9,.3,1), transform 220ms cubic-bezier(.2,.9,.3,1);
+  background: radial-gradient(circle, rgba(255,255,255,0.08), rgba(255,255,255,0.01) 50%, transparent 60%);
+  filter: blur(6px);
+  z-index: 1;
+}
+.timeline-dot::before {
+  content: "";
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%) scale(0.8);
+  width: 160%;
+  height: 160%;
+  border-radius: 9999px;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 220ms cubic-bezier(.2,.9,.3,1), transform 220ms cubic-bezier(.2,.9,.3,1);
+  box-shadow: 0 0 24px rgba(160,170,255,0.12), 0 0 48px rgba(160,170,255,0.06) inset;
+  z-index: 0;
+}
+.timeline-bullet:hover .timeline-dot, .timeline-bullet:focus .timeline-dot {
+  transform: translateY(-6%) scale(1.08);
+  color: #fff;
+  box-shadow:
+    0 6px 18px rgba(160,170,255,0.18),
+    0 0 28px rgba(160,170,255,0.14),
+    0 0 64px rgba(120,130,255,0.08);
+}
+.timeline-bullet:hover .timeline-dot::after,
+.timeline-bullet:focus .timeline-dot::after,
+.timeline-bullet:hover .timeline-dot::before,
+.timeline-bullet:focus .timeline-dot::before,
+.timeline-bullet.active .timeline-dot::after,
+.timeline-bullet.active .timeline-dot::before {
+  opacity: 1;
+  transform: translate(-50%, -50%) scale(1);
+}
+.timeline-bullet.active .timeline-dot {
+  transform: translateY(-2%) scale(1.06);
+  color: #fff;
+  box-shadow:
+    0 8px 26px rgba(160,170,255,0.22),
+    0 0 36px rgba(160,170,255,0.16),
+    0 0 72px rgba(120,130,255,0.08);
+}
+
+/* responsive timeline tweaks */
+@media (max-width: 640px) {
+  .timeline-dot { width: 1.8rem; height: 1.8rem; font-size: 0.72rem; }
+  .timeline-bullet { width: 1.8rem; height: 1.8rem; }
+  .timeline-label { font-size: 0.72rem; padding: 5px 10px; }
+  .timeline-sweep { width: 24%; margin-left: -12%; filter: blur(12px); }
+}
+
+/* ============================================================================
+   STANDINGS / CARD SCROLL FIXES
+   ==========================================================================*/
+
+.season-card-inner {
+  background: transparent;
+  padding-bottom: 8px;
+  position: relative;
+  z-index: 40;
+}
+
+/* table layout stability - prevent horizontal overflow */
+.season-card-inner table {
+  background: transparent;
+  min-width: 0;
+  table-layout: fixed;
+  width: 100% !important;
+}
+
+/* allow last rows (pills / badges) to overflow above overlays */
+.season-card-inner tbody tr:nth-last-child(-n+2) td {
+  overflow: visible;
+  position: relative;
+  z-index: 50;
+}
+
+/* ensure header sticks above content */
+.season-card-inner thead { z-index: 60; position: sticky; top: 0; }
+
+/* keep inner scrollbar track transparent */
+.custom-standings-scroll::-webkit-scrollbar-track { background: transparent; }
+
+/* hide legacy card-bottom overlays if present (fallback) */
+.card-bottom { display: none !important; }
+
+/* decorative cover tweaks so it doesn't obscure content */
+.rounded-3xl > [aria-hidden] {
+  pointer-events: none;
+  transform: translateY(4px);
+  opacity: 0.98;
+  box-shadow: none !important;
+}
+
+/* make inner scrollbar more visible when focused */
+.season-card-inner:focus-within::-webkit-scrollbar-thumb {
+  background: linear-gradient(to bottom, rgba(255,255,255,0.14), rgba(148,163,184,0.14));
+}
+
+/* final responsive tweaks */
+@media (max-width: 900px) {
+  .season-card-inner { padding-bottom: 8px; }
+  .season-card-inner tbody tr:nth-last-child(-n+2) td { z-index: 45; }
+}
+
+/* ============================================================================
+   SEASONS-SPECIFIC FIXES (inner scroller + keep rounded bottom visible)
+   ==========================================================================*/
+
+/* ensure DQ badges and bottom rows aren't clipped by decorative overlays */
+.season-card-inner tbody tr:nth-last-child(-n+2) td { z-index: 50; position: relative; overflow: visible; }
+
+/* minor transform so decorative bottom cover doesn't cover badges */
+.rounded-3xl > [aria-hidden] { z-index: 10; pointer-events: none; transform: translateY(2px); }
