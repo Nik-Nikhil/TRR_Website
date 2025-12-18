@@ -37,12 +37,15 @@ export default function Home() {
                 Gather your squad, lock in your roles, and enter the next
                 chapter of TRR. Registration happens through the admins panel.
               </p>
-              <Link
-                to="/admins"
-                className="inline-flex items-center justify-center rounded-full px-5 py-2 text-sm font-bold uppercase tracking-[0.2em] bg-linear-to-r from-zinc-50 via-zinc-300 to-zinc-100 text-[#050608] shadow-[0_0_22px_rgba(148,163,184,0.85)] hover:brightness-110 transition"
-              >
-                Register Your Team
-              </Link>
+              <div className="relative inline-block group">
+                <button className="inline-flex items-center justify-center rounded-full px-5 py-2 text-sm font-bold uppercase tracking-[0.2em] bg-linear-to-r from-zinc-50 via-zinc-300 to-zinc-100 text-[#050608] shadow-[0_0_22px_rgba(148,163,184,0.85)] hover:brightness-110 transition cursor-pointer">
+                  Register Your Team
+                </button>
+                <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-3 px-3 py-1.5 text-xs font-semibold tracking-wide text-zinc-200 bg-zinc-900/90 backdrop-blur-md border border-white/10 rounded-lg opacity-0 group-hover:opacity-100 transition-all duration-300 transform translate-y-2 group-hover:translate-y-0 pointer-events-none whitespace-nowrap shadow-[0_4px_20px_rgba(0,0,0,0.5)]">
+                  Will start soon!
+                  <div className="absolute top-full left-1/2 -translate-x-1/2 -mt-2 border-4 border-transparent border-t-zinc-900/90" />
+                </div>
+              </div>
             </div>
 
             {/* Schedule / Dates */}
@@ -56,7 +59,7 @@ export default function Home() {
                     Event Dates
                   </span>
                   <span className="text-sm md:text-base font-medium mb-2">
-                    {t.startDate} — {t.endDate}
+                    To Be Announced Soon
                   </span>
                 </div>
                 <p className="text-[0.8rem] md:text-[0.85rem] text-zinc-200">
@@ -77,7 +80,7 @@ export default function Home() {
               </p>
               <div className="flex items-end gap-3">
                 <span className="text-3xl md:text-4xl font-semibold tracking-tight text-transparent bg-clip-text bg-linear-to-r from-yellow-200 via-amber-300 to-orange-400">
-                  ₹{t.prizePool.toLocaleString()}
+                  To Be Announced Soon
                 </span>
               </div>
             </div>

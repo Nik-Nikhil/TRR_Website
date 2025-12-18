@@ -1,7 +1,7 @@
 // src/components/layout/Navbar.tsx
 import { Link, useLocation } from "react-router-dom";
 import { useState, useRef, useEffect, type ReactNode } from "react";
-import { Menu, LayoutGrid, Medal, UsersRound, ScrollText } from "lucide-react";
+import { Menu, Medal, UsersRound, ScrollText, House } from "lucide-react";
 import { AnimatePresence, LayoutGroup, motion } from "framer-motion";
 
 export default function Navbar() {
@@ -39,11 +39,10 @@ export default function Navbar() {
       <div className="w-full mx-0 pl-3 pr-3 sm:pl-6 sm:pr-4 md:pl-10 md:pr-6">
         <div className="h-[60px] md:h-[72px] grid grid-cols-[auto_1fr] items-center w-full">
           {/* Brand / Left side */}
-         <Link
-  to="/"
-  className="flex items-center gap-2 sm:gap-3 no-underline group relative"
->
-
+          <Link
+            to="/"
+            className="flex items-center gap-2 sm:gap-3 no-underline group relative"
+          >
             {/* Logo + glow wrapper */}
             <span className="relative w-12 h-12 md:w-15 md:h-15 flex items-center justify-center">
               <span
@@ -63,29 +62,27 @@ export default function Navbar() {
 
             {/* === Text with SEASONS glow + moving light effect === */}
             <div className="flex flex-col">
-  <h1 className="relative inline-block leading-none">
-    <span
-      className="
+              <h1 className="relative inline-block leading-none">
+                <span
+                  className="
         text-[1.1rem] md:text-[1.35rem] font-extrabold tracking-tight text-transparent bg-clip-text
         bg-linear-to-r from-zinc-200 via-slate-100 to-white
         transition-all duration-400
         group-hover:bg-linear-to-r group-hover:from-[#D16500] group-hover:via-[#E4472F] group-hover:to-[#AF1D5D]
       "
-    >
-      The Roshan Rumble
-    </span>
-
+                >
+                  The Roshan Rumble
+                </span>
 
                 {/* soft duplicate glow under text */}
                 <span
-  className="pointer-events-none absolute inset-0 text-[1.1rem] md:text-[1.35rem] font-extrabold tracking-tight blur-lg opacity-30
+                  className="pointer-events-none absolute inset-0 text-[1.1rem] md:text-[1.35rem] font-extrabold tracking-tight blur-lg opacity-30
              transition-all duration-400
              text-zinc-300 group-hover:text-[#E4472F]"
-  style={{ transform: "translate(-1px, -1px)" }}
->
-  The Roshan Rumble
-</span>
-
+                  style={{ transform: "translate(-1px, -1px)" }}
+                >
+                  The Roshan Rumble
+                </span>
 
                 {/* moving light sweep */}
                 <motion.div
@@ -117,7 +114,7 @@ export default function Navbar() {
             <div className="hidden md:flex items-center justify-end gap-[2.4rem] w-full ">
               <NavItem
                 to="/"
-                icon={<LayoutGrid className="w-[18px] h-[18px]" />}
+                icon={<House className="w-[18px] h-[18px]" />}
                 label="Home"
                 active={pathname === "/"}
               />
@@ -154,7 +151,7 @@ export default function Navbar() {
                 >
                   <NavItem
                     to="/"
-                    icon={<LayoutGrid className="w-[18px] h-[18px]" />}
+                    icon={<House className="w-[18px] h-[18px]" />}
                     label="Home"
                     active={pathname === "/"}
                   />
