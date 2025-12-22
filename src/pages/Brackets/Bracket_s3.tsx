@@ -356,10 +356,9 @@ function Connectors({ pos, flows }: { pos: Record<string, Pos>; flows: Flow[] })
 export default function BracketDotaStyle({ data }: { data: BracketData3 }) {
   const { pos, register } = useNodePositions()
   const HEADER_COLS = Math.max(data.upper.rounds.length, data.lower.rounds.length)
- const LOWER_START_Y =
-  Math.max(...data.upper.rounds.map(r => r.matches.length)) * STACK +
-  HEADER_HEIGHT +
-  90
+ // bring lower bracket up closer to upper and allow easier alignment with upper columns
+const LOWER_START_Y = STACK * 0.8
+
 
 
 
