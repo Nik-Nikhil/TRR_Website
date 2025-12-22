@@ -1,0 +1,163 @@
+{
+  "teams": [
+    { "id": "banner", "name": "Banner", "color": "#3C78D8" },
+    { "id": "reciprocal", "name": "Reciprocal", "color": "#674EA7" },
+    { "id": "billy", "name": "Billy", "color": "#E06666" },
+    { "id": "godspeed", "name": "Godspeed", "color": "#B45F06" },
+    { "id": "helm", "name": "Helm", "color": "#F1C232" },
+    { "id": "kolly", "name": "Kolly", "color": "#C27BA0" },
+    { "id": "nabeel", "name": "Nabeel", "color": "#76A5AF" },
+    { "id": "bazinga", "name": "Bazinga", "color": "#93C47D" }
+  ],
+
+  "upperBracket": {
+    "rounds": [
+      {
+        "id": "UB_R1",
+        "label": "Round 1",
+        "matches": [
+          { "id": "UB_R1_M1", "teams": ["banner", "reciprocal"], "winner": "reciprocal" },
+          { "id": "UB_R1_M2", "teams": ["billy", "godspeed"], "winner": "godspeed" },
+          { "id": "UB_R1_M3", "teams": ["helm", "kolly"], "winner": "kolly" },
+          { "id": "UB_R1_M4", "teams": ["nabeel", "bazinga"], "winner": "bazinga" }
+        ]
+      },
+
+      {
+        "id": "UB_R2",
+        "label": "Round 2",
+        "matches": [
+          {
+            "id": "UB_R2_M1",
+            "from": ["UB_R1_M1", "UB_R1_M2"],
+            "teams": ["reciprocal", "godspeed"],
+            "winner": "reciprocal"
+          },
+          {
+            "id": "UB_R2_M2",
+            "from": ["UB_R1_M3", "UB_R1_M4"],
+            "teams": ["kolly", "bazinga"],
+            "winner": "kolly"
+          }
+        ]
+      },
+
+      {
+        "id": "UB_FINAL",
+        "label": "Upper Bracket Final",
+        "matches": [
+          {
+            "id": "UB_F_M1",
+            "from": ["UB_R2_M1", "UB_R2_M2"],
+            "teams": ["reciprocal", "kolly"],
+
+            "winner": "reciprocal",
+
+            "bye": true,
+            "advanceReason": "Opponent disqualified",
+
+            "events": [
+              {
+                "team": "kolly",
+                "type": "DQ",
+                "reason": "Smurfing"
+              }
+            ]
+          }
+        ]
+      },
+      {
+  "id": "UB_WINNER",
+  "label": "Upper Bracket Winner",
+  "matches": [
+    {
+      "id": "UB_WINNER_M1",
+      "from": ["UB_F_M1"],
+      "teams": ["reciprocal"],
+      "winner": "reciprocal",
+      "type": "winner"
+    }
+  ]
+}
+
+  
+    ]
+  },
+
+  "lowerBracket": {
+    "rounds": [
+      {
+        "id": "LB_R1",
+        "label": "Round 1",
+        "matches": [
+          {
+            "id": "LB_R1_M1",
+            "from": ["UB_R1_M1", "UB_R1_M2"],
+            "teams": ["banner", "billy"],
+            "winner": "banner"
+          },
+          {
+            "id": "LB_R1_M2",
+            "from": ["UB_R1_M3", "UB_R1_M4"],
+            "teams": ["helm", "nabeel"],
+            "winner": "helm"
+          }
+        ]
+      },
+
+      {
+        "id": "LB_R2",
+        "label": "Round 2",
+        "matches": [
+          {
+            "id": "LB_R2_M1",
+            "from": ["LB_R1_M1"],
+            "teams": ["banner", "bazinga"],
+            "winner": "banner"
+          },
+          {
+            "id": "LB_R2_M2",
+            "from": ["LB_R1_M2"],
+            "teams": ["helm", "godspeed"],
+            "winner": "godspeed"
+          }
+        ]
+      },
+
+      {
+        "id": "LB_R3",
+        "label": "Round 3",
+        "matches": [
+          {
+            "id": "LB_R3_M1",
+            "from": ["LB_R2_M1", "LB_R2_M2"],
+            "teams": ["banner", "godspeed"],
+            "winner": "godspeed"
+          }
+        ]
+      },
+
+     {
+  "id": "LB_WINNER",
+  "label": "Lower Bracket Winner",
+  "matches": [
+    {
+      "id": "LB_WINNER_M1",
+      "from": ["LB_F_M1"],
+      "teams": ["godspeed"],
+      "winner": "godspeed",
+      "type": "winner"
+    }
+  ]
+}
+
+    ]
+  },
+
+  "grandFinal": {
+    "id": "GF_M1",
+    "from": ["UB_F_M1", "LB_F_M1"],
+    "teams": ["reciprocal", "godspeed"],
+    "winner": "godspeed"
+  }
+}

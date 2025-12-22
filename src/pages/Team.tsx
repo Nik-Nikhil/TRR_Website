@@ -1,6 +1,6 @@
 // src/pages/Teams.tsx
 import { Link } from "react-router-dom";
-import { teams } from "./data/teams";
+import { teams } from "../data/teams";
 
 export default function Teams() {
   // sort by wins desc, then losses asc

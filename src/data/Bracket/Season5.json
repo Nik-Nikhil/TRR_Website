@@ -1,0 +1,138 @@
+{
+  "teams": [
+    { "id": "bull-s5", "name": "Bull", "color": "#C00000" },
+    { "id": "shadow-s5", "name": "Shadow", "color": "#F4CCCC" },
+    { "id": "sexy-s5", "name": "Sexy", "color": "#E06666" },
+    { "id": "drnemesis-s5", "name": "Dr_Nemesis_X", "color": "#A4C2F4" },
+    { "id": "helm-s5", "name": "Helm", "color": "#F1C232" },
+    { "id": "sasuke-s5", "name": "Sasuke", "color": "#B4A7D6" },
+    { "id": "ezlng-s5", "name": "LightNing Goku", "color": "#6FA8DC" },
+    { "id": "smurfpandas-s5", "name": "KungFuPanda", "color": "#6AA84F" },
+    { "id": "shirley-s5", "name": "Shirleythomas", "color": "#93C47D" },
+    { "id": "gokushery-s5", "name": "Goku-Shery", "color": "#C27BA0" },
+    { "id": "sai-s5", "name": "Sai", "color": "#F6B26B" },
+    { "id": "razer-s5", "name": "Razer", "color": "#DBA900" },
+    { "id": "roronoa-s5", "name": "Roronoa Zoro", "color": "#93C47D" },
+    { "id": "s1mple0-s5", "name": "S1mple0", "color": "#F4CCCC" },
+    { "id": "midas-s5", "name": "Midas", "color": "#FFD966" },
+    { "id": "flux-s5", "name": "FluX-", "color": "#FFE599" }
+  ],
+
+  "upperBracket": {
+    "rounds": [
+      {
+        "id": "UB_R1",
+        "label": "Round 1",
+        "matches": [
+          { "id": "UB_R1_M1", "teams": ["shirley-s5", "sexy-s5"], "winner": "sexy-s5" },
+          { "id": "UB_R1_M2", "teams": ["drnemesis-s5", "gokushery-s5"], "winner": "shadow-s5" },
+          { "id": "UB_R1_M3", "teams": ["s1mple0-s5", "helm-s5"], "winner": "helm-s5" },
+          { "id": "UB_R1_M4", "teams": ["sai-s5", "ezlng-s5"], "winner": "ezlng-s5" }
+        ]
+      },
+      {
+        "id": "UB_R2",
+        "label": "Round 2",
+        "matches": [
+          {
+            "id": "UB_R2_M1",
+            "from": ["UB_R1_M1", "UB_R1_M2"],
+            "teams": ["sexy-s5", "shadow-s5"],
+            "winner": "bull-s5"
+          },
+          {
+            "id": "UB_R2_M2",
+            "from": ["UB_R1_M3", "UB_R1_M4"],
+            "teams": ["helm-s5", "ezlng-s5"],
+            "winner": "helm-s5"
+          }
+        ]
+      },
+      {
+        "id": "UB_R3",
+        "label": "Round 3",
+        "matches": [
+          {
+            "id": "UB_R3_M1",
+            "from": ["UB_R2_M1", "UB_R2_M2"],
+            "teams": ["bull-s5", "shadow-s5"],
+            "winner": "bull-s5"
+          }
+        ]
+      },
+      {
+        "id": "UB_WINNER",
+        "label": "Upper Bracket Winner",
+        "matches": [
+          {
+            "id": "UB_WINNER_M1",
+            "from": ["UB_R3_M1"],
+            "teams": ["bull-s5"],
+            "winner": "bull-s5"
+          }
+        ]
+      }
+    ]
+  },
+
+  "lowerBracket": {
+    "rounds": [
+      {
+        "id": "LB_R1",
+        "label": "Round 1",
+        "matches": [
+          { "id": "LB_R1_M1", "teams": ["shirley-s5", "razer-s5"], "winner": "razer-s5" },
+          { "id": "LB_R1_M2", "teams": ["gokushery-s5", "roronoa-s5"], "winner": "gokushery-s5" },
+          { "id": "LB_R1_M3", "teams": ["s1mple0-s5", "midas-s5"], "winner": "s1mple0-s5" },
+          { "id": "LB_R1_M4", "teams": ["sai-s5", "flux-s5"], "winner": "sai-s5" }
+        ]
+      },
+      {
+        "id": "LB_R2",
+        "label": "Round 2",
+        "matches": [
+          { "id": "LB_R2_M1", "from": ["LB_R1_M1"], "teams": ["razer-s5", "ezlng-s5"], "winner": "razer-s5" },
+          { "id": "LB_R2_M2", "from": ["LB_R1_M2"], "teams": ["gokushery-s5", "smurfpandas-s5"], "winner": "gokushery-s5" },
+          { "id": "LB_R2_M3", "from": ["LB_R1_M3"], "teams": ["s1mple0-s5", "drnemesis-s5"], "winner": "drnemesis-s5" },
+          { "id": "LB_R2_M4", "from": ["LB_R1_M4"], "teams": ["sai-s5", "sexy-s5"], "winner": "sai-s5" }
+        ]
+      },
+      {
+        "id": "LB_R3",
+        "label": "Round 3",
+        "matches": [
+          {
+            "id": "LB_R3_M1",
+            "from": ["LB_R2_M1", "LB_R2_M2"],
+            "teams": ["razer-s5", "gokushery-s5"],
+            "winner": "razer-s5"
+          },
+          {
+            "id": "LB_R3_M2",
+            "from": ["LB_R2_M3", "LB_R2_M4"],
+            "teams": ["drnemesis-s5", "sai-s5"],
+            "winner": "sai-s5"
+          }
+        ]
+      },
+      {
+        "id": "LB_WINNER",
+        "label": "Lower Bracket Winner",
+        "matches": [
+          {
+            "id": "LB_WINNER_M1",
+            "from": ["LB_R3_M1", "LB_R3_M2"],
+            "teams": ["shadow-s5"],
+            "winner": "shadow-s5"
+          }
+        ]
+      }
+    ]
+  },
+
+  "grandFinal": {
+    "id": "GF_M1",
+    "teams": ["bull-s5", "shadow-s5"],
+    "winner": "bull-s5"
+  }
+}

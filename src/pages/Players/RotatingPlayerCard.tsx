@@ -1,7 +1,8 @@
 // src/pages/Players/RotatingPlayerCard.tsx
 import { motion } from "framer-motion";
 import PlayerSummaryCard from "./PlayerSummaryCard";
-import type { Player } from "../data/players";
+// Update the import path below if the correct path is different
+import type { Player } from "../../data/players";
 
 interface RotatingPlayerCardProps {
   player: Player;
@@ -33,7 +34,7 @@ export default function RotatingPlayerCard({ player, index }: RotatingPlayerCard
         id={player.id}
         nickname={player.nickname}
         avatarUrl={player.avatarUrl}
-        seasonBadges={player.seasonBadges}
+        seasonBadges={player.seasonBadges.map(Number)}
         hasWonCup={player.hasWonCup}
         cupRank={player.cupRank}
         cupTooltip={player.cupTooltip}

@@ -1,0 +1,175 @@
+{
+  "season": 3,
+  "type": "double_elimination",
+  "teams": [
+  { "id": "DynamoDon", "name": "DynamoDon", "color": "#3C78D8" },
+  { "id": "Puppy Boss", "name": "Puppy Boss", "color": "#CC0000" },
+  { "id": "Kakarot", "name": "Kakarot", "color": "#E69138" },
+  { "id": "Sridharocky", "name": "Sridharocky", "color": "#76A5AF" },
+  { "id": "Alcromido", "name": "Alcromido", "color": "#E06666" },
+  { "id": "Rinne", "name": "Rinne", "color": "#F4CCCC" },
+  { "id": "Nj", "name": "Nj", "color": "#B4A7D6" },
+  { "id": "Rut", "name": "Rut", "color": "#FFD966" },
+  { "id": "Maldini", "name": "Maldini", "color": "#F1C232" },
+  { "id": "Pero", "name": "Pero", "color": "#BF9000" },
+  { "id": "Helm", "name": "Helm", "color": "#B6D7A8" },
+  { "id": "Epizeuxius", "name": "Epizeuxius", "color": "#6AA84F" },
+  { "id": "Jinx", "name": "Jinx", "color": "#C27BA0" },
+  { "id": "Shikamaru", "name": "Shikamaru", "color": "#8E7CC3" },
+  { "id": "Shadota", "name": "Shadota", "color": "#76A5AF" },
+  { "id": "Nemesis", "name": "Nemesis", "color": "#6D9EEB" }
+]
+  ,
+
+  "upper": {
+    "rounds": [
+      {
+        "id": "UB_R1",
+        "label": "Round 1",
+        "bestOf": 1,
+        "date": "7th June",
+        "matches": [
+          { "id": "UB_R1_M1", "teams": ["DynamoDon", "Alcromido"], "time": "1:00 pm" },
+          { "id": "UB_R1_M2", "teams": ["Shikamaru", "Helm"] },
+          { "id": "UB_R1_M3", "teams": ["Rut", "Kakarot"] },
+          { "id": "UB_R1_M4", "teams": ["Nemesis", "Rinne"] },
+          { "id": "UB_R1_M5", "teams": ["Maldini", "Shadota"] },
+          { "id": "UB_R1_M6", "teams": ["Puppy Boss", "Pero"] },
+          { "id": "UB_R1_M7", "teams": ["Sridharocky", "Epizeuxius"] },
+          { "id": "UB_R1_M8", "teams": ["Jinx", "Nj"] }
+        ]
+      },
+
+      {
+        "id": "UB_R2",
+        "label": "Round 2",
+        "bestOf": 1,
+        "date": "7th June",
+        "matches": [
+          { "id": "UB_R2_M1", "from": ["UB_R1_M1", "UB_R1_M2"], "teams": ["Epizeuxius", "Nemesis"], "time": "3:00 pm" },
+          { "id": "UB_R2_M2", "from": ["UB_R1_M3", "UB_R1_M4"], "teams": ["Jinx", "Pero"] },
+          { "id": "UB_R2_M3", "from": ["UB_R1_M5", "UB_R1_M6"], "teams": ["Rut", "Shadota"] },
+          { "id": "UB_R2_M4", "from": ["UB_R1_M7", "UB_R1_M8"], "teams": ["DynamoDon", "Shikamaru"] }
+        ]
+      },
+
+      {
+        "id": "UB_R3",
+        "label": "Round 3",
+        "bestOf": 1,
+        "date": "8th June",
+        "matches": [
+          { "id": "UB_R3_M1", "from": ["UB_R2_M1", "UB_R2_M2"], "teams": ["DynamoDon", "Pero"], "time": "1:00 pm" },
+          { "id": "UB_R3_M2", "from": ["UB_R2_M3", "UB_R2_M4"], "teams": ["Nemesis", "Shadota"], "time": "3:00 pm" }
+        ]
+      },
+
+      {
+        "id": "UB_R4",
+        "label": "Upper Final",
+        "bestOf": 1,
+        "date": "14th June",
+        "matches": [
+          {
+            "id": "UB_FINAL",
+            "from": ["UB_R3_M1", "UB_R3_M2"],
+            "teams": ["DynamoDon", "Shadota"],
+            "time": "1:30 pm"
+          }
+        ]
+      }
+    ]
+  },
+
+  "lower": {
+    "rounds": [
+      {
+        "id": "LB_R1",
+        "label": "Round 1",
+        "bestOf": 1,
+        "date": "7th June",
+        "matches": [
+          { "id": "LB_R1_M1", "teams": ["Sridharocky", "Rinne"], "time": "3:00 pm" },
+          { "id": "LB_R1_M2", "teams": ["Nj", "Puppy Boss"] },
+          { "id": "LB_R1_M3", "teams": ["Kakarot", "Maldini"] },
+          { "id": "LB_R1_M4", "teams": ["Alcromido", "Helm"] }
+        ]
+      },
+
+      {
+        "id": "LB_R2",
+        "label": "Round 2",
+        "bestOf": 1,
+        "date": "7th June",
+        "matches": [
+          { "id": "LB_R2_M1", "from": ["LB_R1_M1"], "teams": ["Shikamaru", "Rinne"], "time": "4:15 pm" },
+          { "id": "LB_R2_M2", "from": ["LB_R1_M2"], "teams": ["Epizeuxius", "Nj"], "time": "5:45 pm" },
+          { "id": "LB_R2_M3", "from": ["LB_R1_M3"], "teams": ["Jinx", "Maldini"], "time": "7:00 pm" },
+          { "id": "LB_R2_M4", "from": ["LB_R1_M4"], "teams": ["Rut", "Helm"], "time": "8:00 pm" }
+        ]
+      },
+
+      {
+        "id": "LB_R3",
+        "label": "Round 3",
+        "bestOf": 1,
+        "date": "8th June",
+        "matches": [
+          { "id": "LB_R3_M1", "from": ["LB_R2_M1", "LB_R2_M2"], "teams": ["Shikamaru", "Epizeuxius"], "time": "5:00 pm" },
+          { "id": "LB_R3_M2", "from": ["LB_R2_M3", "LB_R2_M4"], "teams": ["Jinx", "Helm"], "time": "7:00 pm" }
+        ]
+      },
+
+      {
+        "id": "LB_R4",
+        "label": "Round 4",
+        "bestOf": 1,
+        "date": "14th June",
+        "matches": [
+          { "id": "LB_R4_M1", "from": ["LB_R3_M1"], "teams": ["Pero", "Shikamaru"], "time": "5:00 pm" },
+          { "id": "LB_R4_M2", "from": ["LB_R3_M2"], "teams": ["Nemesis", "Jinx"], "time": "3:00 pm" }
+        ]
+      },
+
+      {
+        "id": "LB_R5",
+        "label": "Round 5",
+        "bestOf": 1,
+        "date": "14th June",
+        "matches": [
+          {
+            "id": "LB_R5_M1",
+            "from": ["LB_R4_M1", "LB_R4_M2"],
+            "teams": ["Shikamaru", "Nemesis"],
+            "time": "7:00 pm"
+          }
+        ]
+      },
+
+      {
+        "id": "LB_R6",
+        "label": "Lower Final",
+        "bestOf": 1,
+        "date": "15th June",
+        "matches": [
+          {
+            "id": "LB_FINAL",
+            "from": ["LB_R5_M1"],
+            "teams": ["Shadota", "Nemesis"],
+            "time": "1:00 pm"
+          }
+        ]
+      }
+    ]
+  },
+
+  "grandFinal": {
+    "id": "GF",
+    "label": "Grand Finals",
+    "bestOf": 3,
+    "date": "15th June",
+    "time": "4:00 pm",
+    "teams": ["DynamoDon", "Nemesis"],
+    "winner": "DynamoDon"
+  }
+}

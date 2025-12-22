@@ -1,0 +1,54 @@
+{
+  "teams": [
+    { "id": "atomic", "captain": "Atomic", "color": "#B6D7A8" },
+    { "id": "mslayer", "captain": "MSlayer", "color": "#F6B26B" },
+    { "id": "irox", "captain": "Irox", "color": "#76A5AF" },
+    { "id": "machine", "captain": "Machine", "color": "#4A86E8" },
+    { "id": "madlad", "captain": "Madlad", "color": "#E06666" },
+    { "id": "bazinga", "captain": "Bazinga", "color": "#FFD966" }
+  ],
+
+  "knockout": {
+    "rounds": [
+      {
+        "id": "QF",
+        "label": "Quarter Finals",
+        "matches": [
+          {
+            "id": "QF_M1",
+            "teams": ["atomic","mslayer"],
+            "winner": "mslayer"
+          },
+          {
+            "id": "QF_M2",
+            "teams": ["machine", "bazinga"],
+            "winner": "bazinga"
+          }
+        ]
+      },
+
+      {
+        "id": "SF",
+        "label": "Semi Finals",
+        "matches": [
+          {
+            "id": "SF_M1",
+            "teams": ["irox", "mslayer"],
+            "winner": "mslayer"
+          },
+          {
+            "id": "SF_M2",
+            "teams": ["madlad", "bazinga"],
+            "winner": "bazinga"
+          }
+        ]
+      }
+    ]
+  },
+
+  "grandFinal": {
+    "id": "GF",
+    "teams": ["mslayer", "bazinga"],
+    "winner": "mslayer"
+  }
+}

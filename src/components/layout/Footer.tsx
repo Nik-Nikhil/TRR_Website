@@ -22,7 +22,7 @@ function InstagramIcon({ size = 22 }) {
   );
 }
 
-import { primaryTournament } from "../../pages/data/mockTournaments";
+import { primaryTournament } from "../../../src/data/mockTournaments";
 
 export default function Footer() {
   const year = primaryTournament.year;

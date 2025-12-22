@@ -1,5 +1,5 @@
 // src/components/tournament/Schedule.tsx
-import { primaryTournament } from '../../pages/data/mockTournaments'
+import { primaryTournament } from '../../data/mockTournaments'
 import MatchCard from './MatchCard';
 
 export default function TournamentSchedule() {
@@ -10,7 +10,7 @@ export default function TournamentSchedule() {
   return (
     <section className="max-w-5xl mx-auto px-6 py-10">
       <h2 className="text-3xl md:text-4xl font-extrabold mb-6">
-        <span className="bg-gradient-to-r from-emerald-400 to-purple-400 bg-clip-text text-transparent">
+        <span className="bg-linear-to-r from-emerald-400 to-purple-400 bg-clip-text text-transparent">
           Full Schedule
         </span>
       </h2>

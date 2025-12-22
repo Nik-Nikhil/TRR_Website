@@ -1,0 +1,701 @@
+// Bracket_s3.tsx
+import { useMemo, useRef, useLayoutEffect, useState } from "react"
+import { motion } from "framer-motion"
+import { useNavigate } from "react-router-dom"
+
+/* ===================== TYPES ===================== */
+type Team = { id: string; name: string; color: string }
+
+type Match = {
+  id: string
+  teams?: string[]
+  winner?: string
+  from?: string[]
+}
+
+type Round = { id: string; label: string; matches: Match[] }
+
+export type BracketData3 = {
+  season: number
+  type: "double_elimination"
+
+  teams: Team[]
+
+  upper: {
+    rounds: Round[]
+  }
+
+  lower: {
+    rounds: Round[]
+  }
+
+  grandFinal: Match
+}
+
+/* ===================== TUNABLE LAYOUT ===================== */
+// tweak these to squeeze/expand as needed
+
+const GOLD = "#f5c542"
+// ===== Card sizes =====
+const UB_CARD_W = 160
+const UB_CARD_H = 70
+
+const LB_CARD_W = 130
+const LB_CARD_H = 64
+
+// ===== Layout spacing =====
+const COL_GAP = 72
+const ROW_GAP = 22
+
+// stack is based on upper bracket (primary visual)
+const STACK = UB_CARD_H + ROW_GAP
+const UB_STACK = UB_CARD_H + ROW_GAP
+const LB_STACK = LB_CARD_H + ROW_GAP
+
+
+
+
+
+const FINAL_MERGE_ID = "__FINAL_MERGE__"
+const ELBOW = 10
+const HEADER_HEIGHT = 44
+const GF_HEADER_WIDTH = UB_CARD_W * 1.1
+
+
+
+/* ===================== HELPERS ===================== */
+const teamById = (teams: Team[] | undefined, id?: string | null) =>
+  teams?.find(t => t.id === id) ?? null
+
+/* ===================== POSITION RESOLVER ===================== */
+function getMatchY(
+  roundIndex: number,
+  matchIndex: number,
+  rounds: Round[],
+  cache: Map<string, number>,
+  STACK_USE: number = STACK
+)
+: number {
+  const match = rounds[roundIndex].matches[matchIndex]
+
+  if (match.teams?.length === 1) {
+    const totalSlots = Math.max(...rounds.map(r => r.matches.length))
+    const y = ((totalSlots - 1) * STACK) / 2
+    cache.set(match.id, y)
+    return y
+  }
+
+  if (roundIndex === 0 || !match.from?.length) {
+    const y = matchIndex * STACK
+    cache.set(match.id, y)
+    return y
+  }
+
+  const prevRounds = rounds.slice(0, roundIndex)
+
+  const parents = match.from
+    .map(pid => prevRounds.flatMap(r => r.matches).find(m => m.id === pid))
+    .filter(Boolean) as Match[]
+
+  const parentYs = parents.map(p => {
+    if (cache.has(p.id)) return cache.get(p.id)!
+    const rIdx = prevRounds.findIndex(r => r.matches.some(m => m.id === p.id))
+    const mIdx = prevRounds[rIdx].matches.findIndex(m => m.id === p.id)
+    return getMatchY(rIdx, mIdx, rounds, cache)
+  })
+
+  const y = parentYs.length === 1 ? parentYs[0] : (parentYs[0] + parentYs[1]) / 2
+
+  cache.set(match.id, y)
+  return y
+}
+
+/* ===================== POSITION REGISTRY ===================== */
+type Pos = { x: number; y: number }
+
+function useNodePositions() {
+  const map = useRef(new Map<string, HTMLElement>())
+  const [pos, setPos] = useState<Record<string, Pos>>({})
+
+  useLayoutEffect(() => {
+    const calc = () => {
+      const root = document.querySelector(".bracket-canvas")
+
+      if (!root) return
+      const rr = root.getBoundingClientRect()
+
+      const next: Record<string, Pos> = {}
+      map.current.forEach((el, id) => {
+        const r = el.getBoundingClientRect()
+       next[id] = {
+  x: r.left - rr.left,
+  y: r.top - rr.top,
+}
+
+      })
+      setPos(next)
+    }
+
+    calc()
+    const id = window.setTimeout(calc, 150) // extra pass after layout
+    window.addEventListener("resize", calc)
+    return () => {
+      window.clearTimeout(id)
+      window.removeEventListener("resize", calc)
+    }
+  }, [])
+
+  return {
+    pos,
+    register: (id: string, el: HTMLElement | null) =>
+      el ? map.current.set(id, el) : map.current.delete(id),
+  }
+}
+
+/* ===================== UI NODES ===================== */
+function Header({ title, background, glow }: { title: string; background: string; glow?: string }) {
+  return (
+    <div className="mb-5 py-2 text-center font-extrabold rounded-md text-sm tracking-wide"
+      style={{ backgroundImage: background, color: "#06130a", boxShadow: glow ?? "none" }}>
+      {title}
+    </div>
+  )
+}
+
+function MatchNode({
+  id,
+  teams,
+  winner,
+  register,
+  isGrandFinal,
+  size = "upper",
+}: {
+  id: string
+  teams: (Team | null)[]
+  winner?: string
+  isGrandFinal?: boolean
+  size?: "upper" | "lower"
+  register: (id: string, el: HTMLElement | null) => void
+}) {
+
+  return (
+    <motion.div
+      ref={el => register(id, el)}
+      whileHover={{ scale: 1.03 }}
+      className="rounded-md bg-linear-to-b from-[#2b2e36] to-[#1f2128] border border-white/10 shadow"
+      style={{
+  width: size === "upper" ? UB_CARD_W : LB_CARD_W,
+  height: size === "upper" ? UB_CARD_H : LB_CARD_H,
+}}
+
+    >
+      <div className="p-2 flex flex-col gap-1 justify-center h-full">
+        {teams.map((t, i) => {
+          const win = t?.id === winner
+          const isSingle = teams.length === 1
+          const isGFWinner = isGrandFinal && win
+          return (
+            <div key={i} className={`flex items-center gap-2 px-2 py-1 rounded transition-all ${win || isSingle ? "bg-white/10" : "opacity-75"}`}>
+              <span className="w-1.5 h-5 rounded-full" style={{ background: t?.color ?? "#555" }} />
+              <span className="text-xs truncate flex-1">{t?.name ?? "TBD"}</span>
+              {isGFWinner && (
+                <div className="relative group cursor-pointer flex items-center">
+                  <div className="h-5 w-5 rounded-md bg-[#facc15] shadow-[0_0_12px_rgba(250,204,21,0.9)] flex items-center justify-center text-xs leading-none">🏆</div>
+                </div>
+              )}
+            </div>
+          )
+        })}
+      </div>
+    </motion.div>
+  )
+}
+
+/* ===================== CONNECTORS ===================== */
+type Flow = {
+  from: string
+  to: string
+  color: string             // parent color
+  childColors?: string[]    // child colors, in order
+  straight?: boolean
+  merge?: boolean
+  final?: boolean
+  bracket?: "upper" | "lower"
+  roundIndex?: number
+  isAdvancing?: boolean
+
+  // new: index of the team inside the match (0 = top row), and how many teams in that match
+ fromTeamIndex: number
+fromTeamCount: number
+
+}
+
+function Connectors({ pos, flows }: { pos: Record<string, Pos>; flows: Flow[] }) {
+  const STEP = COL_GAP * 0.85   // ⬅️ LONGER connectors
+  
+  const SILVER = "#9fa6ad"
+
+  const TEAM_ROW_HEIGHT = Math.round(UB_CARD_H * 0.28)
+  const TEAM_ROW_GAP = Math.max(6, Math.round(ROW_GAP * 0.3))
+
+  // Silver spines ONLY for upper bracket
+  const spineBuckets = useMemo(() => {
+    const map = new Map<string, { midX: number; ys: number[] }>()
+
+    flows.forEach(f => {
+      if (f.bracket !== "upper") return
+      const a = pos[f.from]
+      if (!a) return
+
+      const cardTop = a.y
+      const totalHeight =
+        f.fromTeamCount * TEAM_ROW_HEIGHT +
+        (f.fromTeamCount - 1) * TEAM_ROW_GAP
+
+      const firstRowY =
+        cardTop + (UB_CARD_H - totalHeight) / 2 + TEAM_ROW_HEIGHT / 2
+
+      const startY =
+        firstRowY +
+        f.fromTeamIndex * (TEAM_ROW_HEIGHT + TEAM_ROW_GAP)
+
+      const midX = a.x + UB_CARD_W + STEP
+      const key = `upper-${f.roundIndex ?? 0}`
+
+      const bucket = map.get(key)
+     if (bucket) {
+  bucket.ys.push(startY)
+} else {
+  map.set(key, { midX, ys: [startY] })
+}
+
+    })
+
+    return map
+  }, [STEP, TEAM_ROW_GAP, TEAM_ROW_HEIGHT, flows, pos])
+
+  return (
+    <svg className="absolute inset-0 w-full h-full pointer-events-none">
+      {/* UPPER SILVER SPINES */}
+      {Array.from(spineBuckets.values()).map((b, i) => (
+        <path
+          key={i}
+          d={`M ${b.midX} ${Math.min(...b.ys)} L ${b.midX} ${Math.max(...b.ys)}`}
+          stroke={SILVER}
+          strokeWidth={5}
+          strokeLinecap="round"
+        />
+      ))}
+
+      {flows.map((f, i) => {
+        const a = pos[f.from]
+        const b = pos[f.to]
+        if (!a || !b) return null
+
+        const isUpper = f.bracket === "upper"
+        const CARD_W_USE = isUpper ? UB_CARD_W : LB_CARD_W
+        const CARD_H_USE = isUpper ? UB_CARD_H : LB_CARD_H
+
+        // GOLD FINAL
+        if (f.final) {
+  return (
+    <path
+      key={i}
+      d={`M ${a.x} ${a.y} L ${b.x} ${b.y + UB_CARD_H / 2}`}
+
+      stroke={GOLD}
+      strokeWidth={5}
+      strokeLinecap="round"
+      style={{ filter: "drop-shadow(0 0 14px rgba(245,197,66,1))" }}
+    />
+  )
+}
+
+
+        const cardTop = a.y
+        const totalHeight =
+          f.fromTeamCount * TEAM_ROW_HEIGHT +
+          (f.fromTeamCount - 1) * TEAM_ROW_GAP
+
+        const firstRowY =
+          cardTop + (CARD_H_USE - totalHeight) / 2 + TEAM_ROW_HEIGHT / 2
+
+        const startY =
+          firstRowY +
+          f.fromTeamIndex * (TEAM_ROW_HEIGHT + TEAM_ROW_GAP)
+
+        const startX = a.x + CARD_W_USE
+        const midX = startX + STEP
+
+        // UPPER
+        if (isUpper) {
+          return (
+            <path
+              key={i}
+              d={`M ${startX} ${startY}
+                 L ${midX} ${startY}`}
+              stroke={f.color}
+              strokeWidth={3.5}
+              fill="none"
+              strokeLinecap="round"
+            />
+          )
+        }
+
+        // LOWER (long elbow, no spine)
+        return (
+          <path
+            key={i}
+            d={`M ${startX} ${startY} L ${midX} ${startY} L ${midX} ${b.y + CARD_H_USE / 2} L ${b.x} ${b.y + CARD_H_USE / 2}`}
+            stroke={f.color}
+            strokeWidth={3}
+            fill="none"
+            strokeLinecap="round"
+          />
+        )
+      })}
+    </svg>
+  )
+}
+
+
+
+/* ===================== MAIN ===================== */
+export default function BracketDotaStyle({ data }: { data: BracketData3 }) {
+  const { pos, register } = useNodePositions()
+  const HEADER_COLS = Math.max(data.upper.rounds.length, data.lower.rounds.length)
+ const LOWER_START_Y =
+  Math.max(...data.upper.rounds.map(r => r.matches.length)) * STACK +
+  HEADER_HEIGHT +
+  90
+
+
+
+  // small gap so GF shows nearer
+  const FINAL_STAGE_GAP = COL_GAP * 0.6
+  const FINAL_X =
+  HEADER_COLS * UB_CARD_W +
+
+  (HEADER_COLS - 1) * COL_GAP +
+  FINAL_STAGE_GAP +
+  GF_HEADER_WIDTH
+
+
+  const ubWinner = data.upper.rounds.flatMap(r => r.matches).find(m => m.id === "UB_FINAL")
+  const lbWinner = data.lower.rounds.flatMap(r => r.matches).find(m => m.id === "LB_FINAL")
+
+  const mergePos = useMemo(() => {
+    if (!ubWinner || !lbWinner) return null
+    const ub = pos[ubWinner.id]
+    const lb = pos[lbWinner.id]
+    if (!ub || !lb) return null
+    const mergeX = Math.max(ub.x, lb.x) + ELBOW
+    return { x: mergeX, y: (ub.y + lb.y) / 2 }
+  }, [pos, ubWinner, lbWinner])
+
+  const elbowPos = useMemo<Record<string, Pos>>(() => {
+    const res: Record<string, Pos> = {}
+    if (ubWinner) {
+      const ub = pos[ubWinner.id]
+      if (ub) res[`${ubWinner.id}_ELBOW`] = { x: ub.x + ELBOW, y: ub.y }
+    }
+    if (lbWinner) {
+      const lb = pos[lbWinner.id]
+      if (lb) res[`${lbWinner.id}_ELBOW`] = { x: lb.x + ELBOW, y: lb.y }
+    }
+    return res
+  }, [pos, ubWinner, lbWinner])
+
+  const flows = useMemo<Flow[]>(() => {
+    const f: Flow[] = []
+
+    const walk = (rounds: Round[], bracket: "upper" | "lower") => {
+      rounds.forEach((r, i) => {
+        if (r.id.includes("WINNER")) return
+        const next = rounds[i + 1]
+        if (!next) return
+
+        r.matches.forEach((m, idx) => {
+  const nextMatch =
+  bracket === "upper"
+    ? next.matches[Math.floor(idx / 2)]
+    : next.matches[idx]
+
+  const teams = m.teams
+  if (!nextMatch || !teams || teams.length === 0) return
+
+  // map the child match team colors (so spine -> child draws one line per child team)
+  const childColors =
+    nextMatch.teams?.map(id => teamById(data.teams, id)?.color ?? "#666") ?? []
+
+  teams.forEach((teamId, teamIdx) => {
+    const team = teamById(data.teams, teamId)
+    if (!team) return
+
+    const isAdvancing =
+      nextMatch.teams?.includes(teamId) ||
+      m.winner === teamId
+
+    f.push({
+      from: m.id,
+      to: nextMatch.id,
+      color: team.color,
+      childColors,                // <-- IMPORTANT: pass child colors here
+      bracket,
+      roundIndex: i,
+      fromTeamIndex: teamIdx,
+      fromTeamCount: teams.length, // use local `teams`, not `m.teams`
+      isAdvancing,
+    })
+  })
+})
+
+
+      })
+    }
+
+    walk(data.upper.rounds, "upper")
+    walk(data.lower.rounds, "lower")
+
+    // UB and LB winner elbow->merge flows
+if (ubWinner) {
+  const team = teamById(data.teams, ubWinner.winner)
+  if (team) {
+    f.push({
+      from: ubWinner.id,
+      to: `${ubWinner.id}_ELBOW`,
+      color: team.color,
+      straight: true,
+      fromTeamIndex: 0,
+      fromTeamCount: 1,
+    })
+    f.push({
+      from: `${ubWinner.id}_ELBOW`,
+      to: FINAL_MERGE_ID,
+      color: team.color,
+      merge: true,
+      fromTeamIndex: 0,
+      fromTeamCount: 1,
+    })
+  }
+}
+
+if (lbWinner) {
+  const team = teamById(data.teams, lbWinner.winner)
+  if (team) {
+    f.push({
+      from: lbWinner.id,
+      to: `${lbWinner.id}_ELBOW`,
+      color: team.color,
+      straight: true,
+      fromTeamIndex: 0,
+      fromTeamCount: 1,
+    })
+    f.push({
+      from: `${lbWinner.id}_ELBOW`,
+      to: FINAL_MERGE_ID,
+      color: team.color,
+      merge: true,
+      fromTeamIndex: 0,
+      fromTeamCount: 1,
+    })
+  }
+}
+
+// Merge to Grand Final (gold)
+if (ubWinner && lbWinner) {
+  f.push({
+    from: FINAL_MERGE_ID,
+    to: data.grandFinal.id,
+    color: GOLD,
+    final: true,
+    fromTeamIndex: 0,
+    fromTeamCount: 1,
+  })
+}
+
+
+    return f
+  }, [data, ubWinner, lbWinner])
+
+  const gfLeft = FINAL_X - GF_HEADER_WIDTH / 2
+
+  const GF_SCALE = 1.04
+  const gfTop = mergePos
+  ? mergePos.y - (UB_CARD_H * GF_SCALE) / 2
+  : HEADER_HEIGHT - (UB_CARD_H * GF_SCALE) / 2
+
+  // vertical shift applied to lower bracket area (negative = raise closer to upper)
+
+
+
+
+  const navigate = useNavigate()
+
+   return (
+    // outer root (used by useNodePositions for coordinate calculations)
+    <div
+  className="bracket-root relative"
+  style={{
+    width: "100vw",
+    minHeight: "100vh",
+    overflow: "hidden",
+  }}
+>
+
+
+      {/* inner content container: fixed design width, centered */}
+     <div
+  className="bracket-canvas relative"
+  style={{
+    width: "100%",
+    minHeight: "100vh",
+    paddingBottom: 120,
+    overflowX: "hidden",
+  }}
+>
+
+
+
+
+
+
+      <button onClick={() => navigate("/seasons")} className="fixed left-8 top-16 z-60 px-4 py-2 rounded-full text-[11px] font-semibold bg-white/90 text-[#050608] shadow">
+        ← BACK
+      </button>
+
+      <Connectors pos={{ ...pos, ...elbowPos, ...(mergePos ? { [FINAL_MERGE_ID]: mergePos } : {}) }} flows={flows} />
+
+           {/* HEADERS (upper + GF) — both start/end aligned inside the same design width */}
+      {/* HEADERS */}
+<div
+  style={{
+    width: "100%",
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "space-between",
+    paddingLeft: 6,
+    paddingRight: 6,
+  }}
+>
+  {/* Upper Bracket */}
+  <div style={{ width: `calc(100% - ${GF_HEADER_WIDTH}px - 12px)` }}>
+    <Header
+      title="Upper Bracket"
+      background="linear-gradient(90deg, #a3ff12 0%, #f5f542 100%)"
+      glow="0 0 28px rgba(163,255,18,0.45)"
+    />
+  </div>
+
+  {/* Grand Final */}
+  <div style={{ width: GF_HEADER_WIDTH }}>
+    <Header
+      title="Grand Final"
+      background={`linear-gradient(90deg, ${GOLD}, ${GOLD})`}
+      glow="0 0 30px rgba(245,197,66,0.6)"
+    />
+  </div>
+</div>
+{/* UPPER */}
+<div className="flex" style={{ marginLeft: 6 }}>
+  {data.upper.rounds.map((r, ri) => {
+    const cache = new Map<string, number>()
+    return (
+      <div key={r.id} style={{ marginLeft: ri ? COL_GAP : 0 }}>
+        <p className="text-xs text-center mb-3">{r.label}</p>
+        <div style={{ width: UB_CARD_W, height: Math.max(...data.upper.rounds.map(rr => rr.matches.length)) * STACK, position: "relative" }}>
+          {r.matches.map((m, mi) => (
+            <div key={m.id} style={{ position: "absolute", top: getMatchY(ri, mi, data.upper.rounds, cache) }}>
+              <MatchNode
+  id={m.id}
+  teams={m.teams?.map(t => teamById(data.teams, t)) ?? [null, null]}
+  winner={m.winner}
+  register={register}
+  size="upper"
+/>
+
+            </div>
+          ))}
+        </div>
+      </div>
+    )
+  })}
+</div>
+
+{/* LOWER HEADER (aligned exactly under upper) */}
+
+<div
+  style={{
+    width: `calc(100% - ${GF_HEADER_WIDTH}px - 12px)`,
+    marginLeft: 6,
+    marginTop: LOWER_START_Y - HEADER_HEIGHT - 20,
+  }}
+>
+
+
+  <Header
+    title="Lower Bracket"
+    background="linear-gradient(90deg, #ff007f 0%, #ffd84d 100%)"
+    glow="0 0 30px rgba(255,0,127,0.4)"
+  />
+</div>
+<div
+  style={{
+    position: "absolute",
+    left: gfLeft,
+    top: gfTop,
+    transform: `scale(${GF_SCALE})`,
+    transformOrigin: "left center",
+    zIndex: 20,
+  }}
+>
+  <MatchNode
+    id={data.grandFinal.id}
+    isGrandFinal
+    teams={data.grandFinal.teams?.map(t => teamById(data.teams, t)) ?? [null, null]}
+    winner={data.grandFinal.winner}
+    register={register}
+  />
+</div>
+
+
+
+
+        <div className="flex">
+          {data.lower.rounds.map((r, ri) => {
+            const cache = new Map<string, number>()
+            return (
+              <div key={r.id} style={{ marginLeft: ri ? COL_GAP : 0 }}>
+                <p className="text-xs text-center mb-3">{r.label}</p>
+                <div style={{ width: LB_CARD_W, height: Math.max(...data.lower.rounds.map(rr => rr.matches.length)) * LB_STACK,
+ position: "relative" }}>
+                  {r.matches.map((m, mi) => (
+                    <div
+  key={m.id}
+  style={{
+    position: "absolute",
+    top: LOWER_START_Y + getMatchY(ri, mi, data.lower.rounds, cache, LB_STACK),
+
+  }}
+>
+
+                      <MatchNode
+  id={m.id}
+  teams={m.teams?.map(t => teamById(data.teams, t)) ?? [null, null]}
+  winner={m.winner}
+  register={register}
+  size="lower"
+/>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )
+          })}
+        </div>
+      </div>
+
+     
+    </div>
+  )
+}

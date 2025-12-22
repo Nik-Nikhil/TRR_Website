@@ -1,5 +1,5 @@
 // src/data/mockTournaments.ts
-import type { Tournament, Team, Match } from "../../types";
+import type { Tournament, Team, Match } from "../types";
 
 const teams: Team[] = [
   { id: "1", name: "Ancient Guardians", shortName: "AG", region: "EU" },

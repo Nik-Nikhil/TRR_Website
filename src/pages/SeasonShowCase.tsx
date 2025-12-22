@@ -7,7 +7,7 @@ import {
   season3Teams,
   season4Teams,
   season5Teams,
-} from "./data/teams";
+} from "../data/teams";
 import Season6Standings from "./Seasons/Season6Standing";
 import SeasonsBackgroundEffect from "./Seasons/Effect";
 
@@ -96,7 +96,6 @@ const rowVariants: Variants = {
   hover: { scale: 1.003, translateY: -2 },
 };
 /* medal variants (used) - kept neutral */
-const medalVariants: Variants = { hover: { scale: 1.0 } };
 
 function buildOrdered<T extends SeasonItem>(
   list: T[],
@@ -189,7 +188,8 @@ function SeasonCard<T extends SeasonItem>({
             {/* center buttons: show only Playoffs for Season 1 */}
             <CenteredStageButtonsInline
               season={seasonNumber}
-              showGroup={seasonNumber !== 1}
+              showGroup={seasonNumber !== 1 && seasonNumber !== 3}
+
               showPlayoff={true}
             />
           </div>
@@ -229,14 +229,16 @@ function SeasonCard<T extends SeasonItem>({
                       const isDQ = dqMap.has(team.id);
 
                       const rowBg = isChampion
-                        ? 'bg-[rgba(250,204,21,0.12)]'
-                        : isRunnerUp
-                        ? 'bg-[rgba(148,163,184,0.06)]'
-                        : isThird
-                        ? 'bg-[rgba(248,153,102,0.06)]'
-                        : isDQ
-                        ? 'bg-[#5a1717]'
-                        : 'bg-[#020617]';
+  ? 'bg-[linear-gradient(90deg,rgba(250,204,21,0.22),rgba(250,204,21,0.06))]'
+  : isRunnerUp
+  ? 'bg-[linear-gradient(90deg,rgba(226,232,240,0.18),rgba(148,163,184,0.05))]'
+  : isThird
+? 'bg-[linear-gradient(90deg,rgba(205,127,50,0.22),rgba(138,75,31,0.06))]'
+
+  : isDQ
+  ? 'bg-[#5a1717]'
+  : 'bg-[#020617]';
+
 
                       const rowTextClass = isDQ ? 'text-white' : 'text-gray-200';
 
@@ -249,7 +251,16 @@ function SeasonCard<T extends SeasonItem>({
                           exit={{ opacity: 0, y: 6 }}
                           variants={rowVariants}
                           whileHover="hover"
-                          className={`group relative h-12 border-b border-white/3 transition-transform duration-150 text-[0.86rem] ${rowBg} ${rowTextClass}`}
+                          className={`
+  group relative h-12 border-b border-white/3
+  transition-all duration-200 text-[0.86rem]
+  ${rowBg} ${rowTextClass}
+
+  ${isChampion ? 'hover:shadow-[0_0_45px_rgba(250,204,21,0.75)]' : ''}
+  ${isRunnerUp ? 'hover:shadow-[0_0_40px_rgba(226,232,240,0.65)]' : ''}
+  ${isThird ? 'hover:shadow-[0_0_40px_rgba(234,179,8,0.6)]' : ''}
+`}
+
                           style={(!isChampion && !isRunnerUp && !isThird && !isDQ && team.logoColor) ? { boxShadow: `0 0 16px ${team.logoColor}40` } : undefined}
                         >
                           <td className="pl-6">
@@ -268,12 +279,76 @@ function SeasonCard<T extends SeasonItem>({
                           </td>
 
                           <td className="text-center">
-                            <motion.div whileHover="hover" variants={medalVariants} className="inline-flex h-9 w-9 items-center justify-center rounded-full pointer-events-none">
-                              {isChampion && <div className="h-9 w-9 rounded-full bg-[#facc15] shadow-[0_0_18px_rgba(250,204,21,0.9)] flex items-center justify-center">🏆</div>}
-                              {isRunnerUp && <div className="h-9 w-9 rounded-full bg-[#9ca3af] shadow-[0_0_12px_rgba(148,163,184,0.6)] flex items-center justify-center">🥈</div>}
-                              {isThird && <div className="h-9 w-9 rounded-full bg-[#d97706] shadow-[0_0_12px_rgba(234,179,8,0.7)] flex items-center justify-center">🥉</div>}
-                              {isDQ && <div className="h-9 w-9 rounded-full bg-[#a62a2a] flex items-center justify-center">DQ</div>}
-                            </motion.div>
+                            <motion.div
+  whileHover={{
+    scale: 1.15,
+  }}
+  transition={{ type: "spring", stiffness: 260, damping: 14 }}
+  className="inline-flex h-9 w-9 items-center justify-center rounded-full"
+>
+  {/* 🥇 GOLD */}
+  {isChampion && (
+    <div
+      className="
+        h-9 w-9 rounded-full flex items-center justify-center
+        bg-[#facc15]
+        shadow-[0_0_28px_rgba(250,204,21,1),0_0_60px_rgba(250,204,21,0.85)]
+        hover:shadow-[0_0_36px_rgba(250,204,21,1),0_0_90px_rgba(250,204,21,0.9)]
+        transition-shadow duration-200
+      "
+    >
+      🏆
+    </div>
+  )}
+
+  {/* 🥈 SILVER */}
+  {isRunnerUp && (
+    <div
+      className="
+        h-9 w-9 rounded-full flex items-center justify-center
+        bg-[#9ca3af]
+        shadow-[0_0_20px_rgba(226,232,240,0.8),0_0_48px_rgba(148,163,184,0.6)]
+        hover:shadow-[0_0_28px_rgba(226,232,240,0.95),0_0_72px_rgba(148,163,184,0.8)]
+        transition-shadow duration-200
+      "
+    >
+      🥈
+    </div>
+  )}
+
+  {/* 🥉 BRONZE */}
+  {isThird && (
+    <div
+      className="
+        h-9 w-9 rounded-full flex items-center justify-center
+        bg-[#d97706]
+        shadow-[0_0_20px_rgba(234,179,8,0.7),0_0_46px_rgba(180,83,9,0.6)]
+        hover:shadow-[0_0_30px_rgba(234,179,8,0.9),0_0_80px_rgba(180,83,9,0.8)]
+        transition-shadow duration-200
+      "
+    >
+      🥉
+    </div>
+  )}
+  {/* 🚫 DQ */}
+{isDQ && (
+  <div
+    className="
+      h-9 w-9 rounded-full flex items-center justify-center
+      bg-[#7f1d1d]
+      text-white font-bold text-xs
+      shadow-[0_0_20px_rgba(127,29,29,0.9)]
+      hover:shadow-[0_0_30px_rgba(127,29,29,1)]
+      transition-shadow duration-200
+    "
+    title="Disqualified due to smurfing"
+  >
+    DQ
+  </div>
+)}
+
+</motion.div>
+
                           </td>
 
                           <td className="text-right pr-4"><span className="tabular-nums text-sm">{team.averageMMR ?? '-'}</span></td>
@@ -332,7 +407,7 @@ function SeasonCard<T extends SeasonItem>({
 function Season1Standings() {
   return SeasonCard<SeasonItem>({
     list: teams as unknown as SeasonItem[],
-    topIds: ['godspeed', 'r3ciprocal', 'banner'],
+    topIds: ['godspeed', 'reciprocal', 'banner'],
     placementOrderAfterTop3: ['helm', 'bazinga', 'billy', 'nabeel'],
     dqIds: ['kolly'],
     seasonNumber: 1,
@@ -468,7 +543,7 @@ export default function SeasonShowCase() {
   return (
     /* NOTE: page scroll is intentionally not used for the seasons area;
        the table gets its own scrollbar so the rounded bottom stays visible. */
-    <main className="seasons-page relative pt-4 pb-8">
+    <main className="seasons-page relative pt-4 pb-8 ">
       <SeasonsBackgroundEffect />
 
       <div className="relative z-10 pt-0 pb-8">

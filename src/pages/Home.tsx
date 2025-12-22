@@ -1,6 +1,6 @@
 import { Link } from "react-router-dom";
 import TrophyCanvas from "../components/3d/TrophyCanvas";
-import { primaryTournament } from "./data/mockTournaments";
+import { primaryTournament } from "../data/mockTournaments";
 
 export default function Home() {
   const t = primaryTournament;
@@ -16,9 +16,7 @@ export default function Home() {
       <div className="relative z-10 w-full max-w-6xl">
         {/* Top title */}
         <header className="mb-10 text-center lg:text-left">
-          <p className="text-[10px] md:text-xs tracking-[0.35em] uppercase text-zinc-400 mb-2">
-            The Roshan Rumble
-          </p>
+          
           <h1 className="text-3xl md:text-4xl lg:text-5xl font-semibold tracking-tight text-transparent bg-clip-text bg-linear-to-b from-white via-zinc-200 to-zinc-500 pt-2 pb-2 pr-2">
             {t.descriptionContent}
           </h1>
@@ -60,7 +58,7 @@ export default function Home() {
                   </span>
                 </div>
                 <p className="text-[0.8rem] md:text-[0.85rem] text-zinc-200">
-                  Match schedules, lobbies, and vetoes will be posted on the TRR
+                  Match schedules, lobbies, and auction details will be posted on the TRR
                   Discord and updated live.
                 </p>
               </div>

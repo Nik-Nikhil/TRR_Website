@@ -2,7 +2,7 @@
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import RotatingPlayerCard from "./RotatingPlayerCard";
-import { players, type Player } from "../data/players";
+import { players, type Player } from "../../data/players";
 
 const SNAP_CYCLE = 10000; // 10 seconds
 

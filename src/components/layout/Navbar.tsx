@@ -9,6 +9,13 @@ export default function Navbar() {
   const [mobileNavOpen, setMobileNavOpen] = useState(false);
   const closeTimeout = useRef<number | null>(null);
 
+const roshanBaseRef = useRef<HTMLAudioElement>(null)
+const roshanLayerRef = useRef<HTMLAudioElement>(null)
+const roshanCooldownRef = useRef(false)
+
+
+
+
   const handleLeave = () => {
     if (closeTimeout.current !== null) {
       window.clearTimeout(closeTimeout.current);
@@ -28,7 +35,7 @@ export default function Navbar() {
   }, []);
 
   return (
-    <nav
+    <nav  
       className="fixed inset-x-0 top-0 z-50 w-full max-h-[10vh] backdrop-blur-[18px] border-b border-[rgba(192,192,192,0.25)] shadow-[0_18px_45px_rgba(0,0,0,0.7)]"
       style={{
         background:
@@ -45,21 +52,63 @@ export default function Navbar() {
 >
 
             {/* Logo + glow wrapper */}
-            <span className="relative w-12 h-12 md:w-15 md:h-15 flex items-center justify-center">
-              <span
-                className="absolute inset-0 -z-10 rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none"
-                style={{
-                  background:
-                    "radial-gradient(circle, #D16500 0%, #AF1D5D 80%)",
-                  filter: "blur(8px)",
-                }}
-              />
-              <img
-                src="./src/assets/roshanIcon.png"
-                className="w-10 h-10 md:w-12 md:h-12 relative z-10"
-                alt="Roshan Icon"
-              />
-            </span>
+<span
+  className="relative w-12 h-12 md:w-15 md:h-15 flex items-center justify-center cursor-pointer"
+  onClick={(e) => {
+    e.preventDefault()
+    e.stopPropagation()
+
+    // ⏳ cooldown (2.5s)
+    if (roshanCooldownRef.current) return
+    roshanCooldownRef.current = true
+    setTimeout(() => {
+      roshanCooldownRef.current = false
+    }, 2500)
+
+    // 🎲 random roar
+    const sounds = [roshanBaseRef.current, roshanLayerRef.current]
+    const sound = sounds[Math.floor(Math.random() * sounds.length)]
+    if (!sound) return
+
+    sound.currentTime = 0
+    sound.volume = 0.85
+    sound.play()
+  }}
+>
+  {/* 🔊 Local Roshan sounds */}
+  <audio ref={roshanBaseRef} src="/audio/roshan_roar_1.mp3" preload="auto" />
+  <audio ref={roshanLayerRef} src="/audio/roshan_roar_2.mp3" preload="auto" />
+
+  {/* 🐲 Roshan Icon */}
+  <img
+    src="https://imagizer.imageshack.com/img924/886/ujUP42.png"
+    alt="Roshan Icon"
+    className="
+      w-10 h-10 md:w-12 md:h-12
+      object-contain
+      scale-[1.35]
+
+      brightness-[1.05]
+      contrast-[1.25]
+      saturate-[0.9]
+
+      drop-shadow-[0_0_4px_rgba(0,0,0,0.7)]
+
+      /* ✨ glow ONLY on icon hover */
+      transition-transform
+      duration-150 ease-out
+      hover:scale-[1.45]
+      hover:drop-shadow-[0_0_10px_rgba(255,255,255,0.6)]
+    "
+  />
+</span>
+
+
+
+
+            
+
+
 
             {/* === Text with SEASONS glow + moving light effect === */}
             <div className="flex flex-col">

@@ -1,6 +1,6 @@
 // src/pages/TeamDetail.tsx
 import { Link, useParams, useNavigate } from "react-router-dom";
-import { getTeamById } from "./data/teams";
+import { getTeamById } from "../data/teams";
 import { Crown } from "lucide-react";
 import { dbNick } from "../../Dotabuff";
 

@@ -1,6 +1,6 @@
 // src/pages/Players/PlayerDetailPage.tsx
 import { useParams, useNavigate } from "react-router-dom";
-import { getPlayerById } from "../data/players";
+import { getPlayerById } from "../../data/players";
 import { FaSteam } from "react-icons/fa";
 
 // Reuse the same metallic/glossy circle styles as PlayerSummaryCard
@@ -321,23 +321,26 @@ export default function PlayerDetailPage() {
                     </div>
                     {player.seasonBadges.length > 0 ? (
                       <div className="mt-2 flex flex-wrap gap-2">
-                        {player.seasonBadges.slice(0, 6).map((s) => (
-                          <div key={s} className="relative group">
-                            <div
-                              className={`relative flex items-center justify-center w-7 h-7 rounded-full border ${
-                                seasonMedalStyles[s] ??
-                                "bg-linear-to-br from-slate-400 to-slate-700 border-slate-200 shadow-[0_0_18px_rgba(148,163,184,0.9)]"
-                              } after:content-[''] after:absolute after:inset-0 after:bg-[radial-gradient(circle_at_25%_25%,rgba(255,255,255,0.45),rgba(255,255,255,0)_55%)] after:pointer-events-none`}
-                            >
-                              <span className="text-[0.6rem] font-bold tracking-tight text-white drop-shadow-[0_1px_2px_rgba(0,0,0,0.7)]">
-                                S{s}
-                              </span>
+                        {player.seasonBadges.slice(0, 6).map((s) => {
+                          const seasonNumber = typeof s === "number" ? s : Number(s);
+                          return (
+                            <div key={s} className="relative group">
+                              <div
+                                className={`relative flex items-center justify-center w-7 h-7 rounded-full border ${
+                                  seasonMedalStyles[seasonNumber] ??
+                                  "bg-linear-to-br from-slate-400 to-slate-700 border-slate-200 shadow-[0_0_18px_rgba(148,163,184,0.9)]"
+                                } after:content-[''] after:absolute after:inset-0 after:bg-[radial-gradient(circle_at_25%_25%,rgba(255,255,255,0.45),rgba(255,255,255,0)_55%)] after:pointer-events-none`}
+                              >
+                                <span className="text-[0.6rem] font-bold tracking-tight text-white drop-shadow-[0_1px_2px_rgba(0,0,0,0.7)]">
+                                  S{s}
+                                </span>
+                              </div>
+                              <div className="pointer-events-none absolute -bottom-5 left-1/2 -translate-x-1/2 rounded-full bg-slate-900/95 px-2.5 py-0.5 text-[0.55rem] font-semibold tracking-[0.12em] uppercase text-slate-100 opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap">
+                                Season {s}
+                              </div>
                             </div>
-                            <div className="pointer-events-none absolute -bottom-5 left-1/2 -translate-x-1/2 rounded-full bg-slate-900/95 px-2.5 py-0.5 text-[0.55rem] font-semibold tracking-[0.12em] uppercase text-slate-100 opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap">
-                              Season {s}
-                            </div>
-                          </div>
-                        ))}
+                          );
+                        })}
                       </div>
                     ) : (
                       <div className="text-sm text-slate-400 mt-1">
