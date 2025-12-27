@@ -68,10 +68,7 @@ const teamById = (teams: Team[] | undefined, id?: string | null) =>
 
 /* ===================== POSITION RESOLVER ===================== */
 function getMatchY(
-  roundIndex: number,
-  matchIndex: number,
-  rounds: Round[],
-  cache: Map<string, number>,
+roundIndex: number, matchIndex: number, rounds: Round[], cache: Map<string, number>, LB_STACK: number,
  
 )
 : number {
@@ -358,6 +355,10 @@ export default function BracketDotaStyle({ data }: { data: BracketData3 }) {
   const HEADER_COLS = Math.max(data.upper.rounds.length, data.lower.rounds.length)
  // bring lower bracket up closer to upper and allow easier alignment with upper columns
 const LOWER_START_Y = STACK * 0.8
+// compute widths to horizontally align lower's rightmost column under upper's rightmost
+const upperTotalWidth = HEADER_COLS * UB_CARD_W + (HEADER_COLS - 1) * COL_GAP
+const lowerTotalWidth = data.lower.rounds.length * LB_CARD_W + (data.lower.rounds.length - 1) * COL_GAP
+const lowerMarginLeft = Math.max(6, upperTotalWidth - lowerTotalWidth + 6) // keeps a little left padding
 
 
 
@@ -594,23 +595,23 @@ if (ubWinner && lbWinner) {
   })}
 </div>
 
-{/* LOWER HEADER (aligned exactly under upper) */}
 
+
+{/* LOWER HEADER (aligned under upper) */}
 <div
   style={{
     width: `calc(100% - ${GF_HEADER_WIDTH}px - 12px)`,
-    marginLeft: 6,
+    marginLeft: lowerMarginLeft,
     marginTop: LOWER_START_Y - HEADER_HEIGHT - 20,
   }}
 >
-
-
   <Header
     title="Lower Bracket"
     background="linear-gradient(90deg, #ff007f 0%, #ffd84d 100%)"
     glow="0 0 30px rgba(255,0,127,0.4)"
   />
 </div>
+
 <div
   style={{
     position: "absolute",

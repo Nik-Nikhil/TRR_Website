@@ -1,20 +1,61 @@
 // src/components/layout/Navbar.tsx
-import { Link, useLocation } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import { useState, useRef, useEffect, type ReactNode } from "react";
 import { Menu, Medal, UsersRound, ScrollText, House } from "lucide-react";
 import { AnimatePresence, LayoutGroup, motion } from "framer-motion";
 
 export default function Navbar() {
   const { pathname } = useLocation();
+  const navigate = useNavigate();
   const [mobileNavOpen, setMobileNavOpen] = useState(false);
   const closeTimeout = useRef<number | null>(null);
+  const audioRef = useRef<HTMLAudioElement[]>([]);
+  const lastPlayedIndexRef = useRef<number>(-1);
 
-const roshanBaseRef = useRef<HTMLAudioElement>(null)
-const roshanLayerRef = useRef<HTMLAudioElement>(null)
-const roshanCooldownRef = useRef(false)
+  // Initialize audio
+  useEffect(() => {
+    const audioPaths = [
+      '/audio/roar1.mp3',
+      '/audio/roar2.mp3'
+    ];
+    
+    // Load all audio files
+    audioPaths.forEach((path) => {
+      const audio = new Audio(path);
+      audio.volume = 0.5;
+      audio.preload = 'auto';
+      audioRef.current.push(audio);
+    });
+    
+    return () => {
+      audioRef.current.forEach(audio => {
+        audio.pause();
+      });
+      audioRef.current = [];
+    };
+  }, []);
 
-
-
+  const handleRoshanClick = (e: React.MouseEvent) => {
+    e.preventDefault();
+    
+    // Play random sound
+    if (audioRef.current.length > 0) {
+      // Get random index different from last played
+      let randomIndex;
+      do {
+        randomIndex = Math.floor(Math.random() * audioRef.current.length);
+      } while (randomIndex === lastPlayedIndexRef.current && audioRef.current.length > 1);
+      
+      lastPlayedIndexRef.current = randomIndex;
+      
+      const audio = audioRef.current[randomIndex];
+      audio.currentTime = 0;
+      audio.play().catch(() => {});
+    }
+    
+    // Navigate to home
+    navigate('/');
+  };
 
   const handleLeave = () => {
     if (closeTimeout.current !== null) {
@@ -35,99 +76,61 @@ const roshanCooldownRef = useRef(false)
   }, []);
 
   return (
-    <nav  
-      className="fixed inset-x-0 top-0 z-50 w-full max-h-[10vh] backdrop-blur-[18px] border-b border-[rgba(192,192,192,0.25)] shadow-[0_18px_45px_rgba(0,0,0,0.7)]"
+    <nav
+      className="fixed inset-x-0 top-0 z-50 w-full backdrop-blur-[18px] border-b border-[rgba(192,192,192,0.25)] shadow-[0_18px_45px_rgba(0,0,0,0.7)]"
       style={{
         background:
           "radial-gradient(circle at 0% 0%, rgba(192,192,192,0.12), transparent 60%), radial-gradient(circle at 100% 100%, rgba(136,144,150,0.10), transparent 60%), rgba(5,7,10,0.92)",
       }}
     >
-      {/* a bit closer to left edge */}
-      <div className="w-full mx-0 pl-3 pr-3 sm:pl-6 sm:pr-4 md:pl-10 md:pr-6">
-        <div className="h-[60px] md:h-[72px] grid grid-cols-[auto_1fr] items-center w-full">
+      <div className="w-full mx-auto px-3 sm:px-4 md:px-6 lg:px-10 max-w-[1920px]">
+        <div className="h-14 sm:h-[60px] md:h-[68px] lg:h-[72px] flex items-center justify-between gap-4">
           {/* Brand / Left side */}
-          <Link
-            to="/"
-            className="flex items-center gap-2 sm:gap-3 no-underline group relative"
+          <button
+            onClick={handleRoshanClick}
+            className="flex items-center gap-1 sm:gap-1.5 md:gap-2 lg:gap-3 no-underline group relative border-none bg-transparent cursor-pointer p-0"
           >
             {/* Logo + glow wrapper */}
-<span
-  className="relative w-12 h-12 md:w-15 md:h-15 flex items-center justify-center cursor-pointer"
-  onClick={(e) => {
-    e.preventDefault()
-    e.stopPropagation()
+            <span className="relative w-8 h-8 sm:w-9 sm:h-9 md:w-10 md:h-10 lg:w-12 lg:h-12 xl:w-14 xl:h-14 flex items-center justify-center shrink-0">
+              <span
+                className="absolute inset-0 -z-10 rounded-full opacity-0 group-hover:opacity-100 group-active:opacity-100 transition-opacity duration-300 pointer-events-none"
+                style={{
+                  background:
+                    "radial-gradient(circle, #D16500 0%, #AF1D5D 80%)",
+                  filter: "blur(8px)",
+                }}
+              />
+              <img
+                src="./src/assets/roshanIcon.png"
+                className="w-full h-full relative z-10 transition-transform duration-200 group-hover:scale-110 group-active:scale-95"
+                alt="Roshan Icon"
+              />
+            </span>
 
-    // ⏳ cooldown (2.5s)
-    if (roshanCooldownRef.current) return
-    roshanCooldownRef.current = true
-    setTimeout(() => {
-      roshanCooldownRef.current = false
-    }, 2500)
-
-    // 🎲 random roar
-    const sounds = [roshanBaseRef.current, roshanLayerRef.current]
-    const sound = sounds[Math.floor(Math.random() * sounds.length)]
-    if (!sound) return
-
-    sound.currentTime = 0
-    sound.volume = 0.85
-    sound.play()
-  }}
->
-  {/* 🔊 Local Roshan sounds */}
-  <audio ref={roshanBaseRef} src="/audio/roshan_roar_1.mp3" preload="auto" />
-  <audio ref={roshanLayerRef} src="/audio/roshan_roar_2.mp3" preload="auto" />
-
-  {/* 🐲 Roshan Icon */}
-  <img
-    src="https://imagizer.imageshack.com/img924/886/ujUP42.png"
-    alt="Roshan Icon"
-    className="
-      w-10 h-10 md:w-12 md:h-12
-      object-contain
-      scale-[1.35]
-
-      brightness-[1.05]
-      contrast-[1.25]
-      saturate-[0.9]
-
-      drop-shadow-[0_0_4px_rgba(0,0,0,0.7)]
-
-      /* ✨ glow ONLY on icon hover */
-      transition-transform
-      duration-150 ease-out
-      hover:scale-[1.45]
-      hover:drop-shadow-[0_0_10px_rgba(255,255,255,0.6)]
-    "
-  />
-</span>
-
-
-
-
-            
-
-
-
-            {/* === Text with SEASONS glow + moving light effect === */}
-            <div className="flex flex-col">
+            {/* Text with SEASONS glow + moving light effect */}
+            <div className="flex flex-col min-w-0">
               <h1 className="relative inline-block leading-none">
                 <span
                   className="
-        text-[1.1rem] md:text-[1.35rem] font-extrabold tracking-tight text-transparent bg-clip-text
-        bg-linear-to-r from-zinc-200 via-slate-100 to-white
-        transition-all duration-400
-        group-hover:bg-linear-to-r group-hover:from-[#D16500] group-hover:via-[#E4472F] group-hover:to-[#AF1D5D]
-      "
+                    text-[0.9rem] sm:text-[1rem] md:text-[1.2rem] lg:text-[1.35rem] 
+                    font-extrabold tracking-tight text-transparent bg-clip-text
+                    bg-linear-to-r from-zinc-200 via-slate-100 to-white
+                    transition-all duration-400
+                    group-hover:bg-linear-to-r group-hover:from-[#D16500] group-hover:via-[#E4472F] group-hover:to-[#AF1D5D]
+                    whitespace-nowrap
+                  "
                 >
                   The Roshan Rumble
                 </span>
 
                 {/* soft duplicate glow under text */}
                 <span
-                  className="pointer-events-none absolute inset-0 text-[1.1rem] md:text-[1.35rem] font-extrabold tracking-tight blur-lg opacity-30
-             transition-all duration-400
-             text-zinc-300 group-hover:text-[#E4472F]"
+                  className="pointer-events-none absolute inset-0 
+                    text-[0.9rem] sm:text-[1rem] md:text-[1.2rem] lg:text-[1.35rem]
+                    font-extrabold tracking-tight blur-lg opacity-30
+                    transition-all duration-400
+                    text-zinc-300 group-hover:text-[#E4472F]
+                    whitespace-nowrap"
                   style={{ transform: "translate(-1px, -1px)" }}
                 >
                   The Roshan Rumble
@@ -141,50 +144,50 @@ const roshanCooldownRef = useRef(false)
                     repeat: Infinity,
                     ease: "linear",
                   }}
-                  className="pointer-events-none absolute -top-3 -left-12 w-28 h-20 bg-linear-to-r from-transparent via-zinc-300 to-transparent blur-2xl"
+                  className="pointer-events-none absolute -top-3 -left-12 w-20 sm:w-24 md:w-28 h-16 sm:h-18 md:h-20 bg-linear-to-r from-transparent via-zinc-300 to-transparent blur-2xl"
                 />
               </h1>
             </div>
-          </Link>
+          </button>
 
-          {/* Hamburger for mobile */}
-          <div className="flex md:hidden justify-end w-full">
-            <button
-              className="p-2 rounded focus:outline-none focus:ring-2 focus:ring-[#D16500]"
-              onClick={() => setMobileNavOpen((v) => !v)}
-              aria-label="Open navigation menu"
-            >
-              <Menu className="w-7 h-7 text-gray-200" />
-            </button>
-          </div>
-
-          {/* Middle + Right Sections */}
+          {/* Desktop Navigation */}
           <LayoutGroup id="navbar">
-            <div className="hidden md:flex items-center justify-end gap-[2.4rem] w-full ">
+            <div className="hidden md:flex items-center gap-2 md:gap-3 lg:gap-5 xl:gap-8">
               <NavItem
                 to="/"
-                icon={<House className="w-[18px] h-[18px]" />}
+                icon={<House className="w-3.5 h-3.5 md:w-4 md:h-4 lg:w-[18px] lg:h-[18px]" />}
                 label="Home"
                 active={pathname === "/"}
               />
               <NavItem
                 to="/rules"
-                icon={<ScrollText className="w-[18px] h-[18px]" />}
+                icon={<ScrollText className="w-3.5 h-3.5 md:w-4 md:h-4 lg:w-[18px] lg:h-[18px]" />}
                 label="Rules"
                 active={pathname.startsWith("/rules")}
               />
               <NavItem
                 to="/seasons"
-                icon={<Medal className="w-[18px] h-[18px]" />}
+                icon={<Medal className="w-3.5 h-3.5 md:w-4 md:h-4 lg:w-[18px] lg:h-[18px]" />}
                 label="Standings"
                 active={pathname.startsWith("/seasons")}
               />
               <NavItem
                 to="/players"
-                icon={<UsersRound className="w-[18px] h-[18px]" />}
+                icon={<UsersRound className="w-3.5 h-3.5 md:w-4 md:h-4 lg:w-[18px] lg:h-[18px]" />}
                 label="Players"
                 active={pathname.startsWith("/players")}
               />
+            </div>
+
+            {/* Hamburger for mobile */}
+            <div className="flex md:hidden">
+              <button
+                className="p-1.5 sm:p-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#D16500] hover:bg-white/5 transition-colors"
+                onClick={() => setMobileNavOpen((v) => !v)}
+                aria-label="Open navigation menu"
+              >
+                <Menu className="w-5 h-5 sm:w-6 sm:h-6 text-gray-200" />
+              </button>
             </div>
 
             {/* Mobile nav menu */}
@@ -195,32 +198,40 @@ const roshanCooldownRef = useRef(false)
                   animate={{ opacity: 1, y: 0 }}
                   exit={{ opacity: 0, y: -10 }}
                   transition={{ duration: 0.18, ease: "easeOut" }}
-                  className="absolute top-[60px] right-4 w-max bg-[rgba(5,7,10,0.98)] border border-[rgba(192,192,192,0.18)] shadow-lg z-999 flex flex-col md:hidden rounded-xl px-2 py-2"
+                  className="absolute top-14 sm:top-[60px] right-3 sm:right-4 w-[200px] sm:w-[220px] 
+                    bg-[rgba(5,7,10,0.98)] border border-[rgba(192,192,192,0.18)] 
+                    shadow-[0_8px_32px_rgba(0,0,0,0.8)] backdrop-blur-xl
+                    z-999 flex flex-col md:hidden rounded-xl px-2 py-2"
                   onMouseLeave={handleLeave}
+                  onClick={() => setMobileNavOpen(false)}
                 >
                   <NavItem
                     to="/"
                     icon={<House className="w-[18px] h-[18px]" />}
                     label="Home"
                     active={pathname === "/"}
+                    mobile
                   />
                   <NavItem
                     to="/rules"
                     icon={<ScrollText className="w-[18px] h-[18px]" />}
                     label="Rules"
                     active={pathname.startsWith("/rules")}
+                    mobile
                   />
                   <NavItem
                     to="/seasons"
                     icon={<Medal className="w-[18px] h-[18px]" />}
                     label="Standings"
                     active={pathname.startsWith("/seasons")}
+                    mobile
                   />
                   <NavItem
                     to="/players"
                     icon={<UsersRound className="w-[18px] h-[18px]" />}
                     label="Players"
                     active={pathname.startsWith("/players")}
+                    mobile
                   />
                 </motion.div>
               )}
@@ -239,19 +250,44 @@ type NavItemProps = {
   icon: ReactNode;
   label: string;
   active: boolean;
+  mobile?: boolean;
 };
 
-function NavItem({ to, icon, label, active }: NavItemProps) {
+function NavItem({ to, icon, label, active, mobile = false }: NavItemProps) {
+  if (mobile) {
+    return (
+      <Link
+        to={to}
+        className="relative flex items-center gap-3 px-3 py-2.5 text-sm text-gray-200 
+          hover:bg-white/5 rounded-lg transition-all duration-200 group"
+      >
+        {active && (
+          <div className="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-8 bg-linear-to-b from-[#D16500] to-[#AF1D5D] rounded-r-full" />
+        )}
+        
+        <span className={`transition-colors ${active ? 'text-[#E4472F]' : ''}`}>
+          {icon}
+        </span>
+        
+        <span className={`font-medium tracking-wide ${active ? 'text-white' : ''}`}>
+          {label}
+        </span>
+      </Link>
+    );
+  }
+
   return (
     <Link
       to={to}
-      className="relative inline-flex items-center gap-[0.35rem] px-3 py-1.5 text-[0.8rem] uppercase tracking-[0.18em] text-gray-200 opacity-90 hover:opacity-100 transition-colors duration-150 group"
+      className="relative inline-flex items-center gap-[0.3rem] md:gap-[0.35rem] px-1.5 md:px-2 lg:px-3 py-1 md:py-1.5 
+        text-[0.65rem] md:text-[0.7rem] lg:text-[0.75rem] xl:text-[0.8rem] uppercase tracking-[0.12em] md:tracking-[0.15em] lg:tracking-[0.18em] 
+        text-gray-200 opacity-90 hover:opacity-100 transition-all duration-200 group"
     >
       {active && <ActiveHighlight />}
 
       {icon}
 
-      <span className="relative">
+      <span className="relative whitespace-nowrap">
         <span
           className="absolute inset-0 -z-10 scale-95 opacity-0 rounded-lg
                      bg-linear-to-r from-[#f5f5f5]/18 via-[#d4d4d4]/14 to-[#9ca3af]/18
@@ -259,7 +295,7 @@ function NavItem({ to, icon, label, active }: NavItemProps) {
                      group-hover:opacity-100 group-hover:scale-100 group-hover:blur-xl"
         />
         {label}
-        <span className="pointer-events-none absolute left-0 right-0 -bottom-1.5 block h-0.5 rounded-full bg-linear-to-r from-[#f5f5f5] to-[#a3a3a3] origin-left scale-x-0 transition-transform duration-200 ease-out group-hover:scale-x-100" />
+        <span className="pointer-events-none absolute left-0 right-0 -bottom-1 lg:-bottom-1.5 block h-0.5 rounded-full bg-linear-to-r from-[#f5f5f5] to-[#a3a3a3] origin-left scale-x-0 transition-transform duration-200 ease-out group-hover:scale-x-100" />
       </span>
     </Link>
   );

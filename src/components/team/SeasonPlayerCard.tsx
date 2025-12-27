@@ -5,7 +5,7 @@ type ActiveRole = "MID" | "CARRY" | "CAPTAIN";
 interface PlayerCardProps {
   nickname: string;
   lane: string;
-  realName?: string;      // optional: "Nikhil Singh"
+  realName?: string;      
   currentRank: string;
   peakRank: string;
   bio: string;

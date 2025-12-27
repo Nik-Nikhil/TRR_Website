@@ -34,7 +34,6 @@ export default function Footer() {
         border-t border-[#2a2c30]/60
         bg-[#111216]
         relative overflow-hidden
-        max-h-[10vh]
       "
     >
       <div
@@ -44,43 +43,110 @@ export default function Footer() {
         "
       />
 
-      {/* ⬇ SAME WIDTH AS STANDINGS TABLE */}
-      <div className="relative z-10 w-full max-w-[880px] mx-auto px-6 py-4 flex flex-col items-center gap-2 text-center">
-        <div className="flex items-center justify-center gap-7">
+      {/* Responsive container */}
+      <div className="relative z-10 w-full max-w-[880px] mx-auto px-3 sm:px-4 md:px-6 py-3 sm:py-3.5 md:py-4 flex flex-col items-center gap-2 sm:gap-2.5 md:gap-3 text-center">
+        {/* Social Media Icons */}
+        <div className="flex items-center justify-center gap-4 sm:gap-5 md:gap-6 lg:gap-7 flex-wrap">
           {[
             {
               to: "https://www.instagram.com/theroshanrumble/",
-              icon: <InstagramIcon size={22} />,
+              icon: <InstagramIcon size={18} />,
+              iconSm: <InstagramIcon size={20} />,
+              iconMd: <InstagramIcon size={22} />,
+              label: "Instagram"
             },
             {
               to: "https://www.youtube.com/@TheRoshanRumble",
               icon: (
                 <img
                   src="../src/assets/youtubeIcon.png"
-                  width={27}
-                  height={27}
+                  width={22}
+                  height={22}
+                  alt="YouTube"
+                  className="block sm:hidden"
                 />
               ),
+              iconSm: (
+                <img
+                  src="../src/assets/youtubeIcon.png"
+                  width={24}
+                  height={24}
+                  alt="YouTube"
+                  className="hidden sm:block md:hidden"
+                />
+              ),
+              iconMd: (
+                <img
+                  src="../src/assets/youtubeIcon.png"
+                  width={27}
+                  height={27}
+                  alt="YouTube"
+                  className="hidden md:block"
+                />
+              ),
+              label: "YouTube"
             },
             {
               to: "https://www.twitch.tv/theroshanrumble",
               icon: (
                 <img
                   src="../src/assets/twitchIcon.png"
-                  width={22}
-                  height={22}
+                  width={18}
+                  height={18}
+                  alt="Twitch"
+                  className="block sm:hidden"
                 />
               ),
+              iconSm: (
+                <img
+                  src="../src/assets/twitchIcon.png"
+                  width={20}
+                  height={20}
+                  alt="Twitch"
+                  className="hidden sm:block md:hidden"
+                />
+              ),
+              iconMd: (
+                <img
+                  src="../src/assets/twitchIcon.png"
+                  width={22}
+                  height={22}
+                  alt="Twitch"
+                  className="hidden md:block"
+                />
+              ),
+              label: "Twitch"
             },
             {
               to: "https://discord.gg/jreebd9Rzc",
               icon: (
                 <img
                   src="../src/assets/discordIcon.png"
-                  width={27}
-                  height={27}
+                  width={22}
+                  height={22}
+                  alt="Discord"
+                  className="block sm:hidden"
                 />
               ),
+              iconSm: (
+                <img
+                  src="../src/assets/discordIcon.png"
+                  width={24}
+                  height={24}
+                  alt="Discord"
+                  className="hidden sm:block md:hidden"
+                />
+              ),
+              iconMd: (
+                <img
+                  src="../src/assets/discordIcon.png"
+                  width={27}
+                  height={27}
+                  alt="Discord"
+                  className="hidden md:block"
+                />
+              ),
+              label: "Discord"
             },
           ].map((item, index) => (
             <a
@@ -88,19 +154,24 @@ export default function Footer() {
               href={item.to}
               target="_blank"
               rel="noreferrer"
+              aria-label={item.label}
               className="
                 text-[#cfcfcf]/80
-                transition duration-300
+                transition-all duration-300
                 hover:text-white hover:opacity-100
-                opacity-70 hover:scale-[1.1]
+                opacity-70 hover:scale-110 active:scale-95
+                inline-flex items-center justify-center
               "
             >
               {item.icon}
+              {item.iconSm}
+              {item.iconMd}
             </a>
           ))}
         </div>
 
-        <p className="text-[0.72rem] text-[#bdbdbd]/80 uppercase tracking-[0.16em]">
+        {/* Copyright Text */}
+        <p className="text-[0.6rem] sm:text-[0.65rem] md:text-[0.72rem] text-[#bdbdbd]/80 uppercase tracking-[0.12em] sm:tracking-[0.14em] md:tracking-[0.16em] leading-relaxed px-2">
           © {year}, The Roshan Rumble — All Rights Reserved.
         </p>
       </div>
