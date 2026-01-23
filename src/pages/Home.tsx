@@ -27,28 +27,24 @@ export default function Home() {
     {
       title: "Season 6 Comming Soon",
       description: "Registration will start soon",
-      icon: "🎮",
       color: "from-green-500/20 to-emerald-500/20",
       border: "border-green-500/30"
     },
     {
       title: "Prize Pool ₹40,000",
       description: "Last Season Prizepool",
-      icon: "💰",
       color: "from-yellow-500/20 to-amber-500/20",
       border: "border-yellow-500/30"
     },
     {
       title: "New Season Starting Soon",
       description: "Registerion will start soon",
-      icon: "🚀",
       color: "from-blue-500/20 to-cyan-500/20",
       border: "border-blue-500/30"
     },
     {
       title: "Join Discord Community",
       description: "Connect with 300+ active Dota 2 players",
-      icon: "🤝",
       color: "from-purple-500/20 to-pink-500/20",
       border: "border-purple-500/30"
     }
@@ -167,7 +163,9 @@ export default function Home() {
                       <div className="relative z-10 h-full flex flex-col">
                         <div className="flex items-center space-x-2 mb-2 justify-center">
                           <div className="w-4 h-4 bg-blue-500/30 rounded-lg flex items-center justify-center">
-                            <span className="text-blue-300 text-xs">📢</span>
+                            <svg className="w-3 h-3 text-blue-300" fill="currentColor" viewBox="0 0 20 20">
+                              <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
+                            </svg>
                           </div>
                           <h3 className="text-xs font-bold text-blue-100">ANNOUNCEMENTS</h3>
                         </div>
@@ -184,7 +182,9 @@ export default function Home() {
                               className={`p-1.5 rounded-lg bg-gradient-to-br ${announcements[currentAnnouncement].color} border ${announcements[currentAnnouncement].border} mb-1`}
                             >
                               <div className="flex items-center space-x-1 mb-1">
-                                <span className="text-xs">{announcements[currentAnnouncement].icon}</span>
+                                <svg className="w-3 h-3 text-yellow-300" fill="currentColor" viewBox="0 0 20 20">
+                                  <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+                                </svg>
                                 <h4 className="font-bold text-white text-xs">{announcements[currentAnnouncement].title}</h4>
                               </div>
                               <p className="text-gray-300 text-xs">{announcements[currentAnnouncement].description}</p>
@@ -222,7 +222,9 @@ export default function Home() {
                       <div className="relative z-10 h-full flex flex-col">
                         <div className="flex items-center space-x-2 mb-2 justify-center">
                           <div className="w-4 h-4 bg-red-500/30 rounded-lg flex items-center justify-center">
-                            <span className="text-red-300 text-xs">📺</span>
+                            <svg className="w-3 h-3 text-red-300" fill="currentColor" viewBox="0 0 20 20">
+                              <path fillRule="evenodd" d="M4 3a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V5a2 2 0 00-2-2H4zm3 2h6v4H7V5zm8 8v2h1v-2h-1zm-2-2H7v4h6v-4z" clipRule="evenodd" />
+                            </svg>
                           </div>
                           <h3 className="text-xs font-bold text-red-100">WATCH</h3>
                         </div>
@@ -300,7 +302,9 @@ export default function Home() {
                       <div className="relative z-10 h-full flex flex-col justify-center">
                         <div className="flex items-center space-x-2 mb-1 justify-center">
                           <div className="w-4 h-4 bg-purple-500/30 rounded-lg flex items-center justify-center">
-                            <span className="text-purple-300 text-xs">📝</span>
+                            <svg className="w-3 h-3 text-purple-300" fill="currentColor" viewBox="0 0 20 20">
+                              <path fillRule="evenodd" d="M6 2a2 2 0 00-2 2v12a2 2 0 002 2h8a2 2 0 002-2V4a2 2 0 00-2-2H6zm1 2a1 1 0 000 2h6a1 1 0 100-2H7zm6 7a1 1 0 011 1v3a1 1 0 11-2 0v-3a1 1 0 011-1zm-3 3a1 1 0 100 2h.01a1 1 0 100-2H10zm-4 1a1 1 0 011-1h.01a1 1 0 110 2H7a1 1 0 01-1-1zm1-4a1 1 0 100 2h.01a1 1 0 100-2H7zm2 0a1 1 0 100 2h.01a1 1 0 100-2H9zm2 0a1 1 0 100 2h.01a1 1 0 100-2H11z" clipRule="evenodd" />
+                            </svg>
                           </div>
                           <h3 className="text-xs font-bold text-purple-100">REGISTRATION</h3>
                         </div>
@@ -335,7 +339,9 @@ export default function Home() {
                       <div className="relative z-10 h-full flex flex-col justify-center">
                         <div className="flex items-center space-x-2 mb-1 justify-center">
                           <div className="w-4 h-4 bg-amber-500/30 rounded-lg flex items-center justify-center">
-                            <span className="text-amber-300 text-xs">🏆</span>
+                            <svg className="w-3 h-3 text-amber-300" fill="currentColor" viewBox="0 0 20 20">
+                              <path fillRule="evenodd" d="M6.267 3.455a3.066 3.066 0 001.745-.723 3.066 3.066 0 013.976 0 3.066 3.066 0 001.745.723 3.066 3.066 0 012.812 2.812c.051.643.304 1.254.723 1.745a3.066 3.066 0 010 3.976 3.066 3.066 0 00-.723 1.745 3.066 3.066 0 01-2.812 2.812 3.066 3.066 0 00-1.745.723 3.066 3.066 0 01-3.976 0 3.066 3.066 0 00-1.745-.723 3.066 3.066 0 01-2.812-2.812 3.066 3.066 0 00-.723-1.745 3.066 3.066 0 010-3.976 3.066 3.066 0 00.723-1.745 3.066 3.066 0 012.812-2.812zm7.44 5.252a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+                            </svg>
                           </div>
                           <h3 className="text-xs font-bold text-amber-100">CHAMPION</h3>
                         </div>
@@ -361,7 +367,9 @@ export default function Home() {
                       <div className="relative z-10 h-full flex flex-col justify-center">
                         <div className="flex items-center space-x-2 mb-1 justify-center">
                           <div className="w-4 h-4 bg-green-500/30 rounded-lg flex items-center justify-center">
-                            <span className="text-green-300 text-xs">⚙️</span>
+                            <svg className="w-3 h-3 text-green-300" fill="currentColor" viewBox="0 0 20 20">
+                              <path fillRule="evenodd" d="M11.49 3.17c-.38-1.56-2.6-1.56-2.98 0a1.532 1.532 0 01-2.286.948c-1.372-.836-2.942.734-2.106 2.106.54.886.061 2.042-.947 2.287-1.561.379-1.561 2.6 0 2.978a1.532 1.532 0 01.947 2.287c-.836 1.372.734 2.942 2.106 2.106a1.532 1.532 0 012.287.947c.379 1.561 2.6 1.561 2.978 0a1.533 1.533 0 012.287-.947c1.372.836 2.942-.734 2.106-2.106a1.533 1.533 0 01.947-2.287c1.561-.379 1.561-2.6 0-2.978a1.532 1.532 0 01-.947-2.287c.836-1.372-.734-2.942-2.106-2.106a1.532 1.532 0 01-2.287-.947zM10 13a3 3 0 100-6 3 3 0 000 6z" clipRule="evenodd" />
+                            </svg>
                           </div>
                           <h3 className="text-xs font-bold text-green-100">ADMIN PANEL</h3>
                         </div>
