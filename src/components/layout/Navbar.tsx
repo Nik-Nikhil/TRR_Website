@@ -123,7 +123,7 @@ export default function Navbar() {
                 }}
               />
               <img
-                src="./src/assets/roshanIcon.png"
+                src="/assets/roshanIcon.png"
                 className="w-full h-full relative z-10 transition-transform duration-200 group-hover:scale-110 group-active:scale-95"
                 alt="Roshan Icon"
               />

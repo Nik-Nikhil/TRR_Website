@@ -43,7 +43,7 @@ export default function Footer() {
       to: "https://www.youtube.com/@TheRoshanRumble",
       icon: (
         <img
-          src="/src/assets/youtubeIcon.png"
+          src="/assets/youtubeIcon.png"
           alt="YouTube"
           className="w-5 h-5 sm:w-5.5 sm:h-5.5 md:w-6 md:h-6"
         />
@@ -54,7 +54,7 @@ export default function Footer() {
       to: "https://www.twitch.tv/theroshanrumble",
       icon: (
         <img
-          src="/src/assets/twitchIcon.png"
+          src="/assets/twitchIcon.png"
           alt="Twitch"
           className="w-4 h-4 sm:w-4.5 sm:h-4.5 md:w-5 md:h-5"
         />
@@ -65,7 +65,7 @@ export default function Footer() {
       to: "https://discord.gg/jreebd9Rzc",
       icon: (
         <img
-          src="/src/assets/discordIcon.png"
+          src="/assets/discordIcon.png"
           alt="Discord"
           className="w-5 h-5 sm:w-5.5 sm:h-5.5 md:w-6 md:h-6"
         />
