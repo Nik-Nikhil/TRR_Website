@@ -1,6 +1,21 @@
+import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 
 export default function RulesPage() {
+  const [expandedIndex, setExpandedIndex] = useState<number | null>(null);
+  const [currentBg, setCurrentBg] = useState(0);
+
+  // Change background every 30 seconds
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setCurrentBg((prev) => (prev === 0 ? 1 : 0));
+    }, 30000); // 30 seconds
+
+    return () => clearInterval(interval);
+  }, []);
+
+  const backgrounds = ['/Roshan1.jpg', '/Roshan2.webp'];
+
   const sections = [
     {
       title: "Participation",
@@ -37,7 +52,7 @@ export default function RulesPage() {
         "Teams must notify admins at least 2 days in advance if a stand-in is needed.",
         "Last-minute stand-ins are not guaranteed to match the original player's MMR.",
         "Teams may suggest stand-ins from the official stand-in list and eliminated players, but final approval lies with admins.",
-        "Stand-ins must be within 300 MMR (higher or lower) of the replaced player’s registered auction MMR.",
+        "Stand-ins must be within 300 MMR (higher or lower) of the replaced player's registered auction MMR.",
         "If a higher MMR stand-in (beyond 300) is suggested, opposing captain approval is required in presence of both captains and an admin.",
         "Unauthorized stand-ins will result in an automatic forfeit.",
         "Only the MMR submitted during registration will be considered — not the player's updated MMR.",
@@ -82,7 +97,7 @@ export default function RulesPage() {
         "15 minutes late → Level 2 Penalty: 70-second draft penalty.",
         "20 minutes late → Level 3 Penalty: 110-second draft penalty.",
         "30 minutes late → Forfeit: Opposing team is awarded a default win.",
-        "“GG” should only be typed when the game is about to end and your team intends to forfeit or conclude the match. Misuse may result in penalties or the game being awarded to opponents.",
+        '"GG" should only be typed when the game is about to end and your team intends to forfeit or conclude the match. Misuse may result in penalties or the game being awarded to opponents.',
       ],
       extras: [
         "Teams will get a 15-minute rest between matches unless otherwise informed.",
@@ -127,7 +142,7 @@ export default function RulesPage() {
         "If a player is found guilty of smurfing, they will be banned from all current and future TRR events with no exceptions.",
       ],
       extras: [
-        "For genuine players only, and after verification, TRR may adjust a player’s listed MMR for balancing using previous TRR seasons, consistency, and verified performance.",
+        "For genuine players only, and after verification, TRR may adjust a player's listed MMR for balancing using previous TRR seasons, consistency, and verified performance.",
         "During registration, every player must submit their correct highest MMR. Providing false or manipulated information is misconduct.",
       ],
     },
@@ -149,315 +164,130 @@ export default function RulesPage() {
         "Forfeiting to give advantage to another team may lead to bans from future TRR seasons.",
       ],
     },
-  ];
+    {
+  title: "Profile Standards",
+  items: [
+    "NSFW, obscene, sexual, or inappropriate usernames are strictly not allowed.",
+    "Profile pictures must not contain nudity, sexual content, offensive symbols, or explicit imagery.",
+    "Any profile found violating this rule may be asked to change immediately.",
+    "Failure to update an inappropriate name or profile picture can result in warnings, match disqualification, or removal from the tournament.",
+    "Repeated or intentional violations may lead to bans from current and future TRR seasons.",
+  ],
+},
 
-  const numberColors = [
-    "radial-gradient(circle at 30% 20%, #ffefad, #facc15)",
-    "radial-gradient(circle at 30% 20%, #ffefad, #facc15)",
-    "radial-gradient(circle at 30% 20%, #ffefad, #facc15)",
-    "radial-gradient(circle at 30% 20%, #ffefad, #facc15)",
-    "radial-gradient(circle at 30% 20%, #ffefad, #facc15)",
-    "radial-gradient(circle at 30% 20%, #ffefad, #facc15)",
-    "radial-gradient(circle at 30% 20%, #ffefad, #facc15)",
-    "radial-gradient(circle at 30% 20%, #ffefad, #facc15)",
-    "radial-gradient(circle at 30% 20%, #ffefad, #facc15)",
-    "radial-gradient(circle at 30% 20%, #ffefad, #facc15)",
-    "radial-gradient(circle at 30% 20%, #ffefad, #facc15)",
-    "radial-gradient(circle at 30% 20%, #ffefad, #facc15)",
   ];
 
   return (
-    <main className="relative min-h-screen overflow-hidden">
-      {/* background glows matching navbar theme */}
-      <div className="pointer-events-none absolute inset-0 -z-10">
-        <div
-          style={{
-            position: "absolute",
-            inset: 0,
-            background:
-              "radial-gradient(circle at 0% 0%, rgba(192,192,192,0.10), transparent 55%)",
-            opacity: 0.7,
-          }}
-        />
-        <div
-          style={{
-            position: "absolute",
-            inset: 0,
-            background:
-              "radial-gradient(circle at 100% 100%, rgba(136,144,150,0.18), transparent 60%)",
-            opacity: 0.5,
-          }}
-        />
-        {/* subtle animated light sweep behind the scroll */}
-        <motion.div
-          style={{
-            position: "absolute",
-            top: "20%",
-            left: "-20%",
-            width: "60%",
-            height: "35%",
-            background:
-              "linear-gradient(120deg, rgba(248,250,252,0.12), transparent)",
-            filter: "blur(28px)",
-          }}
-          animate={{ x: ["0%", "60%", "0%"], opacity: [0, 0.8, 0] }}
-          transition={{ duration: 9, repeat: Infinity, ease: "easeInOut" }}
-        />
+    <>
+      {/* Animated Background Images - Fixed to cover entire page */}
+      <div className="fixed inset-0 z-0">
+        {backgrounds.map((bg, index) => (
+          <div
+            key={bg}
+            className="absolute inset-0 bg-cover bg-center bg-no-repeat transition-opacity duration-1500 ease-in-out"
+            style={{
+              backgroundImage: `url(${bg})`,
+              opacity: index === currentBg ? 1 : 0,
+            }}
+          />
+        ))}
       </div>
 
-      <div
-        style={{
-          width: "100%",
-          maxWidth: "1000px",
-          margin: "0 auto",
-          padding: "3rem 1.25rem 4rem",
-          color: "#e5e5e5",
-          position: "relative",
-          zIndex: 1,
-        }}
+      {/* Dark overlay for readability - Fixed to cover entire page */}
+      <div className="fixed inset-0 bg-black/70 z-[1]" />
+
+      <main 
+        className="relative min-h-screen py-12 sm:py-16 md:py-20 px-3 sm:px-4 md:px-6 lg:px-8 overflow-hidden z-10"
       >
-        {/* Scroll-like container */}
-        <div
-          style={{
-            position: "relative",
-            borderRadius: "28px",
-            border: "1px solid rgba(209,213,219,0.28)",
-            background:
-              // same family as navbar: dark base + soft silvers
-              "radial-gradient(circle at 0% 0%, rgba(192,192,192,0.16), transparent 60%), radial-gradient(circle at 100% 100%, rgba(148,163,184,0.14), transparent 60%), rgba(5,7,10,0.96)",
-            boxShadow:
-              "0 28px 80px rgba(0,0,0,0.9), 0 0 0 1px rgba(15,23,42,0.8)",
-            padding: "2.6rem 1.8rem 3.4rem",
-            overflow: "hidden",
-          }}
+      <div className="max-w-4xl mx-auto">
+        {/* Header */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="text-center mb-8 sm:mb-10 md:mb-12"
         >
-          {/* inner top glow */}
-          <div
-            style={{
-              position: "absolute",
-              inset: "-40% -40% auto -40%",
-              background:
-                "radial-gradient(circle at 20% 0%, rgba(250,250,210,0.16), transparent 60%)",
-              opacity: 0.65,
-              pointerEvents: "none",
-            }}
-          />
-
-          {/* animated outline glow */}
-          <motion.div
-            style={{
-              position: "absolute",
-              inset: 0,
-              borderRadius: "28px",
-              border: "1px solid rgba(250,250,250,0.06)",
-              boxShadow: "0 0 35px rgba(250,250,250,0.08)",
-              pointerEvents: "none",
-            }}
-            animate={{ opacity: [0.2, 0.6, 0.2] }}
-            transition={{ duration: 5, repeat: Infinity, ease: "easeInOut" }}
-          />
-
-          <motion.h1
-            initial={{ opacity: 0, y: 18 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6 }}
-            style={{
-              fontSize: "clamp(2rem, 4vw, 2.6rem)",
-              fontWeight: 800,
-              marginBottom: "0.4rem",
-              backgroundImage:
-                "linear-gradient(90deg, #fafafa, #e5d39f, #d0b46a)",
-              WebkitBackgroundClip: "text",
-              color: "transparent",
-              textAlign: "center",
-            }}
-          >
-            The Roshan Rumble
-          </motion.h1>
-
-          <p
-            style={{
-              textAlign: "center",
-              marginBottom: "0.4rem",
-              fontSize: "clamp(1.1rem, 2.4vw, 1.5rem)",
-              letterSpacing: "0.22em",
-              textTransform: "uppercase",
-              color: "#fbbf24",
-            }}
-          >
+          <h1 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-extrabold mb-2 bg-gradient-to-r from-zinc-200 via-yellow-200 to-zinc-300 bg-clip-text text-transparent px-2">
             Tournament Rules
+          </h1>
+          <p className="text-base sm:text-lg md:text-xl lg:text-2xl font-bold text-zinc-300 mb-2 px-2">
+            Playing in the event means you agree to all rules listed below.
           </p>
+        </motion.div>
 
-          <p
-            style={{
-              textAlign: "center",
-              marginBottom: "2.3rem",
-              fontSize: "0.9rem",
-              color: "#9ca3af",
-            }}
-          >
-            Please read carefully. Playing in the event means you agree to all
-            rules listed below.
-          </p>
-
-          {sections.map((sec, index) => (
-            <motion.section
-              key={sec.title}
-              initial={{ opacity: 0, y: 14 }}
+        {/* Rules List - Single Column */}
+        <div className="flex flex-col gap-2 sm:gap-2.5 md:gap-3">
+          {sections.map((section, index) => (
+            <motion.div
+              key={index}
+              initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.4, delay: index * 0.05 }}
-              style={{
-                marginBottom: index === sections.length - 1 ? 0 : "1.9rem",
-                position: "relative",
-                zIndex: 1,
-                padding: "1.1rem 1.1rem 1.1rem",
-                borderRadius: "18px",
-                background:
-                  "linear-gradient(120deg, rgba(10,12,18,0.9), rgba(12,18,26,0.98))",
-                border: "1px solid rgba(148,163,184,0.45)",
-                boxShadow: "0 18px 45px rgba(0,0,0,0.65)",
-              }}
+              transition={{ delay: index * 0.05 }}
+              onMouseEnter={() => setExpandedIndex(index)}
+              onMouseLeave={() => setExpandedIndex(null)}
+              onClick={() => setExpandedIndex(expandedIndex === index ? null : index)}
+              className={`relative rounded-xl sm:rounded-2xl border overflow-hidden transition-all duration-500 cursor-pointer backdrop-blur-sm ${
+                expandedIndex === index
+                  ? 'border-yellow-400/50 bg-black/60 shadow-[0_0_30px_rgba(250,204,21,0.25)] sm:shadow-[0_0_40px_rgba(250,204,21,0.3)] scale-[1.01] sm:scale-[1.02]'
+                  : 'border-zinc-700/50 bg-black/40 hover:border-zinc-600/50 hover:bg-black/50'
+              }`}
             >
-              {/* Header with numbered badge */}
-              <div
-                style={{
-                  display: "flex",
-                  alignItems: "center",
-                  gap: "0.9rem",
-                  marginBottom: "0.8rem",
-                }}
-              >
+              {/* Header - Always Visible with Golden Numbers and Silver Text */}
+              <div className="p-3 sm:p-4 md:p-5 flex items-center gap-2 sm:gap-3">
                 <div
-                  style={{
-                    width: "42px",
-                    height: "42px",
-                    borderRadius: "999px",
-                    background: numberColors[index % numberColors.length],
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "center",
-                    fontWeight: 800,
-                    fontSize: "1.1rem",
-                    color: "#111827",
-                    boxShadow:
-                      "0 0 18px rgba(250, 204, 21, 0.25), 0 10px 26px rgba(0,0,0,0.9)",
-                    flexShrink: 0,
-                  }}
+                  className={`w-8 h-8 sm:w-10 sm:h-10 md:w-12 md:h-12 rounded-full flex items-center justify-center font-bold text-xs sm:text-sm md:text-base flex-shrink-0 transition-all duration-500 bg-gradient-to-br from-yellow-400 to-yellow-600 text-zinc-900 ${
+                    expandedIndex === index
+                      ? 'shadow-[0_0_15px_rgba(250,204,21,0.4)] sm:shadow-[0_0_20px_rgba(250,204,21,0.5)] scale-105 sm:scale-110'
+                      : 'shadow-[0_0_10px_rgba(250,204,21,0.25)] sm:shadow-[0_0_12px_rgba(250,204,21,0.3)]'
+                  }`}
                 >
-                  {String(index + 1).padStart(2, "0")}
+                  {String(index + 1).padStart(2, '0')}
                 </div>
-
-                <div style={{ display: "flex", flexDirection: "column" }}>
-                  <h2
-                    style={{
-                      fontSize: "clamp(1.05rem, 2.1vw, 1.35rem)",
-                      fontWeight: 700,
-                      color: "#fbbf24",
-                      letterSpacing: "0.04em",
-                      textTransform: "uppercase",
-                    }}
-                  >
-                    {sec.title}
-                  </h2>
-                  <span
-                    style={{
-                      marginTop: "0.15rem",
-                      height: "2px",
-                      width: "60px",
-                      borderRadius: "999px",
-                      background:
-                        "linear-gradient(90deg, rgba(251,191,36,0.9), transparent)",
-                    }}
-                  />
-                </div>
+                <h2
+                  className={`text-sm sm:text-base md:text-lg font-bold uppercase tracking-wide transition-all duration-500 text-zinc-200 ${
+                    expandedIndex === index ? 'scale-[1.02] sm:scale-105 text-zinc-100' : ''
+                  }`}
+                >
+                  {section.title}
+                </h2>
               </div>
 
-              {/* Rules list */}
-              <ul
-                style={{
-                  marginLeft: "0.2rem",
-                  paddingLeft: 0,
-                  marginTop: "0.35rem",
-                  listStyle: "none",
-                  display: "flex",
-                  flexDirection: "column",
-                  gap: "0.35rem",
-                }}
-              >
-                {sec.items.map((item, i) => (
-                  <li
-                    key={i}
-                    style={{
-                      display: "flex",
-                      alignItems: "flex-start",
-                      gap: "0.55rem",
-                      fontSize: "0.95rem",
-                      color: "#e5e7eb",
-                      lineHeight: 1.45,
-                    }}
-                  >
-                    <span
-                      style={{
-                        marginTop: "0.45rem",
-                        width: "7px",
-                        height: "7px",
-                        borderRadius: "999px",
-                        flexShrink: 0,
-                        background: "rgba(252,211,77,0.95)",
-                        boxShadow:
-                          "0 0 0 3px rgba(251,191,36,0.15), 0 0 12px rgba(252,211,77,0.6)",
-                      }}
-                    />
-                    <span style={{ flex: 1 }}>{item}</span>
-                  </li>
-                ))}
-              </ul>
-
-              {sec.extras && (
-                <ul
-                  style={{
-                    marginLeft: "0.2rem",
-                    paddingLeft: 0,
-                    marginTop: "0.7rem",
-                    listStyle: "none",
-                    display: "flex",
-                    flexDirection: "column",
-                    gap: "0.3rem",
-                    fontSize: "0.88rem",
-                    color: "#d1d5db",
-                    opacity: 0.9,
-                    fontStyle: "italic",
-                  }}
+              {/* Expanded Content */}
+              {expandedIndex === index && (
+                <motion.div
+                  initial={{ height: 0, opacity: 0 }}
+                  animate={{ height: 'auto', opacity: 1 }}
+                  exit={{ height: 0, opacity: 0 }}
+                  transition={{ duration: 0.3 }}
+                  className="overflow-hidden"
                 >
-                  {sec.extras.map((e, i) => (
-                    <li
-                      key={i}
-                      style={{
-                        display: "flex",
-                        alignItems: "flex-start",
-                        gap: "0.5rem",
-                      }}
-                    >
-                      <span
-                        style={{
-                          marginTop: "0.45rem",
-                          width: "6px",
-                          height: "6px",
-                          borderRadius: "2px",
-                          flexShrink: 0,
-                          border: "1px solid rgba(156,163,175,0.9)",
-                          boxShadow: "0 0 8px rgba(148,163,184,0.5)",
-                        }}
-                      />
-                      <span style={{ flex: 1 }}>{e}</span>
-                    </li>
-                  ))}
-                </ul>
+                  <div className="px-3 sm:px-4 md:px-5 pb-4 sm:pb-5 pt-1 sm:pt-2">
+                    <ul className="space-y-1.5 sm:space-y-2">
+                      {section.items.map((item, i) => (
+                        <li key={i} className="flex items-start gap-1.5 sm:gap-2 text-xs sm:text-sm text-zinc-300">
+                          <span className="mt-1.5 sm:mt-2 w-1 sm:w-1.5 h-1 sm:h-1.5 rounded-full bg-yellow-400 flex-shrink-0" />
+                          <span className="leading-relaxed">{item}</span>
+                        </li>
+                      ))}
+                    </ul>
+
+                    {section.extras && (
+                      <ul className="mt-3 sm:mt-4 space-y-1.5 sm:space-y-2 pl-2 sm:pl-3 border-l-2 border-zinc-600">
+                        {section.extras.map((extra, i) => (
+                          <li key={i} className="flex items-start gap-1.5 sm:gap-2 text-[0.65rem] sm:text-xs text-zinc-400 italic">
+                            <span className="mt-1 sm:mt-1.5 w-0.5 sm:w-1 h-0.5 sm:h-1 rounded-sm border border-zinc-500 flex-shrink-0" />
+                            <span className="leading-relaxed">{extra}</span>
+                          </li>
+                        ))}
+                      </ul>
+                    )}
+                  </div>
+                </motion.div>
               )}
-            </motion.section>
+            </motion.div>
           ))}
         </div>
       </div>
     </main>
+    </>
   );
 }

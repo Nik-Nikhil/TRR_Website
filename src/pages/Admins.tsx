@@ -2,6 +2,7 @@ import { useRef, useEffect, useState } from "react";
 import { Canvas } from "@react-three/fiber";
 import { Stars, Sparkles } from "@react-three/drei";
 import { motion } from "framer-motion";
+import { useNavigate } from "react-router-dom";
 
 /* ================= THEME ================= */
 const VIVID_VIOLET = "#8A2BE2";
@@ -40,7 +41,7 @@ const founder: Member = {
   role: "Founder",
   tag: "Vision & Direction",
   bio: "Founder of TRR. Oversees tournaments, systems, and structure.",
-  image: "/avatars/admins/Reyusk.jpg",
+  image: "/avatars/admins/reyuk.png",
   nameColor: "#FF4500",
 };
 
@@ -420,6 +421,7 @@ export default function AdminsPage() {
   const [isEyeHovered, setIsEyeHovered] = useState(false);
   const timeoutRef = useRef<number | null>(null);
   const audioRef = useRef<HTMLAudioElement | null>(null);
+  const navigate = useNavigate();
 
   const currentEye = EYE_PHASES[currentEyePhase];
 
@@ -450,8 +452,16 @@ export default function AdminsPage() {
 
     setCurrentEyePhase(prev => {
       const next = prev + 1;
-      // Loop back to 0 after reaching the last phase
-      if (next >= EYE_PHASES.length) return 0;
+      
+      // If reaching the final phase, navigate to Super Admin Dashboard
+      if (next >= EYE_PHASES.length) {
+        // Add a small delay for dramatic effect
+        setTimeout(() => {
+          navigate('/super-admin');
+        }, 1000);
+        return prev; // Keep current phase during transition
+      }
+      
       return next;
     });
   };

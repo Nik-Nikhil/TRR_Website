@@ -2,7 +2,7 @@
 import { Link, useParams, useNavigate } from "react-router-dom";
 import { getTeamById } from "../data/teams";
 import { Crown } from "lucide-react";
-import { dbNick } from "../../Dotabuff";
+import { dbNick } from "../data/dotabuffsteam";
 
 export default function TeamDetail() {
   const { teamId } = useParams<{ teamId: string }>();

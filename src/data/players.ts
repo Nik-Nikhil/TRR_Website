@@ -30,8 +30,10 @@ export interface Player {
   
   currentMedalLabel: string;
   currentMedalId: string;
+  currentMMR?: number;
   peakMedalLabel: string;
   peakMedalId: string;
+  peakMMR?: number;
 
   bio: string;
 
@@ -40,6 +42,16 @@ export interface Player {
   dotabuffUrl: string;
   favoriteHeroes: PlayerHero[];
 
+  // Teammate ratings (1-10 scale)
+  behaviorScore?: {
+    mechanicalSkill?: number;  // Individual skill/mechanics
+    teamwork?: number;         // Cooperation and synergy with team
+    communication?: number;    // Communication skills
+    consistency?: number;      // Performance reliability and stability
+  };
+  
+  // Special badges
+  specialBadge?: "contributor" | "founder" | "mvp";
   
   
 }
@@ -53,13 +65,12 @@ export const players: Player[] = [
     seasonBadges: ["s3"],
     hasWonCup: false,
 
-    
-    
-
-    currentMedalLabel: "Divine 3",
-    currentMedalId: "",
-    peakMedalLabel: "",
-    peakMedalId: "",
+    currentMedalLabel: "Divine 2",
+    currentMedalId: "Divine_2",
+    currentMMR: 4850,
+    peakMedalLabel: "Divine 3",
+    peakMedalId: "Divine_3",
+    peakMMR: 5200,
 
     bio: "",
     roles: [{ iconSrc: "/icons/pos_4.png", label: "Soft Support" }, { iconSrc: "/icons/pos_5.png", label: "Hard Support" },],
@@ -67,9 +78,9 @@ export const players: Player[] = [
     steamUrl: "https://steamcommunity.com/profiles/76561198299655062",
     dotabuffUrl: "https://www.dotabuff.com/players/339389334",
     favoriteHeroes: [
-    { videoSrc: "https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/zuus.webm", name: "Zeus" },
-    { videoSrc: "https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/skywrath_mage.webm", name: "Skywrath Mage" },
-    { videoSrc: "https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/viper.webm", name: "Viper" },
+    { videoSrc: "/Video/npc_dota_hero_zuus.webm", name: "Zeus" },
+    { videoSrc: "/Video/npc_dota_hero_skywrath_mage.webm", name: "Skywrath Mage" },
+    { videoSrc: "/Video/npc_dota_hero_viper.webm", name: "Viper" },
   ],
   },
   {
@@ -80,13 +91,12 @@ export const players: Player[] = [
     seasonBadges: [],
     hasWonCup: false,
 
-    
-    
-
-    currentMedalLabel: "Legend 3",
-    currentMedalId: "Legend_3",
-    peakMedalLabel: "Ancient 3",
-    peakMedalId: "Ancient_3",
+    currentMedalLabel: "Legend 2",
+    currentMedalId: "Legend_2",
+    currentMMR: 3250,
+    peakMedalLabel: "Ancient 1",
+    peakMedalId: "Ancient_1",
+    peakMMR: 3890,
 
     bio: "I plan everything… except my skills.",
     roles: [{ iconSrc: "/icons/pos_4.png", label: "Soft Support" }, { iconSrc: "/icons/pos_5.png", label: "Hard Support" },],
@@ -94,9 +104,9 @@ export const players: Player[] = [
     steamUrl: "https://steamcommunity.com/profiles/76561198061964176",
     dotabuffUrl: "https://www.dotabuff.com/players/101698448",
     favoriteHeroes: [
-    { videoSrc: "https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/earth_spirit.webm", name: "Earth Spirit" },
-    { videoSrc: "https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/tusk.webm", name: "Tusk" },
-    { videoSrc: "https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/earthshaker.webm", name: "Earthshaker" },
+    { videoSrc: "/Video/npc_dota_hero_earth_spirit.webm", name: "Earth Spirit" },
+    { videoSrc: "/Video/npc_dota_hero_tusk.webm", name: "Tusk" },
+    { videoSrc: "/Video/npc_dota_hero_earthshaker.webm", name: "Earthshaker" },
   ],
   },
   {
@@ -107,13 +117,12 @@ export const players: Player[] = [
     seasonBadges: ["s1","s2","s3","s4","s5"],
     hasWonCup: false,
 
-    
-    
-
     currentMedalLabel: "Immortal",
     currentMedalId: "Immortal",
+    currentMMR: 6500,
     peakMedalLabel: "Immortal",
     peakMedalId: "Immortal",
+    peakMMR: 6500,
 
     bio: "",
     roles: [{ iconSrc: "/icons/pos_1.png", label: "Carry" }, { iconSrc: "/icons/pos_2.png", label: "Mid" },],
@@ -121,9 +130,9 @@ export const players: Player[] = [
     steamUrl: "https://steamcommunity.com/profiles/76561198272726365",
     dotabuffUrl: "https://www.dotabuff.com/players/312460637",
     favoriteHeroes: [
-    { videoSrc: "https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/juggernaut.webm", name: "Juggernaut" },
-    { videoSrc: "https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/rubick.webm", name: "Rubick" },
-    { videoSrc: "https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/morphling.webm", name: "Morphling" },
+    { videoSrc: "/Video/npc_dota_hero_juggernaut.webm", name: "Juggernaut" },
+    { videoSrc: "/Video/npc_dota_hero_rubick.webm", name: "Rubick" },
+    { videoSrc: "/Video/npc_dota_hero_morphling.webm", name: "Morphling" },
   ],
   },
   {
@@ -137,13 +146,12 @@ export const players: Player[] = [
     cupTooltip: "1st place — Season 1",
     cupSeason: 1,
 
-    
-    
-
     currentMedalLabel: "Divine 5",
     currentMedalId: "Divine_5",
+    currentMMR: 5500,
     peakMedalLabel: "Immortal",
     peakMedalId: "Immortal",
+    peakMMR: 6000,
 
     bio: "",
     roles: [{ iconSrc: "/icons/pos_3.png", label: "Offlaner" }, { iconSrc: "/icons/pos_1.png", label: "Carry" },],
@@ -151,9 +159,9 @@ export const players: Player[] = [
     steamUrl: "https://steamcommunity.com/profiles/76561198177703726",
     dotabuffUrl: "https://www.dotabuff.com/players/217437998",
     favoriteHeroes: [
-    { videoSrc: "https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/night_stalker.webm", name: "Nightstalker" },
-    { videoSrc: "https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/doom_bringer.webm", name: "Doom" },
-    { videoSrc: "https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/dawnbreaker.webm", name: "Dawnbreaker" },
+    { videoSrc: "/Video/npc_dota_hero_night_stalker.webm", name: "Nightstalker" },
+    { videoSrc: "/Video/npc_dota_hero_doom_bringer.webm", name: "Doom" },
+    { videoSrc: "/Video/npc_dota_hero_dawnbreaker.webm", name: "Dawnbreaker" },
   ],
   },
   {
@@ -164,13 +172,12 @@ export const players: Player[] = [
     seasonBadges: ["s1"],
     hasWonCup: false,
 
-    
-    
-
     currentMedalLabel: "Immortal",
     currentMedalId: "Immortal",
+    currentMMR: 6200,
     peakMedalLabel: "Immortal",
     peakMedalId: "Immortal",
+    peakMMR: 6200,
 
     bio: "",
     roles: [{ iconSrc: "/icons/pos_4.png", label: "Soft Support" }, { iconSrc: "/icons/pos_5.png", label: "Hard Support" },],
@@ -178,9 +185,9 @@ export const players: Player[] = [
     steamUrl: "https://steamcommunity.com/profiles/76561198122176709",
     dotabuffUrl: "https://www.dotabuff.com/players/161910981",
     favoriteHeroes: [
-    { videoSrc: "https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/shadow_shaman.webm", name: "Shadow Shaman" },
-    { videoSrc: "https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/disruptor.webm", name: "Disruptor" },
-    { videoSrc: "https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/jakiro.webm", name: "Jakiro" },
+    { videoSrc: "/Video/npc_dota_hero_shadow_shaman.webm", name: "Shadow Shaman" },
+    { videoSrc: "/Video/npc_dota_hero_disruptor.webm", name: "Disruptor" },
+    { videoSrc: "/Video/npc_dota_hero_jakiro.webm", name: "Jakiro" },
   ],
   },
   {
@@ -191,13 +198,12 @@ export const players: Player[] = [
     seasonBadges: ["s1"],
     hasWonCup: false,
 
-    
-    
-
     currentMedalLabel: "Immortal",
     currentMedalId: "Immortal",
+    currentMMR: 6100,
     peakMedalLabel: "Immortal",
     peakMedalId: "Immortal",
+    peakMMR: 6100,
 
     bio: "",
      roles: [{ iconSrc: "/icons/pos_2.png", label: "Mid" }, { iconSrc: "/icons/pos_3.png", label: "Offlane" },],
@@ -206,9 +212,9 @@ export const players: Player[] = [
     steamUrl: "https://steamcommunity.com/profiles/76561198141055827",
     dotabuffUrl: "https://www.dotabuff.com/players/180790099",
     favoriteHeroes: [
-    { videoSrc: "https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/pudge.webm", name: "Pudge" },
-    { videoSrc: "https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/huskar.webm", name: "Huskar" },
-    { videoSrc: "https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/tinker.webm", name: "Tinker" },
+    { videoSrc: "/Video/npc_dota_hero_pudge.webm", name: "Pudge" },
+    { videoSrc: "/Video/npc_dota_hero_huskar.webm", name: "Huskar" },
+    { videoSrc: "/Video/npc_dota_hero_tinker.webm", name: "Tinker" },
   ],
   },
   {
@@ -219,13 +225,12 @@ export const players: Player[] = [
     seasonBadges: ["s1","s2","s3","s4","s5"],
     hasWonCup: false,
 
-    
-    
-
     currentMedalLabel: "Divine 2",
     currentMedalId: "Divine_2",
+    currentMMR: 4900,
     peakMedalLabel: "Immortal",
     peakMedalId: "Immortal",
+    peakMMR: 6000,
 
     bio: "",
     roles: [{ iconSrc: "/icons/pos_5.png", label: "Hard Support" },{ iconSrc: "/icons/pos_1.png", label: "Carry" }, { iconSrc: "/icons/pos_2.png", label: "Mid" }],
@@ -234,9 +239,9 @@ export const players: Player[] = [
     steamUrl: "https://steamcommunity.com/profiles/76561198047021603",
     dotabuffUrl: "https://www.dotabuff.com/players/86755875",
     favoriteHeroes: [
-    { videoSrc: "https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/tinker.webm", name: "Tinker" },
-    { videoSrc: "https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/crystal_maiden.webm", name: "Crystal Maiden" },
-    { videoSrc: "https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/gyrocopter.webm", name: "Gyrocopter" },
+    { videoSrc: "/Video/npc_dota_hero_tinker.webm", name: "Tinker" },
+    { videoSrc: "/Video/npc_dota_hero_crystal_maiden.webm", name: "Crystal Maiden" },
+    { videoSrc: "/Video/npc_dota_hero_gyrocopter.webm", name: "Gyrocopter" },
   ],
   },
   {
@@ -250,13 +255,12 @@ export const players: Player[] = [
     cupTooltip: "1st place — Season 1",
     cupSeason: 1,
 
-    
-    
-
     currentMedalLabel: "Divine 2",
     currentMedalId: "Divine_2",
+    currentMMR: 4900,
     peakMedalLabel: "Divine 2",
     peakMedalId: "Divine_2",
+    peakMMR: 4900,
 
     bio: "",
     roles: [{ iconSrc: "/icons/pos_2.png", label: "Mid" }, { iconSrc: "/icons/pos_1.png", label: "Carry" },],
@@ -264,9 +268,9 @@ export const players: Player[] = [
     steamUrl: "https://steamcommunity.com/profiles/76561198139217830",
     dotabuffUrl: "https://www.dotabuff.com/players/178952102",
     favoriteHeroes: [
-    { videoSrc: "https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/meepo.webm", name: "Meepo" },
-    { videoSrc: "https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/morphling.webm", name: "Morphling" },
-    { videoSrc: "https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/tinker.webm", name: "Tinker" },
+    { videoSrc: "/Video/npc_dota_hero_meepo.webm", name: "Meepo" },
+    { videoSrc: "/Video/npc_dota_hero_morphling.webm", name: "Morphling" },
+    { videoSrc: "/Video/npc_dota_hero_tinker.webm", name: "Tinker" },
   ],
   },
   {
@@ -277,13 +281,12 @@ export const players: Player[] = [
     seasonBadges: ["s1"],
     hasWonCup: false,
 
-    
-    
-
     currentMedalLabel: "Divine 2",
     currentMedalId: "Divine_2",
+    currentMMR: 4900,
     peakMedalLabel: "Divine 2",
     peakMedalId:"Divine_2",
+    peakMMR: 4900,
 
     bio: "",
     roles: [{ iconSrc: "/icons/pos_4.png", label: "Soft Support" }, { iconSrc: "/icons/pos_5.png", label: "Hard Support" },],
@@ -291,9 +294,9 @@ export const players: Player[] = [
     steamUrl: "https://steamcommunity.com/profiles/76561198057754211",
     dotabuffUrl: "https://www.dotabuff.com/players/97488483",
     favoriteHeroes: [
-    { videoSrc: "https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/pudge.webm", name: "Pudge" },
-    { videoSrc: "https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/rubick.webm", name: "Rubick" },
-    { videoSrc: "https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/lion.webm", name: "Lion" },
+    { videoSrc: "/Video/npc_dota_hero_pudge.webm", name: "Pudge" },
+    { videoSrc: "/Video/npc_dota_hero_rubick.webm", name: "Rubick" },
+    { videoSrc: "/Video/npc_dota_hero_lion.webm", name: "Lion" },
   ],
   },
  
@@ -320,9 +323,9 @@ export const players: Player[] = [
     steamUrl: "https://steamcommunity.com/profiles/76561198214458432",
     dotabuffUrl: "https://www.dotabuff.com/players/254192704",
     favoriteHeroes: [
-    { videoSrc: "https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/enchantress.webm", name: "Enchantress" },
-    { videoSrc: "https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/viper.webm", name: "Viper" },
-    { videoSrc: "https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/riki.webm", name: "Riki" },
+    { videoSrc: "/Video/npc_dota_hero_enchantress.webm", name: "Enchantress" },
+    { videoSrc: "/Video/npc_dota_hero_viper.webm", name: "Viper" },
+    { videoSrc: "/Video/npc_dota_hero_riki.webm", name: "Riki" },
   ],
   },
   {
@@ -348,9 +351,9 @@ export const players: Player[] = [
     steamUrl: "https://steamcommunity.com/profiles/76561198377149072",
     dotabuffUrl: "https://www.dotabuff.com/players/416883344",
     favoriteHeroes: [
-    { videoSrc: "https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/kunkka.webm", name: "Kunkka" },
-    { videoSrc: "https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/riki.webm", name: "Riki" },
-    { videoSrc: "https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/windrunner.webm", name: "Windranger" },
+    { videoSrc: "/Video/npc_dota_hero_kunkka.webm", name: "Kunkka" },
+    { videoSrc: "/Video/npc_dota_hero_riki.webm", name: "Riki" },
+    { videoSrc: "/Video/npc_dota_hero_windrunner.webm", name: "Windranger" },
   ],
   },
   {
@@ -376,9 +379,9 @@ export const players: Player[] = [
     steamUrl: "https://steamcommunity.com/profiles/76561198116763261",
     dotabuffUrl: "https://www.dotabuff.com/players/156497533",
     favoriteHeroes: [
-    { videoSrc: "https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/lina.webm", name: "Lina" },
-    { videoSrc: "https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/phantom_lancer.webm", name: "Phantom Lancer" },
-    { videoSrc: "https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/kez.webm", name: "Kez" },
+    { videoSrc: "/Video/npc_dota_hero_lina.webm", name: "Lina" },
+    { videoSrc: "/Video/npc_dota_hero_phantom_lancer.webm", name: "Phantom Lancer" },
+    { videoSrc: "/Video/npc_dota_hero_kez.webm", name: "Kez" },
   ],
   },
   {
@@ -403,9 +406,9 @@ export const players: Player[] = [
     steamUrl: "https://steamcommunity.com/profiles/76561198333362035",
     dotabuffUrl: "https://www.dotabuff.com/players/373096307",
     favoriteHeroes: [
-    { videoSrc: "https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/storm_spirit.webm", name: "Storm Spirit" },
-    { videoSrc: "https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/luna.webm", name: "Luna" },
-    { videoSrc: "https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/pudge.webm", name: "Pudge" },
+    { videoSrc: "/Video/npc_dota_hero_storm_spirit.webm", name: "Storm Spirit" },
+    { videoSrc: "/Video/npc_dota_hero_luna.webm", name: "Luna" },
+    { videoSrc: "/Video/npc_dota_hero_pudge.webm", name: "Pudge" },
   ],
   },
   {
@@ -430,9 +433,9 @@ export const players: Player[] = [
     steamUrl: "https://steamcommunity.com/profiles/76561198294895700",
     dotabuffUrl: "https://www.dotabuff.com/players/334629972",
     favoriteHeroes: [
-    { videoSrc: "https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/tinker.webm", name: "Tinker" },
-    { videoSrc: "https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/crystal_maiden.webm", name: "Crystal Maiden" },
-    { videoSrc: "https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/bounty_hunter.webm", name: "Bounty Hunter" },
+    { videoSrc: "/Video/npc_dota_hero_tinker.webm", name: "Tinker" },
+    { videoSrc: "/Video/npc_dota_hero_crystal_maiden.webm", name: "Crystal Maiden" },
+    { videoSrc: "/Video/npc_dota_hero_bounty_hunter.webm", name: "Bounty Hunter" },
   ],
   },
   {
@@ -457,9 +460,9 @@ export const players: Player[] = [
     steamUrl: "https://steamcommunity.com/profiles/76561199071132593",
     dotabuffUrl: "https://www.dotabuff.com/players/1110866865",
     favoriteHeroes: [
-    { videoSrc: "https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/visage.webm", name: "Visage" },
-    { videoSrc: "https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/sand_king.webm", name: "Sand King" },
-    { videoSrc: "https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/lion.webm", name: "Lion" },
+    { videoSrc: "/Video/npc_dota_hero_visage.webm", name: "Visage" },
+    { videoSrc: "/Video/npc_dota_hero_sand_king.webm", name: "Sand King" },
+    { videoSrc: "/Video/npc_dota_hero_lion.webm", name: "Lion" },
   ],
   },
   {
@@ -484,9 +487,9 @@ export const players: Player[] = [
     steamUrl: "https://steamcommunity.com/profiles/76561198087793594",
     dotabuffUrl: "https://www.dotabuff.com/players/127527866",
     favoriteHeroes: [
-    { videoSrc: "https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/weaver.webm", name: "Weaver" },
-    { videoSrc: "https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/naga_siren.webm", name: "Naga Siren" },
-    { videoSrc: "https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/monkey_king.webm", name: "Monkey King" },
+    { videoSrc: "/Video/npc_dota_hero_weaver.webm", name: "Weaver" },
+    { videoSrc: "/Video/npc_dota_hero_naga_siren.webm", name: "Naga Siren" },
+    { videoSrc: "/Video/npc_dota_hero_monkey_king.webm", name: "Monkey King" },
   ],
   },
   {
@@ -511,9 +514,9 @@ export const players: Player[] = [
     steamUrl: "https://steamcommunity.com/profiles/76561198047673400",
     dotabuffUrl: "https://www.dotabuff.com/players/87407672",
     favoriteHeroes: [
-    { videoSrc: "https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/earthshaker.webm", name: "Earthshaker" },
-    { videoSrc: "https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/razor.webm", name: "Razor" },
-    { videoSrc: "https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/naga_siren.webm", name: "Naga Siren" },
+    { videoSrc: "/Video/npc_dota_hero_earthshaker.webm", name: "Earthshaker" },
+    { videoSrc: "/Video/npc_dota_hero_razor.webm", name: "Razor" },
+    { videoSrc: "/Video/npc_dota_hero_naga_siren.webm", name: "Naga Siren" },
   ],
   },
   {
@@ -542,9 +545,9 @@ export const players: Player[] = [
     steamUrl: "https://steamcommunity.com/profiles/76561198418600526",
     dotabuffUrl: "https://www.dotabuff.com/players/458334798",
     favoriteHeroes: [
-    { videoSrc: "https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/medusa.webm", name: "Medusa" },
-    { videoSrc: "https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/underlord.webm", name: "Underlord" },
-    { videoSrc: "https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/dark_willow.webm", name: "Dark Willow" },
+    { videoSrc: "/Video/npc_dota_hero_medusa.webm", name: "Medusa" },
+    { videoSrc: "/Video/npc_dota_hero_abyssal_underlord.webm", name: "Underlord" },
+    { videoSrc: "/Video/npc_dota_hero_dark_willow.webm", name: "Dark Willow" },
   ],
   },
   {
@@ -555,13 +558,12 @@ export const players: Player[] = [
     seasonBadges: ["s1","s2","s5"],
     hasWonCup: false,
 
-    
-    
-
     currentMedalLabel: "Divine 4",
     currentMedalId: "Divine_4",
+    currentMMR: 5300,
     peakMedalLabel: "Immortal",
     peakMedalId: "Immortal",
+    peakMMR: 6000,
 
     bio: "",
     roles: [],
@@ -569,9 +571,9 @@ export const players: Player[] = [
     steamUrl: "https://steamcommunity.com/profiles/76561198280446664",
     dotabuffUrl: "https://www.dotabuff.com/players/320180936",
     favoriteHeroes: [
-    { videoSrc: "https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/axe.webm", name: "Axe" },
-    { videoSrc: "https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/antimage.webm", name: "Ant image" },
-    { videoSrc: "https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/life_stealer.webm", name: "Lifestealer" },
+    { videoSrc: "/Video/npc_dota_hero_axe.webm", name: "Axe" },
+    { videoSrc: "/Video/npc_dota_hero_antimage.webm", name: "Anti-Mage" },
+    { videoSrc: "/Video/npc_dota_hero_life_stealer.webm", name: "Lifestealer" },
   ],
   },
   {
@@ -596,9 +598,9 @@ export const players: Player[] = [
     steamUrl: "https://steamcommunity.com/profiles/76561199546434168",
     dotabuffUrl: "https://www.dotabuff.com/players/1586168440",
     favoriteHeroes: [
-    { videoSrc: "https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/skywrath_mage.webm", name: "Skywrath Mage" },
-    { videoSrc: "https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/grimstroke.webm", name: "Grimstroke" },
-    { videoSrc: "https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/legion_commander.webm", name: "Legion Commander" },
+    { videoSrc: "/Video/npc_dota_hero_skywrath_mage.webm", name: "Skywrath Mage" },
+    { videoSrc: "/Video/npc_dota_hero_grimstroke.webm", name: "Grimstroke" },
+    { videoSrc: "/Video/npc_dota_hero_legion_commander.webm", name: "Legion Commander" },
   ],
   },
   {
@@ -623,9 +625,9 @@ export const players: Player[] = [
     steamUrl: "https://steamcommunity.com/profiles/76561198298688769",
     dotabuffUrl: "https://www.dotabuff.com/players/338423041",
     favoriteHeroes: [
-    { videoSrc: "https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/omniknight.webm", name: "Omniknight" },
-    { videoSrc: "https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/nyx_assassin.webm", name: "Nyx Assassin" },
-    { videoSrc: "https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/dragon_knight.webm", name: "Dragon Knight" },
+    { videoSrc: "/Video/npc_dota_hero_omniknight.webm", name: "Omniknight" },
+    { videoSrc: "/Video/npc_dota_hero_nyx_assassin.webm", name: "Nyx Assassin" },
+    { videoSrc: "/Video/npc_dota_hero_dragon_knight.webm", name: "Dragon Knight" },
   ],
   },
   {
@@ -638,25 +640,28 @@ export const players: Player[] = [
     cupRank: "silver",
     cupTooltip: "2nd place — Season 2",
     cupSeason: 2,
-
-
-  
-
-    
-
-    currentMedalLabel: "Divine 3",
-    currentMedalId: "Divine_3",
-    peakMedalLabel: "Immortal",
-    peakMedalId: "Immortal",
+    currentMedalLabel: "Divine 2",
+    currentMedalId: "Divine_2",
+    peakMedalLabel: "Divine 5",
+    peakMedalId: "Divine_5",
+    currentMMR:4900,
+    peakMMR: 5500,
 
     bio: "",
     roles: [{ iconSrc: "/icons/pos_4.png", label: "Soft Support" }, { iconSrc: "/icons/pos_5.png", label: "Hard Support" },],
 
     steamUrl: "https://steamcommunity.com/profiles/76561199007245235",
     dotabuffUrl: "https://www.dotabuff.com/players/1046979507",
-    favoriteHeroes: [{ videoSrc: "https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/lich.webm", name: "Lich" },
-    { videoSrc: "https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/disruptor.webm", name: "Disruptor" },
-    { videoSrc: "https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/abaddon.webm", name: "Abaddon" },]
+    favoriteHeroes: [{ videoSrc: "/Video/npc_dota_hero_lich.webm", name: "Lich" },
+    { videoSrc: "/Video/npc_dota_hero_disruptor.webm", name: "Disruptor" },
+    { videoSrc: "/Video/npc_dota_hero_abaddon.webm", name: "Abaddon" },],
+    behaviorScore: {
+      mechanicalSkill: 8,
+      teamwork: 9,
+      communication: 8,
+      consistency: 8,
+    },
+    specialBadge: "contributor",
   },
   
    {
@@ -667,13 +672,12 @@ export const players: Player[] = [
     seasonBadges: ["s1","s5"],
     hasWonCup: false,
 
-    
-    
-
-    currentMedalLabel: "Legend 4",
-    currentMedalId: "Legend_4",
-    peakMedalLabel: "Ancient 5",
-    peakMedalId: "Ancient_5",
+    currentMedalLabel: "Legend 3",
+    currentMedalId: "Legend_3",
+    currentMMR: 3500,
+    peakMedalLabel: "Ancient 4",
+    peakMedalId: "Ancient_4",
+    peakMMR: 4400,
 
     bio: "Trying to do better !!",
     roles:  [{ iconSrc: "/icons/pos_1.png", label: "Carry" },],
@@ -681,9 +685,9 @@ export const players: Player[] = [
     steamUrl: "https://steamcommunity.com/profiles/76561198246001148",
     dotabuffUrl: "https://www.dotabuff.com/players/285735420",
     favoriteHeroes: [
-    { videoSrc: "https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/terrorblade.webm", name: "Terrorblade" },
-    { videoSrc: "https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/antimage.webm", name: "Anti Mage" },
-    { videoSrc: "https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/juggernaut.webm", name: "Juggernaut" },
+    { videoSrc: "/Video/npc_dota_hero_terrorblade.webm", name: "Terrorblade" },
+    { videoSrc: "/Video/npc_dota_hero_antimage.webm", name: "Anti Mage" },
+    { videoSrc: "/Video/npc_dota_hero_juggernaut.webm", name: "Juggernaut" },
   ],
   },
   {
@@ -712,9 +716,9 @@ export const players: Player[] = [
     steamUrl: "https://steamcommunity.com/profiles/76561198193880361",
     dotabuffUrl: "https://www.dotabuff.com/players/233614633",
     favoriteHeroes: [
-    { videoSrc: "https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/marci.webm", name: "Marci" },
-    { videoSrc: "https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/slardar.webm", name: "Slardar" },
-    { videoSrc: "https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/magnataur.webm", name: "Magnus" },
+    { videoSrc: "/Video/npc_dota_hero_marci.webm", name: "Marci" },
+    { videoSrc: "/Video/npc_dota_hero_slardar.webm", name: "Slardar" },
+    { videoSrc: "/Video/npc_dota_hero_magnataur.webm", name: "Magnus" },
   ],
   },
   {
@@ -739,9 +743,9 @@ export const players: Player[] = [
     steamUrl: "https://steamcommunity.com/profiles/76561198030818634",
     dotabuffUrl: "https://www.dotabuff.com/players/70552906",
     favoriteHeroes: [
-    { videoSrc: "https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/clockwerk.webm", name: "Clockwerk" },
-    { videoSrc: "https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/legion_commander.webm", name: "Legion Commander" },
-    { videoSrc: "https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/antimage.webm", name: "Antimage" },
+    { videoSrc: "/Video/npc_dota_hero_rattletrap.webm", name: "Clockwerk" },
+    { videoSrc: "/Video/npc_dota_hero_legion_commander.webm", name: "Legion Commander" },
+    { videoSrc: "/Video/npc_dota_hero_antimage.webm", name: "Antimage" },
   ],
   },
   {
@@ -766,9 +770,9 @@ export const players: Player[] = [
     steamUrl: "https://steamcommunity.com/profiles/76561199803435912",
     dotabuffUrl: "https://www.dotabuff.com/players/1843170184",
     favoriteHeroes: [
-    { videoSrc: "https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/invoker.webm", name: "Invoker" },
-    { videoSrc: "https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/tinker.webm", name: "Tinker" },
-    { videoSrc: "https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/abaddon.webm", name: "Abaddon" },
+    { videoSrc: "/Video/npc_dota_hero_invoker.webm", name: "Invoker" },
+    { videoSrc: "/Video/npc_dota_hero_tinker.webm", name: "Tinker" },
+    { videoSrc: "/Video/npc_dota_hero_abaddon.webm", name: "Abaddon" },
   ],
   },
   {
@@ -798,9 +802,9 @@ export const players: Player[] = [
     steamUrl: "https://steamcommunity.com/profiles/76561198077736471",
     dotabuffUrl: "https://www.dotabuff.com/players/117470743",
     favoriteHeroes: [
-    { videoSrc: "https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/phoenix.webm", name: "Phoenix" },
-    { videoSrc: "https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/spectre.webm", name: "Spectre" },
-    { videoSrc: "https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/vengefulspirit.webm", name: "Vengefulspirit" },
+    { videoSrc: "/Video/npc_dota_hero_phoenix.webm", name: "Phoenix" },
+    { videoSrc: "/Video/npc_dota_hero_spectre.webm", name: "Spectre" },
+    { videoSrc: "/Video/npc_dota_hero_vengefulspirit.webm", name: "Vengefulspirit" },
   ],
   },
   {
@@ -828,9 +832,9 @@ export const players: Player[] = [
     steamUrl: "https://steamcommunity.com/profiles/76561198303987817",
     dotabuffUrl: "https://www.dotabuff.com/players/343722089",
     favoriteHeroes: [
-    { videoSrc: "https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/magnataur.webm", name: "Magnus" },
-    { videoSrc: "https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/shadow_fiend.webm", name: "Shadow Fiend" },
-    { videoSrc: "https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/axe.webm", name: "Axe" },
+    { videoSrc: "/Video/npc_dota_hero_magnataur.webm", name: "Magnus" },
+    { videoSrc: "/Video/npc_dota_hero_nevermore.webm", name: "Shadow Fiend" },
+    { videoSrc: "/Video/npc_dota_hero_axe.webm", name: "Axe" },
   ],
   },
   {
@@ -855,9 +859,9 @@ export const players: Player[] = [
     steamUrl: "https://steamcommunity.com/profiles/76561199737857315",
     dotabuffUrl: "https://www.dotabuff.com/players/1777591587",
     favoriteHeroes: [
-    { videoSrc: "https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/wisp.webm", name: "Wisp" },
-    { videoSrc: "https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/lion.webm", name: "Lion" },
-    { videoSrc: "https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/lich.webm", name: "Lich" },
+    { videoSrc: "/Video/npc_dota_hero_wisp.webm", name: "Wisp" },
+    { videoSrc: "/Video/npc_dota_hero_lion.webm", name: "Lion" },
+    { videoSrc: "/Video/npc_dota_hero_lich.webm", name: "Lich" },
   ],
   },
   {
@@ -882,9 +886,9 @@ export const players: Player[] = [
     steamUrl: "https://steamcommunity.com/profiles/76561198075302524",
     dotabuffUrl: "https://www.dotabuff.com/players/115036796",
     favoriteHeroes: [
-    { videoSrc: "https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/naga_siren.webm", name: "Naga Siren" },
-    { videoSrc: "https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/lich.webm", name: "Lich" },
-    { videoSrc: "https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/slardar.webm", name: "Slardar" },
+    { videoSrc: "/Video/npc_dota_hero_naga_siren.webm", name: "Naga Siren" },
+    { videoSrc: "/Video/npc_dota_hero_lich.webm", name: "Lich" },
+    { videoSrc: "/Video/npc_dota_hero_slardar.webm", name: "Slardar" },
   ],
   },
   {
@@ -909,9 +913,9 @@ export const players: Player[] = [
     steamUrl: "https://steamcommunity.com/profiles/76561198135084070",
     dotabuffUrl: "https://www.dotabuff.com/players/174818342",
     favoriteHeroes: [
-    { videoSrc: "https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/obsidian_destroyer.webm", name: "Obsidian Destroyer" },
-    { videoSrc: "https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/bristleback.webm", name: "Bristleback" },
-    { videoSrc: "https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/shadow_shaman.webm", name: "Shadow Shaman" },
+    { videoSrc: "/Video/npc_dota_hero_obsidian_destroyer.webm", name: "Obsidian Destroyer" },
+    { videoSrc: "/Video/npc_dota_hero_bristleback.webm", name: "Bristleback" },
+    { videoSrc: "/Video/npc_dota_hero_shadow_shaman.webm", name: "Shadow Shaman" },
   ],
   },
   {
@@ -936,9 +940,9 @@ export const players: Player[] = [
     steamUrl: "https://steamcommunity.com/profiles/76561198363809308",
     dotabuffUrl: "https://www.dotabuff.com/players/403543580",
     favoriteHeroes: [
-    { videoSrc: "https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/abaddon.webm", name: "Abaddon" },
-    { videoSrc: "https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/terrorblade.webm", name: "Terrorblade" },
-    { videoSrc: "https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/broodmother.webm", name: "Broodmother" },
+    { videoSrc: "/Video/npc_dota_hero_abaddon.webm", name: "Abaddon" },
+    { videoSrc: "/Video/npc_dota_hero_terrorblade.webm", name: "Terrorblade" },
+    { videoSrc: "/Video/npc_dota_hero_broodmother.webm", name: "Broodmother" },
   ],
   },
   {
@@ -963,9 +967,9 @@ export const players: Player[] = [
     steamUrl: "https://steamcommunity.com/profiles/76561198158623147",
     dotabuffUrl: "https://www.dotabuff.com/players/198357419",
     favoriteHeroes: [
-    { videoSrc: "https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/earthshaker.webm", name: "Earthshaker" },
-    { videoSrc: "https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/natures_prophet.webm", name: "Natures Prophet" },
-    { videoSrc: "https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/silencer.webm", name: "Silencer" },
+    { videoSrc: "/Video/npc_dota_hero_earthshaker.webm", name: "Earthshaker" },
+    { videoSrc: "/Video/npc_dota_hero_furion.webm", name: "Natures Prophet" },
+    { videoSrc: "/Video/npc_dota_hero_silencer.webm", name: "Silencer" },
   ],
   },
   {
@@ -990,9 +994,9 @@ export const players: Player[] = [
     steamUrl: "https://steamcommunity.com/profiles/76561198289049436",
     dotabuffUrl: "https://www.dotabuff.com/players/328783708",
     favoriteHeroes: [
-    { videoSrc: "https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/leshrac.webm", name: "Leshrac" },
-    { videoSrc: "https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/clinkz.webm", name: "Clinkz" },
-    { videoSrc: "https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/undying.webm", name: "Undying" },
+    { videoSrc: "/Video/npc_dota_hero_leshrac.webm", name: "Leshrac" },
+    { videoSrc: "/Video/npc_dota_hero_clinkz.webm", name: "Clinkz" },
+    { videoSrc: "/Video/npc_dota_hero_undying.webm", name: "Undying" },
   ],
   },
   {
@@ -1017,9 +1021,9 @@ export const players: Player[] = [
     steamUrl: "https://steamcommunity.com/profiles/76561198123145404",
     dotabuffUrl: "https://www.dotabuff.com/players/162879676",
     favoriteHeroes: [
-    { videoSrc: "https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/troll_warlord.webm", name: "Troll Warlord" },
-    { videoSrc: "https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/axe.webm", name: "Axe" },
-    { videoSrc: "https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/winter_wyvern.webm", name: "Winter Wyvern" },
+    { videoSrc: "/Video/npc_dota_hero_troll_warlord.webm", name: "Troll Warlord" },
+    { videoSrc: "/Video/npc_dota_hero_axe.webm", name: "Axe" },
+    { videoSrc: "/Video/npc_dota_hero_winter_wyvern.webm", name: "Winter Wyvern" },
   ],
   },
   {
@@ -1044,9 +1048,9 @@ export const players: Player[] = [
     steamUrl: "https://steamcommunity.com/profiles/76561198148067974",
     dotabuffUrl: "https://www.dotabuff.com/players/187802246",
     favoriteHeroes: [
-    { videoSrc: "https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/dragon_knight.webm", name: "Dragon Knight" },
-    { videoSrc: "https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/lich.webm", name: "Lich" },
-    { videoSrc: "https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/bounty_hunter.webm", name: "Bounty Hunter" },
+    { videoSrc: "/Video/npc_dota_hero_dragon_knight.webm", name: "Dragon Knight" },
+    { videoSrc: "/Video/npc_dota_hero_lich.webm", name: "Lich" },
+    { videoSrc: "/Video/npc_dota_hero_bounty_hunter.webm", name: "Bounty Hunter" },
   ],
   },
   {
@@ -1071,9 +1075,9 @@ export const players: Player[] = [
     steamUrl: "https://steamcommunity.com/profiles/76561198219971485",
     dotabuffUrl: "https://www.dotabuff.com/players/259705757",
     favoriteHeroes: [
-    { videoSrc: "https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/lion.webm", name: "Lion" },
-    { videoSrc: "https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/bane.webm", name: "Bane" },
-    { videoSrc: "https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/luna.webm", name: "Luna" },
+    { videoSrc: "/Video/npc_dota_hero_lion.webm", name: "Lion" },
+    { videoSrc: "/Video/npc_dota_hero_bane.webm", name: "Bane" },
+    { videoSrc: "/Video/npc_dota_hero_luna.webm", name: "Luna" },
   ],
   },
   {
@@ -1098,9 +1102,9 @@ export const players: Player[] = [
     steamUrl: "https://steamcommunity.com/profiles/76561198307989935",
     dotabuffUrl: "https://www.dotabuff.com/players/347724207",
     favoriteHeroes: [
-    { videoSrc: "https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/huskar.webm", name: "Huskar" },
-    { videoSrc: "https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/oracle.webm", name: "Oracle" },
-    { videoSrc: "https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/bane.webm", name: "Bane" },
+    { videoSrc: "/Video/npc_dota_hero_huskar.webm", name: "Huskar" },
+    { videoSrc: "/Video/npc_dota_hero_oracle.webm", name: "Oracle" },
+    { videoSrc: "/Video/npc_dota_hero_bane.webm", name: "Bane" },
   ],
   },
   {
@@ -1125,9 +1129,9 @@ export const players: Player[] = [
     steamUrl: "https://steamcommunity.com/profiles/76561198137707439",
     dotabuffUrl: "https://www.dotabuff.com/players/177441711",
     favoriteHeroes: [
-    { videoSrc: "https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/brewmaster.webm", name: "Brewmaster" },
-    { videoSrc: "https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/jakiro.webm", name: "Jakiro" },
-    { videoSrc: "https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/slark.webm", name: "Slark" },
+    { videoSrc: "/Video/npc_dota_hero_brewmaster.webm", name: "Brewmaster" },
+    { videoSrc: "/Video/npc_dota_hero_jakiro.webm", name: "Jakiro" },
+    { videoSrc: "/Video/npc_dota_hero_slark.webm", name: "Slark" },
   ],
   },
   {
@@ -1152,9 +1156,9 @@ export const players: Player[] = [
     steamUrl: "https://steamcommunity.com/profiles/76561197992169501",
     dotabuffUrl: "https://www.dotabuff.com/players/31903773",
     favoriteHeroes: [
-    { videoSrc: "https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/ringmaster.webm", name: "Ringmaster" },
-    { videoSrc: "https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/lina.webm", name: "Lina" },
-    { videoSrc: "https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/life_stealer.webm", name: "Life Stealer" },
+    { videoSrc: "/Video/npc_dota_hero_ringmaster.webm", name: "Ringmaster" },
+    { videoSrc: "/Video/npc_dota_hero_lina.webm", name: "Lina" },
+    { videoSrc: "/Video/npc_dota_hero_life_stealer.webm", name: "Life Stealer" },
   ],
   },
   {
@@ -1179,9 +1183,9 @@ export const players: Player[] = [
     steamUrl: "https://steamcommunity.com/profiles/76561198124876950",
     dotabuffUrl: "https://www.dotabuff.com/players/164611222",
     favoriteHeroes: [
-    { videoSrc: "https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/mars.webm", name: "Mars" },
-    { videoSrc: "https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/sniper.webm", name: "Sniper" },
-    { videoSrc: "https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/abaddon.webm", name: "Abaddon" },
+    { videoSrc: "/Video/npc_dota_hero_mars.webm", name: "Mars" },
+    { videoSrc: "/Video/npc_dota_hero_sniper.webm", name: "Sniper" },
+    { videoSrc: "/Video/npc_dota_hero_abaddon.webm", name: "Abaddon" },
   ],
   },
   {
@@ -1206,9 +1210,9 @@ export const players: Player[] = [
     steamUrl: "https://steamcommunity.com/profiles/76561198144311979",
     dotabuffUrl: "https://www.dotabuff.com/players/184046251",
     favoriteHeroes: [
-    { videoSrc: "https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/chaos_knight.webm", name: "Chaos Knight" },
-    { videoSrc: "https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/phoenix.webm", name: "Phoenix" },
-    { videoSrc: "https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/nyx_assassin.webm", name: "Nyx Assassin" },
+    { videoSrc: "/Video/npc_dota_hero_chaos_knight.webm", name: "Chaos Knight" },
+    { videoSrc: "/Video/npc_dota_hero_phoenix.webm", name: "Phoenix" },
+    { videoSrc: "/Video/npc_dota_hero_nyx_assassin.webm", name: "Nyx Assassin" },
   ],
   },
   {
@@ -1233,9 +1237,9 @@ export const players: Player[] = [
     steamUrl: "https://steamcommunity.com/profiles/76561198179995037",
     dotabuffUrl: "https://www.dotabuff.com/players/219729309",
     favoriteHeroes: [
-    { videoSrc: "https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/tusk.webm", name: "Tusk" },
-    { videoSrc: "https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/ringmaster.webm", name: "Ringmaster" },
-    { videoSrc: "https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/queenofpain.webm", name: "Queenofpain" },
+    { videoSrc: "/Video/npc_dota_hero_tusk.webm", name: "Tusk" },
+    { videoSrc: "/Video/npc_dota_hero_ringmaster.webm", name: "Ringmaster" },
+    { videoSrc: "/Video/npc_dota_hero_queenofpain.webm", name: "Queen of Pain" },
   ],
   },
   {
@@ -1260,9 +1264,9 @@ export const players: Player[] = [
     steamUrl: "https://steamcommunity.com/profiles/76561198078264270",
     dotabuffUrl: "https://www.dotabuff.com/players/117998542",
     favoriteHeroes: [
-    { videoSrc: "https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/bloodseeker.webm", name: "Bloodseeker" },
-    { videoSrc: "https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/gyrocopter.webm", name: "Gyrocopter" },
-    { videoSrc: "https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/oracle.webm", name: "Oracle" },
+    { videoSrc: "/Video/npc_dota_hero_bloodseeker.webm", name: "Bloodseeker" },
+    { videoSrc: "/Video/npc_dota_hero_gyrocopter.webm", name: "Gyrocopter" },
+    { videoSrc: "/Video/npc_dota_hero_oracle.webm", name: "Oracle" },
   ],
   },
   {
@@ -1287,9 +1291,9 @@ export const players: Player[] = [
     steamUrl: "https://steamcommunity.com/profiles/76561198152763516",
     dotabuffUrl: "https://www.dotabuff.com/players/192497788",
     favoriteHeroes: [
-    { videoSrc: "https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/bristleback.webm", name: "Bristleback" },
-    { videoSrc: "https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/doom_bringer.webm", name: "Doom Bringer" },
-    { videoSrc: "https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/shadow_fiend.webm", name: "Shadow Fiend" },
+    { videoSrc: "/Video/npc_dota_hero_bristleback.webm", name: "Bristleback" },
+    { videoSrc: "/Video/npc_dota_hero_doom_bringer.webm", name: "Doom" },
+    { videoSrc: "/Video/npc_dota_hero_nevermore.webm", name: "Shadow Fiend" },
   ],
   },
   {
@@ -1314,9 +1318,9 @@ export const players: Player[] = [
     steamUrl: "https://steamcommunity.com/profiles/76561198066677527",
     dotabuffUrl: "https://www.dotabuff.com/players/106411799",
     favoriteHeroes: [
-    { videoSrc: "https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/slark.webm", name: "Slark" },
-    { videoSrc: "https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/wisp.webm", name: "Wisp" },
-    { videoSrc: "https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/queenofpain.webm", name: "Queenofpain" },
+    { videoSrc: "/Video/npc_dota_hero_slark.webm", name: "Slark" },
+    { videoSrc: "/Video/npc_dota_hero_wisp.webm", name: "Wisp" },
+    { videoSrc: "/Video/npc_dota_hero_queenofpain.webm", name: "Queen of Pain" },
   ],
   },
   {
@@ -1341,9 +1345,9 @@ export const players: Player[] = [
     steamUrl: "https://steamcommunity.com/profiles/76561199060779081",
     dotabuffUrl: "https://www.dotabuff.com/players/1100513353",
     favoriteHeroes: [
-    { videoSrc: "https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/chen.webm", name: "Chen" },
-    { videoSrc: "https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/magnataur.webm", name: "Magnataur" },
-    { videoSrc: "https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/enigma.webm", name: "Enigma" },
+    { videoSrc: "/Video/npc_dota_hero_chen.webm", name: "Chen" },
+    { videoSrc: "/Video/npc_dota_hero_magnataur.webm", name: "Magnus" },
+    { videoSrc: "/Video/npc_dota_hero_enigma.webm", name: "Enigma" },
   ],
   },
   {
@@ -1368,9 +1372,9 @@ export const players: Player[] = [
     steamUrl: "https://steamcommunity.com/profiles/76561198121456422",
     dotabuffUrl: "https://www.dotabuff.com/players/161190694",
     favoriteHeroes: [
-    { videoSrc: "https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/pugna.webm", name: "Pugna" },
-    { videoSrc: "https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/pangolier.webm", name: "Pangolier" },
-    { videoSrc: "https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/abaddon.webm", name: "Abaddon" },
+    { videoSrc: "/Video/npc_dota_hero_pugna.webm", name: "Pugna" },
+    { videoSrc: "/Video/npc_dota_hero_pangolier.webm", name: "Pangolier" },
+    { videoSrc: "/Video/npc_dota_hero_abaddon.webm", name: "Abaddon" },
   ],
   },
   {
@@ -1395,9 +1399,9 @@ export const players: Player[] = [
     steamUrl: "https://steamcommunity.com/profiles/76561198377531695",
     dotabuffUrl: "https://www.dotabuff.com/players/417265967",
     favoriteHeroes: [
-    { videoSrc: "https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/oracle.webm", name: "Oracle" },
-    { videoSrc: "https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/beastmaster.webm", name: "Beastmaster" },
-    { videoSrc: "https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/dark_willow.webm", name: "Dark Willow" },
+    { videoSrc: "/Video/npc_dota_hero_oracle.webm", name: "Oracle" },
+    { videoSrc: "/Video/npc_dota_hero_beastmaster.webm", name: "Beastmaster" },
+    { videoSrc: "/Video/npc_dota_hero_dark_willow.webm", name: "Dark Willow" },
   ],
   },
   {
@@ -1422,9 +1426,9 @@ export const players: Player[] = [
     steamUrl: "https://steamcommunity.com/profiles/76561198091918772",
     dotabuffUrl: "https://www.dotabuff.com/players/131653044",
     favoriteHeroes: [
-    { videoSrc: "https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/lone_druid.webm", name: "Lone Druid" },
-    { videoSrc: "https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/kunkka.webm", name: "Kunkka" },
-    { videoSrc: "https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/antimage.webm", name: "Antimage" },
+    { videoSrc: "/Video/npc_dota_hero_lone_druid.webm", name: "Lone Druid" },
+    { videoSrc: "/Video/npc_dota_hero_kunkka.webm", name: "Kunkka" },
+    { videoSrc: "/Video/npc_dota_hero_antimage.webm", name: "Anti-Mage" },
   ],
   },
   {
@@ -1449,9 +1453,9 @@ export const players: Player[] = [
     steamUrl: "https://steamcommunity.com/profiles/76561198150642808",
     dotabuffUrl: "https://www.dotabuff.com/players/190377080",
     favoriteHeroes: [
-    { videoSrc: "https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/skywrath_mage.webm", name: "Skywrath Mage" },
-    { videoSrc: "https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/invoker.webm", name: "Invoker" },
-    { videoSrc: "https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/rubick.webm", name: "Rubick" },
+    { videoSrc: "/Video/npc_dota_hero_skywrath_mage.webm", name: "Skywrath Mage" },
+    { videoSrc: "/Video/npc_dota_hero_invoker.webm", name: "Invoker" },
+    { videoSrc: "/Video/npc_dota_hero_rubick.webm", name: "Rubick" },
   ],
   },
   {
@@ -1476,9 +1480,9 @@ export const players: Player[] = [
     steamUrl: "https://steamcommunity.com/profiles/76561198068033271",
     dotabuffUrl: "https://www.dotabuff.com/players/107767543",
     favoriteHeroes: [
-    { videoSrc: "https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/oracle.webm", name: "Oracle" },
-    { videoSrc: "https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/elder_titan.webm", name: "Elder Titan" },
-    { videoSrc: "https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/arc_warden.webm", name: "Arc Warden" },
+    { videoSrc: "/Video/npc_dota_hero_oracle.webm", name: "Oracle" },
+    { videoSrc: "/Video/npc_dota_hero_elder_titan.webm", name: "Elder Titan" },
+    { videoSrc: "/Video/npc_dota_hero_arc_warden.webm", name: "Arc Warden" },
   ],
   },
   {
@@ -1503,9 +1507,9 @@ export const players: Player[] = [
     steamUrl: "https://steamcommunity.com/profiles/76561198117759496",
     dotabuffUrl: "http://dotabuff.com/players/157493768",
     favoriteHeroes: [
-    { videoSrc: "https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/sniper.webm", name: "Sniper" },
-    { videoSrc: "https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/phoenix.webm", name: "Phoenix" },
-    { videoSrc: "https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/earthshaker.webm", name: "Earthshaker" },
+    { videoSrc: "/Video/npc_dota_hero_sniper.webm", name: "Sniper" },
+    { videoSrc: "/Video/npc_dota_hero_phoenix.webm", name: "Phoenix" },
+    { videoSrc: "/Video/npc_dota_hero_earthshaker.webm", name: "Earthshaker" },
   ],
   },
   {
@@ -1530,9 +1534,9 @@ export const players: Player[] = [
     steamUrl: "https://steamcommunity.com/profiles/76561198326213024",
     dotabuffUrl: "https://www.dotabuff.com/players/365947296",
     favoriteHeroes: [
-    { videoSrc: "https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/beastmaster.webm", name: "Beastmaster" },
-    { videoSrc: "https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/kunkka.webm", name: "Kunkka" },
-    { videoSrc: "https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/morphling.webm", name: "Morphling" },
+    { videoSrc: "/Video/npc_dota_hero_beastmaster.webm", name: "Beastmaster" },
+    { videoSrc: "/Video/npc_dota_hero_kunkka.webm", name: "Kunkka" },
+    { videoSrc: "/Video/npc_dota_hero_morphling.webm", name: "Morphling" },
   ],
   },
   {
@@ -1557,9 +1561,9 @@ export const players: Player[] = [
     steamUrl: "https://steamcommunity.com/profiles/76561198069201259",
     dotabuffUrl: "https://www.dotabuff.com/players/108935531",
     favoriteHeroes: [
-    { videoSrc: "https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/lion.webm", name: "Lion" },
-    { videoSrc: "https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/silencer.webm", name: "Silencer" },
-    { videoSrc: "https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/omniknight.webm", name: "Omniknight" },
+    { videoSrc: "/Video/npc_dota_hero_lion.webm", name: "Lion" },
+    { videoSrc: "/Video/npc_dota_hero_silencer.webm", name: "Silencer" },
+    { videoSrc: "/Video/npc_dota_hero_omniknight.webm", name: "Omniknight" },
   ],
   },
   {
@@ -1584,9 +1588,9 @@ export const players: Player[] = [
     steamUrl: "https://steamcommunity.com/profiles/76561198414536121",
     dotabuffUrl: "https://www.dotabuff.com/players/454270393",
     favoriteHeroes: [
-    { videoSrc: "https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/templar_assassin.webm", name: "Templar Assassin" },
-    { videoSrc: "https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/vengefulspirit.webm", name: "Vengefulspirit" },
-    { videoSrc: "https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/kunkka.webm", name: "Kunkka" },
+    { videoSrc: "/Video/npc_dota_hero_templar_assassin.webm", name: "Templar Assassin" },
+    { videoSrc: "/Video/npc_dota_hero_vengefulspirit.webm", name: "Vengeful Spirit" },
+    { videoSrc: "/Video/npc_dota_hero_kunkka.webm", name: "Kunkka" },
   ],
   },
   {
@@ -1611,9 +1615,9 @@ export const players: Player[] = [
     steamUrl: "https://steamcommunity.com/profiles/76561198398712064",
     dotabuffUrl: "https://www.dotabuff.com/players/438446336",
     favoriteHeroes: [
-    { videoSrc: "https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/tidehunter.webm", name: "Tidehunter" },
-    { videoSrc: "https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/visage.webm", name: "Visage" },
-    { videoSrc: "https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/lone_druid.webm", name: "Lone Druid" },
+    { videoSrc: "/Video/npc_dota_hero_tidehunter.webm", name: "Tidehunter" },
+    { videoSrc: "/Video/npc_dota_hero_visage.webm", name: "Visage" },
+    { videoSrc: "/Video/npc_dota_hero_lone_druid.webm", name: "Lone Druid" },
   ],
   },
   {
@@ -1638,9 +1642,9 @@ export const players: Player[] = [
     steamUrl: "https://steamcommunity.com/profiles/76561199029628836",
     dotabuffUrl: "https://www.dotabuff.com/players/1069363108",
     favoriteHeroes: [
-    { videoSrc: "https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/huskar.webm", name: "Huskar" },
-    { videoSrc: "https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/antimage.webm", name: "Antimage" },
-    { videoSrc: "https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/centaur.webm", name: "Centaur" },
+    { videoSrc: "/Video/npc_dota_hero_huskar.webm", name: "Huskar" },
+    { videoSrc: "/Video/npc_dota_hero_antimage.webm", name: "Anti-Mage" },
+    { videoSrc: "/Video/npc_dota_hero_centaur.webm", name: "Centaur Warrunner" },
   ],
   },
   {
@@ -1665,9 +1669,9 @@ export const players: Player[] = [
     steamUrl: "https://steamcommunity.com/profiles/76561198137806863",
     dotabuffUrl: "https://www.dotabuff.com/players/177541135",
     favoriteHeroes: [
-    { videoSrc: "https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/bane.webm", name: "Bane" },
-    { videoSrc: "https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/leshrac.webm", name: "Leshrac" },
-    { videoSrc: "https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/lycan.webm", name: "Lycan" },
+    { videoSrc: "/Video/npc_dota_hero_bane.webm", name: "Bane" },
+    { videoSrc: "/Video/npc_dota_hero_leshrac.webm", name: "Leshrac" },
+    { videoSrc: "/Video/npc_dota_hero_lycan.webm", name: "Lycan" },
   ],
   },
   {
@@ -1692,9 +1696,9 @@ export const players: Player[] = [
     steamUrl: "https://steamcommunity.com/profiles/76561198403148919",
     dotabuffUrl: "https://www.dotabuff.com/players/442883191",
     favoriteHeroes: [
-    { videoSrc: "https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/weaver.webm", name: "Weaver" },
-    { videoSrc: "https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/lone_druid.webm", name: "Lone Druid" },
-    { videoSrc: "https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/antimage.webm", name: "Antimage" },
+    { videoSrc: "/Video/npc_dota_hero_weaver.webm", name: "Weaver" },
+    { videoSrc: "/Video/npc_dota_hero_lone_druid.webm", name: "Lone Druid" },
+    { videoSrc: "/Video/npc_dota_hero_antimage.webm", name: "Anti-Mage" },
   ],
   },
   {
@@ -1719,9 +1723,9 @@ export const players: Player[] = [
     steamUrl: "https://steamcommunity.com/profiles/76561198325778330",
     dotabuffUrl: "https://www.dotabuff.com/players/365512602",
     favoriteHeroes: [
-    { videoSrc: "https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/abaddon.webm", name: "Abaddon" },
-    { videoSrc: "https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/terrorblade.webm", name: "Terrorblade" },
-    { videoSrc: "https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/dazzle.webm", name: "Dazzle" },
+    { videoSrc: "/Video/npc_dota_hero_abaddon.webm", name: "Abaddon" },
+    { videoSrc: "/Video/npc_dota_hero_terrorblade.webm", name: "Terrorblade" },
+    { videoSrc: "/Video/npc_dota_hero_dazzle.webm", name: "Dazzle" },
   ],
   },
   {
@@ -1746,9 +1750,9 @@ export const players: Player[] = [
     steamUrl: "https://steamcommunity.com/profiles/76561198331138863",
     dotabuffUrl: "https://www.dotabuff.com/players/370873135",
     favoriteHeroes: [
-    { videoSrc: "https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/batrider.webm", name: "Batrider" },
-    { videoSrc: "https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/bane.webm", name: "Bane" },
-    { videoSrc: "https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/axe.webm", name: "Axe" },
+    { videoSrc: "/Video/npc_dota_hero_batrider.webm", name: "Batrider" },
+    { videoSrc: "/Video/npc_dota_hero_bane.webm", name: "Bane" },
+    { videoSrc: "/Video/npc_dota_hero_axe.webm", name: "Axe" },
   ],
   },
   {
@@ -1773,9 +1777,9 @@ export const players: Player[] = [
     steamUrl: "https://steamcommunity.com/profiles/76561198198688573",
     dotabuffUrl: "https://www.dotabuff.com/players/238422845",
     favoriteHeroes: [
-    { videoSrc: "https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/jakiro.webm", name: "Jakiro" },
-    { videoSrc: "https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/enchantress.webm", name: "Enchantress" },
-    { videoSrc: "https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/silencer.webm", name: "Silencer" },
+    { videoSrc: "/Video/npc_dota_hero_jakiro.webm", name: "Jakiro" },
+    { videoSrc: "/Video/npc_dota_hero_enchantress.webm", name: "Enchantress" },
+    { videoSrc: "/Video/npc_dota_hero_silencer.webm", name: "Silencer" },
   ],
   },
   {
@@ -1800,9 +1804,9 @@ export const players: Player[] = [
     steamUrl: "https://steamcommunity.com/profiles/76561198113414132",
     dotabuffUrl: "https://www.dotabuff.com/players/153148404",
     favoriteHeroes: [
-    { videoSrc: "https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/ringmaster.webm", name: "Ringmaster" },
-    { videoSrc: "https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/enchantress.webm", name: "Enchantress" },
-    { videoSrc: "https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/legion_commander.webm", name: "Legion Commander" },
+    { videoSrc: "/Video/npc_dota_hero_ringmaster.webm", name: "Ringmaster" },
+    { videoSrc: "/Video/npc_dota_hero_enchantress.webm", name: "Enchantress" },
+    { videoSrc: "/Video/npc_dota_hero_legion_commander.webm", name: "Legion Commander" },
   ],
   },
   {
@@ -1827,9 +1831,9 @@ export const players: Player[] = [
     steamUrl: "https://steamcommunity.com/profiles/76561198076789562",
     dotabuffUrl: "https://www.dotabuff.com/players/116523834",
     favoriteHeroes: [
-    { videoSrc: "https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/wisp.webm", name: "Wisp" },
-    { videoSrc: "https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/earth_spirit.webm", name: "Earth Spirit" },
-    { videoSrc: "https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/necrophos.webm", name: "Necrophos" },
+    { videoSrc: "/Video/npc_dota_hero_wisp.webm", name: "Wisp" },
+    { videoSrc: "/Video/npc_dota_hero_earth_spirit.webm", name: "Earth Spirit" },
+    { videoSrc: "/Video/npc_dota_hero_necrolyte.webm", name: "Necrophos" },
   ],
   },
   {
@@ -1854,9 +1858,9 @@ export const players: Player[] = [
     steamUrl: "https://steamcommunity.com/profiles/76561198347230210",
     dotabuffUrl: "https://www.dotabuff.com/players/386964482",
     favoriteHeroes: [
-    { videoSrc: "https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/axe.webm", name: "Axe" },
-    { videoSrc: "https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/chaos_knight.webm", name: "Chaos Knight" },
-    { videoSrc: "https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/tiny.webm", name: "Tiny" },
+    { videoSrc: "/Video/npc_dota_hero_axe.webm", name: "Axe" },
+    { videoSrc: "/Video/npc_dota_hero_chaos_knight.webm", name: "Chaos Knight" },
+    { videoSrc: "/Video/npc_dota_hero_tiny.webm", name: "Tiny" },
   ],
   },
   {
@@ -1881,9 +1885,9 @@ export const players: Player[] = [
     steamUrl: "https://steamcommunity.com/profiles/76561198070813383",
     dotabuffUrl: "https://www.dotabuff.com/players/110547655",
     favoriteHeroes: [
-    { videoSrc: "https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/sven.webm", name: "Sven" },
-    { videoSrc: "https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/brewmaster.webm", name: "Brewmaster" },
-    { videoSrc: "https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/winter_wyvern.webm", name: "Winter Wyvern" },
+    { videoSrc: "/Video/npc_dota_hero_sven.webm", name: "Sven" },
+    { videoSrc: "/Video/npc_dota_hero_brewmaster.webm", name: "Brewmaster" },
+    { videoSrc: "/Video/npc_dota_hero_winter_wyvern.webm", name: "Winter Wyvern" },
   ],
   },
   {
@@ -1908,9 +1912,9 @@ export const players: Player[] = [
     steamUrl: "https://steamcommunity.com/profiles/76561197989269842",
     dotabuffUrl: "https://www.dotabuff.com/players/29004114",
     favoriteHeroes: [
-    { videoSrc: "https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/dark_willow.webm", name: "Dark Willow" },
-    { videoSrc: "https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/monkey_king.webm", name: "Monkey King" },
-    { videoSrc: "https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/meepo.webm", name: "Meepo" },
+    { videoSrc: "/Video/npc_dota_hero_dark_willow.webm", name: "Dark Willow" },
+    { videoSrc: "/Video/npc_dota_hero_monkey_king.webm", name: "Monkey King" },
+    { videoSrc: "/Video/npc_dota_hero_meepo.webm", name: "Meepo" },
   ],
   },
   {
@@ -1935,9 +1939,9 @@ export const players: Player[] = [
     steamUrl: "https://steamcommunity.com/profiles/76561198216899824",
     dotabuffUrl: "https://www.dotabuff.com/players/256634096",
     favoriteHeroes: [
-    { videoSrc: "https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/elder_titan.webm", name: "Elder Titan" },
-    { videoSrc: "https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/broodmother.webm", name: "Broodmother" },
-    { videoSrc: "https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/ancient_apparition.webm", name: "Ancient Apparition" },
+    { videoSrc: "/Video/npc_dota_hero_elder_titan.webm", name: "Elder Titan" },
+    { videoSrc: "/Video/npc_dota_hero_broodmother.webm", name: "Broodmother" },
+    { videoSrc: "/Video/npc_dota_hero_ancient_apparition.webm", name: "Ancient Apparition" },
   ],
   },
   {
@@ -1962,9 +1966,9 @@ export const players: Player[] = [
     steamUrl: "https://steamcommunity.com/profiles/76561198801747001",
     dotabuffUrl: "https://www.dotabuff.com/players/841481273",
     favoriteHeroes: [
-    { videoSrc: "https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/hoodwink.webm", name: "Hoodwink" },
-    { videoSrc: "https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/naga_siren.webm", name: "Naga Siren" },
-    { videoSrc: "https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/troll_warlord.webm", name: "Troll Warlord" },
+    { videoSrc: "/Video/npc_dota_hero_hoodwink.webm", name: "Hoodwink" },
+    { videoSrc: "/Video/npc_dota_hero_naga_siren.webm", name: "Naga Siren" },
+    { videoSrc: "/Video/npc_dota_hero_troll_warlord.webm", name: "Troll Warlord" },
   ],
   },
   {
@@ -1989,9 +1993,9 @@ export const players: Player[] = [
     steamUrl: "https://steamcommunity.com/profiles/76561198067922073",
     dotabuffUrl: "http://www.dotabuff.com/players/107656345",
     favoriteHeroes: [
-    { videoSrc: "https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/snapfire.webm", name: "Snapfire" },
-    { videoSrc: "https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/bloodseeker.webm", name: "Bloodseeker" },
-    { videoSrc: "https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/brewmaster.webm", name: "Brewmaster" },
+    { videoSrc: "/Video/npc_dota_hero_snapfire.webm", name: "Snapfire" },
+    { videoSrc: "/Video/npc_dota_hero_bloodseeker.webm", name: "Bloodseeker" },
+    { videoSrc: "/Video/npc_dota_hero_brewmaster.webm", name: "Brewmaster" },
   ],
   },
   {
@@ -2016,9 +2020,9 @@ export const players: Player[] = [
     steamUrl: "https://steamcommunity.com/profiles/76561198371188806",
     dotabuffUrl: "https://www.dotabuff.com/players/410923078",
     favoriteHeroes: [
-    { videoSrc: "https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/pudge.webm", name: "Pudge" },
-    { videoSrc: "https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/sniper.webm", name: "Sniper" },
-    { videoSrc: "https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/dawnbreaker.webm", name: "Dawnbreaker" },
+    { videoSrc: "/Video/npc_dota_hero_pudge.webm", name: "Pudge" },
+    { videoSrc: "/Video/npc_dota_hero_sniper.webm", name: "Sniper" },
+    { videoSrc: "/Video/npc_dota_hero_dawnbreaker.webm", name: "Dawnbreaker" },
   ],
   },
   {
@@ -2043,9 +2047,9 @@ export const players: Player[] = [
     steamUrl: "https://steamcommunity.com/profiles/76561199037287674",
     dotabuffUrl: "https://www.dotabuff.com/players/1077021946",
     favoriteHeroes: [
-    { videoSrc: "https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/wisp.webm", name: "Wisp" },
-    { videoSrc: "https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/crystal_maiden.webm", name: "Crystal Maiden" },
-    { videoSrc: "https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/razor.webm", name: "Razor" },
+    { videoSrc: "/Video/npc_dota_hero_wisp.webm", name: "Wisp" },
+    { videoSrc: "/Video/npc_dota_hero_crystal_maiden.webm", name: "Crystal Maiden" },
+    { videoSrc: "/Video/npc_dota_hero_razor.webm", name: "Razor" },
   ],
   },
   {
@@ -2070,9 +2074,9 @@ export const players: Player[] = [
     steamUrl: "https://steamcommunity.com/profiles/76561198812913109",
     dotabuffUrl: "https://www.dotabuff.com/players/852647381",
     favoriteHeroes: [
-    { videoSrc: "https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/juggernaut.webm", name: "Juggernaut" },
-    { videoSrc: "https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/dark_seer.webm", name: "Dark Seer" },
-    { videoSrc: "https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/shadow_demon.webm", name: "Shadow Demon" },
+    { videoSrc: "/Video/npc_dota_hero_juggernaut.webm", name: "Juggernaut" },
+    { videoSrc: "/Video/npc_dota_hero_dark_seer.webm", name: "Dark Seer" },
+    { videoSrc: "/Video/npc_dota_hero_shadow_demon.webm", name: "Shadow Demon" },
   ],
   },
   {
@@ -2097,9 +2101,9 @@ export const players: Player[] = [
     steamUrl: "https://steamcommunity.com/profiles/76561198225698148",
     dotabuffUrl: "https://www.dotabuff.com/players/265432420",
     favoriteHeroes: [
-    { videoSrc: "https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/necrophos.webm", name: "Necrophos" },
-    { videoSrc: "https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/elder_titan.webm", name: "Elder Titan" },
-    { videoSrc: "https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/sand_king.webm", name: "Sand King" },
+    { videoSrc: "/Video/npc_dota_hero_necrolyte.webm", name: "Necrophos" },
+    { videoSrc: "/Video/npc_dota_hero_elder_titan.webm", name: "Elder Titan" },
+    { videoSrc: "/Video/npc_dota_hero_sand_king.webm", name: "Sand King" },
   ],
   },
   {
@@ -2124,9 +2128,9 @@ export const players: Player[] = [
     steamUrl: "https://steamcommunity.com/profiles/76561198111784982",
     dotabuffUrl: "https://www.dotabuff.com/players/151519254",
     favoriteHeroes: [
-    { videoSrc: "https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/meepo.webm", name: "Meepo" },
-    { videoSrc: "https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/dark_seer.webm", name: "Dark Seer" },
-    { videoSrc: "https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/snapfire.webm", name: "Snapfire" },
+    { videoSrc: "/Video/npc_dota_hero_meepo.webm", name: "Meepo" },
+    { videoSrc: "/Video/npc_dota_hero_dark_seer.webm", name: "Dark Seer" },
+    { videoSrc: "/Video/npc_dota_hero_snapfire.webm", name: "Snapfire" },
   ],
   },
   {
@@ -2151,9 +2155,9 @@ export const players: Player[] = [
     steamUrl: "https://steamcommunity.com/profiles/76561198327996098",
     dotabuffUrl: "https://www.dotabuff.com/players/367730370",
     favoriteHeroes: [
-    { videoSrc: "https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/grimstroke.webm", name: "Grimstroke" },
-    { videoSrc: "https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/weaver.webm", name: "Weaver" },
-    { videoSrc: "https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/void_spirit.webm", name: "Void Spirit" },
+    { videoSrc: "/Video/npc_dota_hero_grimstroke.webm", name: "Grimstroke" },
+    { videoSrc: "/Video/npc_dota_hero_weaver.webm", name: "Weaver" },
+    { videoSrc: "/Video/npc_dota_hero_void_spirit.webm", name: "Void Spirit" },
   ],
   },
   {
@@ -2178,9 +2182,9 @@ export const players: Player[] = [
     steamUrl: "https://steamcommunity.com/profiles/76561198134866805",
     dotabuffUrl: "https://www.dotabuff.com/players/174601077",
     favoriteHeroes: [
-    { videoSrc: "https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/ursa.webm", name: "Ursa" },
-    { videoSrc: "https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/shadow_fiend.webm", name: "Shadow Fiend" },
-    { videoSrc: "https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/winter_wyvern.webm", name: "Winter Wyvern" },
+    { videoSrc: "/Video/npc_dota_hero_ursa.webm", name: "Ursa" },
+    { videoSrc: "/Video/npc_dota_hero_nevermore.webm", name: "Shadow Fiend" },
+    { videoSrc: "/Video/npc_dota_hero_winter_wyvern.webm", name: "Winter Wyvern" },
   ],
   },
   {
@@ -2205,9 +2209,9 @@ export const players: Player[] = [
     steamUrl: "https://steamcommunity.com/profiles/76561198147931199",
     dotabuffUrl: "https://www.dotabuff.com/players/187665471",
     favoriteHeroes: [
-    { videoSrc: "https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/shadow_fiend.webm", name: "Shadow Fiend" },
-    { videoSrc: "https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/earthshaker.webm", name: "Earthshaker" },
-    { videoSrc: "https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/spirit_breaker.webm", name: "Spirit Breaker" },
+    { videoSrc: "/Video/npc_dota_hero_nevermore.webm", name: "Shadow Fiend" },
+    { videoSrc: "/Video/npc_dota_hero_earthshaker.webm", name: "Earthshaker" },
+    { videoSrc: "/Video/npc_dota_hero_spirit_breaker.webm", name: "Spirit Breaker" },
   ],
   },
   {
@@ -2232,9 +2236,9 @@ export const players: Player[] = [
     steamUrl: "https://steamcommunity.com/profiles/76561198263590410",
     dotabuffUrl: "https://www.dotabuff.com/players/303324682",
     favoriteHeroes: [
-    { videoSrc: "https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/axe.webm", name: "Axe" },
-    { videoSrc: "https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/slardar.webm", name: "Slardar" },
-    { videoSrc: "https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/drow_ranger.webm", name: "Drow Ranger" },
+    { videoSrc: "/Video/npc_dota_hero_axe.webm", name: "Axe" },
+    { videoSrc: "/Video/npc_dota_hero_slardar.webm", name: "Slardar" },
+    { videoSrc: "/Video/npc_dota_hero_drow_ranger.webm", name: "Drow Ranger" },
   ],
   },
   {
@@ -2259,9 +2263,9 @@ export const players: Player[] = [
     steamUrl: "https://steamcommunity.com/profiles/76561198305120933",
     dotabuffUrl: "https://www.dotabuff.com/players/344855205",
     favoriteHeroes: [
-    { videoSrc: "https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/spirit_breaker.webm", name: "Spirit Breaker" },
-    { videoSrc: "https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/tusk.webm", name: "Tusk" },
-    { videoSrc: "https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/viper.webm", name: "Viper" },
+    { videoSrc: "/Video/npc_dota_hero_spirit_breaker.webm", name: "Spirit Breaker" },
+    { videoSrc: "/Video/npc_dota_hero_tusk.webm", name: "Tusk" },
+    { videoSrc: "/Video/npc_dota_hero_viper.webm", name: "Viper" },
   ],
   },
   {
@@ -2286,9 +2290,9 @@ export const players: Player[] = [
     steamUrl: "https://steamcommunity.com/profiles/76561199154924950",
     dotabuffUrl: "https://www.dotabuff.com/players/1194659222",
     favoriteHeroes: [
-    { videoSrc: "https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/night_stalker.webm", name: "Night Stalker" },
-    { videoSrc: "https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/beastmaster.webm", name: "Beastmaster" },
-    { videoSrc: "https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/skywrath_mage.webm", name: "Skywrath Mage" },
+    { videoSrc: "/Video/npc_dota_hero_night_stalker.webm", name: "Night Stalker" },
+    { videoSrc: "/Video/npc_dota_hero_beastmaster.webm", name: "Beastmaster" },
+    { videoSrc: "/Video/npc_dota_hero_skywrath_mage.webm", name: "Skywrath Mage" },
   ],
   },
   {
@@ -2313,9 +2317,9 @@ export const players: Player[] = [
     steamUrl: "https://steamcommunity.com/profiles/76561198111564276",
     dotabuffUrl: "https://www.dotabuff.com/players/151298548",
     favoriteHeroes: [
-    { videoSrc: "https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/luna.webm", name: "Luna" },
-    { videoSrc: "https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/shadow_shaman.webm", name: "Shadow Shaman" },
-    { videoSrc: "https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/zeus.webm", name: "Zeus" },
+    { videoSrc: "/Video/npc_dota_hero_luna.webm", name: "Luna" },
+    { videoSrc: "/Video/npc_dota_hero_shadow_shaman.webm", name: "Shadow Shaman" },
+    { videoSrc: "/Video/npc_dota_hero_zuus.webm", name: "Zeus" },
   ],
   },
   {
@@ -2340,9 +2344,9 @@ export const players: Player[] = [
     steamUrl: "https://steamcommunity.com/profiles/76561198855283430",
     dotabuffUrl: "https://www.dotabuff.com/players/895017702",
     favoriteHeroes: [
-    { videoSrc: "https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/viper.webm", name: "Viper" },
-    { videoSrc: "https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/wisp.webm", name: "Wisp" },
-    { videoSrc: "https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/enigma.webm", name: "Enigma" },
+    { videoSrc: "/Video/npc_dota_hero_viper.webm", name: "Viper" },
+    { videoSrc: "/Video/npc_dota_hero_wisp.webm", name: "Wisp" },
+    { videoSrc: "/Video/npc_dota_hero_enigma.webm", name: "Enigma" },
   ],
   },
   {
@@ -2367,9 +2371,9 @@ export const players: Player[] = [
     steamUrl: "https://steamcommunity.com/profiles/76561198008347663",
     dotabuffUrl: "https://www.dotabuff.com/players/48081935",
     favoriteHeroes: [
-    { videoSrc: "https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/huskar.webm", name: "Huskar" },
-    { videoSrc: "https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/mirana.webm", name: "Mirana" },
-    { videoSrc: "https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/shadow_shaman.webm", name: "Shadow Shaman" },
+    { videoSrc: "/Video/npc_dota_hero_huskar.webm", name: "Huskar" },
+    { videoSrc: "/Video/npc_dota_hero_mirana.webm", name: "Mirana" },
+    { videoSrc: "/Video/npc_dota_hero_shadow_shaman.webm", name: "Shadow Shaman" },
   ],
   },
   {
@@ -2394,9 +2398,9 @@ export const players: Player[] = [
     steamUrl: "https://steamcommunity.com/profiles/76561198207682317",
     dotabuffUrl: "https://www.dotabuff.com/players/247416589",
     favoriteHeroes: [
-    { videoSrc: "https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/witch_doctor.webm", name: "Witch Doctor" },
-    { videoSrc: "https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/juggernaut.webm", name: "Juggernaut" },
-    { videoSrc: "https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/phantom_lancer.webm", name: "Phantom Lancer" },
+    { videoSrc: "/Video/npc_dota_hero_witch_doctor.webm", name: "Witch Doctor" },
+    { videoSrc: "/Video/npc_dota_hero_juggernaut.webm", name: "Juggernaut" },
+    { videoSrc: "/Video/npc_dota_hero_phantom_lancer.webm", name: "Phantom Lancer" },
   ],
   },
   {
@@ -2421,9 +2425,9 @@ export const players: Player[] = [
     steamUrl: "https://steamcommunity.com/profiles/76561198060588081",
     dotabuffUrl: "http://dotabuff.com/players/100322353",
     favoriteHeroes: [
-    { videoSrc: "https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/bounty_hunter.webm", name: "Bounty Hunter" },
-    { videoSrc: "https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/dragon_knight.webm", name: "Dragon Knight" },
-    { videoSrc: "https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/vengefulspirit.webm", name: "Vengefulspirit" },
+    { videoSrc: "/Video/npc_dota_hero_bounty_hunter.webm", name: "Bounty Hunter" },
+    { videoSrc: "/Video/npc_dota_hero_dragon_knight.webm", name: "Dragon Knight" },
+    { videoSrc: "/Video/npc_dota_hero_vengefulspirit.webm", name: "Vengefulspirit" },
   ],
   },
   {
@@ -2448,9 +2452,9 @@ export const players: Player[] = [
     steamUrl: "https://steamcommunity.com/profiles/76561198129811418",
     dotabuffUrl: "https://www.dotabuff.com/players/169545690",
     favoriteHeroes: [
-    { videoSrc: "https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/meepo.webm", name: "Meepo" },
-    { videoSrc: "https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/bloodseeker.webm", name: "Bloodseeker" },
-    { videoSrc: "https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/grimstroke.webm", name: "Grimstroke" },
+    { videoSrc: "/Video/npc_dota_hero_meepo.webm", name: "Meepo" },
+    { videoSrc: "/Video/npc_dota_hero_bloodseeker.webm", name: "Bloodseeker" },
+    { videoSrc: "/Video/npc_dota_hero_grimstroke.webm", name: "Grimstroke" },
   ],
   },
   {
@@ -2475,9 +2479,9 @@ export const players: Player[] = [
     steamUrl: "https://steamcommunity.com/profiles/76561198157163286",
     dotabuffUrl: "https://www.dotabuff.com/players/196897558",
     favoriteHeroes: [
-    { videoSrc: "https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/earthshaker.webm", name: "Earthshaker" },
-    { videoSrc: "https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/razor.webm", name: "Razor" },
-    { videoSrc: "https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/doom_bringer.webm", name: "Doom Bringer" },
+    { videoSrc: "/Video/npc_dota_hero_earthshaker.webm", name: "Earthshaker" },
+    { videoSrc: "/Video/npc_dota_hero_razor.webm", name: "Razor" },
+    { videoSrc: "/Video/npc_dota_hero_doom_bringer.webm", name: "Doom Bringer" },
   ],
   },
   {
@@ -2502,9 +2506,9 @@ export const players: Player[] = [
     steamUrl: "https://steamcommunity.com/profiles/76561198870516878",
     dotabuffUrl: "https://www.dotabuff.com/players/910251150",
     favoriteHeroes: [
-    { videoSrc: "https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/faceless_void.webm", name: "Faceless Void" },
-    { videoSrc: "https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/axe.webm", name: "Axe" },
-    { videoSrc: "https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/legion_commander.webm", name: "Legion Commander" },
+    { videoSrc: "/Video/npc_dota_hero_faceless_void.webm", name: "Faceless Void" },
+    { videoSrc: "/Video/npc_dota_hero_axe.webm", name: "Axe" },
+    { videoSrc: "/Video/npc_dota_hero_legion_commander.webm", name: "Legion Commander" },
   ],
   },
   {
@@ -2529,9 +2533,9 @@ export const players: Player[] = [
     steamUrl: "https://steamcommunity.com/profiles/76561198285780323",
     dotabuffUrl: "https://www.dotabuff.com/players/325514595",
     favoriteHeroes: [
-    { videoSrc: "https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/sniper.webm", name: "Sniper" },
-    { videoSrc: "https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/leshrac.webm", name: "Leshrac" },
-    { videoSrc: "https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/wraith_king.webm", name: "Wraith King" },
+    { videoSrc: "/Video/npc_dota_hero_sniper.webm", name: "Sniper" },
+    { videoSrc: "/Video/npc_dota_hero_leshrac.webm", name: "Leshrac" },
+    { videoSrc: "/Video/npc_dota_hero_wraith_king.webm", name: "Wraith King" },
   ],
   },
   {
@@ -2556,9 +2560,9 @@ export const players: Player[] = [
     steamUrl: "https://steamcommunity.com/profiles/76561198312840616",
     dotabuffUrl: "https://www.dotabuff.com/players/352574888",
     favoriteHeroes: [
-    { videoSrc: "https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/kunkka.webm", name: "Kunkka" },
-    { videoSrc: "https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/snapfire.webm", name: "Snapfire" },
-    { videoSrc: "https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/dark_seer.webm", name: "Dark Seer" },
+    { videoSrc: "/Video/npc_dota_hero_kunkka.webm", name: "Kunkka" },
+    { videoSrc: "/Video/npc_dota_hero_snapfire.webm", name: "Snapfire" },
+    { videoSrc: "/Video/npc_dota_hero_dark_seer.webm", name: "Dark Seer" },
   ],
   },
   {
@@ -2583,9 +2587,9 @@ export const players: Player[] = [
     steamUrl: "https://steamcommunity.com/profiles/76561198060748169",
     dotabuffUrl: "https://www.dotabuff.com/players/100482441",
     favoriteHeroes: [
-    { videoSrc: "https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/dark_willow.webm", name: "Dark Willow" },
-    { videoSrc: "https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/dragon_knight.webm", name: "Dragon Knight" },
-    { videoSrc: "https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/bloodseeker.webm", name: "Bloodseeker" },
+    { videoSrc: "/Video/npc_dota_hero_dark_willow.webm", name: "Dark Willow" },
+    { videoSrc: "/Video/npc_dota_hero_dragon_knight.webm", name: "Dragon Knight" },
+    { videoSrc: "/Video/npc_dota_hero_bloodseeker.webm", name: "Bloodseeker" },
   ],
   },
   {
@@ -2610,9 +2614,9 @@ export const players: Player[] = [
     steamUrl: "https://steamcommunity.com/profiles/76561198154928635",
     dotabuffUrl: "https://www.dotabuff.com/players/194662907",
     favoriteHeroes: [
-    { videoSrc: "https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/tiny.webm", name: "Tiny" },
-    { videoSrc: "https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/troll_warlord.webm", name: "Troll Warlord" },
-    { videoSrc: "https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/shadow_demon.webm", name: "Shadow Demon" },
+    { videoSrc: "/Video/npc_dota_hero_tiny.webm", name: "Tiny" },
+    { videoSrc: "/Video/npc_dota_hero_troll_warlord.webm", name: "Troll Warlord" },
+    { videoSrc: "/Video/npc_dota_hero_shadow_demon.webm", name: "Shadow Demon" },
   ],
   },
   {
@@ -2637,9 +2641,9 @@ export const players: Player[] = [
     steamUrl: "https://steamcommunity.com/profiles/76561199048093511",
     dotabuffUrl: "https://www.dotabuff.com/players/1087827783",
     favoriteHeroes: [
-    { videoSrc: "https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/batrider.webm", name: "Batrider" },
-    { videoSrc: "https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/obsidian_destroyer.webm", name: "Obsidian Destroyer" },
-    { videoSrc: "https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/huskar.webm", name: "Huskar" },
+    { videoSrc: "/Video/npc_dota_hero_batrider.webm", name: "Batrider" },
+    { videoSrc: "/Video/npc_dota_hero_obsidian_destroyer.webm", name: "Obsidian Destroyer" },
+    { videoSrc: "/Video/npc_dota_hero_huskar.webm", name: "Huskar" },
   ],
   },
   {
@@ -2664,9 +2668,9 @@ export const players: Player[] = [
     steamUrl: "https://steamcommunity.com/profiles/76561198263747606",
     dotabuffUrl: "https://www.dotabuff.com/players/303481878",
     favoriteHeroes: [
-    { videoSrc: "https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/luna.webm", name: "Luna" },
-    { videoSrc: "https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/earthshaker.webm", name: "Earthshaker" },
-    { videoSrc: "https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/antimage.webm", name: "Antimage" },
+    { videoSrc: "/Video/npc_dota_hero_luna.webm", name: "Luna" },
+    { videoSrc: "/Video/npc_dota_hero_earthshaker.webm", name: "Earthshaker" },
+    { videoSrc: "/Video/npc_dota_hero_antimage.webm", name: "Antimage" },
   ],
   },
   {
@@ -2691,9 +2695,9 @@ export const players: Player[] = [
     steamUrl: "https://steamcommunity.com/profiles/76561198172935917",
     dotabuffUrl: "https://www.dotabuff.com/players/212670189",
     favoriteHeroes: [
-    { videoSrc: "https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/nyx_assassin.webm", name: "Nyx Assassin" },
-    { videoSrc: "https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/chaos_knight.webm", name: "Chaos Knight" },
-    { videoSrc: "https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/wraith_king.webm", name: "Wraith King" },
+    { videoSrc: "/Video/npc_dota_hero_nyx_assassin.webm", name: "Nyx Assassin" },
+    { videoSrc: "/Video/npc_dota_hero_chaos_knight.webm", name: "Chaos Knight" },
+    { videoSrc: "/Video/npc_dota_hero_wraith_king.webm", name: "Wraith King" },
   ],
   },
   {
@@ -2718,9 +2722,9 @@ export const players: Player[] = [
     steamUrl: "https://steamcommunity.com/profiles/76561198063274138",
     dotabuffUrl: "https://www.dotabuff.com/players/103008410",
     favoriteHeroes: [
-    { videoSrc: "https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/spectre.webm", name: "Spectre" },
-    { videoSrc: "https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/tidehunter.webm", name: "Tidehunter" },
-    { videoSrc: "https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/earthshaker.webm", name: "Earthshaker" },
+    { videoSrc: "/Video/npc_dota_hero_spectre.webm", name: "Spectre" },
+    { videoSrc: "/Video/npc_dota_hero_tidehunter.webm", name: "Tidehunter" },
+    { videoSrc: "/Video/npc_dota_hero_earthshaker.webm", name: "Earthshaker" },
   ],
   },
   {
@@ -2745,9 +2749,9 @@ export const players: Player[] = [
     steamUrl: "https://steamcommunity.com/profiles/76561198260703559",
     dotabuffUrl: "https://www.dotabuff.com/players/300437831",
     favoriteHeroes: [
-    { videoSrc: "https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/templar_assassin.webm", name: "Templar Assassin" },
-    { videoSrc: "https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/viper.webm", name: "Viper" },
-    { videoSrc: "https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/warlock.webm", name: "Warlock" },
+    { videoSrc: "/Video/npc_dota_hero_templar_assassin.webm", name: "Templar Assassin" },
+    { videoSrc: "/Video/npc_dota_hero_viper.webm", name: "Viper" },
+    { videoSrc: "/Video/npc_dota_hero_warlock.webm", name: "Warlock" },
   ],
   },
   {
@@ -2772,9 +2776,9 @@ export const players: Player[] = [
     steamUrl: "https://steamcommunity.com/profiles/76561198355994680",
     dotabuffUrl: "https://www.dotabuff.com/players/395728952",
     favoriteHeroes: [
-    { videoSrc: "https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/pangolier.webm", name: "Pangolier" },
-    { videoSrc: "https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/doom_bringer.webm", name: "Doom Bringer" },
-    { videoSrc: "https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/storm_spirit.webm", name: "Storm Spirit" },
+    { videoSrc: "/Video/npc_dota_hero_pangolier.webm", name: "Pangolier" },
+    { videoSrc: "/Video/npc_dota_hero_doom_bringer.webm", name: "Doom Bringer" },
+    { videoSrc: "/Video/npc_dota_hero_storm_spirit.webm", name: "Storm Spirit" },
   ],
   },
   {
@@ -2799,9 +2803,9 @@ export const players: Player[] = [
     steamUrl: "https://steamcommunity.com/profiles/76561198123347448",
     dotabuffUrl: "https://www.dotabuff.com/players/163081720",
     favoriteHeroes: [
-    { videoSrc: "https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/bloodseeker.webm", name: "Bloodseeker" },
-    { videoSrc: "https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/naga_siren.webm", name: "Naga Siren" },
-    { videoSrc: "https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/arc_warden.webm", name: "Arc Warden" },
+    { videoSrc: "/Video/npc_dota_hero_bloodseeker.webm", name: "Bloodseeker" },
+    { videoSrc: "/Video/npc_dota_hero_naga_siren.webm", name: "Naga Siren" },
+    { videoSrc: "/Video/npc_dota_hero_arc_warden.webm", name: "Arc Warden" },
   ],
   },
   {
@@ -2826,9 +2830,9 @@ export const players: Player[] = [
     steamUrl: "https://steamcommunity.com/profiles/76561197998665425",
     dotabuffUrl: "https://www.dotabuff.com/players/38399697",
     favoriteHeroes: [
-    { videoSrc: "https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/shadow_demon.webm", name: "Shadow Demon" },
-    { videoSrc: "https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/drow_ranger.webm", name: "Drow Ranger" },
-    { videoSrc: "https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/medusa.webm", name: "Medusa" },
+    { videoSrc: "/Video/npc_dota_hero_shadow_demon.webm", name: "Shadow Demon" },
+    { videoSrc: "/Video/npc_dota_hero_drow_ranger.webm", name: "Drow Ranger" },
+    { videoSrc: "/Video/npc_dota_hero_medusa.webm", name: "Medusa" },
   ],
   },
   {
@@ -2853,9 +2857,9 @@ export const players: Player[] = [
     steamUrl: "https://steamcommunity.com/profiles/76561198268814917",
     dotabuffUrl: "https://www.dotabuff.com/players/308549189",
     favoriteHeroes: [
-    { videoSrc: "https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/monkey_king.webm", name: "Monkey King" },
-    { videoSrc: "https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/dark_seer.webm", name: "Dark Seer" },
-    { videoSrc: "https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/shadow_demon.webm", name: "Shadow Demon" },
+    { videoSrc: "/Video/npc_dota_hero_monkey_king.webm", name: "Monkey King" },
+    { videoSrc: "/Video/npc_dota_hero_dark_seer.webm", name: "Dark Seer" },
+    { videoSrc: "/Video/npc_dota_hero_shadow_demon.webm", name: "Shadow Demon" },
   ],
   },
   {
@@ -2880,9 +2884,9 @@ export const players: Player[] = [
     steamUrl: "https://steamcommunity.com/profiles/76561198332637766",
     dotabuffUrl: "https://www.dotabuff.com/players/372372038",
     favoriteHeroes: [
-    { videoSrc: "https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/chaos_knight.webm", name: "Chaos Knight" },
-    { videoSrc: "https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/templar_assassin.webm", name: "Templar Assassin" },
-    { videoSrc: "https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/underlord.webm", name: "Underlord" },
+    { videoSrc: "/Video/npc_dota_hero_chaos_knight.webm", name: "Chaos Knight" },
+    { videoSrc: "/Video/npc_dota_hero_templar_assassin.webm", name: "Templar Assassin" },
+    { videoSrc: "/Video/npc_dota_hero_underlord.webm", name: "Underlord" },
   ],
   },
   {
@@ -2907,9 +2911,9 @@ export const players: Player[] = [
     steamUrl: "https://steamcommunity.com/profiles/76561198349412593",
     dotabuffUrl: "https://www.dotabuff.com/players/389146865",
     favoriteHeroes: [
-    { videoSrc: "https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/riki.webm", name: "Riki" },
-    { videoSrc: "https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/lina.webm", name: "Lina" },
-    { videoSrc: "https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/snapfire.webm", name: "Snapfire" },
+    { videoSrc: "/Video/npc_dota_hero_riki.webm", name: "Riki" },
+    { videoSrc: "/Video/npc_dota_hero_lina.webm", name: "Lina" },
+    { videoSrc: "/Video/npc_dota_hero_snapfire.webm", name: "Snapfire" },
   ],
   },
   {
@@ -2934,9 +2938,9 @@ export const players: Player[] = [
     steamUrl: "https://steamcommunity.com/profiles/76561198118395432",
     dotabuffUrl: "https://www.dotabuff.com/players/158129704",
     favoriteHeroes: [
-    { videoSrc: "https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/invoker.webm", name: "Invoker" },
-    { videoSrc: "https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/wraith_king.webm", name: "Wraith King" },
-    { videoSrc: "https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/bloodseeker.webm", name: "Bloodseeker" },
+    { videoSrc: "/Video/npc_dota_hero_invoker.webm", name: "Invoker" },
+    { videoSrc: "/Video/npc_dota_hero_wraith_king.webm", name: "Wraith King" },
+    { videoSrc: "/Video/npc_dota_hero_bloodseeker.webm", name: "Bloodseeker" },
   ],
   },
   {
@@ -2961,9 +2965,9 @@ export const players: Player[] = [
     steamUrl: "https://steamcommunity.com/profiles/76561199085296348",
     dotabuffUrl: "https://www.dotabuff.com/players/1125030620",
     favoriteHeroes: [
-    { videoSrc: "https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/ogre_magi.webm", name: "Ogre Magi" },
-    { videoSrc: "https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/tinker.webm", name: "Tinker" },
-    { videoSrc: "https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/drow_ranger.webm", name: "Drow Ranger" },
+    { videoSrc: "/Video/npc_dota_hero_ogre_magi.webm", name: "Ogre Magi" },
+    { videoSrc: "/Video/npc_dota_hero_tinker.webm", name: "Tinker" },
+    { videoSrc: "/Video/npc_dota_hero_drow_ranger.webm", name: "Drow Ranger" },
   ],
   },
   {
@@ -2988,9 +2992,9 @@ export const players: Player[] = [
     steamUrl: "https://steamcommunity.com/profiles/76561198048011177",
     dotabuffUrl: "https://www.dotabuff.com/players/87745449",
     favoriteHeroes: [
-    { videoSrc: "https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/monkey_king.webm", name: "Monkey King" },
-    { videoSrc: "https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/elder_titan.webm", name: "Elder Titan" },
-    { videoSrc: "https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/juggernaut.webm", name: "Juggernaut" },
+    { videoSrc: "/Video/npc_dota_hero_monkey_king.webm", name: "Monkey King" },
+    { videoSrc: "/Video/npc_dota_hero_elder_titan.webm", name: "Elder Titan" },
+    { videoSrc: "/Video/npc_dota_hero_juggernaut.webm", name: "Juggernaut" },
   ],
   },
   {
@@ -3015,9 +3019,9 @@ export const players: Player[] = [
     steamUrl: "https://steamcommunity.com/profiles/76561198196591646",
     dotabuffUrl: "https://www.dotabuff.com/players/236325918",
     favoriteHeroes: [
-    { videoSrc: "https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/kunkka.webm", name: "Kunkka" },
-    { videoSrc: "https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/magnataur.webm", name: "Magnataur" },
-    { videoSrc: "https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/dark_willow.webm", name: "Dark Willow" },
+    { videoSrc: "/Video/npc_dota_hero_kunkka.webm", name: "Kunkka" },
+    { videoSrc: "/Video/npc_dota_hero_magnataur.webm", name: "Magnataur" },
+    { videoSrc: "/Video/npc_dota_hero_dark_willow.webm", name: "Dark Willow" },
   ],
   },
   {
@@ -3042,9 +3046,9 @@ export const players: Player[] = [
     steamUrl: "https://steamcommunity.com/profiles/76561198102419508",
     dotabuffUrl: "https://www.dotabuff.com/players/142153780",
     favoriteHeroes: [
-    { videoSrc: "https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/crystal_maiden.webm", name: "Crystal Maiden" },
-    { videoSrc: "https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/templar_assassin.webm", name: "Templar Assassin" },
-    { videoSrc: "https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/dawnbreaker.webm", name: "Dawnbreaker" },
+    { videoSrc: "/Video/npc_dota_hero_crystal_maiden.webm", name: "Crystal Maiden" },
+    { videoSrc: "/Video/npc_dota_hero_templar_assassin.webm", name: "Templar Assassin" },
+    { videoSrc: "/Video/npc_dota_hero_dawnbreaker.webm", name: "Dawnbreaker" },
   ],
   },
   {
@@ -3069,9 +3073,9 @@ export const players: Player[] = [
     steamUrl: "https://steamcommunity.com/profiles/76561198080338787",
     dotabuffUrl: "https://www.dotabuff.com/players/120073059",
     favoriteHeroes: [
-    { videoSrc: "https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/tinker.webm", name: "Tinker" },
-    { videoSrc: "https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/dark_willow.webm", name: "Dark Willow" },
-    { videoSrc: "https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/sniper.webm", name: "Sniper" },
+    { videoSrc: "/Video/npc_dota_hero_tinker.webm", name: "Tinker" },
+    { videoSrc: "/Video/npc_dota_hero_dark_willow.webm", name: "Dark Willow" },
+    { videoSrc: "/Video/npc_dota_hero_sniper.webm", name: "Sniper" },
   ],
   },
   {
@@ -3096,9 +3100,9 @@ export const players: Player[] = [
     steamUrl: "https://steamcommunity.com/profiles/76561198057114143",
     dotabuffUrl: "https://www.dotabuff.com/players/96848415",
     favoriteHeroes: [
-    { videoSrc: "https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/pugna.webm", name: "Pugna" },
-    { videoSrc: "https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/clockwerk.webm", name: "Clockwerk" },
-    { videoSrc: "https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/void_spirit.webm", name: "Void Spirit" },
+    { videoSrc: "/Video/npc_dota_hero_pugna.webm", name: "Pugna" },
+    { videoSrc: "/Video/npc_dota_hero_clockwerk.webm", name: "Clockwerk" },
+    { videoSrc: "/Video/npc_dota_hero_void_spirit.webm", name: "Void Spirit" },
   ],
   },
   {
@@ -3123,9 +3127,9 @@ export const players: Player[] = [
     steamUrl: "https://steamcommunity.com/profiles/76561199634618094",
     dotabuffUrl: "https://www.dotabuff.com/players/1674352366",
     favoriteHeroes: [
-    { videoSrc: "https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/bane.webm", name: "Bane" },
-    { videoSrc: "https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/dark_seer.webm", name: "Dark Seer" },
-    { videoSrc: "https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/pudge.webm", name: "Pudge" },
+    { videoSrc: "/Video/npc_dota_hero_bane.webm", name: "Bane" },
+    { videoSrc: "/Video/npc_dota_hero_dark_seer.webm", name: "Dark Seer" },
+    { videoSrc: "/Video/npc_dota_hero_pudge.webm", name: "Pudge" },
   ],
   },
   {
@@ -3150,9 +3154,9 @@ export const players: Player[] = [
     steamUrl: "https://steamcommunity.com/profiles/76561198156738930",
     dotabuffUrl: "https://www.dotabuff.com/players/196473202",
     favoriteHeroes: [
-    { videoSrc: "https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/void_spirit.webm", name: "Void Spirit" },
-    { videoSrc: "https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/night_stalker.webm", name: "Night Stalker" },
-    { videoSrc: "https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/broodmother.webm", name: "Broodmother" },
+    { videoSrc: "/Video/npc_dota_hero_void_spirit.webm", name: "Void Spirit" },
+    { videoSrc: "/Video/npc_dota_hero_night_stalker.webm", name: "Night Stalker" },
+    { videoSrc: "/Video/npc_dota_hero_broodmother.webm", name: "Broodmother" },
   ],
   },
   {
@@ -3177,9 +3181,9 @@ export const players: Player[] = [
     steamUrl: "https://steamcommunity.com/profiles/76561198091954713",
     dotabuffUrl: "https://www.dotabuff.com/players/131688985",
     favoriteHeroes: [
-    { videoSrc: "https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/treant.webm", name: "Treant" },
-    { videoSrc: "https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/juggernaut.webm", name: "Juggernaut" },
-    { videoSrc: "https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/abaddon.webm", name: "Abaddon" },
+    { videoSrc: "/Video/npc_dota_hero_treant.webm", name: "Treant" },
+    { videoSrc: "/Video/npc_dota_hero_juggernaut.webm", name: "Juggernaut" },
+    { videoSrc: "/Video/npc_dota_hero_abaddon.webm", name: "Abaddon" },
   ],
   },
   {
@@ -3204,9 +3208,9 @@ export const players: Player[] = [
     steamUrl: "https://steamcommunity.com/profiles/76561198389078730",
     dotabuffUrl: "https://www.dotabuff.com/players/428813002",
     favoriteHeroes: [
-    { videoSrc: "https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/clinkz.webm", name: "Clinkz" },
-    { videoSrc: "https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/tinker.webm", name: "Tinker" },
-    { videoSrc: "https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/omniknight.webm", name: "Omniknight" },
+    { videoSrc: "/Video/npc_dota_hero_clinkz.webm", name: "Clinkz" },
+    { videoSrc: "/Video/npc_dota_hero_tinker.webm", name: "Tinker" },
+    { videoSrc: "/Video/npc_dota_hero_omniknight.webm", name: "Omniknight" },
   ],
   },
   {
@@ -3231,9 +3235,9 @@ export const players: Player[] = [
     steamUrl: "https://steamcommunity.com/profiles/76561198363322461",
     dotabuffUrl: "https://www.dotabuff.com/players/403056733",
     favoriteHeroes: [
-    { videoSrc: "https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/antimage.webm", name: "Antimage" },
-    { videoSrc: "https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/sven.webm", name: "Sven" },
-    { videoSrc: "https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/enigma.webm", name: "Enigma" },
+    { videoSrc: "/Video/npc_dota_hero_antimage.webm", name: "Antimage" },
+    { videoSrc: "/Video/npc_dota_hero_sven.webm", name: "Sven" },
+    { videoSrc: "/Video/npc_dota_hero_enigma.webm", name: "Enigma" },
   ],
   },
   {
@@ -3258,9 +3262,9 @@ export const players: Player[] = [
     steamUrl: "https://steamcommunity.com/profiles/76561198424433386",
     dotabuffUrl: "https://www.dotabuff.com/players/464167658",
     favoriteHeroes: [
-    { videoSrc: "https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/invoker.webm", name: "Invoker" },
-    { videoSrc: "https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/snapfire.webm", name: "Snapfire" },
-    { videoSrc: "https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/lycan.webm", name: "Lycan" },
+    { videoSrc: "/Video/npc_dota_hero_invoker.webm", name: "Invoker" },
+    { videoSrc: "/Video/npc_dota_hero_snapfire.webm", name: "Snapfire" },
+    { videoSrc: "/Video/npc_dota_hero_lycan.webm", name: "Lycan" },
   ],
   },
   {
@@ -3285,9 +3289,9 @@ export const players: Player[] = [
     steamUrl: "https://steamcommunity.com/profiles/76561199634110560",
     dotabuffUrl: "https://www.dotabuff.com/players/1673844832",
     favoriteHeroes: [
-    { videoSrc: "https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/wraith_king.webm", name: "Wraith King" },
-    { videoSrc: "https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/ursa.webm", name: "Ursa" },
-    { videoSrc: "https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/earthshaker.webm", name: "Earthshaker" },
+    { videoSrc: "/Video/npc_dota_hero_wraith_king.webm", name: "Wraith King" },
+    { videoSrc: "/Video/npc_dota_hero_ursa.webm", name: "Ursa" },
+    { videoSrc: "/Video/npc_dota_hero_earthshaker.webm", name: "Earthshaker" },
   ],
   },
   {
@@ -3312,9 +3316,9 @@ export const players: Player[] = [
     steamUrl: "https://steamcommunity.com/profiles/76561198338169972",
     dotabuffUrl: "https://www.dotabuff.com/players/377904244",
     favoriteHeroes: [
-    { videoSrc: "https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/witch_doctor.webm", name: "Witch Doctor" },
-    { videoSrc: "https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/slark.webm", name: "Slark" },
-    { videoSrc: "https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/ursa.webm", name: "Ursa" },
+    { videoSrc: "/Video/npc_dota_hero_witch_doctor.webm", name: "Witch Doctor" },
+    { videoSrc: "/Video/npc_dota_hero_slark.webm", name: "Slark" },
+    { videoSrc: "/Video/npc_dota_hero_ursa.webm", name: "Ursa" },
   ],
   },
   {
@@ -3339,9 +3343,9 @@ export const players: Player[] = [
     steamUrl: "https://steamcommunity.com/profiles/76561198254597798",
     dotabuffUrl: "https://www.dotabuff.com/players/294332070",
     favoriteHeroes: [
-    { videoSrc: "https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/meepo.webm", name: "Meepo" },
-    { videoSrc: "https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/bloodseeker.webm", name: "Bloodseeker" },
-    { videoSrc: "https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/sand_king.webm", name: "Sand King" },
+    { videoSrc: "/Video/npc_dota_hero_meepo.webm", name: "Meepo" },
+    { videoSrc: "/Video/npc_dota_hero_bloodseeker.webm", name: "Bloodseeker" },
+    { videoSrc: "/Video/npc_dota_hero_sand_king.webm", name: "Sand King" },
   ],
   },
   {
@@ -3366,9 +3370,9 @@ export const players: Player[] = [
     steamUrl: "https://steamcommunity.com/profiles/76561198199055633",
     dotabuffUrl: "https://www.dotabuff.com/players/238789905",
     favoriteHeroes: [
-    { videoSrc: "https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/treant.webm", name: "Treant" },
-    { videoSrc: "https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/bounty_hunter.webm", name: "Bounty Hunter" },
-    { videoSrc: "https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/dazzle.webm", name: "Dazzle" },
+    { videoSrc: "/Video/npc_dota_hero_treant.webm", name: "Treant" },
+    { videoSrc: "/Video/npc_dota_hero_bounty_hunter.webm", name: "Bounty Hunter" },
+    { videoSrc: "/Video/npc_dota_hero_dazzle.webm", name: "Dazzle" },
   ],
   },
   {
@@ -3393,9 +3397,9 @@ export const players: Player[] = [
     steamUrl: "https://steamcommunity.com/profiles/76561198135668078",
     dotabuffUrl: "https://www.dotabuff.com/players/175402350",
     favoriteHeroes: [
-    { videoSrc: "https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/templar_assassin.webm", name: "Templar Assassin" },
-    { videoSrc: "https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/dark_seer.webm", name: "Dark Seer" },
-    { videoSrc: "https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/visage.webm", name: "Visage" },
+    { videoSrc: "/Video/npc_dota_hero_templar_assassin.webm", name: "Templar Assassin" },
+    { videoSrc: "/Video/npc_dota_hero_dark_seer.webm", name: "Dark Seer" },
+    { videoSrc: "/Video/npc_dota_hero_visage.webm", name: "Visage" },
   ],
   },
   {
@@ -3420,9 +3424,9 @@ export const players: Player[] = [
     steamUrl: "https://steamcommunity.com/profiles/76561198081607826",
     dotabuffUrl: "https://www.dotabuff.com/players/121342098",
     favoriteHeroes: [
-    { videoSrc: "https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/chen.webm", name: "Chen" },
-    { videoSrc: "https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/sven.webm", name: "Sven" },
-    { videoSrc: "https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/abaddon.webm", name: "Abaddon" },
+    { videoSrc: "/Video/npc_dota_hero_chen.webm", name: "Chen" },
+    { videoSrc: "/Video/npc_dota_hero_sven.webm", name: "Sven" },
+    { videoSrc: "/Video/npc_dota_hero_abaddon.webm", name: "Abaddon" },
   ],
   },
   {
@@ -3447,9 +3451,9 @@ export const players: Player[] = [
     steamUrl: "https://steamcommunity.com/profiles/76561198195766263",
     dotabuffUrl: "https://www.dotabuff.com/players/235500535",
     favoriteHeroes: [
-    { videoSrc: "https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/sniper.webm", name: "Sniper" },
-    { videoSrc: "https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/venomancer.webm", name: "Venomancer" },
-    { videoSrc: "https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/huskar.webm", name: "Huskar" },
+    { videoSrc: "/Video/npc_dota_hero_sniper.webm", name: "Sniper" },
+    { videoSrc: "/Video/npc_dota_hero_venomancer.webm", name: "Venomancer" },
+    { videoSrc: "/Video/npc_dota_hero_huskar.webm", name: "Huskar" },
   ],
   },
   {
@@ -3474,9 +3478,9 @@ export const players: Player[] = [
     steamUrl: "https://steamcommunity.com/profiles/76561198204082433",
     dotabuffUrl: "https://www.dotabuff.com/players/243816705",
     favoriteHeroes: [
-    { videoSrc: "https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/clinkz.webm", name: "Clinkz" },
-    { videoSrc: "https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/void_spirit.webm", name: "Void Spirit" },
-    { videoSrc: "https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/puck.webm", name: "Puck" },
+    { videoSrc: "/Video/npc_dota_hero_clinkz.webm", name: "Clinkz" },
+    { videoSrc: "/Video/npc_dota_hero_void_spirit.webm", name: "Void Spirit" },
+    { videoSrc: "/Video/npc_dota_hero_puck.webm", name: "Puck" },
   ],
   },
   {
@@ -3501,9 +3505,9 @@ export const players: Player[] = [
     steamUrl: "https://steamcommunity.com/profiles/76561198242832460",
     dotabuffUrl: "https://www.dotabuff.com/players/282566732",
     favoriteHeroes: [
-    { videoSrc: "https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/templar_assassin.webm", name: "Templar Assassin" },
-    { videoSrc: "https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/broodmother.webm", name: "Broodmother" },
-    { videoSrc: "https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/legion_commander.webm", name: "Legion Commander" },
+    { videoSrc: "/Video/npc_dota_hero_templar_assassin.webm", name: "Templar Assassin" },
+    { videoSrc: "/Video/npc_dota_hero_broodmother.webm", name: "Broodmother" },
+    { videoSrc: "/Video/npc_dota_hero_legion_commander.webm", name: "Legion Commander" },
   ],
   },
   {
@@ -3528,9 +3532,9 @@ export const players: Player[] = [
     steamUrl: "https://steamcommunity.com/profiles/76561198202259953",
     dotabuffUrl: "https://www.dotabuff.com/players/241994225",
     favoriteHeroes: [
-    { videoSrc: "https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/treant.webm", name: "Treant" },
-    { videoSrc: "https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/gyrocopter.webm", name: "Gyrocopter" },
-    { videoSrc: "https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/necrophos.webm", name: "Necrophos" },
+    { videoSrc: "/Video/npc_dota_hero_treant.webm", name: "Treant" },
+    { videoSrc: "/Video/npc_dota_hero_gyrocopter.webm", name: "Gyrocopter" },
+    { videoSrc: "/Video/npc_dota_hero_necrophos.webm", name: "Necrophos" },
   ],
   },
   {
@@ -3555,9 +3559,9 @@ export const players: Player[] = [
     steamUrl: "https://steamcommunity.com/profiles/76561198111785158",
     dotabuffUrl: "https://www.dotabuff.com/players/151519430",
     favoriteHeroes: [
-    { videoSrc: "https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/axe.webm", name: "Axe" },
-    { videoSrc: "https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/medusa.webm", name: "Medusa" },
-    { videoSrc: "https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/chen.webm", name: "Chen" },
+    { videoSrc: "/Video/npc_dota_hero_axe.webm", name: "Axe" },
+    { videoSrc: "/Video/npc_dota_hero_medusa.webm", name: "Medusa" },
+    { videoSrc: "/Video/npc_dota_hero_chen.webm", name: "Chen" },
   ],
   },
   {
@@ -3582,9 +3586,9 @@ export const players: Player[] = [
     steamUrl: "https://steamcommunity.com/profiles/76561198320585919",
     dotabuffUrl: "https://www.dotabuff.com/players/360320191",
     favoriteHeroes: [
-    { videoSrc: "https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/enchantress.webm", name: "Enchantress" },
-    { videoSrc: "https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/undying.webm", name: "Undying" },
-    { videoSrc: "https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/kunkka.webm", name: "Kunkka" },
+    { videoSrc: "/Video/npc_dota_hero_enchantress.webm", name: "Enchantress" },
+    { videoSrc: "/Video/npc_dota_hero_undying.webm", name: "Undying" },
+    { videoSrc: "/Video/npc_dota_hero_kunkka.webm", name: "Kunkka" },
   ],
   },
   {
@@ -3609,9 +3613,9 @@ export const players: Player[] = [
     steamUrl: "https://steamcommunity.com/profiles/76561197980242110",
     dotabuffUrl: "https://www.dotabuff.com/players/19976382",
     favoriteHeroes: [
-    { videoSrc: "https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/life_stealer.webm", name: "Life Stealer" },
-    { videoSrc: "https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/necrophos.webm", name: "Necrophos" },
-    { videoSrc: "https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/morphling.webm", name: "Morphling" },
+    { videoSrc: "/Video/npc_dota_hero_life_stealer.webm", name: "Life Stealer" },
+    { videoSrc: "/Video/npc_dota_hero_necrophos.webm", name: "Necrophos" },
+    { videoSrc: "/Video/npc_dota_hero_morphling.webm", name: "Morphling" },
   ],
   },
   {
@@ -3636,9 +3640,9 @@ export const players: Player[] = [
     steamUrl: "https://steamcommunity.com/profiles/76561198117828891",
     dotabuffUrl: "https://www.dotabuff.com/players/157563163",
     favoriteHeroes: [
-    { videoSrc: "https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/necrophos.webm", name: "Necrophos" },
-    { videoSrc: "https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/skywrath_mage.webm", name: "Skywrath Mage" },
-    { videoSrc: "https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/bloodseeker.webm", name: "Bloodseeker" },
+    { videoSrc: "/Video/npc_dota_hero_necrophos.webm", name: "Necrophos" },
+    { videoSrc: "/Video/npc_dota_hero_skywrath_mage.webm", name: "Skywrath Mage" },
+    { videoSrc: "/Video/npc_dota_hero_bloodseeker.webm", name: "Bloodseeker" },
   ],
   },
   {
@@ -3663,9 +3667,9 @@ export const players: Player[] = [
     steamUrl: "https://steamcommunity.com/profiles/76561198259599149",
     dotabuffUrl: "https://www.dotabuff.com/players/299333421",
     favoriteHeroes: [
-    { videoSrc: "https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/beastmaster.webm", name: "Beastmaster" },
-    { videoSrc: "https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/obsidian_destroyer.webm", name: "Obsidian Destroyer" },
-    { videoSrc: "https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/arc_warden.webm", name: "Arc Warden" },
+    { videoSrc: "/Video/npc_dota_hero_beastmaster.webm", name: "Beastmaster" },
+    { videoSrc: "/Video/npc_dota_hero_obsidian_destroyer.webm", name: "Obsidian Destroyer" },
+    { videoSrc: "/Video/npc_dota_hero_arc_warden.webm", name: "Arc Warden" },
   ],
   },
   {
@@ -3690,9 +3694,9 @@ export const players: Player[] = [
     steamUrl: "https://steamcommunity.com/profiles/76561198207632437",
     dotabuffUrl: "https://www.dotabuff.com/players/247366709",
     favoriteHeroes: [
-    { videoSrc: "https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/ancient_apparition.webm", name: "Ancient Apparition" },
-    { videoSrc: "https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/dazzle.webm", name: "Dazzle" },
-    { videoSrc: "https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/mars.webm", name: "Mars" },
+    { videoSrc: "/Video/npc_dota_hero_ancient_apparition.webm", name: "Ancient Apparition" },
+    { videoSrc: "/Video/npc_dota_hero_dazzle.webm", name: "Dazzle" },
+    { videoSrc: "/Video/npc_dota_hero_mars.webm", name: "Mars" },
   ],
   },
   {
@@ -3717,9 +3721,9 @@ export const players: Player[] = [
     steamUrl: "https://steamcommunity.com/profiles/76561198322673785",
     dotabuffUrl: "https://www.dotabuff.com/players/362408057",
     favoriteHeroes: [
-    { videoSrc: "https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/naga_siren.webm", name: "Naga Siren" },
-    { videoSrc: "https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/weaver.webm", name: "Weaver" },
-    { videoSrc: "https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/winter_wyvern.webm", name: "Winter Wyvern" },
+    { videoSrc: "/Video/npc_dota_hero_naga_siren.webm", name: "Naga Siren" },
+    { videoSrc: "/Video/npc_dota_hero_weaver.webm", name: "Weaver" },
+    { videoSrc: "/Video/npc_dota_hero_winter_wyvern.webm", name: "Winter Wyvern" },
   ],
   },
   {
@@ -3744,9 +3748,9 @@ export const players: Player[] = [
     steamUrl: "https://steamcommunity.com/profiles/76561198136696117",
     dotabuffUrl: "https://www.dotabuff.com/players/176430389",
     favoriteHeroes: [
-    { videoSrc: "https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/tidehunter.webm", name: "Tidehunter" },
-    { videoSrc: "https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/weaver.webm", name: "Weaver" },
-    { videoSrc: "https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/death_prophet.webm", name: "Death Prophet" },
+    { videoSrc: "/Video/npc_dota_hero_tidehunter.webm", name: "Tidehunter" },
+    { videoSrc: "/Video/npc_dota_hero_weaver.webm", name: "Weaver" },
+    { videoSrc: "/Video/npc_dota_hero_death_prophet.webm", name: "Death Prophet" },
   ],
   },
   {
@@ -3771,9 +3775,9 @@ export const players: Player[] = [
     steamUrl: "https://steamcommunity.com/profiles/76561198117014632",
     dotabuffUrl: "https://www.dotabuff.com/players/156748904",
     favoriteHeroes: [
-    { videoSrc: "https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/morphling.webm", name: "Morphling" },
-    { videoSrc: "https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/lone_druid.webm", name: "Lone Druid" },
-    { videoSrc: "https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/slark.webm", name: "Slark" },
+    { videoSrc: "/Video/npc_dota_hero_morphling.webm", name: "Morphling" },
+    { videoSrc: "/Video/npc_dota_hero_lone_druid.webm", name: "Lone Druid" },
+    { videoSrc: "/Video/npc_dota_hero_slark.webm", name: "Slark" },
   ],
   },
   {
@@ -3798,9 +3802,9 @@ export const players: Player[] = [
     steamUrl: "https://steamcommunity.com/profiles/76561198254389672",
     dotabuffUrl: "https://www.dotabuff.com/players/294123944",
     favoriteHeroes: [
-    { videoSrc: "https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/meepo.webm", name: "Meepo" },
-    { videoSrc: "https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/natures_prophet.webm", name: "Natures Prophet" },
-    { videoSrc: "https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/centaur.webm", name: "Centaur" },
+    { videoSrc: "/Video/npc_dota_hero_meepo.webm", name: "Meepo" },
+    { videoSrc: "/Video/npc_dota_hero_natures_prophet.webm", name: "Natures Prophet" },
+    { videoSrc: "/Video/npc_dota_hero_centaur.webm", name: "Centaur" },
   ],
   },
   {
@@ -3825,9 +3829,9 @@ export const players: Player[] = [
     steamUrl: "https://steamcommunity.com/profiles/76561198047537854",
     dotabuffUrl: "https://www.dotabuff.com/players/87272126",
     favoriteHeroes: [
-    { videoSrc: "https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/lycan.webm", name: "Lycan" },
-    { videoSrc: "https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/phoenix.webm", name: "Phoenix" },
-    { videoSrc: "https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/nyx_assassin.webm", name: "Nyx Assassin" },
+    { videoSrc: "/Video/npc_dota_hero_lycan.webm", name: "Lycan" },
+    { videoSrc: "/Video/npc_dota_hero_phoenix.webm", name: "Phoenix" },
+    { videoSrc: "/Video/npc_dota_hero_nyx_assassin.webm", name: "Nyx Assassin" },
   ],
   },
   {
@@ -3852,9 +3856,9 @@ export const players: Player[] = [
     steamUrl: "https://steamcommunity.com/profiles/76561198332653736",
     dotabuffUrl: "https://www.dotabuff.com/players/372388008",
     favoriteHeroes: [
-    { videoSrc: "https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/ogre_magi.webm", name: "Ogre Magi" },
-    { videoSrc: "https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/dazzle.webm", name: "Dazzle" },
-    { videoSrc: "https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/mars.webm", name: "Mars" },
+    { videoSrc: "/Video/npc_dota_hero_ogre_magi.webm", name: "Ogre Magi" },
+    { videoSrc: "/Video/npc_dota_hero_dazzle.webm", name: "Dazzle" },
+    { videoSrc: "/Video/npc_dota_hero_mars.webm", name: "Mars" },
   ],
   },
   {
@@ -3879,9 +3883,9 @@ export const players: Player[] = [
     steamUrl: "https://steamcommunity.com/profiles/76561198068707755",
     dotabuffUrl: "https://www.dotabuff.com/players/108442027",
     favoriteHeroes: [
-    { videoSrc: "https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/troll_warlord.webm", name: "Troll Warlord" },
-    { videoSrc: "https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/lion.webm", name: "Lion" },
-    { videoSrc: "https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/windrunner.webm", name: "Windrunner" },
+    { videoSrc: "/Video/npc_dota_hero_troll_warlord.webm", name: "Troll Warlord" },
+    { videoSrc: "/Video/npc_dota_hero_lion.webm", name: "Lion" },
+    { videoSrc: "/Video/npc_dota_hero_windrunner.webm", name: "Windrunner" },
   ],
   },
   {
@@ -3906,9 +3910,9 @@ export const players: Player[] = [
     steamUrl: "https://steamcommunity.com/profiles/76561198290132443",
     dotabuffUrl: "https://www.dotabuff.com/players/329866715",
     favoriteHeroes: [
-    { videoSrc: "https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/terrorblade.webm", name: "Terrorblade" },
-    { videoSrc: "https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/ogre_magi.webm", name: "Ogre Magi" },
-    { videoSrc: "https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/kunkka.webm", name: "Kunkka" },
+    { videoSrc: "/Video/npc_dota_hero_terrorblade.webm", name: "Terrorblade" },
+    { videoSrc: "/Video/npc_dota_hero_ogre_magi.webm", name: "Ogre Magi" },
+    { videoSrc: "/Video/npc_dota_hero_kunkka.webm", name: "Kunkka" },
   ],
   },
   {
@@ -3933,9 +3937,9 @@ export const players: Player[] = [
     steamUrl: "https://steamcommunity.com/profiles/76561199166345064",
     dotabuffUrl: "https://www.dotabuff.com/players/1206079336",
     favoriteHeroes: [
-    { videoSrc: "https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/crystal_maiden.webm", name: "Crystal Maiden" },
-    { videoSrc: "https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/dragon_knight.webm", name: "Dragon Knight" },
-    { videoSrc: "https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/sand_king.webm", name: "Sand King" },
+    { videoSrc: "/Video/npc_dota_hero_crystal_maiden.webm", name: "Crystal Maiden" },
+    { videoSrc: "/Video/npc_dota_hero_dragon_knight.webm", name: "Dragon Knight" },
+    { videoSrc: "/Video/npc_dota_hero_sand_king.webm", name: "Sand King" },
   ],
   },
   {
@@ -3960,9 +3964,9 @@ export const players: Player[] = [
     steamUrl: "https://steamcommunity.com/profiles/76561198350577268",
     dotabuffUrl: "https://www.dotabuff.com/players/390311540",
     favoriteHeroes: [
-    { videoSrc: "https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/night_stalker.webm", name: "Night Stalker" },
-    { videoSrc: "https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/undying.webm", name: "Undying" },
-    { videoSrc: "https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/mars.webm", name: "Mars" },
+    { videoSrc: "/Video/npc_dota_hero_night_stalker.webm", name: "Night Stalker" },
+    { videoSrc: "/Video/npc_dota_hero_undying.webm", name: "Undying" },
+    { videoSrc: "/Video/npc_dota_hero_mars.webm", name: "Mars" },
   ],
   },
   {
@@ -3987,9 +3991,9 @@ export const players: Player[] = [
     steamUrl: "https://steamcommunity.com/profiles/76561198151377752",
     dotabuffUrl: "https://www.dotabuff.com/players/191112024",
     favoriteHeroes: [
-    { videoSrc: "https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/death_prophet.webm", name: "Death Prophet" },
-    { videoSrc: "https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/queenofpain.webm", name: "Queenofpain" },
-    { videoSrc: "https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/chen.webm", name: "Chen" },
+    { videoSrc: "/Video/npc_dota_hero_death_prophet.webm", name: "Death Prophet" },
+    { videoSrc: "/Video/npc_dota_hero_queenofpain.webm", name: "Queenofpain" },
+    { videoSrc: "/Video/npc_dota_hero_chen.webm", name: "Chen" },
   ],
   },
   {
@@ -4014,9 +4018,9 @@ export const players: Player[] = [
     steamUrl: "https://steamcommunity.com/profiles/76561199245515668",
     dotabuffUrl: "https://www.dotabuff.com/players/1285249940",
     favoriteHeroes: [
-    { videoSrc: "https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/templar_assassin.webm", name: "Templar Assassin" },
-    { videoSrc: "https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/ogre_magi.webm", name: "Ogre Magi" },
-    { videoSrc: "https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/winter_wyvern.webm", name: "Winter Wyvern" },
+    { videoSrc: "/Video/npc_dota_hero_templar_assassin.webm", name: "Templar Assassin" },
+    { videoSrc: "/Video/npc_dota_hero_ogre_magi.webm", name: "Ogre Magi" },
+    { videoSrc: "/Video/npc_dota_hero_winter_wyvern.webm", name: "Winter Wyvern" },
   ],
   },
   {
@@ -4041,9 +4045,9 @@ export const players: Player[] = [
     steamUrl: "https://steamcommunity.com/profiles/76561198081824644",
     dotabuffUrl: "https://www.dotabuff.com/players/121558916",
     favoriteHeroes: [
-    { videoSrc: "https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/ember_spirit.webm", name: "Ember Spirit" },
-    { videoSrc: "https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/meepo.webm", name: "Meepo" },
-    { videoSrc: "https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/disruptor.webm", name: "Disruptor" },
+    { videoSrc: "/Video/npc_dota_hero_ember_spirit.webm", name: "Ember Spirit" },
+    { videoSrc: "/Video/npc_dota_hero_meepo.webm", name: "Meepo" },
+    { videoSrc: "/Video/npc_dota_hero_disruptor.webm", name: "Disruptor" },
   ],
   },
   {
@@ -4068,9 +4072,9 @@ export const players: Player[] = [
     steamUrl: "https://steamcommunity.com/profiles/76561198973871305",
     dotabuffUrl: "https://www.dotabuff.com/players/1013605577",
     favoriteHeroes: [
-    { videoSrc: "https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/beastmaster.webm", name: "Beastmaster" },
-    { videoSrc: "https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/meepo.webm", name: "Meepo" },
-    { videoSrc: "https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/lion.webm", name: "Lion" },
+    { videoSrc: "/Video/npc_dota_hero_beastmaster.webm", name: "Beastmaster" },
+    { videoSrc: "/Video/npc_dota_hero_meepo.webm", name: "Meepo" },
+    { videoSrc: "/Video/npc_dota_hero_lion.webm", name: "Lion" },
   ],
   },
   {
@@ -4095,9 +4099,9 @@ export const players: Player[] = [
     steamUrl: "https://steamcommunity.com/profiles/76561198189550322",
     dotabuffUrl: "https://www.dotabuff.com/players/229284594",
     favoriteHeroes: [
-    { videoSrc: "https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/visage.webm", name: "Visage" },
-    { videoSrc: "https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/snapfire.webm", name: "Snapfire" },
-    { videoSrc: "https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/troll_warlord.webm", name: "Troll Warlord" },
+    { videoSrc: "/Video/npc_dota_hero_visage.webm", name: "Visage" },
+    { videoSrc: "/Video/npc_dota_hero_snapfire.webm", name: "Snapfire" },
+    { videoSrc: "/Video/npc_dota_hero_troll_warlord.webm", name: "Troll Warlord" },
   ],
   },
   {
@@ -4122,9 +4126,9 @@ export const players: Player[] = [
     steamUrl: "https://steamcommunity.com/profiles/76561198114968522",
     dotabuffUrl: "https://www.dotabuff.com/players/154702794",
     favoriteHeroes: [
-    { videoSrc: "https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/chen.webm", name: "Chen" },
-    { videoSrc: "https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/lycan.webm", name: "Lycan" },
-    { videoSrc: "https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/meepo.webm", name: "Meepo" },
+    { videoSrc: "/Video/npc_dota_hero_chen.webm", name: "Chen" },
+    { videoSrc: "/Video/npc_dota_hero_lycan.webm", name: "Lycan" },
+    { videoSrc: "/Video/npc_dota_hero_meepo.webm", name: "Meepo" },
   ],
   },
   {
@@ -4149,9 +4153,9 @@ export const players: Player[] = [
     steamUrl: "https://steamcommunity.com/profiles/76561198334942741",
     dotabuffUrl: "https://www.dotabuff.com/players/374677013",
     favoriteHeroes: [
-    { videoSrc: "https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/broodmother.webm", name: "Broodmother" },
-    { videoSrc: "https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/ancient_apparition.webm", name: "Ancient Apparition" },
-    { videoSrc: "https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/pugna.webm", name: "Pugna" },
+    { videoSrc: "/Video/npc_dota_hero_broodmother.webm", name: "Broodmother" },
+    { videoSrc: "/Video/npc_dota_hero_ancient_apparition.webm", name: "Ancient Apparition" },
+    { videoSrc: "/Video/npc_dota_hero_pugna.webm", name: "Pugna" },
   ],
   },
   {
@@ -4176,9 +4180,9 @@ export const players: Player[] = [
     steamUrl: "https://steamcommunity.com/profiles/76561198390575907",
     dotabuffUrl: "https://www.dotabuff.com/players/430310179",
     favoriteHeroes: [
-    { videoSrc: "https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/oracle.webm", name: "Oracle" },
-    { videoSrc: "https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/necrophos.webm", name: "Necrophos" },
-    { videoSrc: "https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/gyrocopter.webm", name: "Gyrocopter" },
+    { videoSrc: "/Video/npc_dota_hero_oracle.webm", name: "Oracle" },
+    { videoSrc: "/Video/npc_dota_hero_necrophos.webm", name: "Necrophos" },
+    { videoSrc: "/Video/npc_dota_hero_gyrocopter.webm", name: "Gyrocopter" },
   ],
   },
   {
@@ -4203,9 +4207,9 @@ export const players: Player[] = [
     steamUrl: "https://steamcommunity.com/profiles/76561199011354107",
     dotabuffUrl: "https://www.dotabuff.com/players/1051088379",
     favoriteHeroes: [
-    { videoSrc: "https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/queenofpain.webm", name: "Queenofpain" },
-    { videoSrc: "https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/omniknight.webm", name: "Omniknight" },
-    { videoSrc: "https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/monkey_king.webm", name: "Monkey King" },
+    { videoSrc: "/Video/npc_dota_hero_queenofpain.webm", name: "Queenofpain" },
+    { videoSrc: "/Video/npc_dota_hero_omniknight.webm", name: "Omniknight" },
+    { videoSrc: "/Video/npc_dota_hero_monkey_king.webm", name: "Monkey King" },
   ],
   },
   {
@@ -4230,9 +4234,9 @@ export const players: Player[] = [
     steamUrl: "https://steamcommunity.com/profiles/76561198180754487",
     dotabuffUrl: "https://www.dotabuff.com/players/220488759",
     favoriteHeroes: [
-    { videoSrc: "https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/wisp.webm", name: "Wisp" },
-    { videoSrc: "https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/omniknight.webm", name: "Omniknight" },
-    { videoSrc: "https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/disruptor.webm", name: "Disruptor" },
+    { videoSrc: "/Video/npc_dota_hero_wisp.webm", name: "Wisp" },
+    { videoSrc: "/Video/npc_dota_hero_omniknight.webm", name: "Omniknight" },
+    { videoSrc: "/Video/npc_dota_hero_disruptor.webm", name: "Disruptor" },
   ],
   },
   {
@@ -4257,9 +4261,9 @@ export const players: Player[] = [
     steamUrl: "https://steamcommunity.com/profiles/76561199045778662",
     dotabuffUrl: "https://www.dotabuff.com/players/1085512934",
     favoriteHeroes: [
-    { videoSrc: "https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/warlock.webm", name: "Warlock" },
-    { videoSrc: "https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/slardar.webm", name: "Slardar" },
-    { videoSrc: "https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/leshrac.webm", name: "Leshrac" },
+    { videoSrc: "/Video/npc_dota_hero_warlock.webm", name: "Warlock" },
+    { videoSrc: "/Video/npc_dota_hero_slardar.webm", name: "Slardar" },
+    { videoSrc: "/Video/npc_dota_hero_leshrac.webm", name: "Leshrac" },
   ],
   },
   {
@@ -4284,9 +4288,9 @@ export const players: Player[] = [
     steamUrl: "https://steamcommunity.com/profiles/76561198077906358",
     dotabuffUrl: "https://www.dotabuff.com/players/117640630",
     favoriteHeroes: [
-    { videoSrc: "https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/mars.webm", name: "Mars" },
-    { videoSrc: "https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/silencer.webm", name: "Silencer" },
-    { videoSrc: "https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/treant.webm", name: "Treant" },
+    { videoSrc: "/Video/npc_dota_hero_mars.webm", name: "Mars" },
+    { videoSrc: "/Video/npc_dota_hero_silencer.webm", name: "Silencer" },
+    { videoSrc: "/Video/npc_dota_hero_treant.webm", name: "Treant" },
   ],
   },
   {
@@ -4311,9 +4315,9 @@ export const players: Player[] = [
     steamUrl: "https://steamcommunity.com/profiles/76561199219352365",
     dotabuffUrl: "https://www.dotabuff.com/players/1259086637",
     favoriteHeroes: [
-    { videoSrc: "https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/nyx_assassin.webm", name: "Nyx Assassin" },
-    { videoSrc: "https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/riki.webm", name: "Riki" },
-    { videoSrc: "https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/phantom_assassin.webm", name: "Phantom Assassin" },
+    { videoSrc: "/Video/npc_dota_hero_nyx_assassin.webm", name: "Nyx Assassin" },
+    { videoSrc: "/Video/npc_dota_hero_riki.webm", name: "Riki" },
+    { videoSrc: "/Video/npc_dota_hero_phantom_assassin.webm", name: "Phantom Assassin" },
   ],
   },
   {
@@ -4338,9 +4342,9 @@ export const players: Player[] = [
     steamUrl: "https://steamcommunity.com/profiles/76561198105146154",
     dotabuffUrl: "https://www.dotabuff.com/players/144880426",
     favoriteHeroes: [
-    { videoSrc: "https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/silencer.webm", name: "Silencer" },
-    { videoSrc: "https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/axe.webm", name: "Axe" },
-    { videoSrc: "https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/grimstroke.webm", name: "Grimstroke" },
+    { videoSrc: "/Video/npc_dota_hero_silencer.webm", name: "Silencer" },
+    { videoSrc: "/Video/npc_dota_hero_axe.webm", name: "Axe" },
+    { videoSrc: "/Video/npc_dota_hero_grimstroke.webm", name: "Grimstroke" },
   ],
   },
   {
@@ -4365,9 +4369,9 @@ export const players: Player[] = [
     steamUrl: "https://steamcommunity.com/profiles/76561198351732682",
     dotabuffUrl: "https://www.dotabuff.com/players/391466954",
     favoriteHeroes: [
-    { videoSrc: "https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/clockwerk.webm", name: "Clockwerk" },
-    { videoSrc: "https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/lich.webm", name: "Lich" },
-    { videoSrc: "https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/huskar.webm", name: "Huskar" },
+    { videoSrc: "/Video/npc_dota_hero_clockwerk.webm", name: "Clockwerk" },
+    { videoSrc: "/Video/npc_dota_hero_lich.webm", name: "Lich" },
+    { videoSrc: "/Video/npc_dota_hero_huskar.webm", name: "Huskar" },
   ],
   },
   {
@@ -4392,9 +4396,9 @@ export const players: Player[] = [
     steamUrl: "https://steamcommunity.com/profiles/76561199713361554",
     dotabuffUrl: "https://www.dotabuff.com/players/1753095826",
     favoriteHeroes: [
-    { videoSrc: "https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/windrunner.webm", name: "Windrunner" },
-    { videoSrc: "https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/sand_king.webm", name: "Sand King" },
-    { videoSrc: "https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/brewmaster.webm", name: "Brewmaster" },
+    { videoSrc: "/Video/npc_dota_hero_windrunner.webm", name: "Windrunner" },
+    { videoSrc: "/Video/npc_dota_hero_sand_king.webm", name: "Sand King" },
+    { videoSrc: "/Video/npc_dota_hero_brewmaster.webm", name: "Brewmaster" },
   ],
   },
   {
@@ -4419,9 +4423,9 @@ export const players: Player[] = [
     steamUrl: "https://steamcommunity.com/profiles/76561198813955149",
     dotabuffUrl: "https://www.dotabuff.com/players/853689421",
     favoriteHeroes: [
-    { videoSrc: "https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/necrophos.webm", name: "Necrophos" },
-    { videoSrc: "https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/clinkz.webm", name: "Clinkz" },
-    { videoSrc: "https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/antimage.webm", name: "Antimage" },
+    { videoSrc: "/Video/npc_dota_hero_necrophos.webm", name: "Necrophos" },
+    { videoSrc: "/Video/npc_dota_hero_clinkz.webm", name: "Clinkz" },
+    { videoSrc: "/Video/npc_dota_hero_antimage.webm", name: "Antimage" },
   ],
   },
   {
@@ -4446,9 +4450,9 @@ export const players: Player[] = [
     steamUrl: "https://steamcommunity.com/profiles/76561198378968295",
     dotabuffUrl: "https://www.dotabuff.com/players/418702567",
     favoriteHeroes: [
-    { videoSrc: "https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/lion.webm", name: "Lion" },
-    { videoSrc: "https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/phoenix.webm", name: "Phoenix" },
-    { videoSrc: "https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/visage.webm", name: "Visage" },
+    { videoSrc: "/Video/npc_dota_hero_lion.webm", name: "Lion" },
+    { videoSrc: "/Video/npc_dota_hero_phoenix.webm", name: "Phoenix" },
+    { videoSrc: "/Video/npc_dota_hero_visage.webm", name: "Visage" },
   ],
   },
   {
@@ -4473,9 +4477,9 @@ export const players: Player[] = [
     steamUrl: "https://steamcommunity.com/profiles/76561198322499979",
     dotabuffUrl: "https://www.dotabuff.com/players/362234251",
     favoriteHeroes: [
-    { videoSrc: "https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/phantom_lancer.webm", name: "Phantom Lancer" },
-    { videoSrc: "https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/tiny.webm", name: "Tiny" },
-    { videoSrc: "https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/grimstroke.webm", name: "Grimstroke" },
+    { videoSrc: "/Video/npc_dota_hero_phantom_lancer.webm", name: "Phantom Lancer" },
+    { videoSrc: "/Video/npc_dota_hero_tiny.webm", name: "Tiny" },
+    { videoSrc: "/Video/npc_dota_hero_grimstroke.webm", name: "Grimstroke" },
   ],
   },
   {
@@ -4500,9 +4504,9 @@ export const players: Player[] = [
     steamUrl: "https://steamcommunity.com/profiles/76561198108822781",
     dotabuffUrl: "https://www.dotabuff.com/players/148557053",
     favoriteHeroes: [
-    { videoSrc: "https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/medusa.webm", name: "Medusa" },
-    { videoSrc: "https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/monkey_king.webm", name: "Monkey King" },
-    { videoSrc: "https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/phoenix.webm", name: "Phoenix" },
+    { videoSrc: "/Video/npc_dota_hero_medusa.webm", name: "Medusa" },
+    { videoSrc: "/Video/npc_dota_hero_monkey_king.webm", name: "Monkey King" },
+    { videoSrc: "/Video/npc_dota_hero_phoenix.webm", name: "Phoenix" },
   ],
   },
   {
@@ -4527,9 +4531,9 @@ export const players: Player[] = [
     steamUrl: "https://steamcommunity.com/profiles/76561198047161874",
     dotabuffUrl: "https://www.dotabuff.com/players/86896146",
     favoriteHeroes: [
-    { videoSrc: "https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/spectre.webm", name: "Spectre" },
-    { videoSrc: "https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/riki.webm", name: "Riki" },
-    { videoSrc: "https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/lone_druid.webm", name: "Lone Druid" },
+    { videoSrc: "/Video/npc_dota_hero_spectre.webm", name: "Spectre" },
+    { videoSrc: "/Video/npc_dota_hero_riki.webm", name: "Riki" },
+    { videoSrc: "/Video/npc_dota_hero_lone_druid.webm", name: "Lone Druid" },
   ],
   },
   {
@@ -4554,9 +4558,9 @@ export const players: Player[] = [
     steamUrl: "https://steamcommunity.com/profiles/76561198433204338",
     dotabuffUrl: "https://www.dotabuff.com/players/472938610",
     favoriteHeroes: [
-    { videoSrc: "https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/spirit_breaker.webm", name: "Spirit Breaker" },
-    { videoSrc: "https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/chen.webm", name: "Chen" },
-    { videoSrc: "https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/pugna.webm", name: "Pugna" },
+    { videoSrc: "/Video/npc_dota_hero_spirit_breaker.webm", name: "Spirit Breaker" },
+    { videoSrc: "/Video/npc_dota_hero_chen.webm", name: "Chen" },
+    { videoSrc: "/Video/npc_dota_hero_pugna.webm", name: "Pugna" },
   ],
   },
   {
@@ -4581,9 +4585,9 @@ export const players: Player[] = [
     steamUrl: "https://steamcommunity.com/profiles/76561198244311744",
     dotabuffUrl: "https://www.dotabuff.com/players/284046016",
     favoriteHeroes: [
-    { videoSrc: "https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/grimstroke.webm", name: "Grimstroke" },
-    { videoSrc: "https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/necrophos.webm", name: "Necrophos" },
-    { videoSrc: "https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/juggernaut.webm", name: "Juggernaut" },
+    { videoSrc: "/Video/npc_dota_hero_grimstroke.webm", name: "Grimstroke" },
+    { videoSrc: "/Video/npc_dota_hero_necrophos.webm", name: "Necrophos" },
+    { videoSrc: "/Video/npc_dota_hero_juggernaut.webm", name: "Juggernaut" },
   ],
   },
   {
@@ -4608,9 +4612,9 @@ export const players: Player[] = [
     steamUrl: "https://steamcommunity.com/profiles/76561198076358634",
     dotabuffUrl: "https://www.dotabuff.com/players/116092906",
     favoriteHeroes: [
-    { videoSrc: "https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/clockwerk.webm", name: "Clockwerk" },
-    { videoSrc: "https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/lina.webm", name: "Lina" },
-    { videoSrc: "https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/pangolier.webm", name: "Pangolier" },
+    { videoSrc: "/Video/npc_dota_hero_clockwerk.webm", name: "Clockwerk" },
+    { videoSrc: "/Video/npc_dota_hero_lina.webm", name: "Lina" },
+    { videoSrc: "/Video/npc_dota_hero_pangolier.webm", name: "Pangolier" },
   ],
   },
   {
@@ -4635,9 +4639,9 @@ export const players: Player[] = [
     steamUrl: "https://steamcommunity.com/profiles/76561198386122515",
     dotabuffUrl: "https://www.dotabuff.com/players/425856787",
     favoriteHeroes: [
-    { videoSrc: "https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/chen.webm", name: "Chen" },
-    { videoSrc: "https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/natures_prophet.webm", name: "Natures Prophet" },
-    { videoSrc: "https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/earthshaker.webm", name: "Earthshaker" },
+    { videoSrc: "/Video/npc_dota_hero_chen.webm", name: "Chen" },
+    { videoSrc: "/Video/npc_dota_hero_natures_prophet.webm", name: "Natures Prophet" },
+    { videoSrc: "/Video/npc_dota_hero_earthshaker.webm", name: "Earthshaker" },
   ],
   },
   {
@@ -4662,9 +4666,9 @@ export const players: Player[] = [
     steamUrl: "https://steamcommunity.com/profiles/76561198082130292",
     dotabuffUrl: "https://www.dotabuff.com/players/121864564",
     favoriteHeroes: [
-    { videoSrc: "https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/ember_spirit.webm", name: "Ember Spirit" },
-    { videoSrc: "https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/visage.webm", name: "Visage" },
-    { videoSrc: "https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/pangolier.webm", name: "Pangolier" },
+    { videoSrc: "/Video/npc_dota_hero_ember_spirit.webm", name: "Ember Spirit" },
+    { videoSrc: "/Video/npc_dota_hero_visage.webm", name: "Visage" },
+    { videoSrc: "/Video/npc_dota_hero_pangolier.webm", name: "Pangolier" },
   ],
   },
   {
@@ -4689,9 +4693,9 @@ export const players: Player[] = [
     steamUrl: "https://steamcommunity.com/profiles/76561198214252141",
     dotabuffUrl: "https://www.dotabuff.com/players/253986413",
     favoriteHeroes: [
-    { videoSrc: "https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/doom_bringer.webm", name: "Doom Bringer" },
-    { videoSrc: "https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/witch_doctor.webm", name: "Witch Doctor" },
-    { videoSrc: "https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/night_stalker.webm", name: "Night Stalker" },
+    { videoSrc: "/Video/npc_dota_hero_doom_bringer.webm", name: "Doom Bringer" },
+    { videoSrc: "/Video/npc_dota_hero_witch_doctor.webm", name: "Witch Doctor" },
+    { videoSrc: "/Video/npc_dota_hero_night_stalker.webm", name: "Night Stalker" },
   ],
   },
   {
@@ -4716,9 +4720,9 @@ export const players: Player[] = [
     steamUrl: "https://steamcommunity.com/profiles/76561198158529135",
     dotabuffUrl: "https://www.dotabuff.com/players/198263407",
     favoriteHeroes: [
-    { videoSrc: "https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/faceless_void.webm", name: "Faceless Void" },
-    { videoSrc: "https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/lycan.webm", name: "Lycan" },
-    { videoSrc: "https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/slardar.webm", name: "Slardar" },
+    { videoSrc: "/Video/npc_dota_hero_faceless_void.webm", name: "Faceless Void" },
+    { videoSrc: "/Video/npc_dota_hero_lycan.webm", name: "Lycan" },
+    { videoSrc: "/Video/npc_dota_hero_slardar.webm", name: "Slardar" },
   ],
   },
   {
@@ -4743,9 +4747,9 @@ export const players: Player[] = [
     steamUrl: "https://steamcommunity.com/profiles/76561198160588415",
     dotabuffUrl: "https://www.dotabuff.com/players/200322687",
     favoriteHeroes: [
-    { videoSrc: "https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/antimage.webm", name: "Antimage" },
-    { videoSrc: "https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/kunkka.webm", name: "Kunkka" },
-    { videoSrc: "https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/sniper.webm", name: "Sniper" },
+    { videoSrc: "/Video/npc_dota_hero_antimage.webm", name: "Antimage" },
+    { videoSrc: "/Video/npc_dota_hero_kunkka.webm", name: "Kunkka" },
+    { videoSrc: "/Video/npc_dota_hero_sniper.webm", name: "Sniper" },
   ],
   },
   {
@@ -4770,9 +4774,9 @@ export const players: Player[] = [
     steamUrl: "https://steamcommunity.com/profiles/76561198117028430",
     dotabuffUrl: "https://www.dotabuff.com/players/156762702",
     favoriteHeroes: [
-    { videoSrc: "https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/visage.webm", name: "Visage" },
-    { videoSrc: "https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/shadow_demon.webm", name: "Shadow Demon" },
-    { videoSrc: "https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/queenofpain.webm", name: "Queenofpain" },
+    { videoSrc: "/Video/npc_dota_hero_visage.webm", name: "Visage" },
+    { videoSrc: "/Video/npc_dota_hero_shadow_demon.webm", name: "Shadow Demon" },
+    { videoSrc: "/Video/npc_dota_hero_queenofpain.webm", name: "Queenofpain" },
   ],
   },
   {
@@ -4797,9 +4801,9 @@ export const players: Player[] = [
     steamUrl: "https://steamcommunity.com/profiles/76561198931002036",
     dotabuffUrl: "https://www.dotabuff.com/players/970736308",
     favoriteHeroes: [
-    { videoSrc: "https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/enchantress.webm", name: "Enchantress" },
-    { videoSrc: "https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/phantom_assassin.webm", name: "Phantom Assassin" },
-    { videoSrc: "https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/slark.webm", name: "Slark" },
+    { videoSrc: "/Video/npc_dota_hero_enchantress.webm", name: "Enchantress" },
+    { videoSrc: "/Video/npc_dota_hero_phantom_assassin.webm", name: "Phantom Assassin" },
+    { videoSrc: "/Video/npc_dota_hero_slark.webm", name: "Slark" },
   ],
   },
   {
@@ -4824,9 +4828,9 @@ export const players: Player[] = [
     steamUrl: "https://steamcommunity.com/profiles/76561198084648453",
     dotabuffUrl: "https://www.dotabuff.com/players/124382725",
     favoriteHeroes: [
-    { videoSrc: "https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/shadow_fiend.webm", name: "Shadow Fiend" },
-    { videoSrc: "https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/legion_commander.webm", name: "Legion Commander" },
-    { videoSrc: "https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/dark_seer.webm", name: "Dark Seer" },
+    { videoSrc: "/Video/npc_dota_hero_shadow_fiend.webm", name: "Shadow Fiend" },
+    { videoSrc: "/Video/npc_dota_hero_legion_commander.webm", name: "Legion Commander" },
+    { videoSrc: "/Video/npc_dota_hero_dark_seer.webm", name: "Dark Seer" },
   ],
   },
   {
@@ -4851,9 +4855,9 @@ export const players: Player[] = [
     steamUrl: "https://steamcommunity.com/profiles/76561198287848090",
     dotabuffUrl: "https://www.dotabuff.com/players/327582362",
     favoriteHeroes: [
-    { videoSrc: "https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/natures_prophet.webm", name: "Natures Prophet" },
-    { videoSrc: "https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/meepo.webm", name: "Meepo" },
-    { videoSrc: "https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/death_prophet.webm", name: "Death Prophet" },
+    { videoSrc: "/Video/npc_dota_hero_natures_prophet.webm", name: "Natures Prophet" },
+    { videoSrc: "/Video/npc_dota_hero_meepo.webm", name: "Meepo" },
+    { videoSrc: "/Video/npc_dota_hero_death_prophet.webm", name: "Death Prophet" },
   ],
   },
   {
@@ -4878,9 +4882,9 @@ export const players: Player[] = [
     steamUrl: "https://steamcommunity.com/profiles/76561198166103553",
     dotabuffUrl: "https://www.dotabuff.com/players/205837825",
     favoriteHeroes: [
-    { videoSrc: "https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/riki.webm", name: "Riki" },
-    { videoSrc: "https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/legion_commander.webm", name: "Legion Commander" },
-    { videoSrc: "https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/wisp.webm", name: "Wisp" },
+    { videoSrc: "/Video/npc_dota_hero_riki.webm", name: "Riki" },
+    { videoSrc: "/Video/npc_dota_hero_legion_commander.webm", name: "Legion Commander" },
+    { videoSrc: "/Video/npc_dota_hero_wisp.webm", name: "Wisp" },
   ],
   },
   {
@@ -4905,9 +4909,9 @@ export const players: Player[] = [
     steamUrl: "https://steamcommunity.com/profiles/76561198068047115",
     dotabuffUrl: "https://www.dotabuff.com/players/107781387",
     favoriteHeroes: [
-    { videoSrc: "https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/viper.webm", name: "Viper" },
-    { videoSrc: "https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/wisp.webm", name: "Wisp" },
-    { videoSrc: "https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/centaur.webm", name: "Centaur" },
+    { videoSrc: "/Video/npc_dota_hero_viper.webm", name: "Viper" },
+    { videoSrc: "/Video/npc_dota_hero_wisp.webm", name: "Wisp" },
+    { videoSrc: "/Video/npc_dota_hero_centaur.webm", name: "Centaur" },
   ],
   },
   {
@@ -4932,9 +4936,9 @@ export const players: Player[] = [
     steamUrl: "https://steamcommunity.com/profiles/76561198047008729",
     dotabuffUrl: "https://www.dotabuff.com/players/86743001",
     favoriteHeroes: [
-    { videoSrc: "https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/invoker.webm", name: "Invoker" },
-    { videoSrc: "https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/silencer.webm", name: "Silencer" },
-    { videoSrc: "https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/brewmaster.webm", name: "Brewmaster" },
+    { videoSrc: "/Video/npc_dota_hero_invoker.webm", name: "Invoker" },
+    { videoSrc: "/Video/npc_dota_hero_silencer.webm", name: "Silencer" },
+    { videoSrc: "/Video/npc_dota_hero_brewmaster.webm", name: "Brewmaster" },
   ],
   },
   {
@@ -4959,9 +4963,9 @@ export const players: Player[] = [
     steamUrl: "https://steamcommunity.com/profiles/76561198144438318",
     dotabuffUrl: "https://www.dotabuff.com/players/184172590",
     favoriteHeroes: [
-    { videoSrc: "https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/storm_spirit.webm", name: "Storm Spirit" },
-    { videoSrc: "https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/tusk.webm", name: "Tusk" },
-    { videoSrc: "https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/templar_assassin.webm", name: "Templar Assassin" },
+    { videoSrc: "/Video/npc_dota_hero_storm_spirit.webm", name: "Storm Spirit" },
+    { videoSrc: "/Video/npc_dota_hero_tusk.webm", name: "Tusk" },
+    { videoSrc: "/Video/npc_dota_hero_templar_assassin.webm", name: "Templar Assassin" },
   ],
   },
   {
@@ -4986,9 +4990,9 @@ export const players: Player[] = [
     steamUrl: "https://steamcommunity.com/profiles/76561198175791819",
     dotabuffUrl: "https://www.dotabuff.com/players/215526091",
     favoriteHeroes: [
-    { videoSrc: "https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/ancient_apparition.webm", name: "Ancient Apparition" },
-    { videoSrc: "https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/kunkka.webm", name: "Kunkka" },
-    { videoSrc: "https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/death_prophet.webm", name: "Death Prophet" },
+    { videoSrc: "/Video/npc_dota_hero_ancient_apparition.webm", name: "Ancient Apparition" },
+    { videoSrc: "/Video/npc_dota_hero_kunkka.webm", name: "Kunkka" },
+    { videoSrc: "/Video/npc_dota_hero_death_prophet.webm", name: "Death Prophet" },
   ],
   },
   {
@@ -5013,9 +5017,9 @@ export const players: Player[] = [
     steamUrl: "https://steamcommunity.com/profiles/76561198133064552",
     dotabuffUrl: "https://www.dotabuff.com/players/172798824",
     favoriteHeroes: [
-    { videoSrc: "https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/earthshaker.webm", name: "Earthshaker" },
-    { videoSrc: "https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/batrider.webm", name: "Batrider" },
-    { videoSrc: "https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/axe.webm", name: "Axe" },
+    { videoSrc: "/Video/npc_dota_hero_earthshaker.webm", name: "Earthshaker" },
+    { videoSrc: "/Video/npc_dota_hero_batrider.webm", name: "Batrider" },
+    { videoSrc: "/Video/npc_dota_hero_axe.webm", name: "Axe" },
   ],
   },
   {
@@ -5040,9 +5044,9 @@ export const players: Player[] = [
     steamUrl: "https://steamcommunity.com/profiles/76561198054143997",
     dotabuffUrl: "https://www.dotabuff.com/players/93878269",
     favoriteHeroes: [
-    { videoSrc: "https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/ringmaster.webm", name: "Ringmaster" },
-    { videoSrc: "https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/lone_druid.webm", name: "Lone Druid" },
-    { videoSrc: "https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/weaver.webm", name: "Weaver" },
+    { videoSrc: "/Video/npc_dota_hero_ringmaster.webm", name: "Ringmaster" },
+    { videoSrc: "/Video/npc_dota_hero_lone_druid.webm", name: "Lone Druid" },
+    { videoSrc: "/Video/npc_dota_hero_weaver.webm", name: "Weaver" },
   ],
   },
   {
@@ -5067,9 +5071,9 @@ export const players: Player[] = [
     steamUrl: "https://steamcommunity.com/profiles/76561198186642209",
     dotabuffUrl: "https://www.dotabuff.com/players/226376481",
     favoriteHeroes: [
-    { videoSrc: "https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/dark_willow.webm", name: "Dark Willow" },
-    { videoSrc: "https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/enigma.webm", name: "Enigma" },
-    { videoSrc: "https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/morphling.webm", name: "Morphling" },
+    { videoSrc: "/Video/npc_dota_hero_dark_willow.webm", name: "Dark Willow" },
+    { videoSrc: "/Video/npc_dota_hero_enigma.webm", name: "Enigma" },
+    { videoSrc: "/Video/npc_dota_hero_morphling.webm", name: "Morphling" },
   ],
   },
   {
@@ -5094,9 +5098,9 @@ export const players: Player[] = [
     steamUrl: "https://steamcommunity.com/profiles/76561198168754602",
     dotabuffUrl: "https://www.dotabuff.com/players/208488874",
     favoriteHeroes: [
-    { videoSrc: "https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/legion_commander.webm", name: "Legion Commander" },
-    { videoSrc: "https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/faceless_void.webm", name: "Faceless Void" },
-    { videoSrc: "https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/undying.webm", name: "Undying" },
+    { videoSrc: "/Video/npc_dota_hero_legion_commander.webm", name: "Legion Commander" },
+    { videoSrc: "/Video/npc_dota_hero_faceless_void.webm", name: "Faceless Void" },
+    { videoSrc: "/Video/npc_dota_hero_undying.webm", name: "Undying" },
   ],
   },
   {
@@ -5121,9 +5125,9 @@ export const players: Player[] = [
     steamUrl: "https://steamcommunity.com/profiles/76561197967583758",
     dotabuffUrl: "https://www.dotabuff.com/players/7318030",
     favoriteHeroes: [
-    { videoSrc: "https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/weaver.webm", name: "Weaver" },
-    { videoSrc: "https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/dawnbreaker.webm", name: "Dawnbreaker" },
-    { videoSrc: "https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/broodmother.webm", name: "Broodmother" },
+    { videoSrc: "/Video/npc_dota_hero_weaver.webm", name: "Weaver" },
+    { videoSrc: "/Video/npc_dota_hero_dawnbreaker.webm", name: "Dawnbreaker" },
+    { videoSrc: "/Video/npc_dota_hero_broodmother.webm", name: "Broodmother" },
   ],
   },
   {
@@ -5148,9 +5152,9 @@ export const players: Player[] = [
     steamUrl: "https://steamcommunity.com/profiles/76561198094855757",
     dotabuffUrl: "https://www.dotabuff.com/players/134590029",
     favoriteHeroes: [
-    { videoSrc: "https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/lich.webm", name: "Lich" },
-    { videoSrc: "https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/chaos_knight.webm", name: "Chaos Knight" },
-    { videoSrc: "https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/mars.webm", name: "Mars" },
+    { videoSrc: "/Video/npc_dota_hero_lich.webm", name: "Lich" },
+    { videoSrc: "/Video/npc_dota_hero_chaos_knight.webm", name: "Chaos Knight" },
+    { videoSrc: "/Video/npc_dota_hero_mars.webm", name: "Mars" },
   ],
   },
   {
@@ -5175,9 +5179,9 @@ export const players: Player[] = [
     steamUrl: "https://steamcommunity.com/profiles/76561198371739829",
     dotabuffUrl: "https://www.dotabuff.com/players/411474101",
     favoriteHeroes: [
-    { videoSrc: "https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/morphling.webm", name: "Morphling" },
-    { videoSrc: "https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/broodmother.webm", name: "Broodmother" },
-    { videoSrc: "https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/brewmaster.webm", name: "Brewmaster" },
+    { videoSrc: "/Video/npc_dota_hero_morphling.webm", name: "Morphling" },
+    { videoSrc: "/Video/npc_dota_hero_broodmother.webm", name: "Broodmother" },
+    { videoSrc: "/Video/npc_dota_hero_brewmaster.webm", name: "Brewmaster" },
   ],
   },
   {
@@ -5202,9 +5206,9 @@ export const players: Player[] = [
     steamUrl: "https://steamcommunity.com/profiles/76561198353666149",
     dotabuffUrl: "https://www.dotabuff.com/players/393400421",
     favoriteHeroes: [
-    { videoSrc: "https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/necrophos.webm", name: "Necrophos" },
-    { videoSrc: "https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/alchemist.webm", name: "Alchemist" },
-    { videoSrc: "https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/oracle.webm", name: "Oracle" },
+    { videoSrc: "/Video/npc_dota_hero_necrophos.webm", name: "Necrophos" },
+    { videoSrc: "/Video/npc_dota_hero_alchemist.webm", name: "Alchemist" },
+    { videoSrc: "/Video/npc_dota_hero_oracle.webm", name: "Oracle" },
   ],
   },
   {
@@ -5229,9 +5233,9 @@ export const players: Player[] = [
     steamUrl: "https://steamcommunity.com/profiles/76561198350173346",
     dotabuffUrl: "https://www.dotabuff.com/players/389907618",
     favoriteHeroes: [
-    { videoSrc: "https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/underlord.webm", name: "Underlord" },
-    { videoSrc: "https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/life_stealer.webm", name: "Life Stealer" },
-    { videoSrc: "https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/dark_seer.webm", name: "Dark Seer" },
+    { videoSrc: "/Video/npc_dota_hero_underlord.webm", name: "Underlord" },
+    { videoSrc: "/Video/npc_dota_hero_life_stealer.webm", name: "Life Stealer" },
+    { videoSrc: "/Video/npc_dota_hero_dark_seer.webm", name: "Dark Seer" },
   ],
   },
   {
@@ -5256,9 +5260,9 @@ export const players: Player[] = [
     steamUrl: "https://steamcommunity.com/profiles/76561198193258895",
     dotabuffUrl: "https://www.dotabuff.com/players/232993167",
     favoriteHeroes: [
-    { videoSrc: "https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/broodmother.webm", name: "Broodmother" },
-    { videoSrc: "https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/tiny.webm", name: "Tiny" },
-    { videoSrc: "https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/warlock.webm", name: "Warlock" },
+    { videoSrc: "/Video/npc_dota_hero_broodmother.webm", name: "Broodmother" },
+    { videoSrc: "/Video/npc_dota_hero_tiny.webm", name: "Tiny" },
+    { videoSrc: "/Video/npc_dota_hero_warlock.webm", name: "Warlock" },
   ],
   },
   {
@@ -5283,9 +5287,9 @@ export const players: Player[] = [
     steamUrl: "https://steamcommunity.com/profiles/76561198041898419",
     dotabuffUrl: "https://www.dotabuff.com/players/81632691",
     favoriteHeroes: [
-    { videoSrc: "https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/medusa.webm", name: "Medusa" },
-    { videoSrc: "https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/chen.webm", name: "Chen" },
-    { videoSrc: "https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/pangolier.webm", name: "Pangolier" },
+    { videoSrc: "/Video/npc_dota_hero_medusa.webm", name: "Medusa" },
+    { videoSrc: "/Video/npc_dota_hero_chen.webm", name: "Chen" },
+    { videoSrc: "/Video/npc_dota_hero_pangolier.webm", name: "Pangolier" },
   ],
   },
   {
@@ -5310,9 +5314,9 @@ export const players: Player[] = [
     steamUrl: "https://steamcommunity.com/profiles/76561198862247886",
     dotabuffUrl: "https://www.dotabuff.com/players/901982158",
     favoriteHeroes: [
-    { videoSrc: "https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/earthshaker.webm", name: "Earthshaker" },
-    { videoSrc: "https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/axe.webm", name: "Axe" },
-    { videoSrc: "https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/shadow_demon.webm", name: "Shadow Demon" },
+    { videoSrc: "/Video/npc_dota_hero_earthshaker.webm", name: "Earthshaker" },
+    { videoSrc: "/Video/npc_dota_hero_axe.webm", name: "Axe" },
+    { videoSrc: "/Video/npc_dota_hero_shadow_demon.webm", name: "Shadow Demon" },
   ],
   },
   {
@@ -5337,9 +5341,9 @@ export const players: Player[] = [
     steamUrl: "https://steamcommunity.com/profiles/76561198414427034",
     dotabuffUrl: "https://www.dotabuff.com/players/454161306",
     favoriteHeroes: [
-    { videoSrc: "https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/leshrac.webm", name: "Leshrac" },
-    { videoSrc: "https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/ember_spirit.webm", name: "Ember Spirit" },
-    { videoSrc: "https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/monkey_king.webm", name: "Monkey King" },
+    { videoSrc: "/Video/npc_dota_hero_leshrac.webm", name: "Leshrac" },
+    { videoSrc: "/Video/npc_dota_hero_ember_spirit.webm", name: "Ember Spirit" },
+    { videoSrc: "/Video/npc_dota_hero_monkey_king.webm", name: "Monkey King" },
   ],
   },
   {
@@ -5364,9 +5368,9 @@ export const players: Player[] = [
     steamUrl: "https://steamcommunity.com/profiles/76561198302708950",
     dotabuffUrl: "https://www.dotabuff.com/players/342443222",
     favoriteHeroes: [
-    { videoSrc: "https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/clinkz.webm", name: "Clinkz" },
-    { videoSrc: "https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/monkey_king.webm", name: "Monkey King" },
-    { videoSrc: "https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/arc_warden.webm", name: "Arc Warden" },
+    { videoSrc: "/Video/npc_dota_hero_clinkz.webm", name: "Clinkz" },
+    { videoSrc: "/Video/npc_dota_hero_monkey_king.webm", name: "Monkey King" },
+    { videoSrc: "/Video/npc_dota_hero_arc_warden.webm", name: "Arc Warden" },
   ],
   },
   {
@@ -5391,9 +5395,9 @@ export const players: Player[] = [
     steamUrl: "https://steamcommunity.com/profiles/76561198289724568",
     dotabuffUrl: "https://www.dotabuff.com/players/329458840",
     favoriteHeroes: [
-    { videoSrc: "https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/disruptor.webm", name: "Disruptor" },
-    { videoSrc: "https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/treant.webm", name: "Treant" },
-    { videoSrc: "https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/tinker.webm", name: "Tinker" },
+    { videoSrc: "/Video/npc_dota_hero_disruptor.webm", name: "Disruptor" },
+    { videoSrc: "/Video/npc_dota_hero_treant.webm", name: "Treant" },
+    { videoSrc: "/Video/npc_dota_hero_tinker.webm", name: "Tinker" },
   ],
   },
   {
@@ -5418,9 +5422,9 @@ export const players: Player[] = [
     steamUrl: "https://steamcommunity.com/profiles/76561198150397483",
     dotabuffUrl: "https://www.dotabuff.com/players/190131755",
     favoriteHeroes: [
-    { videoSrc: "https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/nyx_assassin.webm", name: "Nyx Assassin" },
-    { videoSrc: "https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/sand_king.webm", name: "Sand King" },
-    { videoSrc: "https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/medusa.webm", name: "Medusa" },
+    { videoSrc: "/Video/npc_dota_hero_nyx_assassin.webm", name: "Nyx Assassin" },
+    { videoSrc: "/Video/npc_dota_hero_sand_king.webm", name: "Sand King" },
+    { videoSrc: "/Video/npc_dota_hero_medusa.webm", name: "Medusa" },
   ],
   },
   {
@@ -5445,9 +5449,9 @@ export const players: Player[] = [
     steamUrl: "https://steamcommunity.com/profiles/76561198254530768",
     dotabuffUrl: "https://www.dotabuff.com/players/294265040",
     favoriteHeroes: [
-    { videoSrc: "https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/medusa.webm", name: "Medusa" },
-    { videoSrc: "https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/meepo.webm", name: "Meepo" },
-    { videoSrc: "https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/treant.webm", name: "Treant" },
+    { videoSrc: "/Video/npc_dota_hero_medusa.webm", name: "Medusa" },
+    { videoSrc: "/Video/npc_dota_hero_meepo.webm", name: "Meepo" },
+    { videoSrc: "/Video/npc_dota_hero_treant.webm", name: "Treant" },
   ],
   },
   {
@@ -5472,9 +5476,9 @@ export const players: Player[] = [
     steamUrl: "https://steamcommunity.com/profiles/76561198059411294",
     dotabuffUrl: "https://www.dotabuff.com/players/99145566",
     favoriteHeroes: [
-    { videoSrc: "https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/huskar.webm", name: "Huskar" },
-    { videoSrc: "https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/dark_willow.webm", name: "Dark Willow" },
-    { videoSrc: "https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/tusk.webm", name: "Tusk" },
+    { videoSrc: "/Video/npc_dota_hero_huskar.webm", name: "Huskar" },
+    { videoSrc: "/Video/npc_dota_hero_dark_willow.webm", name: "Dark Willow" },
+    { videoSrc: "/Video/npc_dota_hero_tusk.webm", name: "Tusk" },
   ],
   },
   {
@@ -5499,9 +5503,9 @@ export const players: Player[] = [
     steamUrl: "https://steamcommunity.com/profiles/76561198369505601",
     dotabuffUrl: "https://www.dotabuff.com/players/409239873",
     favoriteHeroes: [
-    { videoSrc: "https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/vengefulspirit.webm", name: "Vengefulspirit" },
-    { videoSrc: "https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/razor.webm", name: "Razor" },
-    { videoSrc: "https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/obsidian_destroyer.webm", name: "Obsidian Destroyer" },
+    { videoSrc: "/Video/npc_dota_hero_vengefulspirit.webm", name: "Vengefulspirit" },
+    { videoSrc: "/Video/npc_dota_hero_razor.webm", name: "Razor" },
+    { videoSrc: "/Video/npc_dota_hero_obsidian_destroyer.webm", name: "Obsidian Destroyer" },
   ],
   },
   {
@@ -5526,9 +5530,9 @@ export const players: Player[] = [
     steamUrl: "https://steamcommunity.com/profiles/76561198078162250",
     dotabuffUrl: "https://www.dotabuff.com/players/117896522",
     favoriteHeroes: [
-    { videoSrc: "https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/natures_prophet.webm", name: "Natures Prophet" },
-    { videoSrc: "https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/monkey_king.webm", name: "Monkey King" },
-    { videoSrc: "https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/earthshaker.webm", name: "Earthshaker" },
+    { videoSrc: "/Video/npc_dota_hero_natures_prophet.webm", name: "Natures Prophet" },
+    { videoSrc: "/Video/npc_dota_hero_monkey_king.webm", name: "Monkey King" },
+    { videoSrc: "/Video/npc_dota_hero_earthshaker.webm", name: "Earthshaker" },
   ],
   },
   {
@@ -5553,9 +5557,9 @@ export const players: Player[] = [
     steamUrl: "https://steamcommunity.com/profiles/76561198390800289",
     dotabuffUrl: "https://www.dotabuff.com/players/430534561",
     favoriteHeroes: [
-    { videoSrc: "https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/meepo.webm", name: "Meepo" },
-    { videoSrc: "https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/lich.webm", name: "Lich" },
-    { videoSrc: "https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/brewmaster.webm", name: "Brewmaster" },
+    { videoSrc: "/Video/npc_dota_hero_meepo.webm", name: "Meepo" },
+    { videoSrc: "/Video/npc_dota_hero_lich.webm", name: "Lich" },
+    { videoSrc: "/Video/npc_dota_hero_brewmaster.webm", name: "Brewmaster" },
   ],
   },
   {
@@ -5580,9 +5584,9 @@ export const players: Player[] = [
     steamUrl: "https://steamcommunity.com/profiles/76561199151767706",
     dotabuffUrl: "https://www.dotabuff.com/players/1191501978",
     favoriteHeroes: [
-    { videoSrc: "https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/snapfire.webm", name: "Snapfire" },
-    { videoSrc: "https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/bloodseeker.webm", name: "Bloodseeker" },
-    { videoSrc: "https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/alchemist.webm", name: "Alchemist" },
+    { videoSrc: "/Video/npc_dota_hero_snapfire.webm", name: "Snapfire" },
+    { videoSrc: "/Video/npc_dota_hero_bloodseeker.webm", name: "Bloodseeker" },
+    { videoSrc: "/Video/npc_dota_hero_alchemist.webm", name: "Alchemist" },
   ],
   },
   {
@@ -5607,9 +5611,9 @@ export const players: Player[] = [
     steamUrl: "https://steamcommunity.com/profiles/76561199080961534",
     dotabuffUrl: "https://www.dotabuff.com/players/1120695806",
     favoriteHeroes: [
-    { videoSrc: "https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/dark_seer.webm", name: "Dark Seer" },
-    { videoSrc: "https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/snapfire.webm", name: "Snapfire" },
-    { videoSrc: "https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/brewmaster.webm", name: "Brewmaster" },
+    { videoSrc: "/Video/npc_dota_hero_dark_seer.webm", name: "Dark Seer" },
+    { videoSrc: "/Video/npc_dota_hero_snapfire.webm", name: "Snapfire" },
+    { videoSrc: "/Video/npc_dota_hero_brewmaster.webm", name: "Brewmaster" },
   ],
   },
   {
@@ -5634,9 +5638,9 @@ export const players: Player[] = [
     steamUrl: "https://steamcommunity.com/profiles/76561198820297026",
     dotabuffUrl: "https://www.dotabuff.com/players/860031298",
     favoriteHeroes: [
-    { videoSrc: "https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/natures_prophet.webm", name: "Natures Prophet" },
-    { videoSrc: "https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/lycan.webm", name: "Lycan" },
-    { videoSrc: "https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/obsidian_destroyer.webm", name: "Obsidian Destroyer" },
+    { videoSrc: "/Video/npc_dota_hero_natures_prophet.webm", name: "Natures Prophet" },
+    { videoSrc: "/Video/npc_dota_hero_lycan.webm", name: "Lycan" },
+    { videoSrc: "/Video/npc_dota_hero_obsidian_destroyer.webm", name: "Obsidian Destroyer" },
   ],
   },
   {
@@ -5661,9 +5665,9 @@ export const players: Player[] = [
     steamUrl: "https://steamcommunity.com/profiles/76561198073507265",
     dotabuffUrl: "https://www.dotabuff.com/players/113241537",
     favoriteHeroes: [
-    { videoSrc: "https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/sniper.webm", name: "Sniper" },
-    { videoSrc: "https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/ancient_apparition.webm", name: "Ancient Apparition" },
-    { videoSrc: "https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/alchemist.webm", name: "Alchemist" },
+    { videoSrc: "/Video/npc_dota_hero_sniper.webm", name: "Sniper" },
+    { videoSrc: "/Video/npc_dota_hero_ancient_apparition.webm", name: "Ancient Apparition" },
+    { videoSrc: "/Video/npc_dota_hero_alchemist.webm", name: "Alchemist" },
   ],
   },
   {
@@ -5688,9 +5692,9 @@ export const players: Player[] = [
     steamUrl: "https://steamcommunity.com/profiles/76561198319039061",
     dotabuffUrl: "https://www.dotabuff.com/players/358773333",
     favoriteHeroes: [
-    { videoSrc: "https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/dawnbreaker.webm", name: "Dawnbreaker" },
-    { videoSrc: "https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/bane.webm", name: "Bane" },
-    { videoSrc: "https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/batrider.webm", name: "Batrider" },
+    { videoSrc: "/Video/npc_dota_hero_dawnbreaker.webm", name: "Dawnbreaker" },
+    { videoSrc: "/Video/npc_dota_hero_bane.webm", name: "Bane" },
+    { videoSrc: "/Video/npc_dota_hero_batrider.webm", name: "Batrider" },
   ],
   },
   {
@@ -5715,9 +5719,9 @@ export const players: Player[] = [
     steamUrl: "https://steamcommunity.com/profiles/76561198100030137",
     dotabuffUrl: "https://www.dotabuff.com/players/139764409",
     favoriteHeroes: [
-    { videoSrc: "https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/lich.webm", name: "Lich" },
-    { videoSrc: "https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/pangolier.webm", name: "Pangolier" },
-    { videoSrc: "https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/void_spirit.webm", name: "Void Spirit" },
+    { videoSrc: "/Video/npc_dota_hero_lich.webm", name: "Lich" },
+    { videoSrc: "/Video/npc_dota_hero_pangolier.webm", name: "Pangolier" },
+    { videoSrc: "/Video/npc_dota_hero_void_spirit.webm", name: "Void Spirit" },
   ],
   },
   {
@@ -5742,9 +5746,9 @@ export const players: Player[] = [
     steamUrl: "https://steamcommunity.com/profiles/76561199195657578",
     dotabuffUrl: "https://www.dotabuff.com/players/1235391850",
     favoriteHeroes: [
-    { videoSrc: "https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/undying.webm", name: "Undying" },
-    { videoSrc: "https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/treant.webm", name: "Treant" },
-    { videoSrc: "https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/enchantress.webm", name: "Enchantress" },
+    { videoSrc: "/Video/npc_dota_hero_undying.webm", name: "Undying" },
+    { videoSrc: "/Video/npc_dota_hero_treant.webm", name: "Treant" },
+    { videoSrc: "/Video/npc_dota_hero_enchantress.webm", name: "Enchantress" },
   ],
   },
   {
@@ -5769,9 +5773,9 @@ export const players: Player[] = [
     steamUrl: "https://steamcommunity.com/profiles/76561198328888387",
     dotabuffUrl: "https://www.dotabuff.com/players/368622659",
     favoriteHeroes: [
-    { videoSrc: "https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/dark_willow.webm", name: "Dark Willow" },
-    { videoSrc: "https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/shadow_demon.webm", name: "Shadow Demon" },
-    { videoSrc: "https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/antimage.webm", name: "Antimage" },
+    { videoSrc: "/Video/npc_dota_hero_dark_willow.webm", name: "Dark Willow" },
+    { videoSrc: "/Video/npc_dota_hero_shadow_demon.webm", name: "Shadow Demon" },
+    { videoSrc: "/Video/npc_dota_hero_antimage.webm", name: "Antimage" },
   ],
   },
   {
@@ -5796,9 +5800,9 @@ export const players: Player[] = [
     steamUrl: "https://steamcommunity.com/profiles/76561199635090797",
     dotabuffUrl: "https://www.dotabuff.com/players/1674825069",
     favoriteHeroes: [
-    { videoSrc: "https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/slark.webm", name: "Slark" },
-    { videoSrc: "https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/pugna.webm", name: "Pugna" },
-    { videoSrc: "https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/spectre.webm", name: "Spectre" },
+    { videoSrc: "/Video/npc_dota_hero_slark.webm", name: "Slark" },
+    { videoSrc: "/Video/npc_dota_hero_pugna.webm", name: "Pugna" },
+    { videoSrc: "/Video/npc_dota_hero_spectre.webm", name: "Spectre" },
   ],
   },
   {
@@ -5823,9 +5827,9 @@ export const players: Player[] = [
     steamUrl: "https://steamcommunity.com/profiles/76561198307264129",
     dotabuffUrl: "https://www.dotabuff.com/players/346998401",
     favoriteHeroes: [
-    { videoSrc: "https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/mirana.webm", name: "Mirana" },
-    { videoSrc: "https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/phantom_assassin.webm", name: "Phantom Assassin" },
-    { videoSrc: "https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/weaver.webm", name: "Weaver" },
+    { videoSrc: "/Video/npc_dota_hero_mirana.webm", name: "Mirana" },
+    { videoSrc: "/Video/npc_dota_hero_phantom_assassin.webm", name: "Phantom Assassin" },
+    { videoSrc: "/Video/npc_dota_hero_weaver.webm", name: "Weaver" },
   ],
   },
   {
@@ -5850,9 +5854,9 @@ export const players: Player[] = [
     steamUrl: "https://steamcommunity.com/profiles/76561198301439473",
     dotabuffUrl: "https://www.dotabuff.com/players/341173745",
     favoriteHeroes: [
-    { videoSrc: "https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/bane.webm", name: "Bane" },
-    { videoSrc: "https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/naga_siren.webm", name: "Naga Siren" },
-    { videoSrc: "https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/chaos_knight.webm", name: "Chaos Knight" },
+    { videoSrc: "/Video/npc_dota_hero_bane.webm", name: "Bane" },
+    { videoSrc: "/Video/npc_dota_hero_naga_siren.webm", name: "Naga Siren" },
+    { videoSrc: "/Video/npc_dota_hero_chaos_knight.webm", name: "Chaos Knight" },
   ],
   },
   {
@@ -5877,9 +5881,9 @@ export const players: Player[] = [
     steamUrl: "https://steamcommunity.com/profiles/76561198876667791",
     dotabuffUrl: "https://www.dotabuff.com/players/916402063",
     favoriteHeroes: [
-    { videoSrc: "https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/medusa.webm", name: "Medusa" },
-    { videoSrc: "https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/storm_spirit.webm", name: "Storm Spirit" },
-    { videoSrc: "https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/juggernaut.webm", name: "Juggernaut" },
+    { videoSrc: "/Video/npc_dota_hero_medusa.webm", name: "Medusa" },
+    { videoSrc: "/Video/npc_dota_hero_storm_spirit.webm", name: "Storm Spirit" },
+    { videoSrc: "/Video/npc_dota_hero_juggernaut.webm", name: "Juggernaut" },
   ],
   },
   {
@@ -5904,9 +5908,9 @@ export const players: Player[] = [
     steamUrl: "https://steamcommunity.com/profiles/76561198845147763",
     dotabuffUrl: "https://www.dotabuff.com/players/884882035",
     favoriteHeroes: [
-    { videoSrc: "https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/queenofpain.webm", name: "Queenofpain" },
-    { videoSrc: "https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/lich.webm", name: "Lich" },
-    { videoSrc: "https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/phoenix.webm", name: "Phoenix" },
+    { videoSrc: "/Video/npc_dota_hero_queenofpain.webm", name: "Queenofpain" },
+    { videoSrc: "/Video/npc_dota_hero_lich.webm", name: "Lich" },
+    { videoSrc: "/Video/npc_dota_hero_phoenix.webm", name: "Phoenix" },
   ],
   },
   {
@@ -5931,9 +5935,9 @@ export const players: Player[] = [
     steamUrl: "https://steamcommunity.com/profiles/76561198241427100",
     dotabuffUrl: "https://www.dotabuff.com/players/281161372",
     favoriteHeroes: [
-    { videoSrc: "https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/mirana.webm", name: "Mirana" },
-    { videoSrc: "https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/bane.webm", name: "Bane" },
-    { videoSrc: "https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/magnataur.webm", name: "Magnataur" },
+    { videoSrc: "/Video/npc_dota_hero_mirana.webm", name: "Mirana" },
+    { videoSrc: "/Video/npc_dota_hero_bane.webm", name: "Bane" },
+    { videoSrc: "/Video/npc_dota_hero_magnataur.webm", name: "Magnataur" },
   ],
   },
   {
@@ -5958,9 +5962,9 @@ export const players: Player[] = [
     steamUrl: "https://steamcommunity.com/profiles/76561198392179703",
     dotabuffUrl: "https://www.dotabuff.com/players/431913975",
     favoriteHeroes: [
-    { videoSrc: "https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/wraith_king.webm", name: "Wraith King" },
-    { videoSrc: "https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/natures_prophet.webm", name: "Natures Prophet" },
-    { videoSrc: "https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/slardar.webm", name: "Slardar" },
+    { videoSrc: "/Video/npc_dota_hero_wraith_king.webm", name: "Wraith King" },
+    { videoSrc: "/Video/npc_dota_hero_natures_prophet.webm", name: "Natures Prophet" },
+    { videoSrc: "/Video/npc_dota_hero_slardar.webm", name: "Slardar" },
   ],
   },
   {
@@ -5985,9 +5989,9 @@ export const players: Player[] = [
     steamUrl: "https://steamcommunity.com/profiles/76561198132130996",
     dotabuffUrl: "https://www.dotabuff.com/players/171865268",
     favoriteHeroes: [
-    { videoSrc: "https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/ringmaster.webm", name: "Ringmaster" },
-    { videoSrc: "https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/mirana.webm", name: "Mirana" },
-    { videoSrc: "https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/meepo.webm", name: "Meepo" },
+    { videoSrc: "/Video/npc_dota_hero_ringmaster.webm", name: "Ringmaster" },
+    { videoSrc: "/Video/npc_dota_hero_mirana.webm", name: "Mirana" },
+    { videoSrc: "/Video/npc_dota_hero_meepo.webm", name: "Meepo" },
   ],
   },
   {
@@ -6012,9 +6016,9 @@ export const players: Player[] = [
     steamUrl: "https://steamcommunity.com/profiles/76561198327829346",
     dotabuffUrl: "https://www.dotabuff.com/players/367563618",
     favoriteHeroes: [
-    { videoSrc: "https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/dark_seer.webm", name: "Dark Seer" },
-    { videoSrc: "https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/silencer.webm", name: "Silencer" },
-    { videoSrc: "https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/abaddon.webm", name: "Abaddon" },
+    { videoSrc: "/Video/npc_dota_hero_dark_seer.webm", name: "Dark Seer" },
+    { videoSrc: "/Video/npc_dota_hero_silencer.webm", name: "Silencer" },
+    { videoSrc: "/Video/npc_dota_hero_abaddon.webm", name: "Abaddon" },
   ],
   },
   {
@@ -6039,9 +6043,9 @@ export const players: Player[] = [
     steamUrl: "https://steamcommunity.com/profiles/76561198360909414",
     dotabuffUrl: "https://www.dotabuff.com/players/400643686",
     favoriteHeroes: [
-    { videoSrc: "https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/clockwerk.webm", name: "Clockwerk" },
-    { videoSrc: "https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/dark_willow.webm", name: "Dark Willow" },
-    { videoSrc: "https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/pangolier.webm", name: "Pangolier" },
+    { videoSrc: "/Video/npc_dota_hero_clockwerk.webm", name: "Clockwerk" },
+    { videoSrc: "/Video/npc_dota_hero_dark_willow.webm", name: "Dark Willow" },
+    { videoSrc: "/Video/npc_dota_hero_pangolier.webm", name: "Pangolier" },
   ],
   },
   {
@@ -6066,9 +6070,9 @@ export const players: Player[] = [
     steamUrl: "https://steamcommunity.com/profiles/76561198249643688",
     dotabuffUrl: "https://www.dotabuff.com/players/289377960",
     favoriteHeroes: [
-    { videoSrc: "https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/lycan.webm", name: "Lycan" },
-    { videoSrc: "https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/faceless_void.webm", name: "Faceless Void" },
-    { videoSrc: "https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/viper.webm", name: "Viper" },
+    { videoSrc: "/Video/npc_dota_hero_lycan.webm", name: "Lycan" },
+    { videoSrc: "/Video/npc_dota_hero_faceless_void.webm", name: "Faceless Void" },
+    { videoSrc: "/Video/npc_dota_hero_viper.webm", name: "Viper" },
   ],
   },
   {
@@ -6093,9 +6097,9 @@ export const players: Player[] = [
     steamUrl: "https://steamcommunity.com/profiles/76561198981961488",
     dotabuffUrl: "https://www.dotabuff.com/players/1021695760",
     favoriteHeroes: [
-    { videoSrc: "https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/riki.webm", name: "Riki" },
-    { videoSrc: "https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/chaos_knight.webm", name: "Chaos Knight" },
-    { videoSrc: "https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/visage.webm", name: "Visage" },
+    { videoSrc: "/Video/npc_dota_hero_riki.webm", name: "Riki" },
+    { videoSrc: "/Video/npc_dota_hero_chaos_knight.webm", name: "Chaos Knight" },
+    { videoSrc: "/Video/npc_dota_hero_visage.webm", name: "Visage" },
   ],
   },
   {
@@ -6120,9 +6124,9 @@ export const players: Player[] = [
     steamUrl: "https://steamcommunity.com/profiles/76561198833089137",
     dotabuffUrl: "https://www.dotabuff.com/players/872823409",
     favoriteHeroes: [
-    { videoSrc: "https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/phantom_assassin.webm", name: "Phantom Assassin" },
-    { videoSrc: "https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/windrunner.webm", name: "Windrunner" },
-    { videoSrc: "https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/ogre_magi.webm", name: "Ogre Magi" },
+    { videoSrc: "/Video/npc_dota_hero_phantom_assassin.webm", name: "Phantom Assassin" },
+    { videoSrc: "/Video/npc_dota_hero_windrunner.webm", name: "Windrunner" },
+    { videoSrc: "/Video/npc_dota_hero_ogre_magi.webm", name: "Ogre Magi" },
   ],
   },
   {
@@ -6147,9 +6151,9 @@ export const players: Player[] = [
     steamUrl: "https://steamcommunity.com/profiles/76561198383152988",
     dotabuffUrl: "https://www.dotabuff.com/players/422887260",
     favoriteHeroes: [
-    { videoSrc: "https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/windrunner.webm", name: "Windrunner" },
-    { videoSrc: "https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/tiny.webm", name: "Tiny" },
-    { videoSrc: "https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/dragon_knight.webm", name: "Dragon Knight" },
+    { videoSrc: "/Video/npc_dota_hero_windrunner.webm", name: "Windrunner" },
+    { videoSrc: "/Video/npc_dota_hero_tiny.webm", name: "Tiny" },
+    { videoSrc: "/Video/npc_dota_hero_dragon_knight.webm", name: "Dragon Knight" },
   ],
   },
   {
@@ -6174,9 +6178,9 @@ export const players: Player[] = [
     steamUrl: "https://steamcommunity.com/profiles/76561198835367057",
     dotabuffUrl: "https://www.dotabuff.com/players/875101329",
     favoriteHeroes: [
-    { videoSrc: "https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/crystal_maiden.webm", name: "Crystal Maiden" },
-    { videoSrc: "https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/queenofpain.webm", name: "Queenofpain" },
-    { videoSrc: "https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/bounty_hunter.webm", name: "Bounty Hunter" },
+    { videoSrc: "/Video/npc_dota_hero_crystal_maiden.webm", name: "Crystal Maiden" },
+    { videoSrc: "/Video/npc_dota_hero_queenofpain.webm", name: "Queenofpain" },
+    { videoSrc: "/Video/npc_dota_hero_bounty_hunter.webm", name: "Bounty Hunter" },
   ],
   },
   {
@@ -6202,9 +6206,9 @@ export const players: Player[] = [
     steamUrl: "https://steamcommunity.com/profiles/76561198287827827",
     dotabuffUrl: "https://www.dotabuff.com/players/327562099",
     favoriteHeroes: [
-    { videoSrc: "https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/bristleback.webm", name: "Bristleback" },
-    { videoSrc: "https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/warlock.webm", name: "Warlock" },
-    { videoSrc: "https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/skywrath_mage.webm", name: "Skywrath Mage" },
+    { videoSrc: "/Video/npc_dota_hero_bristleback.webm", name: "Bristleback" },
+    { videoSrc: "/Video/npc_dota_hero_warlock.webm", name: "Warlock" },
+    { videoSrc: "/Video/npc_dota_hero_skywrath_mage.webm", name: "Skywrath Mage" },
   ],
   },
   {
@@ -6229,9 +6233,9 @@ export const players: Player[] = [
     steamUrl: "https://steamcommunity.com/profiles/76561198357688464",
     dotabuffUrl: "https://www.dotabuff.com/players/397422736",
     favoriteHeroes: [
-    { videoSrc: "https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/terrorblade.webm", name: "Terrorblade" },
-    { videoSrc: "https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/slark.webm", name: "Slark" },
-    { videoSrc: "https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/mars.webm", name: "Mars" },
+    { videoSrc: "/Video/npc_dota_hero_terrorblade.webm", name: "Terrorblade" },
+    { videoSrc: "/Video/npc_dota_hero_slark.webm", name: "Slark" },
+    { videoSrc: "/Video/npc_dota_hero_mars.webm", name: "Mars" },
   ],
   },
   {
@@ -6256,9 +6260,9 @@ export const players: Player[] = [
     steamUrl: "https://steamcommunity.com/profiles/76561198138494882",
     dotabuffUrl: "https://www.dotabuff.com/players/178229154",
     favoriteHeroes: [
-    { videoSrc: "https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/rubick.webm", name: "Rubick" },
-    { videoSrc: "https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/chaos_knight.webm", name: "Chaos Knight" },
-    { videoSrc: "https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/crystal_maiden.webm", name: "Crystal Maiden" },
+    { videoSrc: "/Video/npc_dota_hero_rubick.webm", name: "Rubick" },
+    { videoSrc: "/Video/npc_dota_hero_chaos_knight.webm", name: "Chaos Knight" },
+    { videoSrc: "/Video/npc_dota_hero_crystal_maiden.webm", name: "Crystal Maiden" },
   ],
   },
   {
@@ -6283,9 +6287,9 @@ export const players: Player[] = [
     steamUrl: "https://steamcommunity.com/profiles/76561198067747110",
     dotabuffUrl: "https://www.dotabuff.com/players/107481382",
     favoriteHeroes: [
-    { videoSrc: "https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/bounty_hunter.webm", name: "Bounty Hunter" },
-    { videoSrc: "https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/wisp.webm", name: "Wisp" },
-    { videoSrc: "https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/leshrac.webm", name: "Leshrac" },
+    { videoSrc: "/Video/npc_dota_hero_bounty_hunter.webm", name: "Bounty Hunter" },
+    { videoSrc: "/Video/npc_dota_hero_wisp.webm", name: "Wisp" },
+    { videoSrc: "/Video/npc_dota_hero_leshrac.webm", name: "Leshrac" },
   ],
   },
   {
@@ -6311,9 +6315,9 @@ export const players: Player[] = [
     steamUrl: "https://steamcommunity.com/profiles/76561199028189611",
     dotabuffUrl: "https://www.dotabuff.com/players/1067923883",
     favoriteHeroes: [
-    { videoSrc: "https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/witch_doctor.webm", name: "Witch Doctor" },
-    { videoSrc: "https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/lich.webm", name: "Lich" },
-    { videoSrc: "https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/shadow_shaman.webm", name: "Shadow Shaman" },
+    { videoSrc: "/Video/npc_dota_hero_witch_doctor.webm", name: "Witch Doctor" },
+    { videoSrc: "/Video/npc_dota_hero_lich.webm", name: "Lich" },
+    { videoSrc: "/Video/npc_dota_hero_shadow_shaman.webm", name: "Shadow Shaman" },
   ],
   },
   {
@@ -6338,13 +6342,30 @@ export const players: Player[] = [
     steamUrl: "https://steamcommunity.com/profiles/76561198069911814",
     dotabuffUrl: "https://www.dotabuff.com/players/109646086",
     favoriteHeroes: [
-    { videoSrc: "https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/undying.webm", name: "Undying" },
-    { videoSrc: "https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/bane.webm", name: "Bane" },
-    { videoSrc: "https://cdn.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/enigma.webm", name: "Enigma" },
+    { videoSrc: "/Video/npc_dota_hero_undying.webm", name: "Undying" },
+    { videoSrc: "/Video/npc_dota_hero_bane.webm", name: "Bane" },
+    { videoSrc: "/Video/npc_dota_hero_enigma.webm", name: "Enigma" },
   ],
   }
 ];
 
 export function getPlayerById(id: string): Player | undefined {
   return players.find((p) => p.id === id);
+}
+
+export function findPlayerIdByNickname(nickname: string): string | undefined {
+  const player = players.find((p) => 
+    p.nickname.toLowerCase() === nickname.toLowerCase()
+  );
+  return player?.id;
+}
+
+export function searchPlayersByQuery(query: string): Player[] {
+  if (!query.trim()) return [];
+  
+  const searchTerm = query.toLowerCase();
+  return players.filter(player => 
+    player.nickname.toLowerCase().includes(searchTerm) ||
+    (player.realName && player.realName.toLowerCase().includes(searchTerm))
+  );
 }

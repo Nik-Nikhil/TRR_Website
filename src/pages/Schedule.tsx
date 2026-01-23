@@ -1,6 +1,6 @@
 // src/pages/Schedule.tsx
 import TournamentSchedule from '../components/tournament/Schedule';
-import { primaryTournament } from '../../src/data/mockTournaments';
+import { primaryTournament } from '../data/mockTournaments';
 
 export default function SchedulePage() {
   return (

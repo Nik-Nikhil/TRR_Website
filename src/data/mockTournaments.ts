@@ -76,7 +76,7 @@ export const primaryTournament: Tournament = {
   id: "trr-2025",
   name: "The Roshan Rumble",
   shortName: "TRR",
-  year: 2025,
+  year: 2026,
   prizePool: 40000,
   location: "India ",
   startDate: "12th June 2025",

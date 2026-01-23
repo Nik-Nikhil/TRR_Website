@@ -1,16 +1,24 @@
 // src/components/layout/Navbar.tsx
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { useState, useRef, useEffect, type ReactNode } from "react";
-import { Menu, Medal, UsersRound, ScrollText, House } from "lucide-react";
+import * as React from "react";
+import { Menu, Medal, UsersRound, ScrollText, House, LogIn, User, Shield, ChevronDown, UserCircle } from "lucide-react";
 import { AnimatePresence, LayoutGroup, motion } from "framer-motion";
+import AuthService from "../../services/auth";
 
 export default function Navbar() {
   const { pathname } = useLocation();
   const navigate = useNavigate();
   const [mobileNavOpen, setMobileNavOpen] = useState(false);
+  const [loginDropdownOpen, setLoginDropdownOpen] = useState(false);
   const closeTimeout = useRef<number | null>(null);
+  const loginDropdownRef = useRef<HTMLDivElement>(null);
   const audioRef = useRef<HTMLAudioElement[]>([]);
   const lastPlayedIndexRef = useRef<number>(-1);
+
+  // Get current user
+  const currentUser = AuthService.getCurrentUser();
+  const isLoggedIn = AuthService.isSessionValid();
 
   // Initialize audio
   useEffect(() => {
@@ -67,6 +75,20 @@ export default function Navbar() {
     }, 200);
   };
 
+  // Close login dropdown when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (loginDropdownRef.current && !loginDropdownRef.current.contains(event.target as Node)) {
+        setLoginDropdownOpen(false);
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, []);
+
   useEffect(() => {
     return () => {
       if (closeTimeout.current !== null) {
@@ -84,7 +106,7 @@ export default function Navbar() {
       }}
     >
       <div className="w-full mx-auto px-3 sm:px-4 md:px-6 lg:px-10 max-w-[1920px]">
-        <div className="h-14 sm:h-[60px] md:h-[68px] lg:h-[72px] flex items-center justify-between gap-4">
+        <div className="h-16 sm:h-[68px] md:h-[76px] lg:h-20 flex items-center justify-between gap-4">
           {/* Brand / Left side */}
           <button
             onClick={handleRoshanClick}
@@ -172,11 +194,125 @@ export default function Navbar() {
                 active={pathname.startsWith("/seasons")}
               />
               <NavItem
-                to="/players"
-                icon={<UsersRound className="w-3.5 h-3.5 md:w-4 md:h-4 lg:w-[18px] lg:h-[18px]" />}
-                label="Players"
-                active={pathname.startsWith("/players")}
+                to="/auction"
+                icon={<svg className="w-3.5 h-3.5 md:w-4 md:h-4 lg:w-[18px] lg:h-[18px]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>}
+                label="Auction"
+                active={pathname.startsWith("/auction")}
               />
+              
+              {/* Profile Link - Only show for logged-in players */}
+              {isLoggedIn && currentUser?.type === 'player' && (
+                <NavItem
+                  to={`/players/${currentUser.playerId}`}
+                  icon={<UserCircle className="w-3.5 h-3.5 md:w-4 md:h-4 lg:w-[18px] lg:h-[18px]" />}
+                  label="Profile"
+                  active={pathname.startsWith("/players") && pathname.includes(currentUser.playerId)}
+                />
+              )}
+              
+              {/* Login Dropdown - Matching Navbar Style */}
+              <div className="relative" ref={loginDropdownRef}>
+                <button
+                  onClick={() => setLoginDropdownOpen(!loginDropdownOpen)}
+                  className={`relative inline-flex items-center gap-[0.3rem] md:gap-[0.35rem] px-1.5 md:px-2 lg:px-3 py-1 md:py-1.5 
+                    text-[0.65rem] md:text-[0.7rem] lg:text-[0.75rem] xl:text-[0.8rem] uppercase tracking-[0.12em] md:tracking-[0.15em] lg:tracking-[0.18em] 
+                    transition-all duration-300 group rounded-lg text-zinc-200 hover:text-white ${
+                    loginDropdownOpen ? 'bg-white/10' : 'hover:bg-white/5'
+                  }`}
+                >
+                  {loginDropdownOpen && <ActiveHighlight color="white" />}
+
+                  <LogIn className="w-3.5 h-3.5 md:w-4 md:h-4 lg:w-[18px] lg:h-[18px] transition-colors duration-300 text-zinc-200 group-hover:text-white" />
+                  
+                  <span className="relative whitespace-nowrap">
+                    Login
+                    <span className={`pointer-events-none absolute left-0 right-0 -bottom-1 lg:-bottom-1.5 block h-0.5 rounded-full origin-left transition-all duration-300 bg-gradient-to-r from-zinc-300 to-zinc-400 ${
+                      loginDropdownOpen ? 'scale-x-100' : 'scale-x-0 group-hover:scale-x-100'
+                    }`} />
+                  </span>
+                  
+                  <ChevronDown className={`w-3 h-3 transition-transform duration-200 ${loginDropdownOpen ? 'rotate-180' : ''}`} />
+                </button>
+
+                <AnimatePresence>
+                  {loginDropdownOpen && (
+                    <motion.div
+                      initial={{ opacity: 0, y: -10, scale: 0.95 }}
+                      animate={{ opacity: 1, y: 0, scale: 1 }}
+                      exit={{ opacity: 0, y: -10, scale: 0.95 }}
+                      transition={{ duration: 0.15, ease: "easeOut" }}
+                      className="absolute top-full right-0 mt-2 w-48 
+                        bg-[rgba(5,7,10,0.98)] border border-[rgba(192,192,192,0.18)] 
+                        shadow-[0_8px_32px_rgba(0,0,0,0.8)] backdrop-blur-xl
+                        rounded-xl py-2 z-50"
+                    >
+                      {isLoggedIn ? (
+                        // Logged in - show user info and logout
+                        <>
+                          <div className="px-4 py-2 border-b border-gray-700">
+                            <p className="text-xs text-gray-400">Logged in as</p>
+                            <p className="text-sm text-white font-medium">
+                              {currentUser?.type === 'player' ? currentUser.nickname : currentUser?.username}
+                            </p>
+                            <p className="text-xs text-gray-500 capitalize">{currentUser?.type}</p>
+                          </div>
+                          {currentUser?.type === 'player' && (
+                            <Link
+                              to={`/players/${currentUser.playerId}`}
+                              onClick={() => setLoginDropdownOpen(false)}
+                              className="flex items-center gap-3 px-4 py-2.5 text-sm text-gray-200 hover:bg-white/5 transition-colors"
+                            >
+                              <UserCircle className="w-4 h-4 text-white" />
+                              <span>My Profile</span>
+                            </Link>
+                          )}
+                          {currentUser?.type === 'admin' && (
+                            <Link
+                              to="/admin-dashboard"
+                              onClick={() => setLoginDropdownOpen(false)}
+                              className="flex items-center gap-3 px-4 py-2.5 text-sm text-gray-200 hover:bg-white/5 transition-colors"
+                            >
+                              <Shield className="w-4 h-4 text-white" />
+                              <span>Dashboard</span>
+                            </Link>
+                          )}
+                          <button
+                            onClick={() => {
+                              AuthService.logout();
+                              setLoginDropdownOpen(false);
+                              navigate('/');
+                            }}
+                            className="flex items-center gap-3 px-4 py-2.5 text-sm text-red-300 hover:bg-red-500/10 transition-colors w-full text-left"
+                          >
+                            <LogIn className="w-4 h-4 text-red-400 rotate-180" />
+                            <span>Logout</span>
+                          </button>
+                        </>
+                      ) : (
+                        // Not logged in - show login options
+                        <>
+                          <Link
+                            to="/player-login"
+                            onClick={() => setLoginDropdownOpen(false)}
+                            className="flex items-center gap-3 px-4 py-2.5 text-sm text-gray-200 hover:bg-white/5 transition-colors"
+                          >
+                            <User className="w-4 h-4 text-white" />
+                            <span>Players</span>
+                          </Link>
+                          <Link
+                            to="/admin-login"
+                            onClick={() => setLoginDropdownOpen(false)}
+                            className="flex items-center gap-3 px-4 py-2.5 text-sm text-gray-200 hover:bg-white/5 transition-colors"
+                          >
+                            <Shield className="w-4 h-4 text-white" />
+                            <span>Admins</span>
+                          </Link>
+                        </>
+                      )}
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+              </div>
             </div>
 
             {/* Hamburger for mobile */}
@@ -198,7 +334,7 @@ export default function Navbar() {
                   animate={{ opacity: 1, y: 0 }}
                   exit={{ opacity: 0, y: -10 }}
                   transition={{ duration: 0.18, ease: "easeOut" }}
-                  className="absolute top-14 sm:top-[60px] right-3 sm:right-4 w-[200px] sm:w-[220px] 
+                  className="absolute top-16 sm:top-[68px] right-3 sm:right-4 w-[200px] sm:w-[220px] 
                     bg-[rgba(5,7,10,0.98)] border border-[rgba(192,192,192,0.18)] 
                     shadow-[0_8px_32px_rgba(0,0,0,0.8)] backdrop-blur-xl
                     z-999 flex flex-col md:hidden rounded-xl px-2 py-2"
@@ -227,12 +363,81 @@ export default function Navbar() {
                     mobile
                   />
                   <NavItem
-                    to="/players"
-                    icon={<UsersRound className="w-[18px] h-[18px]" />}
-                    label="Players"
-                    active={pathname.startsWith("/players")}
+                    to="/auction"
+                    icon={<svg className="w-[18px] h-[18px]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>}
+                    label="Auction"
+                    active={pathname.startsWith("/auction")}
                     mobile
                   />
+                  
+                  {/* Profile Link - Only show for logged-in players */}
+                  {isLoggedIn && currentUser?.type === 'player' && (
+                    <NavItem
+                      to={`/players/${currentUser.playerId}`}
+                      icon={<UserCircle className="w-[18px] h-[18px]" />}
+                      label="Profile"
+                      active={pathname.startsWith("/players") && pathname.includes(currentUser.playerId)}
+                      mobile
+                    />
+                  )}
+                  
+                  {/* Mobile Login Section */}
+                  <div className="border-t border-gray-600/30 mt-2 pt-2">
+                    {isLoggedIn ? (
+                      // Logged in - show user info and logout
+                      <>
+                        <div className="px-3 py-2">
+                          <div className="text-xs text-gray-400 uppercase tracking-wider">Logged in as</div>
+                          <div className="text-sm text-white font-medium">
+                            {currentUser?.type === 'player' ? currentUser.nickname : currentUser?.username}
+                          </div>
+                          <div className="text-xs text-gray-500 capitalize">{currentUser?.type}</div>
+                        </div>
+                        {currentUser?.type === 'admin' && (
+                          <Link
+                            to="/admin-dashboard"
+                            onClick={() => setMobileNavOpen(false)}
+                            className="flex items-center gap-3 px-3 py-2.5 text-sm text-gray-200 hover:bg-white/5 rounded-lg transition-colors"
+                          >
+                            <Shield className="w-[18px] h-[18px] text-white" />
+                            <span>Dashboard</span>
+                          </Link>
+                        )}
+                        <button
+                          onClick={() => {
+                            AuthService.logout();
+                            setMobileNavOpen(false);
+                            navigate('/');
+                          }}
+                          className="flex items-center gap-3 px-3 py-2.5 text-sm text-red-300 hover:bg-red-500/10 rounded-lg transition-colors w-full text-left"
+                        >
+                          <LogIn className="w-[18px] h-[18px] text-red-400 rotate-180" />
+                          <span>Logout</span>
+                        </button>
+                      </>
+                    ) : (
+                      // Not logged in - show login options
+                      <>
+                        <div className="px-3 py-1 text-xs text-gray-400 uppercase tracking-wider">Login</div>
+                        <Link
+                          to="/player-login"
+                          onClick={() => setMobileNavOpen(false)}
+                          className="flex items-center gap-3 px-3 py-2.5 text-sm text-gray-200 hover:bg-white/5 rounded-lg transition-colors"
+                        >
+                          <User className="w-[18px] h-[18px] text-white" />
+                          <span>Players</span>
+                        </Link>
+                        <Link
+                          to="/admin-login"
+                          onClick={() => setMobileNavOpen(false)}
+                          className="flex items-center gap-3 px-3 py-2.5 text-sm text-gray-200 hover:bg-white/5 rounded-lg transition-colors"
+                        >
+                          <Shield className="w-[18px] h-[18px] text-white" />
+                          <span>Admins</span>
+                        </Link>
+                      </>
+                    )}
+                  </div>
                 </motion.div>
               )}
             </AnimatePresence>
@@ -254,6 +459,7 @@ type NavItemProps = {
 };
 
 function NavItem({ to, icon, label, active, mobile = false }: NavItemProps) {
+  // Mobile rendering
   if (mobile) {
     return (
       <Link
@@ -262,10 +468,10 @@ function NavItem({ to, icon, label, active, mobile = false }: NavItemProps) {
           hover:bg-white/5 rounded-lg transition-all duration-200 group"
       >
         {active && (
-          <div className="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-8 bg-linear-to-b from-[#D16500] to-[#AF1D5D] rounded-r-full" />
+          <div className="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-8 bg-gradient-to-b from-zinc-300 to-zinc-400 rounded-r-full" />
         )}
         
-        <span className={`transition-colors ${active ? 'text-[#E4472F]' : ''}`}>
+        <span className={`transition-colors ${active ? 'text-white' : 'text-zinc-200'}`}>
           {icon}
         </span>
         
@@ -276,40 +482,42 @@ function NavItem({ to, icon, label, active, mobile = false }: NavItemProps) {
     );
   }
 
+  // Desktop rendering - same for all buttons
   return (
     <Link
       to={to}
-      className="relative inline-flex items-center gap-[0.3rem] md:gap-[0.35rem] px-1.5 md:px-2 lg:px-3 py-1 md:py-1.5 
+      className={`relative inline-flex items-center gap-[0.3rem] md:gap-[0.35rem] px-1.5 md:px-2 lg:px-3 py-1 md:py-1.5 
         text-[0.65rem] md:text-[0.7rem] lg:text-[0.75rem] xl:text-[0.8rem] uppercase tracking-[0.12em] md:tracking-[0.15em] lg:tracking-[0.18em] 
-        text-gray-200 opacity-90 hover:opacity-100 transition-all duration-200 group"
+        transition-all duration-300 group rounded-lg text-zinc-200 hover:text-white ${
+        active ? 'bg-white/10' : 'hover:bg-white/5'
+      }`}
     >
-      {active && <ActiveHighlight />}
+      {active && <ActiveHighlight color="white" />}
 
-      {icon}
+      <span className="transition-colors duration-300 text-zinc-200 group-hover:text-white">
+        {icon}
+      </span>
 
       <span className="relative whitespace-nowrap">
-        <span
-          className="absolute inset-0 -z-10 scale-95 opacity-0 rounded-lg
-                     bg-linear-to-r from-[#f5f5f5]/18 via-[#d4d4d4]/14 to-[#9ca3af]/18
-                     blur-md transition-all duration-300
-                     group-hover:opacity-100 group-hover:scale-100 group-hover:blur-xl"
-        />
         {label}
-        <span className="pointer-events-none absolute left-0 right-0 -bottom-1 lg:-bottom-1.5 block h-0.5 rounded-full bg-linear-to-r from-[#f5f5f5] to-[#a3a3a3] origin-left scale-x-0 transition-transform duration-200 ease-out group-hover:scale-x-100" />
+        <span className={`pointer-events-none absolute left-0 right-0 -bottom-1 lg:-bottom-1.5 block h-0.5 rounded-full origin-left transition-all duration-300 bg-gradient-to-r from-zinc-300 to-zinc-400 ${
+          active ? 'scale-x-100' : 'scale-x-0 group-hover:scale-x-100'
+        }`} />
       </span>
     </Link>
   );
 }
 
-function ActiveHighlight() {
+function ActiveHighlight({ color }: { color: string }) {
+  const colorClass = color === 'white' 
+    ? 'border-white/30 bg-white/10 shadow-[0_0_18px_rgba(255,255,255,0.2)]'
+    : 'border-white/30 bg-white/10 shadow-[0_0_18px_rgba(255,255,255,0.2)]';
+    
   return (
     <motion.div
       layoutId="activeNav"
       transition={{ type: "spring", stiffness: 350, damping: 28 }}
-      className="absolute inset-0 -z-10 rounded-lg
-                 border border-[rgba(192,192,192,0.45)]
-                 bg-[linear-gradient(120deg,rgba(245,245,245,0.12),rgba(192,192,192,0.18),rgba(75,85,99,0.24))]
-                 shadow-[0_0_18px_rgba(148,163,184,0.55)]"
+      className={`absolute inset-0 -z-10 rounded-lg border ${colorClass}`}
     />
   );
 }
