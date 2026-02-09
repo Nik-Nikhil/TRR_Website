@@ -637,7 +637,6 @@ export default function AdminDashboard() {
         console.error('Error clearing auction data:', error);
         alert('Error clearing auction data');
       }
-    };
       
       setShowClearModal(false);
       
