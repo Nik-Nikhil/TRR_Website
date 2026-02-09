@@ -6,6 +6,7 @@ import { getPlayerById, type Player } from '../data/players';
 import AuthService from '../services/auth';
 import DatabaseService from '../services/database';
 import playerBanService from '../services/playerBanService';
+import { getMedalFromMMR, type MedalInfo } from '../utils/mmrToMedal';
 
 export const PlayerProfile: React.FC = () => {
   const { playerId } = useParams<{ playerId: string }>();
@@ -31,6 +32,76 @@ export const PlayerProfile: React.FC = () => {
     { id: 'soft_support', label: 'Soft Support', iconSrc: '/icons/pos_4.png' },
     { id: 'hard_support', label: 'Hard Support', iconSrc: '/icons/pos_5.png' }
   ];
+
+  // Medal Display Component
+  const MedalDisplay = ({ mmr, label, type }: { mmr?: number; label?: string; type: 'current' | 'peak' }) => {
+    if (!mmr) {
+      return (
+        <div className="flex items-center gap-3 p-4 bg-gray-700/30 rounded-xl border border-gray-600/30">
+          <div className="w-16 h-16 bg-gray-600/50 rounded-full flex items-center justify-center">
+            <img src="/medals/Uncalibrated.png" alt="Uncalibrated" className="w-12 h-12 opacity-60" />
+          </div>
+          <div>
+            <p className="text-gray-400 text-sm font-medium">{type === 'current' ? 'Current Rank' : 'Peak Rank'}</p>
+            <p className="text-gray-500 text-lg font-bold">Uncalibrated</p>
+            <p className="text-gray-600 text-sm">No MMR data</p>
+          </div>
+        </div>
+      );
+    }
+
+    const medalInfo = getMedalFromMMR(mmr);
+    const medalImagePath = `/medals/${medalInfo.id}.png`;
+    
+    // Color scheme based on medal tier
+    const getColorScheme = (medalId: string) => {
+      if (medalId.includes('Herald')) return { bg: 'from-orange-900/20 to-red-900/20', border: 'border-orange-500/30', text: 'text-orange-300', glow: 'shadow-orange-500/20' };
+      if (medalId.includes('Guardian')) return { bg: 'from-green-900/20 to-emerald-900/20', border: 'border-green-500/30', text: 'text-green-300', glow: 'shadow-green-500/20' };
+      if (medalId.includes('Crusader')) return { bg: 'from-yellow-900/20 to-amber-900/20', border: 'border-yellow-500/30', text: 'text-yellow-300', glow: 'shadow-yellow-500/20' };
+      if (medalId.includes('Archon')) return { bg: 'from-blue-900/20 to-cyan-900/20', border: 'border-blue-500/30', text: 'text-blue-300', glow: 'shadow-blue-500/20' };
+      if (medalId.includes('Legend')) return { bg: 'from-purple-900/20 to-violet-900/20', border: 'border-purple-500/30', text: 'text-purple-300', glow: 'shadow-purple-500/20' };
+      if (medalId.includes('Ancient')) return { bg: 'from-pink-900/20 to-rose-900/20', border: 'border-pink-500/30', text: 'text-pink-300', glow: 'shadow-pink-500/20' };
+      if (medalId.includes('Divine')) return { bg: 'from-indigo-900/20 to-blue-900/20', border: 'border-indigo-500/30', text: 'text-indigo-300', glow: 'shadow-indigo-500/20' };
+      if (medalId.includes('Immortal')) return { bg: 'from-red-900/20 to-orange-900/20', border: 'border-red-500/30', text: 'text-red-300', glow: 'shadow-red-500/20' };
+      return { bg: 'from-gray-900/20 to-slate-900/20', border: 'border-gray-500/30', text: 'text-gray-300', glow: 'shadow-gray-500/20' };
+    };
+
+    const colors = getColorScheme(medalInfo.id);
+
+    return (
+      <div className={`relative flex items-center gap-4 p-4 bg-gradient-to-r ${colors.bg} rounded-xl border ${colors.border} backdrop-blur-sm hover:scale-[1.02] transition-all duration-300 ${colors.glow} hover:shadow-lg`}>
+        <div className="relative">
+          <div className="w-16 h-16 rounded-full bg-black/20 flex items-center justify-center p-1">
+            <img 
+              src={medalImagePath} 
+              alt={medalInfo.label} 
+              className="w-14 h-14 object-contain"
+              onError={(e) => {
+                e.currentTarget.src = "/medals/Uncalibrated.png";
+              }}
+            />
+          </div>
+          {type === 'peak' && (
+            <div className="absolute -top-1 -right-1 w-6 h-6 bg-yellow-500 rounded-full flex items-center justify-center">
+              <Star className="w-3 h-3 text-yellow-900" />
+            </div>
+          )}
+        </div>
+        <div className="flex-1">
+          <p className="text-gray-400 text-sm font-medium">{type === 'current' ? 'Current Rank' : 'Peak Rank'}</p>
+          <p className={`${colors.text} text-lg font-bold`}>{medalInfo.label}</p>
+          <p className="text-gray-300 text-sm font-semibold">{mmr.toLocaleString()} MMR</p>
+        </div>
+        <div className="text-right">
+          <div className={`px-3 py-1 ${colors.bg} rounded-full border ${colors.border}`}>
+            <span className={`text-xs font-bold ${colors.text}`}>
+              {medalInfo.id.includes('Immortal') ? 'TOP TIER' : `${medalInfo.minMMR}-${medalInfo.maxMMR}`}
+            </span>
+          </div>
+        </div>
+      </div>
+    );
+  };
 
   // Get current user from auth service
   const currentUser = AuthService.getCurrentUser();
@@ -189,19 +260,25 @@ export const PlayerProfile: React.FC = () => {
               animate={{ opacity: 1, x: 0 }}
               className="lg:col-span-1"
             >
-              <div className="bg-gray-800/40 backdrop-blur-xl border border-gray-600/30 rounded-2xl p-6">
+              <div className="bg-gradient-to-br from-gray-800/60 to-gray-900/60 backdrop-blur-xl border border-gray-600/30 rounded-2xl p-6 shadow-2xl">
                 <h2 className="text-xl font-semibold mb-6 flex items-center text-white">
                   <Camera className="w-5 h-5 mr-2" />
                   Profile Picture
                 </h2>
                 
                 <div className="text-center">
-                  <div className="w-32 h-32 mx-auto mb-4 rounded-full overflow-hidden bg-gray-700">
-                    <img 
-                      src={player.avatarUrl || '/avatars/default.png'} 
-                      alt={player.nickname}
-                      className="w-full h-full object-cover"
-                    />
+                  <div className="relative w-32 h-32 mx-auto mb-4">
+                    <div className="w-full h-full rounded-full overflow-hidden bg-gradient-to-br from-blue-500/20 to-purple-500/20 border-4 border-gray-600/50 shadow-xl">
+                      <img 
+                        src={player.avatarUrl || '/avatars/default.png'} 
+                        alt={player.nickname}
+                        className="w-full h-full object-cover"
+                      />
+                    </div>
+                    {/* Online indicator */}
+                    <div className="absolute bottom-2 right-2 w-6 h-6 bg-green-500 rounded-full border-3 border-gray-800 shadow-lg flex items-center justify-center">
+                      <div className="w-3 h-3 bg-green-400 rounded-full animate-pulse"></div>
+                    </div>
                   </div>
                   <p className="text-gray-400 text-sm">Avatar upload feature temporarily disabled</p>
                 </div>
@@ -209,24 +286,26 @@ export const PlayerProfile: React.FC = () => {
                 {/* Player Stats Summary */}
                 <div className="mt-6 space-y-4">
                   <div className="text-center">
-                    <h3 className="text-lg font-semibold text-white mb-2">{player.nickname}</h3>
+                    <h3 className="text-xl font-bold text-white mb-2 bg-gradient-to-r from-blue-400 to-purple-400 bg-clip-text text-transparent">
+                      {player.nickname}
+                    </h3>
                     {player.realName && (
-                      <p className="text-gray-400 text-sm">{player.realName}</p>
+                      <p className="text-gray-400 text-sm font-medium">{player.realName}</p>
                     )}
                     
                     {/* Banned Status */}
                     {playerBanService.isPlayerBanned(player.id) && (
-                      <div className="mt-3 p-3 bg-red-900/30 border border-red-500/50 rounded-lg">
-                        <div className="flex items-center justify-center gap-2 text-red-300">
-                          <AlertTriangle className="w-4 h-4" />
-                          <span className="font-semibold text-sm">Disabled by Admins</span>
+                      <div className="mt-4 p-4 bg-red-900/40 border border-red-500/60 rounded-xl backdrop-blur-sm">
+                        <div className="flex items-center justify-center gap-2 text-red-300 mb-2">
+                          <AlertTriangle className="w-5 h-5" />
+                          <span className="font-bold">Account Disabled</span>
                         </div>
                         {(() => {
                           const banDetails = playerBanService.getBanDetails(player.id);
                           return banDetails && (
-                            <div className="mt-2 text-xs text-red-400 text-center">
-                              <p>Reason: {banDetails.reason}</p>
-                              <p>Banned on: {new Date(banDetails.bannedAt).toLocaleDateString()}</p>
+                            <div className="text-xs text-red-400 text-center space-y-1">
+                              <p className="font-medium">Reason: {banDetails.reason}</p>
+                              <p>Date: {new Date(banDetails.bannedAt).toLocaleDateString()}</p>
                             </div>
                           );
                         })()}
@@ -234,23 +313,35 @@ export const PlayerProfile: React.FC = () => {
                     )}
                   </div>
 
-                  {/* Badges */}
+                  {/* Enhanced Badges */}
                   <div className="flex flex-wrap gap-2 justify-center">
                     {player.hasWonCup && (
-                      <div className="flex items-center gap-1 px-2 py-1 bg-yellow-600/20 border border-yellow-500/30 rounded-lg">
-                        <Trophy className="w-3 h-3 text-yellow-400" />
-                        <span className="text-xs text-yellow-300">Champion</span>
+                      <div className="flex items-center gap-2 px-3 py-2 bg-gradient-to-r from-yellow-600/20 to-amber-600/20 border border-yellow-500/40 rounded-xl backdrop-blur-sm">
+                        <Trophy className="w-4 h-4 text-yellow-400" />
+                        <span className="text-sm text-yellow-300 font-semibold">Champion</span>
                       </div>
                     )}
                     {player.specialBadge && (
-                      <div className="flex items-center gap-1 px-2 py-1 bg-purple-600/20 border border-purple-500/30 rounded-lg">
-                        <Star className="w-3 h-3 text-purple-400" />
-                        <span className="text-xs text-purple-300 capitalize">{player.specialBadge}</span>
+                      <div className="flex items-center gap-2 px-3 py-2 bg-gradient-to-r from-purple-600/20 to-pink-600/20 border border-purple-500/40 rounded-xl backdrop-blur-sm">
+                        <Star className="w-4 h-4 text-purple-400" />
+                        <span className="text-sm text-purple-300 font-semibold capitalize">{player.specialBadge}</span>
                       </div>
                     )}
-                    <div className="flex items-center gap-1 px-2 py-1 bg-blue-600/20 border border-blue-500/30 rounded-lg">
-                      <Shield className="w-3 h-3 text-blue-400" />
-                      <span className="text-xs text-blue-300">S{player.seasonBadges.length}</span>
+                    <div className="flex items-center gap-2 px-3 py-2 bg-gradient-to-r from-blue-600/20 to-cyan-600/20 border border-blue-500/40 rounded-xl backdrop-blur-sm">
+                      <Shield className="w-4 h-4 text-blue-400" />
+                      <span className="text-sm text-blue-300 font-semibold">Season {player.seasonBadges.length}</span>
+                    </div>
+                  </div>
+
+                  {/* Quick Stats */}
+                  <div className="grid grid-cols-2 gap-3 mt-6">
+                    <div className="text-center p-3 bg-gray-700/30 rounded-xl border border-gray-600/30">
+                      <p className="text-2xl font-bold text-green-400">{player.currentMMR || '?'}</p>
+                      <p className="text-xs text-gray-400">Current MMR</p>
+                    </div>
+                    <div className="text-center p-3 bg-gray-700/30 rounded-xl border border-gray-600/30">
+                      <p className="text-2xl font-bold text-yellow-400">{player.peakMMR || '?'}</p>
+                      <p className="text-xs text-gray-400">Peak MMR</p>
                     </div>
                   </div>
                 </div>
@@ -363,32 +454,32 @@ export const PlayerProfile: React.FC = () => {
 
                   {/* Game Stats */}
                   <div>
-                    <h3 className="text-lg font-semibold text-white mb-4">Game Statistics</h3>
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                      <div>
-                        <label className="block text-sm font-medium text-gray-300 mb-2">
-                          Current Medal
-                        </label>
-                        {isEditing ? (
-                          <input
-                            type="text"
-                            value={editedData.currentMedalLabel}
-                            onChange={(e) => setEditedData(prev => ({ ...prev, currentMedalLabel: e.target.value }))}
-                            className="w-full p-3 bg-gray-700/50 border border-gray-600/40 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
-                            placeholder="e.g., Divine 3"
-                          />
-                        ) : (
-                          <div className="text-lg text-white bg-gray-700/50 p-3 rounded-lg">
-                            {player.currentMedalLabel || 'Not calibrated'}
-                          </div>
-                        )}
-                      </div>
-                      
-                      <div>
-                        <label className="block text-sm font-medium text-gray-300 mb-2">
-                          Current MMR
-                        </label>
-                        {isEditing ? (
+                    <h3 className="text-lg font-semibold text-white mb-6 flex items-center gap-2">
+                      <Trophy className="w-5 h-5 text-yellow-400" />
+                      Game Statistics
+                    </h3>
+                    
+                    {/* Medal Displays */}
+                    <div className="space-y-4 mb-6">
+                      <MedalDisplay 
+                        mmr={player.currentMMR} 
+                        label={player.currentMedalLabel} 
+                        type="current" 
+                      />
+                      <MedalDisplay 
+                        mmr={player.peakMMR} 
+                        label={player.peakMedalLabel} 
+                        type="peak" 
+                      />
+                    </div>
+
+                    {/* Editable MMR Fields */}
+                    {isEditing && (
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 p-4 bg-blue-900/10 border border-blue-500/20 rounded-xl">
+                        <div>
+                          <label className="block text-sm font-medium text-blue-300 mb-2">
+                            Update Current MMR
+                          </label>
                           <input
                             type="number"
                             value={editedData.currentMMR}
@@ -396,37 +487,13 @@ export const PlayerProfile: React.FC = () => {
                             className="w-full p-3 bg-gray-700/50 border border-gray-600/40 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
                             placeholder="e.g., 4500"
                           />
-                        ) : (
-                          <div className="text-lg text-white bg-gray-700/50 p-3 rounded-lg">
-                            {player.currentMMR || 'Not calibrated'}
-                          </div>
-                        )}
-                      </div>
-
-                      <div>
-                        <label className="block text-sm font-medium text-gray-300 mb-2">
-                          Peak Medal
-                        </label>
-                        {isEditing ? (
-                          <input
-                            type="text"
-                            value={editedData.peakMedalLabel}
-                            onChange={(e) => setEditedData(prev => ({ ...prev, peakMedalLabel: e.target.value }))}
-                            className="w-full p-3 bg-gray-700/50 border border-gray-600/40 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
-                            placeholder="e.g., Immortal"
-                          />
-                        ) : (
-                          <div className="text-lg text-white bg-gray-700/50 p-3 rounded-lg">
-                            {player.peakMedalLabel || 'Not calibrated'}
-                          </div>
-                        )}
-                      </div>
-                      
-                      <div>
-                        <label className="block text-sm font-medium text-gray-300 mb-2">
-                          Peak MMR
-                        </label>
-                        {isEditing ? (
+                          <p className="text-xs text-blue-400 mt-1">Medal will be calculated automatically</p>
+                        </div>
+                        
+                        <div>
+                          <label className="block text-sm font-medium text-blue-300 mb-2">
+                            Update Peak MMR
+                          </label>
                           <input
                             type="number"
                             value={editedData.peakMMR}
@@ -434,46 +501,60 @@ export const PlayerProfile: React.FC = () => {
                             className="w-full p-3 bg-gray-700/50 border border-gray-600/40 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
                             placeholder="e.g., 5200"
                           />
-                        ) : (
-                          <div className="text-lg text-white bg-gray-700/50 p-3 rounded-lg">
-                            {player.peakMMR || 'Not calibrated'}
-                          </div>
-                        )}
+                          <p className="text-xs text-blue-400 mt-1">Medal will be calculated automatically</p>
+                        </div>
                       </div>
-                    </div>
+                    )}
                   </div>
 
                   {/* Roles Section */}
                   <div>
-                    <div className="flex items-center justify-between mb-4">
-                      <h3 className="text-lg font-semibold text-white">Preferred Roles</h3>
+                    <div className="flex items-center justify-between mb-6">
+                      <h3 className="text-lg font-semibold text-white flex items-center gap-2">
+                        <User className="w-5 h-5 text-blue-400" />
+                        Preferred Roles
+                      </h3>
                       <button
                         onClick={() => setShowRoleChangeModal(true)}
-                        className="px-3 py-1 bg-orange-600/80 hover:bg-orange-600 text-white text-sm rounded-lg transition-colors backdrop-blur-sm"
+                        className="px-4 py-2 bg-gradient-to-r from-orange-600/80 to-red-600/80 hover:from-orange-600 hover:to-red-600 text-white text-sm rounded-xl transition-all duration-300 backdrop-blur-sm shadow-lg hover:shadow-orange-500/20 transform hover:scale-105"
                       >
                         Request Role Change
                       </button>
                     </div>
                     
-                    <div className="bg-gray-700/50 p-4 rounded-lg">
+                    <div className="bg-gradient-to-br from-gray-700/30 to-gray-800/30 p-6 rounded-xl border border-gray-600/30 backdrop-blur-sm">
                       {player.roles && player.roles.length > 0 ? (
-                        <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                           {player.roles.map((role, index) => (
-                            <div key={index} className="flex items-center gap-2 p-2 bg-gray-600/50 rounded-lg">
-                              <img 
-                                src={role.iconSrc} 
-                                alt={role.label}
-                                className="w-6 h-6"
-                              />
-                              <span className="text-sm text-white">{role.label}</span>
-                              <span className="text-xs text-gray-400 ml-auto">#{index + 1}</span>
+                            <div key={index} className="flex items-center gap-4 p-4 bg-gradient-to-r from-blue-600/10 to-purple-600/10 border border-blue-500/20 rounded-xl hover:from-blue-600/20 hover:to-purple-600/20 transition-all duration-300">
+                              <div className="relative">
+                                <div className="w-12 h-12 bg-gradient-to-br from-blue-500/20 to-purple-500/20 rounded-xl flex items-center justify-center border border-blue-500/30">
+                                  <img 
+                                    src={role.iconSrc} 
+                                    alt={role.label}
+                                    className="w-8 h-8"
+                                  />
+                                </div>
+                                <div className="absolute -top-1 -right-1 w-6 h-6 bg-blue-500 rounded-full flex items-center justify-center text-white text-xs font-bold">
+                                  {index + 1}
+                                </div>
+                              </div>
+                              <div className="flex-1">
+                                <p className="text-white font-semibold">{role.label}</p>
+                                <p className="text-gray-400 text-sm">
+                                  {index === 0 ? 'Primary Role' : index === 1 ? 'Secondary Role' : 'Alternative Role'}
+                                </p>
+                              </div>
                             </div>
                           ))}
                         </div>
                       ) : (
-                        <div className="text-center py-4">
-                          <p className="text-gray-400">No roles assigned yet</p>
-                          <p className="text-xs text-gray-500 mt-1">Request role assignment from admins</p>
+                        <div className="text-center py-8">
+                          <div className="w-16 h-16 bg-gray-600/30 rounded-full flex items-center justify-center mx-auto mb-4">
+                            <User className="w-8 h-8 text-gray-400" />
+                          </div>
+                          <p className="text-gray-400 font-medium">No roles assigned yet</p>
+                          <p className="text-gray-500 text-sm mt-2">Request role assignment from admins</p>
                         </div>
                       )}
                     </div>

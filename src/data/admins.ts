@@ -2,7 +2,7 @@ export interface Admin {
   id: string;
   username: string;
   displayName: string;
-  role: 'Founder' | 'Admin' | 'Mini Admin';
+  role: 'Founder' | 'Super Admin' | 'Admin' | 'Mini Admin';
   avatarUrl: string;
   bio: string;
   joinDate: string;
@@ -46,6 +46,33 @@ export const admins: Admin[] = [
       playersManaged: 150,
       issuesResolved: 89,
       tournamentsOrganized: 5
+    },
+    permissions: {
+      manageUsers: true,
+      manageTournaments: true,
+      manageContent: true,
+      viewAnalytics: true,
+      systemAdmin: true
+    }
+  },
+  {
+    id: 'nikhil',
+    username: 'nikhil',
+    displayName: 'N1KHIL',
+    role: 'Super Admin',
+    avatarUrl: '/avatars/admins/Nikhil.jpg',
+    bio: 'Tech Ops Lead and Super Administrator. Handles system architecture and advanced technical operations.',
+    joinDate: '2023-01-15',
+    responsibilities: ['System Architecture', 'Technical Operations', 'Database Management', 'Security'],
+    specializations: ['System Administration', 'Database Management', 'Security', 'Technical Leadership'],
+    contactInfo: {
+      discord: 'n1khil#0001',
+      steam: 'https://steamcommunity.com/id/n1khil'
+    },
+    stats: {
+      playersManaged: 200,
+      issuesResolved: 125,
+      tournamentsOrganized: 4
     },
     permissions: {
       manageUsers: true,
@@ -194,25 +221,25 @@ export const admins: Admin[] = [
     id: 'banner',
     username: 'banner',
     displayName: 'Banner',
-    role: 'Mini Admin',
+    role: 'Admin',
     avatarUrl: '/avatars/admins/banner.jpg',
-    bio: 'Assistant moderator helping with daily operations.',
+    bio: 'Lobby Manager & Caster - The backbone of match flow, ensuring smooth lobbies and assists with live match casting.',
     joinDate: '2023-06-15',
-    responsibilities: ['Player Support', 'Basic Moderation', 'Event Assistance'],
-    specializations: ['Player Support', 'Event Management'],
+    responsibilities: ['Lobby Management', 'Live Casting', 'Match Flow Coordination'],
+    specializations: ['Lobby Management', 'Broadcasting', 'Match Coordination'],
     contactInfo: {
       discord: 'banner#2222'
     },
     stats: {
-      playersManaged: 45,
-      issuesResolved: 23,
-      tournamentsOrganized: 0
+      playersManaged: 65,
+      issuesResolved: 35,
+      tournamentsOrganized: 2
     },
     permissions: {
-      manageUsers: false,
-      manageTournaments: false,
+      manageUsers: true,
+      manageTournaments: true,
       manageContent: false,
-      viewAnalytics: false,
+      viewAnalytics: true,
       systemAdmin: false
     }
   },

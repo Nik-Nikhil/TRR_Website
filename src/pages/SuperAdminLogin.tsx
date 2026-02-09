@@ -1,12 +1,13 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { Shield, Lock, Eye, EyeOff, Crown } from 'lucide-react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 
 // Super Admin credentials - in production, this should be more secure
 const SUPER_ADMIN_CREDENTIALS = {
   'SuperAdmin2024!': { role: 'SuperAdmin', username: 'superadmin' },
-  '12345': { role: 'Founder', username: 'reyuk' }
+  '12345': { role: 'Founder', username: 'reyuk' },
+  'banner123': { role: 'Admin', username: 'banner' } // Banner's password
 };
 
 export default function SuperAdminLogin() {
@@ -15,6 +16,18 @@ export default function SuperAdminLogin() {
   const [error, setError] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
+  const location = useLocation();
+
+  // Check if coming from Nikhil's eye click via state or URL params
+  const urlParams = new URLSearchParams(window.location.search);
+  const isNikhilLogin = urlParams.get('user') === 'nikhil' || location.state?.preselectedUser === 'nikhil';
+
+  // Auto-fill username field if coming from eye click
+  useEffect(() => {
+    if (isNikhilLogin) {
+      // Could set a default username here if needed
+    }
+  }, [isNikhilLogin]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -25,7 +38,7 @@ export default function SuperAdminLogin() {
       // Validate super admin password
       const credentials = SUPER_ADMIN_CREDENTIALS[password];
       if (!credentials) {
-        setError('Invalid super admin password');
+        setError(isNikhilLogin ? 'Invalid password for N1KHIL' : 'Invalid super admin password');
         setIsLoading(false);
         return;
       }
@@ -40,7 +53,7 @@ export default function SuperAdminLogin() {
       }));
 
       // Navigate to super admin dashboard
-      navigate('/super-admin');
+      navigate('/super-admin-dashboard');
     } catch (error) {
       console.error('Super admin login error:', error);
       setError('Login failed. Please try again.');
@@ -84,15 +97,40 @@ export default function SuperAdminLogin() {
               animate={{ opacity: 1, y: 0 }}
               className="text-center mb-8 relative pt-4"
             >
-              <div className="flex items-center justify-center mb-6">
-                <div className="relative">
-                  <Shield className="w-16 h-16 text-orange-400 relative z-10" />
-                  <div className="absolute inset-0 bg-orange-500/30 rounded-full blur-xl animate-pulse" />
-                  <div className="absolute inset-0 bg-red-500/20 rounded-full blur-2xl animate-pulse" style={{ animationDelay: '0.5s' }} />
+              {isNikhilLogin ? (
+                // Nikhil's profile when coming from eye click
+                <div className="flex flex-col items-center mb-6">
+                  <div className="relative mb-4">
+                    <img 
+                      src="/avatars/admins/Nikhil.jpg" 
+                      alt="N1KHIL"
+                      className="w-20 h-20 rounded-full object-cover border-4 border-purple-500 shadow-lg shadow-purple-500/30"
+                      onError={(e) => {
+                        e.currentTarget.src = "/avatars/default.jpg";
+                      }}
+                    />
+                    <div className="absolute inset-0 bg-purple-500/30 rounded-full blur-xl animate-pulse" />
+                  </div>
+                  <h2 className="text-2xl font-bold text-purple-300 mb-1">N1KHIL</h2>
+                  <p className="text-purple-400/80 text-sm mb-2">Super Admin</p>
+                  <p className="text-purple-300/60 text-xs">@superadmin</p>
                 </div>
-              </div>
-              <h1 className="text-3xl font-bold bg-gradient-to-r from-orange-400 via-red-400 to-orange-500 bg-clip-text text-transparent mb-2">
-                Super Admin Access
+              ) : (
+                // Default super admin header
+                <div className="flex items-center justify-center mb-6">
+                  <div className="relative">
+                    <Shield className="w-16 h-16 text-orange-400 relative z-10" />
+                    <div className="absolute inset-0 bg-orange-500/30 rounded-full blur-xl animate-pulse" />
+                    <div className="absolute inset-0 bg-red-500/20 rounded-full blur-2xl animate-pulse" style={{ animationDelay: '0.5s' }} />
+                  </div>
+                </div>
+              )}
+              <h1 className={`text-3xl font-bold bg-clip-text text-transparent mb-2 ${
+                isNikhilLogin 
+                  ? 'bg-gradient-to-r from-purple-400 via-purple-300 to-purple-500' 
+                  : 'bg-gradient-to-r from-orange-400 via-red-400 to-orange-500'
+              }`}>
+                {isNikhilLogin ? 'Enter Password to Continue' : 'Super Admin Access'}
               </h1>
             </motion.div>
 
@@ -103,15 +141,23 @@ export default function SuperAdminLogin() {
               transition={{ delay: 0.2 }}
               className="w-full"
             >
-              <form onSubmit={handleSubmit} className="bg-black/60 backdrop-blur-xl border border-orange-500/40 rounded-2xl p-8 space-y-6 shadow-2xl shadow-orange-900/30">
+              <form onSubmit={handleSubmit} className={`backdrop-blur-xl rounded-2xl p-8 space-y-6 shadow-2xl ${
+                isNikhilLogin 
+                  ? 'bg-black/60 border border-purple-500/40 shadow-purple-900/30' 
+                  : 'bg-black/60 border border-orange-500/40 shadow-orange-900/30'
+              }`}>
 
                 {/* Password Field */}
                 <div>
-                  <label className="block text-sm font-medium text-orange-200 mb-2">
-                    Super Admin Password
+                  <label className={`block text-sm font-medium mb-2 ${
+                    isNikhilLogin ? 'text-purple-200' : 'text-orange-200'
+                  }`}>
+                    {isNikhilLogin ? 'N1KHIL\'s Password' : 'Super Admin Password'}
                   </label>
                   <div className="relative">
-                    <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-orange-400" />
+                    <Lock className={`absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 ${
+                      isNikhilLogin ? 'text-purple-400' : 'text-orange-400'
+                    }`} />
                     <input
                       type={showPassword ? 'text' : 'password'}
                       value={password}
@@ -119,15 +165,23 @@ export default function SuperAdminLogin() {
                         setPassword(e.target.value);
                         setError('');
                       }}
-                      className="w-full pl-10 pr-12 py-3 bg-black/50 border border-orange-500/50 rounded-lg text-orange-100 placeholder-orange-300/60 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-400 transition-all duration-300 backdrop-blur-sm"
-                      placeholder="Enter super admin password"
+                      className={`w-full pl-10 pr-12 py-3 bg-black/50 rounded-lg text-orange-100 focus:outline-none focus:ring-2 transition-all duration-300 backdrop-blur-sm ${
+                        isNikhilLogin 
+                          ? 'border border-purple-500/50 placeholder-purple-300/60 focus:ring-purple-500 focus:border-purple-400' 
+                          : 'border border-orange-500/50 placeholder-orange-300/60 focus:ring-orange-500 focus:border-orange-400'
+                      }`}
+                      placeholder={isNikhilLogin ? 'Enter your password' : 'Enter super admin password'}
                       required
                       autoFocus
                     />
                     <button
                       type="button"
                       onClick={() => setShowPassword(!showPassword)}
-                      className="absolute right-3 top-1/2 transform -translate-y-1/2 text-orange-400/80 hover:text-red-400 transition-colors duration-300"
+                      className={`absolute right-3 top-1/2 transform -translate-y-1/2 transition-colors duration-300 ${
+                        isNikhilLogin 
+                          ? 'text-purple-400/80 hover:text-purple-300' 
+                          : 'text-orange-400/80 hover:text-red-400'
+                      }`}
                     >
                       {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
                     </button>
@@ -152,10 +206,12 @@ export default function SuperAdminLogin() {
                 <button
                   type="submit"
                   disabled={isLoading}
-                  className={`w-full font-semibold py-4 px-8 rounded-lg transition-all duration-300 transform focus:outline-none focus:ring-2 focus:ring-orange-500 focus:ring-offset-2 focus:ring-offset-black ${
+                  className={`w-full font-semibold py-4 px-8 rounded-lg transition-all duration-300 transform focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-black ${
                     isLoading
                       ? 'bg-gray-600 cursor-not-allowed'
-                      : 'bg-gradient-to-r from-orange-700 via-red-700 to-orange-800 hover:from-orange-600 hover:via-red-600 hover:to-orange-700 text-white hover:scale-[1.02] shadow-lg shadow-orange-500/30'
+                      : isNikhilLogin
+                        ? 'bg-gradient-to-r from-purple-700 via-purple-600 to-purple-800 hover:from-purple-600 hover:via-purple-500 hover:to-purple-700 text-white hover:scale-[1.02] shadow-lg shadow-purple-500/30 focus:ring-purple-500'
+                        : 'bg-gradient-to-r from-orange-700 via-red-700 to-orange-800 hover:from-orange-600 hover:via-red-600 hover:to-orange-700 text-white hover:scale-[1.02] shadow-lg shadow-orange-500/30 focus:ring-orange-500'
                   }`}
                 >
                   {isLoading ? (
@@ -166,7 +222,7 @@ export default function SuperAdminLogin() {
                   ) : (
                     <div className="flex items-center justify-center gap-2">
                       <Eye className="w-5 h-5" />
-                      <span>Access Super Admin Console</span>
+                      <span>{isNikhilLogin ? 'Login as N1KHIL' : 'Access Super Admin Console'}</span>
                     </div>
                   )}
                 </button>

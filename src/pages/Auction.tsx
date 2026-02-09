@@ -1,8 +1,6 @@
 import { useState, useEffect } from "react";
-import { Link } from "react-router-dom";
 import { players } from "../data/players";
 import { AuthService } from "../services/auth";
-import { DOTA_HEROES } from "../data/heroes";
 
 interface AuctionPlayer {
   id: string;
@@ -148,10 +146,6 @@ export default function Auction() {
   // Initialize auction players with enhanced data
   useEffect(() => {
     const initPlayers: AuctionPlayer[] = players.map((player, index) => {
-      // Get random top 3 heroes for each player
-      const shuffledHeroes = [...DOTA_HEROES].sort(() => 0.5 - Math.random());
-      const top3Heroes = shuffledHeroes.slice(0, 3);
-      
       return {
         id: player.id,
         nickname: player.nickname,
@@ -166,7 +160,7 @@ export default function Auction() {
         status: 'in-jar',
         ping: Math.floor(Math.random() * 150) + 10, // Random ping 10-160ms
         gold: Math.floor(Math.random() * 1000) + 100, // Random gold 100-1100
-        favoriteHeroes: top3Heroes.map(hero => ({ name: hero.name, videoSrc: hero.videoSrc })),
+        favoriteHeroes: [], // Removed to improve performance
         isBanned: false,
         banReason: ''
       };
@@ -540,151 +534,225 @@ export default function Auction() {
         <div className="absolute inset-0 bg-black/60" />
       </div>
 
-      <main className="relative h-screen overflow-hidden flex flex-col w-full px-4 md:px-8 z-10" style={{ paddingTop: '100px' }}>
-        <div className="w-full max-w-6xl mx-auto">
-          {/* Login Section - Captain on Left, Admin on Right - Close to navbar */}
-          {!isAdmin && !currentPlayerSession && (
-            <div className="mb-6 flex flex-col lg:flex-row gap-4 max-w-5xl mx-auto">
-              {/* Captain Login - Left Side */}
-              <div className="flex-1 bg-gradient-to-r from-yellow-900/50 to-orange-900/50 border border-yellow-500/30 rounded-xl p-5 backdrop-blur-sm">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-3">
-                    <div className="w-6 h-6 bg-yellow-500/30 rounded-lg flex items-center justify-center">
-                      <svg className="w-4 h-4 text-yellow-300" fill="currentColor" viewBox="0 0 20 20">
-                        <path fillRule="evenodd" d="M6.267 3.455a3.066 3.066 0 001.745-.723 3.066 3.066 0 013.976 0 3.066 3.066 0 001.745.723 3.066 3.066 0 012.812 2.812c.051.643.304 1.254.723 1.745a3.066 3.066 0 010 3.976 3.066 3.066 0 00-.723 1.745 3.066 3.066 0 01-2.812 2.812 3.066 3.066 0 00-1.745.723 3.066 3.066 0 01-3.976 0 3.066 3.066 0 00-1.745-.723 3.066 3.066 0 01-2.812-2.812 3.066 3.066 0 00-.723-1.745 3.066 3.066 0 010-3.976 3.066 3.066 0 00.723-1.745 3.066 3.066 0 012.812-2.812zm7.44 5.252a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
-                      </svg>
-                    </div>
-                    <div>
-                      <h3 className="text-yellow-300 font-bold">Are you a captain?</h3>
-                      <p className="text-yellow-400/80 text-sm">Login to participate</p>
-                    </div>
-                  </div>
-                  <button
-                    onClick={() => setShowCaptainLogin(true)}
-                    className="px-4 py-2 bg-yellow-600/20 hover:bg-yellow-600/30 border border-yellow-500/50 text-yellow-300 rounded-lg text-sm transition-colors cursor-pointer"
-                  >
-                    Captain Login
-                  </button>
+      <main className="relative min-h-screen flex flex-col w-full z-10 pb-20" style={{ paddingTop: '80px' }}>
+        <div className="flex-1 px-4 md:px-6 py-4">
+          {/* Hero Section - Compact */}
+          <div className="text-center mb-8">
+            <div className="relative inline-block mb-4">
+              <div className="absolute inset-0 bg-gradient-to-r from-yellow-400/20 via-orange-400/20 to-red-400/20 blur-2xl rounded-full"></div>
+              <h1 className="relative text-2xl md:text-4xl lg:text-5xl font-black bg-gradient-to-r from-yellow-400 via-orange-400 to-red-400 bg-clip-text text-transparent mb-2 flex items-center justify-center gap-3">
+                <div className="w-10 h-10 md:w-12 md:h-12 bg-gradient-to-br from-yellow-500 to-orange-600 rounded-xl flex items-center justify-center shadow-xl shadow-orange-500/30">
+                  <svg className="w-6 h-6 md:w-7 md:h-7 text-white" fill="currentColor" viewBox="0 0 24 24">
+                    <path d="M12 2L15.09 8.26L22 9L17 14L18.18 21L12 17.77L5.82 21L7 14L2 9L8.91 8.26L12 2Z"/>
+                  </svg>
                 </div>
-              </div>
-
-              {/* Admin Login - Right Side */}
-              <div className="flex-1 bg-slate-900/80 border border-slate-600/50 rounded-xl p-5 backdrop-blur-sm">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-3">
-                    <div className="w-6 h-6 bg-slate-500/30 rounded-lg flex items-center justify-center">
-                      <svg className="w-4 h-4 text-slate-300" fill="currentColor" viewBox="0 0 20 20">
-                        <path fillRule="evenodd" d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z" clipRule="evenodd" />
-                      </svg>
-                    </div>
-                    <div>
-                      <h3 className="text-slate-300 font-bold">Admin Access</h3>
-                      <p className="text-slate-400/80 text-sm">Manage auction controls</p>
-                    </div>
-                  </div>
-                  <Link 
-                    to="/admin-login"
-                    className="inline-flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white rounded-lg text-sm font-semibold transition-all cursor-pointer"
-                  >
-                    <svg className="w-4 h-4 text-white" fill="currentColor" viewBox="0 0 20 20">
-                      <path fillRule="evenodd" d="M18 8a6 6 0 01-7.743 5.743L10 14l-1 1-1 1H6v2H2v-4l4.257-4.257A6 6 0 1118 8zm-6-4a1 1 0 100 2 2 2 0 012 2 1 1 0 102 0 4 4 0 00-4-4z" clipRule="evenodd" />
-                    </svg> Admin Login
-                  </Link>
-                </div>
-              </div>
+                Player Auction
+              </h1>
             </div>
-          )}
-
-          {/* Header */}
-          <div className="text-center mb-6">
-            <h1 className="text-3xl md:text-5xl font-black bg-gradient-to-r from-yellow-400 via-orange-400 to-red-400 bg-clip-text text-transparent mb-3 flex items-center justify-center gap-4">
-              <svg className="w-12 h-12 text-yellow-400" fill="currentColor" viewBox="0 0 20 20">
-                <path d="M3 4a1 1 0 011-1h12a1 1 0 011 1v2a1 1 0 01-1 1H4a1 1 0 01-1-1V4zM3 10a1 1 0 011-1h6a1 1 0 011 1v6a1 1 0 01-1 1H4a1 1 0 01-1-1v-6zM14 9a1 1 0 00-1 1v6a1 1 0 001 1h2a1 1 0 001-1v-6a1 1 0 00-1-1h-2z" />
-              </svg>
-              Player Auction
-              <svg className="w-12 h-12 text-yellow-400" fill="currentColor" viewBox="0 0 20 20">
-                <path d="M3 4a1 1 0 011-1h12a1 1 0 011 1v2a1 1 0 01-1 1H4a1 1 0 01-1-1V4zM3 10a1 1 0 011-1h6a1 1 0 011 1v6a1 1 0 01-1 1H4a1 1 0 01-1-1v-6zM14 9a1 1 0 00-1 1v6a1 1 0 001 1h2a1 1 0 001-1v-6a1 1 0 00-1-1h-2z" />
-              </svg>
-            </h1>
-            <p className="text-sm md:text-base lg:text-lg text-gray-400 max-w-xl mx-auto">
+            <p className="text-sm md:text-base text-gray-300 max-w-xl mx-auto">
               India's premier amateur league auction system.
             </p>
           </div>
 
-          {/* No Auction Running - Non-Admin View */}
-          {!isAdmin && auctionStatus === 'setup' && (
-            <div className="text-center">
-              <div className="bg-slate-900/80 border border-slate-600/50 rounded-xl p-6 backdrop-blur-sm max-w-md mx-auto">
-                <div className="flex items-center justify-center mb-3">
-                  <svg className="w-16 h-16 text-slate-400" fill="currentColor" viewBox="0 0 20 20">
-                    <path d="M3 4a1 1 0 011-1h12a1 1 0 011 1v2a1 1 0 01-1 1H4a1 1 0 01-1-1V4zM3 10a1 1 0 011-1h6a1 1 0 011 1v6a1 1 0 01-1 1H4a1 1 0 01-1-1v-6zM14 9a1 1 0 00-1 1v6a1 1 0 001 1h2a1 1 0 001-1v-6a1 1 0 00-1-1h-2z" />
-                  </svg>
-                </div>
-                <h2 className="text-xl font-bold text-white mb-2">Auction Not Started</h2>
-                <p className="text-slate-300 text-sm">
-                  Administrators are setting up teams.
-                </p>
-              </div>
-            </div>
-          )}
-
-          {/* Admin Welcome */}
-          {isAdmin && (
-            <div className="mb-6 bg-gradient-to-r from-green-900/50 to-emerald-900/50 border border-green-500/30 rounded-xl p-4 backdrop-blur-sm">
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-3">
-                  <div className="text-2xl">👑</div>
-                  <div>
-                    <h3 className="text-green-300 font-bold">Admin Access Granted</h3>
-                    <p className="text-green-400/80 text-sm">Welcome, {adminSession?.username} ({adminSession?.role})</p>
+          {/* Captain Login and Player Showcase - Side by Side */}
+          {!isAdmin && !currentPlayerSession && auctionStatus === 'setup' && (
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
+              {/* Captain Login Card */}
+              <div className="group relative overflow-hidden">
+                <div className="absolute inset-0 bg-gradient-to-br from-yellow-500/20 via-orange-500/20 to-red-500/20 blur-lg"></div>
+                <div className="relative bg-black/60 backdrop-blur-xl border border-yellow-500/30 rounded-xl p-6 hover:border-yellow-400/50 transition-all duration-300 hover:scale-[1.02] hover:shadow-lg hover:shadow-yellow-500/20">
+                  <div className="flex items-center gap-4 mb-4">
+                    <div className="w-14 h-14 bg-gradient-to-br from-yellow-500 to-orange-600 rounded-lg flex items-center justify-center shadow-lg">
+                      <span className="text-2xl">👑</span>
+                    </div>
+                    <div>
+                      <h3 className="text-xl font-bold text-yellow-300 mb-1">Team Captain</h3>
+                      <p className="text-yellow-400/80 text-sm">Lead your squad to victory</p>
+                    </div>
                   </div>
-                </div>
-                <div className="flex gap-2">
+                  <p className="text-gray-300 mb-6 text-sm leading-relaxed">
+                    Ready to build your dream team? Login as a captain to participate in the auction and bid on the best players.
+                  </p>
                   <button
+                    onClick={() => setShowCaptainLogin(true)}
+                    className="w-full px-6 py-3 bg-gradient-to-r from-yellow-600 to-orange-600 hover:from-yellow-500 hover:to-orange-500 text-white font-semibold rounded-lg transition-all duration-300 transform hover:scale-[1.02] shadow-md"
+                  >
+                    🏆 Captain Login
+                  </button>
+                </div>
+              </div>
+
+              {/* Player Showcase */}
+              <div className="group relative overflow-hidden">
+                <div className="absolute inset-0 bg-gradient-to-br from-blue-500/20 via-purple-500/20 to-indigo-500/20 blur-lg"></div>
+                <div className="relative bg-black/60 backdrop-blur-xl border border-blue-500/30 rounded-xl p-6 hover:border-blue-400/50 transition-all duration-300 hover:scale-[1.02] hover:shadow-lg hover:shadow-blue-500/20">
+                  <div className="flex items-center gap-4 mb-4">
+                    <div className="w-14 h-14 bg-gradient-to-br from-blue-500 to-purple-600 rounded-lg flex items-center justify-center shadow-lg">
+                      <span className="text-2xl">🎯</span>
+                    </div>
+                    <div>
+                      <h3 className="text-xl font-bold text-blue-300 mb-1">Player Showcase</h3>
+                      <p className="text-blue-400/80 text-sm">Explore our talented players</p>
+                    </div>
+                  </div>
+                  <p className="text-gray-300 mb-6 text-sm leading-relaxed">
+                    Browse through our roster of {auctionPlayers.length} skilled players while the auction is being prepared.
+                  </p>
+                  <button 
                     onClick={() => setShowEnhancedPlayerCards(true)}
-                    className="px-4 py-2 bg-blue-600/20 hover:bg-blue-600/30 border border-blue-500/50 text-blue-300 rounded-lg text-sm transition-colors cursor-pointer"
+                    className="w-full px-6 py-3 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-500 hover:to-purple-500 text-white font-semibold rounded-lg transition-all duration-300 transform hover:scale-[1.02] shadow-md"
                   >
                     👥 View All Players
                   </button>
-                  <button
-                    onClick={() => {
-                      AuthService.clearAdminSession();
-                      setIsAdmin(false);
-                      setAdminSession(null);
-                    }}
-                    className="px-4 py-2 bg-red-600/20 hover:bg-red-600/30 border border-red-500/50 text-red-300 rounded-lg text-sm transition-colors cursor-pointer"
-                  >
-                    Logout
-                  </button>
                 </div>
               </div>
             </div>
           )}
 
-          {/* Captain Welcome */}
-          {!isAdmin && currentPlayerSession && (
-            <div className="mb-6 bg-gradient-to-r from-blue-900/50 to-purple-900/50 border border-blue-500/30 rounded-xl p-4 backdrop-blur-sm">
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-3">
-                  <img 
-                    src={currentPlayerSession.avatarUrl} 
-                    alt={currentPlayerSession.nickname}
-                    className="w-10 h-10 rounded-full object-cover border-2 border-blue-400"
-                    onError={(e) => {
-                      e.currentTarget.src = "/avatars/default.jpg";
-                    }}
-                  />
-                  <div>
-                    <h3 className="text-blue-300 font-bold">Captain Logged In</h3>
-                    <p className="text-blue-400/80 text-sm">Welcome, Captain {currentPlayerSession.nickname}</p>
+          {/* Live Auction Display with Curtain Animation */}
+          {auctionStatus === 'live' && currentPlayer && (
+            <div className="max-w-4xl mx-auto">
+              {/* Curtain Animation Container */}
+              <div className="relative h-96 bg-black/40 backdrop-blur-sm rounded-2xl border border-red-500/30 overflow-hidden">
+                {/* Animated Curtains */}
+                <div className="absolute inset-0 flex">
+                  <div className="w-1/2 h-full bg-gradient-to-r from-red-900 to-red-700 transform -translate-x-full animate-curtain-left border-r-2 border-gold-400"></div>
+                  <div className="w-1/2 h-full bg-gradient-to-l from-red-900 to-red-700 transform translate-x-full animate-curtain-right border-l-2 border-gold-400"></div>
+                </div>
+
+                {/* Live Auction Content */}
+                <div className="absolute inset-0 flex items-center justify-center p-8 animate-fade-in-delayed">
+                  <div className="text-center">
+                    <div className="mb-6">
+                      <div className="inline-block bg-red-600/20 backdrop-blur-sm rounded-full px-4 py-2 border border-red-500/50 mb-4">
+                        <span className="text-red-300 text-sm font-bold">🔴 LIVE AUCTION</span>
+                      </div>
+                    </div>
+
+                    {/* Current Player Card */}
+                    <div className="bg-black/60 backdrop-blur-xl rounded-2xl p-6 border border-yellow-500/40 max-w-md mx-auto">
+                      <div className="flex items-center justify-center mb-4">
+                        <img 
+                          src={currentPlayer.avatarUrl} 
+                          alt={currentPlayer.nickname}
+                          className="w-20 h-20 rounded-full object-cover border-4 border-yellow-400 shadow-lg"
+                          onError={(e) => {
+                            e.currentTarget.src = "/avatars/default.jpg";
+                          }}
+                        />
+                      </div>
+                      
+                      <h3 className="text-2xl font-bold text-white mb-2">{currentPlayer.nickname}</h3>
+                      {currentPlayer.realName && (
+                        <p className="text-slate-400 mb-4">{currentPlayer.realName}</p>
+                      )}
+
+                      <div className="flex items-center justify-center gap-2 text-sm mb-4">
+                        <span className="text-slate-400">🏅</span>
+                        <span className="text-blue-400">{currentPlayer.currentMedalLabel}</span>
+                        <span className="text-slate-400">•</span>
+                        <span className="text-green-400">MMR: {currentPlayer.currentMMR}</span>
+                      </div>
+
+                      {/* Current Bid Display */}
+                      <div className="bg-gradient-to-r from-yellow-600/20 to-orange-600/20 backdrop-blur-sm rounded-xl p-4 border border-yellow-500/40 mb-4">
+                        <div className="text-center">
+                          <div className="text-yellow-300 text-sm font-semibold mb-1">Current Bid</div>
+                          <div className="text-yellow-400 text-3xl font-bold">🪙{currentBid}</div>
+                          {selectedTeam && (
+                            <div className="text-yellow-300/80 text-xs mt-1">
+                              Leading: {auctionTeams.find(t => t.id === selectedTeam)?.name}
+                            </div>
+                          )}
+                        </div>
+                      </div>
+
+                      {/* Timer */}
+                      <div className="flex items-center justify-center gap-2 text-lg">
+                        <span className="text-red-400">⏱️</span>
+                        <span className="text-white font-bold">{formatTime(timeLeft)}</span>
+                      </div>
+                    </div>
                   </div>
                 </div>
-                <button
-                  onClick={handleCaptainLogout}
-                  className="px-4 py-2 bg-red-600/20 hover:bg-red-600/30 border border-red-500/50 text-red-300 rounded-lg text-sm transition-colors cursor-pointer"
-                >
-                  Logout
-                </button>
+              </div>
+            </div>
+          )}
+
+          {/* Admin Welcome - Compact */}
+          {isAdmin && (
+            <div className="mb-6 max-w-3xl mx-auto">
+              <div className="relative overflow-hidden">
+                <div className="absolute inset-0 bg-gradient-to-br from-green-500/20 via-emerald-500/20 to-teal-500/20 blur-lg"></div>
+                <div className="relative bg-black/70 backdrop-blur-xl border border-green-500/40 rounded-xl p-5">
+                  <div className="flex flex-col md:flex-row items-center justify-between gap-4">
+                    <div className="flex items-center gap-4">
+                      <div className="w-14 h-14 bg-gradient-to-br from-green-500 to-emerald-600 rounded-xl flex items-center justify-center shadow-lg">
+                        👑
+                      </div>
+                      <div>
+                        <h3 className="text-xl font-bold text-green-300 mb-1">Admin Control Panel</h3>
+                        <p className="text-green-400/80 text-sm">Welcome, <span className="font-semibold">{adminSession?.username}</span> ({adminSession?.role})</p>
+                      </div>
+                    </div>
+                    <div className="flex flex-col sm:flex-row gap-3">
+                      <button
+                        onClick={() => setShowEnhancedPlayerCards(true)}
+                        className="px-4 py-2 bg-blue-600/20 hover:bg-blue-600/30 border border-blue-500/50 text-blue-300 rounded-lg text-sm font-semibold transition-all duration-300 hover:scale-105 shadow-md"
+                      >
+                        👥 View Players
+                      </button>
+                      <button
+                        onClick={() => {
+                          AuthService.clearAdminSession();
+                          setIsAdmin(false);
+                          setAdminSession(null);
+                        }}
+                        className="px-4 py-2 bg-red-600/20 hover:bg-red-600/30 border border-red-500/50 text-red-300 rounded-lg text-sm font-semibold transition-all duration-300 hover:scale-105 shadow-md"
+                      >
+                        🚪 Logout
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* Captain Welcome - Compact */}
+          {!isAdmin && currentPlayerSession && (
+            <div className="mb-6 max-w-3xl mx-auto">
+              <div className="relative overflow-hidden">
+                <div className="absolute inset-0 bg-gradient-to-br from-blue-500/20 via-purple-500/20 to-indigo-500/20 blur-lg"></div>
+                <div className="relative bg-black/70 backdrop-blur-xl border border-blue-500/40 rounded-xl p-5">
+                  <div className="flex flex-col md:flex-row items-center justify-between gap-4">
+                    <div className="flex items-center gap-4">
+                      <div className="relative">
+                        <img 
+                          src={currentPlayerSession.avatarUrl} 
+                          alt={currentPlayerSession.nickname}
+                          className="w-14 h-14 rounded-xl object-cover border-3 border-blue-400 shadow-lg"
+                          onError={(e) => {
+                            e.currentTarget.src = "/avatars/default.jpg";
+                          }}
+                        />
+                        <div className="absolute -top-1 -right-1 w-6 h-6 bg-gradient-to-br from-yellow-400 to-orange-500 rounded-full flex items-center justify-center shadow-md">
+                          👑
+                        </div>
+                      </div>
+                      <div>
+                        <h3 className="text-xl font-bold text-blue-300 mb-1">Captain Dashboard</h3>
+                        <p className="text-blue-400/80 text-sm">Welcome, Captain <span className="font-semibold">{currentPlayerSession.nickname}</span></p>
+                      </div>
+                    </div>
+                    <button
+                      onClick={handleCaptainLogout}
+                      className="px-4 py-2 bg-red-600/20 hover:bg-red-600/30 border border-red-500/50 text-red-300 rounded-lg text-sm font-semibold transition-all duration-300 hover:scale-105 shadow-md"
+                    >
+                      🚪 Logout
+                    </button>
+                  </div>
+                </div>
               </div>
             </div>
           )}
@@ -1080,7 +1148,8 @@ export default function Auction() {
                       {currentPlayer.realName && (
                         <p className="text-slate-400 text-sm mb-2">{currentPlayer.realName}</p>
                       )}
-                      <div className="flex items-center justify-center gap-4 text-sm">
+                      <div className="flex items-center justify-center gap-2 text-sm">
+                        <span className="text-slate-400">🏅</span>
                         <span className="text-blue-400">{currentPlayer.currentMedalLabel}</span>
                         <span className="text-slate-400">•</span>
                         <span className="text-green-400">MMR: {currentPlayer.currentMMR}</span>
@@ -1317,7 +1386,8 @@ export default function Auction() {
                     {currentPlayer.realName && (
                       <p className="text-slate-400 text-sm mb-2">{currentPlayer.realName}</p>
                     )}
-                    <div className="flex items-center justify-center gap-4 text-sm">
+                    <div className="flex items-center justify-center gap-2 text-sm">
+                      <span className="text-slate-400">🏅</span>
                       <span className="text-blue-400">{currentPlayer.currentMedalLabel}</span>
                       <span className="text-slate-400">•</span>
                       <span className="text-green-400">MMR: {currentPlayer.currentMMR}</span>
@@ -1818,56 +1888,35 @@ export default function Auction() {
                   {/* Player Stats */}
                   <div className="space-y-2 mb-4">
                     <div className="flex justify-between items-center text-xs">
-                      <span className="text-slate-400">Medal:</span>
-                      <span className="text-blue-400 font-semibold">{player.currentMedalLabel}</span>
+                      <span className="text-slate-400">🏅 Medal • MMR:</span>
+                      <div className="flex items-center gap-2">
+                        <span className="text-blue-400 font-semibold">{player.currentMedalLabel}</span>
+                        <span className="text-green-400 font-semibold">{player.currentMMR}</span>
+                      </div>
                     </div>
                     <div className="flex justify-between items-center text-xs">
-                      <span className="text-slate-400">MMR:</span>
-                      <span className="text-green-400 font-semibold">{player.currentMMR}</span>
-                    </div>
-                    <div className="flex justify-between items-center text-xs">
-                      <span className="text-slate-400">Ping:</span>
+                      <span className="text-slate-400">📡 Ping:</span>
                       <span className={`font-semibold ${player.ping && player.ping < 50 ? 'text-green-400' : player.ping && player.ping < 100 ? 'text-yellow-400' : 'text-red-400'}`}>
                         {player.ping}ms
                       </span>
                     </div>
                     <div className="flex justify-between items-center text-xs">
-                      <span className="text-slate-400">Gold:</span>
-                      <span className="text-yellow-400 font-semibold">🪙{player.gold}</span>
-                    </div>
-                    <div className="flex justify-between items-center text-xs">
-                      <span className="text-slate-400">Role:</span>
-                      <span className="text-purple-400 font-semibold">{getRoleLabel(player.roles)}</span>
-                    </div>
-                  </div>
-
-                  {/* Top 3 Heroes */}
-                  <div className="mb-4">
-                    <h5 className="text-xs font-semibold text-slate-300 mb-2">Top Heroes:</h5>
-                    <div className="flex gap-1">
-                      {player.favoriteHeroes?.slice(0, 3).map((hero, index) => (
-                        <div key={index} className="flex-1 text-center">
-                          <div className="w-8 h-8 mx-auto mb-1 bg-slate-700 rounded border overflow-hidden">
-                            <video 
-                              className="w-full h-full object-cover"
-                              muted
-                              loop
-                              onMouseEnter={(e) => e.currentTarget.play()}
-                              onMouseLeave={(e) => e.currentTarget.pause()}
-                            >
-                              <source src={hero.videoSrc} type="video/webm" />
-                            </video>
-                          </div>
-                          <span className="text-xs text-slate-400 truncate block">{hero.name}</span>
-                        </div>
-                      ))}
+                      <span className="text-slate-400">🎯 Role:</span>
+                      <span className="text-purple-400 font-semibold">
+                        {getRoleLabel(player.roles) === 'Carry' && '⚔️ Carry'}
+                        {getRoleLabel(player.roles) === 'Mid' && '🔮 Mid'}
+                        {getRoleLabel(player.roles) === 'Offlane' && '🛡️ Offlane'}
+                        {getRoleLabel(player.roles) === 'Soft Support' && '💊 Soft Support'}
+                        {getRoleLabel(player.roles) === 'Hard Support' && '🌟 Hard Support'}
+                        {!['Carry', 'Mid', 'Offlane', 'Soft Support', 'Hard Support'].includes(getRoleLabel(player.roles)) && `🎮 ${getRoleLabel(player.roles)}`}
+                      </span>
                     </div>
                   </div>
 
                   {/* Price Info */}
                   <div className="space-y-2 mb-4">
                     <div className="flex justify-between items-center p-2 bg-slate-700/50 rounded text-xs">
-                      <span className="text-slate-400">Base Price:</span>
+                      <span className="text-slate-400">💰 Base Price:</span>
                       <span className="text-white font-bold">🪙{player.basePrice}</span>
                     </div>
                     {player.currentBid > 0 && (

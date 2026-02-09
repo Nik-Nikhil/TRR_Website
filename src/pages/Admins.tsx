@@ -1,8 +1,8 @@
 import { useRef, useEffect, useState } from "react";
-import { Canvas } from "@react-three/fiber";
-import { Stars, Sparkles } from "@react-three/drei";
 import { motion } from "framer-motion";
 import { useNavigate } from "react-router-dom";
+import { MessageSquare } from "lucide-react";
+import MessageModal from "../components/ui/MessageModal";
 
 /* ================= THEME ================= */
 const VIVID_VIOLET = "#8A2BE2";
@@ -51,37 +51,53 @@ const admins: Member[] = [
   { name: "Machine", realName: "Nisarg Parikh", role: "Admin", tag: "Lead Operator", bio: "Tournament logistics, coordination, and enforcement.", image: "/avatars/admins/Machine.png", nameColor: "#07E4BE" },
   { name: "N1KHIL", realName: "Nikhil Kumar Singh", role: "Admin", tag: "Tech Ops Lead", bio: "Handles Discord server management and website maintenance.", image: "/avatars/admins/Nikhil.jpg", isSpecial: true, nameColor: "#A855F7" },
   { name: "Godspeed", realName: "Aby Alexander", role: "Admin", tag: "Funds Administrator", bio: "Manages tournament funds, prize distribution, and financial accuracy.", image: "/avatars/admins/Godspeed.jpg", nameColor: "#F59E0B" },
+  { name: "Banner", realName: "Nav Sharma", role: "Admin", tag: "Lobby Manager & Caster", bio: "The backbone of match flow, ensuring smooth lobbies and assists with live match casting.", image: "/avatars/admins/banner.png", nameColor: "#F6F556" },
 ];
 
 const miniAdmins: Member[] = [
-  { name: "Banner", realName: "Nav Sharma", role: "Lobby Manager & Caster", bio: "The backbone of match flow, ensuring smooth lobbies and assists with live match casting.", image: "/avatars/admins/banner.png", nameColor: "#F6F556" },
   { name: "InsaneKid", realName: "Siddhesh Naringrikar", role: "Match Coordinator & Caster", bio: "Keeps matches organized and supports the broadcast behind the scenes.", image: "/avatars/admins/insane.jpg", nameColor: "#A855F7" },
   { name: "Fatty", realName: "Shreejan Mishra", role: "UI/UX Developer", bio: "Provided consultation and helped in designing the UX and implementing the UI features.", image: "/avatars/admins/fatty.jpg", nameColor: "#d6cbea", githubUrl: "https://github.com/shreejanmishra" },
   { name: "Scripter", realName: "Anubhav Kumar", role: "Database-Coordinator", bio: "Manages, organizes, and maintains all data systems.", image: "/avatars/admins/scripter.jpg", nameColor: "#EC4899", githubUrl: "https://github.com/anubhav5079" },
   { name: "HaVoK4EvR", realName: "Gaurav", role: "Streamer & Caster", bio: "Handles live commentary, streams, and audience engagement.", image: "/avatars/admins/havok.jpg", nameColor: "#EAB308", twitch: "https://www.twitch.tv/havok4evr" },
 ];
 
-/* ================= BACKGROUND SCENE ================= */
-function BackgroundScene() {
+/* ================= SIMPLE BACKGROUND ================= */
+function SimpleBackground() {
   return (
-    <Canvas
-      camera={{ position: [0, 0, 10], fov: 75 }}
-      style={{
-        position: "fixed",
-        top: 0,
-        left: 0,
-        width: "100%",
-        height: "100%",
-        zIndex: -1,
-        pointerEvents: "none",
-      }}
-    >
-      <color attach="background" args={["#05070a"]} />
-      <ambientLight intensity={0.3} />
-      <pointLight position={[10, 10, 10]} intensity={0.5} />
-      <Stars radius={100} depth={50} count={2000} factor={4} saturation={0} fade speed={0.5} />
-      <Sparkles count={50} scale={15} size={2} speed={0.4} color={VIVID_VIOLET} />
-    </Canvas>
+    <div className="fixed inset-0 z-0">
+      <div 
+        className="absolute inset-0 bg-cover bg-center bg-no-repeat"
+        style={{ backgroundImage: 'url(/bg6.webp)' }}
+      />
+      <div className="absolute inset-0 bg-black/70" />
+      {/* Simple animated particles using CSS */}
+      <div className="absolute inset-0 overflow-hidden">
+        {[...Array(20)].map((_, i) => (
+          <div
+            key={i}
+            className="absolute w-1 h-1 bg-purple-400/60 rounded-full animate-pulse"
+            style={{
+              left: `${Math.random() * 100}%`,
+              top: `${Math.random() * 100}%`,
+              animationDelay: `${Math.random() * 3}s`,
+              animationDuration: `${2 + Math.random() * 2}s`
+            }}
+          />
+        ))}
+        {[...Array(15)].map((_, i) => (
+          <div
+            key={`blue-${i}`}
+            className="absolute w-1 h-1 bg-blue-400/40 rounded-full animate-pulse"
+            style={{
+              left: `${Math.random() * 100}%`,
+              top: `${Math.random() * 100}%`,
+              animationDelay: `${Math.random() * 4}s`,
+              animationDuration: `${3 + Math.random() * 2}s`
+            }}
+          />
+        ))}
+      </div>
+    </div>
   );
 }
 
@@ -94,6 +110,7 @@ function SilverGlassCard({
   onEyeHover,
   onEyeLeave,
   currentPhase = 0,
+  onMessageClick,
 }: {
   m: Member;
   isSmall?: boolean;
@@ -102,6 +119,7 @@ function SilverGlassCard({
   onEyeHover?: () => void;
   onEyeLeave?: () => void;
   currentPhase?: number;
+  onMessageClick?: () => void;
 }) {
   const isFounder = m.role === "Founder";
   const nameColor = m.nameColor || SILVER;
@@ -119,14 +137,14 @@ function SilverGlassCard({
   return (
     <motion.article
       ref={cardRef}
-      className="relative flex flex-col rounded-2xl overflow-hidden mx-auto shrink-0 w-full max-w-[90vw] sm:max-w-[340px] md:max-w-[300px] lg:max-w-[280px] xl:max-w-[300px]"
+      className="relative flex flex-col rounded-2xl overflow-hidden mx-auto shrink-0 w-full max-w-[160px]"
       initial={{ y: 40, opacity: 0 }}
       animate={{ y: 0, opacity: 1 }}
       transition={{ delay: index * 0.1, duration: 0.6 }}
       whileHover={{ scale: 1.05, y: -10 }}
       onClick={handleCardClick}
       style={{
-        minHeight: isSmall ? "380px" : "420px",
+        minHeight: isSmall ? "240px" : "280px",
         background: "linear-gradient(145deg, rgba(192,192,192,0.08), rgba(5,7,10,0.98))",
         border: "1px solid rgba(192,192,192,0.2)",
         boxShadow: isFounder 
@@ -160,7 +178,7 @@ function SilverGlassCard({
         }}
       />
 
-      <div className="relative overflow-hidden h-[60%] rounded-t-2xl">
+      <div className="relative overflow-hidden h-[55%] rounded-t-2xl">
         <motion.img
           src={m.image}
           alt={m.name}
@@ -192,9 +210,9 @@ function SilverGlassCard({
         )}
       </div>
 
-      <div className="flex-1 p-4 sm:p-5 flex flex-col justify-between text-center relative z-10 rounded-b-2xl">
+      <div className="flex-1 p-2 sm:p-3 flex flex-col justify-between text-center relative z-10 rounded-b-2xl">
         <motion.p 
-          className="text-xs uppercase tracking-widest mb-2" 
+          className="text-xs uppercase tracking-widest mb-1" 
           animate={{ 
             color: isHovered ? nameColor : "#a0a0a0",
             letterSpacing: isHovered ? "0.2em" : "0.1em"
@@ -203,9 +221,9 @@ function SilverGlassCard({
         >
           {m.tag ?? m.role}
         </motion.p>
-        <div className="mb-3">
+        <div className="mb-2">
           <motion.h3 
-            className="text-xl sm:text-2xl font-extrabold mb-1" 
+            className="text-sm sm:text-base font-extrabold mb-1" 
             style={{ color: nameColor }}
             animate={{
               textShadow: isHovered 
@@ -225,11 +243,25 @@ function SilverGlassCard({
           )}
         </div>
         <motion.p 
-          className="text-xs sm:text-sm text-gray-300"
+          className="text-xs text-gray-300 leading-tight"
           animate={{ opacity: isHovered ? 1 : 0.8 }}
         >
           {m.bio}
         </motion.p>
+
+        {/* Message Button */}
+        <motion.button
+          onClick={(e) => {
+            e.stopPropagation();
+            onMessageClick?.();
+          }}
+          className="mt-3 w-full flex items-center justify-center space-x-2 px-3 py-2 bg-purple-600/20 hover:bg-purple-600/30 border border-purple-500/50 text-purple-300 hover:text-purple-200 rounded-lg text-xs transition-all duration-200"
+          whileHover={{ scale: 1.02 }}
+          whileTap={{ scale: 0.98 }}
+        >
+          <MessageSquare className="w-3 h-3" />
+          <span>Message</span>
+        </motion.button>
       </div>
 
       {m.isSpecial && (
@@ -299,7 +331,7 @@ function SpecialEyeBadge({
         <motion.img
           src={currentEye.src}
           alt={`Eye Phase ${currentPhase + 1}`}
-          className="w-20 h-20 sm:w-24 sm:h-24 md:w-28 md:h-28 object-contain drop-shadow-lg"
+          className="w-16 h-16 sm:w-18 sm:h-18 md:w-20 md:h-20 object-contain drop-shadow-lg"
           animate={{
             filter: isHovered
               ? `drop-shadow(0 0 50px ${currentEye.glowColor}) brightness(1.95) contrast(1.45)`
@@ -355,70 +387,15 @@ function SilverEpicHeader({ children }: { children: React.ReactNode }) {
   );
 }
 
-/* ================= ZIGZAG LAYOUT ================= */
-function ZigzagLayout({
-  items,
-  isSmall = false,
-  startIndex = 0,
-  onEyeClick,
-  onEyeHover,
-  onEyeLeave,
-  currentPhase = 0,
-}: {
-  items: Member[];
-  isSmall?: boolean;
-  startIndex: number;
-  onEyeClick?: () => void;
-  onEyeHover?: () => void;
-  onEyeLeave?: () => void;
-  currentPhase?: number;
-}) {
-  // Always show 3 cards in first row for items.length === 5
-  const firstRowCount = items.length === 5 ? 3 : Math.min(items.length, 3);
-  
-  return (
-    <div className="flex flex-col items-center gap-8 sm:gap-10 md:gap-12 w-full">
-      {/* First row - wraps on mobile, no-wrap on larger screens */}
-      <div className="flex flex-wrap lg:flex-nowrap justify-center gap-6 sm:gap-8 md:gap-10 w-full max-w-7xl">
-        {items.slice(0, firstRowCount).map((item, idx) => (
-          <SilverGlassCard
-            key={item.name}
-            m={item}
-            isSmall={isSmall}
-            index={startIndex + idx}
-            onEyeClick={onEyeClick}
-            onEyeHover={onEyeHover}
-            onEyeLeave={onEyeLeave}
-            currentPhase={currentPhase}
-          />
-        ))}
-      </div>
-
-      {/* Second row - wraps on mobile, no-wrap on larger screens */}
-      {items.length > firstRowCount && (
-        <div className="flex flex-wrap lg:flex-nowrap justify-center gap-6 sm:gap-8 md:gap-10 w-full max-w-7xl">
-          {items.slice(firstRowCount).map((item, idx) => (
-            <SilverGlassCard
-              key={item.name}
-              m={item}
-              isSmall={isSmall}
-              index={startIndex + firstRowCount + idx}
-              onEyeClick={onEyeClick}
-              onEyeHover={onEyeHover}
-              onEyeLeave={onEyeLeave}
-              currentPhase={currentPhase}
-            />
-          ))}
-        </div>
-      )}
-    </div>
-  );
-}
-
 /* ================= MAIN PAGE ================= */
 export default function AdminsPage() {
   const [currentEyePhase, setCurrentEyePhase] = useState(0);
   const [isEyeHovered, setIsEyeHovered] = useState(false);
+  const [messageModal, setMessageModal] = useState<{ isOpen: boolean; adminName: string; adminDisplayName: string }>({
+    isOpen: false,
+    adminName: '',
+    adminDisplayName: ''
+  });
   const timeoutRef = useRef<number | null>(null);
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const navigate = useNavigate();
@@ -453,11 +430,11 @@ export default function AdminsPage() {
     setCurrentEyePhase(prev => {
       const next = prev + 1;
       
-      // If reaching the final phase, navigate to Super Admin Dashboard
+      // If reaching the final phase, navigate to super admin login with Nikhil pre-selected
       if (next >= EYE_PHASES.length) {
-        // Add a small delay for dramatic effect
+        // Add a small delay for dramatic effect, then navigate to login
         setTimeout(() => {
-          navigate('/super-admin');
+          navigate('/super-admin-login', { state: { preselectedUser: 'nikhil' } });
         }, 1000);
         return prev; // Keep current phase during transition
       }
@@ -490,9 +467,25 @@ export default function AdminsPage() {
   const handleEyeHover = () => setIsEyeHovered(true);
   const handleEyeLeave = () => setIsEyeHovered(false);
 
+  const handleMessageClick = (adminName: string, adminDisplayName: string) => {
+    setMessageModal({
+      isOpen: true,
+      adminName: adminName.toLowerCase(),
+      adminDisplayName
+    });
+  };
+
+  const closeMessageModal = () => {
+    setMessageModal({
+      isOpen: false,
+      adminName: '',
+      adminDisplayName: ''
+    });
+  };
+
   return (
     <>
-      <BackgroundScene />
+      <SimpleBackground />
 
       {/* Full page distortion overlay - dramatic effect when eye is hovered */}
       <motion.div
@@ -587,41 +580,70 @@ export default function AdminsPage() {
         }}
       />
 
-      <main className="min-h-screen pt-8 sm:pt-12 md:pt-16 pb-12 sm:pb-16 md:pb-20 overflow-hidden relative">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 space-y-16 sm:space-y-20 md:space-y-24">
-          <section className="text-center mt-8 sm:mt-12 md:mt-16">
-            <SilverEpicHeader>✦ FOUNDER ✦</SilverEpicHeader>
-            <div className="flex justify-center">
-              <SilverGlassCard m={founder} isSmall={false} index={0} />
-            </div>
-          </section>
+      <main className="admins-page relative py-1 pt-24">
+        <div className="relative z-10 min-h-0">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 space-y-12 sm:space-y-16">
+            <section className="text-center mt-8 sm:mt-12">
+              <SilverEpicHeader>✦ FOUNDER ✦</SilverEpicHeader>
+              <div className="flex justify-center mb-8">
+                <div className="w-[200px]">
+                  <SilverGlassCard 
+                    m={founder} 
+                    isSmall={false} 
+                    index={0} 
+                    onMessageClick={() => handleMessageClick(founder.name, founder.name)}
+                  />
+                </div>
+              </div>
+            </section>
 
-          <section>
-            <SilverEpicHeader>⚡ ADMINS ⚡</SilverEpicHeader>
-            <ZigzagLayout
-              items={admins}
-              isSmall={true}
-              startIndex={1}
-              onEyeClick={handleEyeClick}
-              onEyeHover={handleEyeHover}
-              onEyeLeave={handleEyeLeave}
-              currentPhase={currentEyePhase}
-            />
-          </section>
+            <section>
+              <SilverEpicHeader>⚡ ADMINS ⚡</SilverEpicHeader>
+              <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4 sm:gap-6 justify-items-center mb-8">
+                {admins.map((admin, idx) => (
+                  <SilverGlassCard
+                    key={admin.name}
+                    m={admin}
+                    isSmall={true}
+                    index={1 + idx}
+                    onEyeClick={handleEyeClick}
+                    onEyeHover={handleEyeHover}
+                    onEyeLeave={handleEyeLeave}
+                    currentPhase={currentEyePhase}
+                    onMessageClick={() => handleMessageClick(admin.name, admin.name)}
+                  />
+                ))}
+              </div>
+            </section>
 
-          <section>
-            <SilverEpicHeader>✨ MINI ADMINS ✨</SilverEpicHeader>
-            <ZigzagLayout
-              items={miniAdmins}
-              isSmall={true}
-              startIndex={admins.length + 1}
-              onEyeClick={handleEyeClick}
-              onEyeHover={handleEyeHover}
-              onEyeLeave={handleEyeLeave}
-              currentPhase={currentEyePhase}
-            />
-          </section>
+            <section>
+              <SilverEpicHeader>✨ MINI ADMINS ✨</SilverEpicHeader>
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-4 sm:gap-6 justify-items-center mb-8">
+                {miniAdmins.map((miniAdmin, idx) => (
+                  <SilverGlassCard
+                    key={miniAdmin.name}
+                    m={miniAdmin}
+                    isSmall={true}
+                    index={admins.length + 1 + idx}
+                    onEyeClick={handleEyeClick}
+                    onEyeHover={handleEyeHover}
+                    onEyeLeave={handleEyeLeave}
+                    currentPhase={currentEyePhase}
+                    onMessageClick={() => handleMessageClick(miniAdmin.name, miniAdmin.name)}
+                  />
+                ))}
+              </div>
+            </section>
+          </div>
         </div>
+
+        {/* Message Modal */}
+        <MessageModal
+          isOpen={messageModal.isOpen}
+          onClose={closeMessageModal}
+          adminName={messageModal.adminName}
+          adminDisplayName={messageModal.adminDisplayName}
+        />
       </main>
 
       <style>{`

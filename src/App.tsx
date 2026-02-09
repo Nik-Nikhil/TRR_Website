@@ -68,6 +68,7 @@ function App() {
           <Route path="/player-login" element={<PlayerLogin />} />
           <Route path="/admin-dashboard" element={<AdminDashboard />} />
           <Route path="/super-admin" element={<SuperAdminDashboard />} />
+          <Route path="/super-admin-dashboard" element={<SuperAdminDashboard />} />
         </Routes>
       </div>
 

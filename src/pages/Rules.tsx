@@ -1,5 +1,9 @@
 import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
+import { 
+  Shield, Users, Clock, Server, Trophy, AlertTriangle, 
+  Eye, MessageSquare, Ban, Video, Flag, UserCheck
+} from "lucide-react";
 
 export default function RulesPage() {
   const [expandedIndex, setExpandedIndex] = useState<number | null>(null);
@@ -19,6 +23,8 @@ export default function RulesPage() {
   const sections = [
     {
       title: "Participation",
+      icon: Users,
+      color: "blue",
       items: [
         "Players must register using their highest MMR account and must play all matches using the same account throughout the tournament.",
         "Captains will be selected by TRR admins and will participate in a live auction to build their teams.",
@@ -33,6 +39,8 @@ export default function RulesPage() {
     },
     {
       title: "Teams & Captains",
+      icon: Shield,
+      color: "purple",
       items: [
         "Each captain must appoint a vice-captain to manage the team in their absence.",
         "Captains are responsible for managing their roster and informing admins promptly if a stand-in is needed.",
@@ -46,6 +54,8 @@ export default function RulesPage() {
     },
     {
       title: "Stand-ins",
+      icon: UserCheck,
+      color: "green",
       items: [
         "Only 1 stand-in is allowed. More than 1 requires admin approval.",
         "All stand-ins will be provided by TRR admins.",
@@ -68,6 +78,8 @@ export default function RulesPage() {
     },
     {
       title: "Server Settings",
+      icon: Server,
+      color: "orange",
       items: [
         "The default server is SEA (Singapore).",
         "Switching to another server (EU, India, Dubai, etc.) is only allowed with mutual agreement between both teams.",
@@ -77,6 +89,8 @@ export default function RulesPage() {
     },
     {
       title: "Match Rules & Format",
+      icon: Trophy,
+      color: "yellow",
       items: [
         "All games are played in Captains Mode.",
         "Matches usually take place between 12 PM and 9 PM IST on weekends, but timings may change as per activity checks for that season.",
@@ -92,6 +106,8 @@ export default function RulesPage() {
     },
     {
       title: "Match Punctuality & Penalties",
+      icon: Clock,
+      color: "red",
       items: [
         "10 minutes late → Level 1 Penalty: 30-second draft penalty.",
         "15 minutes late → Level 2 Penalty: 70-second draft penalty.",
@@ -107,6 +123,8 @@ export default function RulesPage() {
     },
     {
       title: "Disputes, Conduct & Discipline",
+      icon: AlertTriangle,
+      color: "red",
       items: [
         "All players must use non-offensive Steam names, bios, team names, and images.",
         "Post-match complaints regarding stand-ins or server issues will not be accepted.",
@@ -118,6 +136,8 @@ export default function RulesPage() {
     },
     {
       title: "Discord & Player Verification",
+      icon: MessageSquare,
+      color: "indigo",
       items: [
         "All players must remain connected to their TRR team voice channel during matches.",
         "Players are required to keep their microphones unmuted at all times while playing, unless permitted by admins.",
@@ -132,6 +152,8 @@ export default function RulesPage() {
     },
     {
       title: "Cheating, Misconduct & Investigation",
+      icon: Eye,
+      color: "pink",
       items: [
         "All investigations related to smurfing, cheating, or suspicious behaviour will be conducted only by TRR admins.",
         "Players must not pause the game for smurf or cheat suspicions or for verification reasons.",
@@ -148,6 +170,8 @@ export default function RulesPage() {
     },
     {
       title: "Streaming Rule",
+      icon: Video,
+      color: "cyan",
       items: [
         "Players or streamers who broadcast matches must add a 5-minute delay to their stream.",
         "Admins must be informed before the season starts if you plan to stream.",
@@ -157,6 +181,8 @@ export default function RulesPage() {
     },
     {
       title: "Forfeit Rule",
+      icon: Flag,
+      color: "gray",
       items: [
         "If a team stops playing further matches, their past results (wins/draws) will remain.",
         "All upcoming matches for that team will be considered forfeited.",
@@ -165,16 +191,17 @@ export default function RulesPage() {
       ],
     },
     {
-  title: "Profile Standards",
-  items: [
-    "NSFW, obscene, sexual, or inappropriate usernames are strictly not allowed.",
-    "Profile pictures must not contain nudity, sexual content, offensive symbols, or explicit imagery.",
-    "Any profile found violating this rule may be asked to change immediately.",
-    "Failure to update an inappropriate name or profile picture can result in warnings, match disqualification, or removal from the tournament.",
-    "Repeated or intentional violations may lead to bans from current and future TRR seasons.",
-  ],
-},
-
+      title: "Profile Standards",
+      icon: Ban,
+      color: "red",
+      items: [
+        "NSFW, obscene, sexual, or inappropriate usernames are strictly not allowed.",
+        "Profile pictures must not contain nudity, sexual content, offensive symbols, or explicit imagery.",
+        "Any profile found violating this rule may be asked to change immediately.",
+        "Failure to update an inappropriate name or profile picture can result in warnings, match disqualification, or removal from the tournament.",
+        "Repeated or intentional violations may lead to bans from current and future TRR seasons.",
+      ],
+    },
   ];
 
   return (
@@ -197,7 +224,7 @@ export default function RulesPage() {
       <div className="fixed inset-0 bg-black/70 z-[1]" />
 
       <main 
-        className="relative min-h-screen py-12 sm:py-16 md:py-20 px-3 sm:px-4 md:px-6 lg:px-8 overflow-hidden z-10"
+        className="relative min-h-screen pt-24 pb-12 px-3 sm:px-4 md:px-6 lg:px-8 overflow-hidden z-10"
       >
       <div className="max-w-4xl mx-auto">
         {/* Header */}
@@ -206,10 +233,10 @@ export default function RulesPage() {
           animate={{ opacity: 1, y: 0 }}
           className="text-center mb-8 sm:mb-10 md:mb-12"
         >
-          <h1 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-extrabold mb-2 bg-gradient-to-r from-zinc-200 via-yellow-200 to-zinc-300 bg-clip-text text-transparent px-2">
+          <h1 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-extrabold mb-3 bg-gradient-to-r from-zinc-200 via-yellow-200 to-zinc-300 bg-clip-text text-transparent px-2">
             Tournament Rules
           </h1>
-          <p className="text-base sm:text-lg md:text-xl lg:text-2xl font-bold text-zinc-300 mb-2 px-2">
+          <p className="text-sm sm:text-base md:text-lg lg:text-xl font-medium text-zinc-300 mb-4 px-2 leading-relaxed">
             Playing in the event means you agree to all rules listed below.
           </p>
         </motion.div>

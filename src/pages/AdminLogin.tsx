@@ -15,7 +15,8 @@ const ADMIN_DATA = [
     color: 'from-purple-600 to-purple-800',
     icon: Crown,
     image: '/avatars/admins/reyuk.png',
-    description: 'Tournament Founder'
+    description: 'Tournament Founder',
+    isSuperAdmin: true
   },
   { 
     id: 'r3ciprocal', 
@@ -65,10 +66,10 @@ const ADMIN_DATA = [
     id: 'banner', 
     name: 'Banner', 
     realName: 'Nav Sharma',
-    role: 'Mini Admin', 
-    password: 'mini2024',
-    color: 'from-blue-600 to-blue-800',
-    icon: UserCheck,
+    role: 'Admin', 
+    password: 'banner123',
+    color: 'from-red-600 to-red-800',
+    icon: Shield,
     image: '/avatars/admins/banner.png',
     description: 'Lobby Manager & Caster'
   },
@@ -156,19 +157,19 @@ export default function AdminLogin() {
         return;
       }
 
-      // Special handling for reyuk (Founder) - redirect to SuperAdmin
-      if (admin.id === 'reyuk' && admin.role === 'Founder') {
-        // Set super admin session for reyuk
+      // Special handling for super admins (Reyuk and Nikhil) - redirect to SuperAdmin Dashboard
+      if (admin.isSuperAdmin) {
+        // Set super admin session
         localStorage.setItem('superAdminSession', JSON.stringify({
           authenticated: true,
           loginTime: new Date().toISOString(),
           type: 'superadmin',
-          role: 'Founder',
-          username: 'reyuk'
+          role: admin.role,
+          username: admin.name.toLowerCase()
         }));
         
         // Navigate to super admin dashboard
-        navigate('/super-admin');
+        navigate('/super-admin-dashboard');
       } else {
         // Navigate to regular admin dashboard for other admins
         navigate('/admin-dashboard');

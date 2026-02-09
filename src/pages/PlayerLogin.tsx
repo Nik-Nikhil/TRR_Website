@@ -351,23 +351,6 @@ export default function PlayerLogin() {
                 </div>
               </div>
             )}
-            
-            {/* New Player Registration Link */}
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.3 }}
-              className="text-center mt-8"
-            >
-              <p className="text-gray-400 text-sm mb-4">Don't have an account yet?</p>
-              <button
-                onClick={() => navigate('/new-player-registration')}
-                className="inline-flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-blue-600/80 to-purple-600/80 hover:from-blue-600 hover:to-purple-600 text-white rounded-xl font-semibold transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-xl cursor-pointer"
-              >
-                <User className="w-4 h-4" />
-                Create New Player Account
-              </button>
-            </motion.div>
           </div>
         </div>
       </main>

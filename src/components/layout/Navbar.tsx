@@ -19,6 +19,10 @@ export default function Navbar() {
   // Get current user
   const currentUser = AuthService.getCurrentUser();
   const isLoggedIn = AuthService.isSessionValid();
+  
+  // Check for super admin session
+  const superAdminSession = localStorage.getItem('superAdminSession');
+  const isSuperAdmin = superAdminSession ? JSON.parse(superAdminSession).authenticated : false;
 
   // Initialize audio
   useEffect(() => {
@@ -210,29 +214,50 @@ export default function Navbar() {
                 />
               )}
               
-              {/* Login Dropdown - Matching Navbar Style */}
-              <div className="relative" ref={loginDropdownRef}>
+              {/* Super Admin Logout Button - Only show for super admins */}
+              {isSuperAdmin && (
                 <button
-                  onClick={() => setLoginDropdownOpen(!loginDropdownOpen)}
-                  className={`relative inline-flex items-center gap-[0.3rem] md:gap-[0.35rem] px-1.5 md:px-2 lg:px-3 py-1 md:py-1.5 
+                  onClick={() => {
+                    localStorage.removeItem('superAdminSession');
+                    navigate('/');
+                  }}
+                  className="relative inline-flex items-center gap-[0.3rem] md:gap-[0.35rem] px-1.5 md:px-2 lg:px-3 py-1 md:py-1.5 
                     text-[0.65rem] md:text-[0.7rem] lg:text-[0.75rem] xl:text-[0.8rem] uppercase tracking-[0.12em] md:tracking-[0.15em] lg:tracking-[0.18em] 
-                    transition-all duration-300 group rounded-lg text-zinc-200 hover:text-white ${
-                    loginDropdownOpen ? 'bg-white/10' : 'hover:bg-white/5'
-                  }`}
+                    transition-all duration-300 group rounded-lg text-red-300 hover:text-red-200 hover:bg-red-500/10"
                 >
-                  {loginDropdownOpen && <ActiveHighlight color="white" />}
-
-                  <LogIn className="w-3.5 h-3.5 md:w-4 md:h-4 lg:w-[18px] lg:h-[18px] transition-colors duration-300 text-zinc-200 group-hover:text-white" />
+                  <LogIn className="w-3.5 h-3.5 md:w-4 md:h-4 lg:w-[18px] lg:h-[18px] transition-colors duration-300 text-red-300 group-hover:text-red-200 rotate-180" />
                   
                   <span className="relative whitespace-nowrap">
-                    Login
-                    <span className={`pointer-events-none absolute left-0 right-0 -bottom-1 lg:-bottom-1.5 block h-0.5 rounded-full origin-left transition-all duration-300 bg-gradient-to-r from-zinc-300 to-zinc-400 ${
-                      loginDropdownOpen ? 'scale-x-100' : 'scale-x-0 group-hover:scale-x-100'
-                    }`} />
+                    Logout
+                    <span className="pointer-events-none absolute left-0 right-0 -bottom-1 lg:-bottom-1.5 block h-0.5 rounded-full origin-left transition-all duration-300 bg-gradient-to-r from-red-300 to-red-400 scale-x-0 group-hover:scale-x-100" />
                   </span>
-                  
-                  <ChevronDown className={`w-3 h-3 transition-transform duration-200 ${loginDropdownOpen ? 'rotate-180' : ''}`} />
                 </button>
+              )}
+              
+              {/* Login Dropdown - Hide for super admins */}
+              {!isSuperAdmin && pathname !== '/super-admin-dashboard' && (
+                <div className="relative" ref={loginDropdownRef}>
+                  <button
+                    onClick={() => setLoginDropdownOpen(!loginDropdownOpen)}
+                    className={`relative inline-flex items-center gap-[0.3rem] md:gap-[0.35rem] px-1.5 md:px-2 lg:px-3 py-1 md:py-1.5 
+                      text-[0.65rem] md:text-[0.7rem] lg:text-[0.75rem] xl:text-[0.8rem] uppercase tracking-[0.12em] md:tracking-[0.15em] lg:tracking-[0.18em] 
+                      transition-all duration-300 group rounded-lg text-zinc-200 hover:text-white ${
+                      loginDropdownOpen ? 'bg-white/10' : 'hover:bg-white/5'
+                    }`}
+                  >
+                    {loginDropdownOpen && <ActiveHighlight color="white" />}
+
+                    <LogIn className="w-3.5 h-3.5 md:w-4 md:h-4 lg:w-[18px] lg:h-[18px] transition-colors duration-300 text-zinc-200 group-hover:text-white" />
+                    
+                    <span className="relative whitespace-nowrap">
+                      Login
+                      <span className={`pointer-events-none absolute left-0 right-0 -bottom-1 lg:-bottom-1.5 block h-0.5 rounded-full origin-left transition-all duration-300 bg-gradient-to-r from-zinc-300 to-zinc-400 ${
+                        loginDropdownOpen ? 'scale-x-100' : 'scale-x-0 group-hover:scale-x-100'
+                      }`} />
+                    </span>
+                    
+                    <ChevronDown className={`w-3 h-3 transition-transform duration-200 ${loginDropdownOpen ? 'rotate-180' : ''}`} />
+                  </button>
 
                 <AnimatePresence>
                   {loginDropdownOpen && (
@@ -312,7 +337,8 @@ export default function Navbar() {
                     </motion.div>
                   )}
                 </AnimatePresence>
-              </div>
+                </div>
+              )}
             </div>
 
             {/* Hamburger for mobile */}
@@ -381,7 +407,23 @@ export default function Navbar() {
                     />
                   )}
                   
-                  {/* Mobile Login Section */}
+                  {/* Super Admin Logout Button - Mobile */}
+                  {isSuperAdmin && (
+                    <button
+                      onClick={() => {
+                        localStorage.removeItem('superAdminSession');
+                        setMobileNavOpen(false);
+                        navigate('/');
+                      }}
+                      className="flex items-center gap-3 px-3 py-2.5 text-sm text-red-300 hover:bg-red-500/10 rounded-lg transition-colors w-full text-left"
+                    >
+                      <LogIn className="w-[18px] h-[18px] text-red-400 rotate-180" />
+                      <span>Logout</span>
+                    </button>
+                  )}
+                  
+                  {/* Mobile Login Section - Hide for super admins */}
+                  {!isSuperAdmin && (
                   <div className="border-t border-gray-600/30 mt-2 pt-2">
                     {isLoggedIn ? (
                       // Logged in - show user info and logout
@@ -438,6 +480,7 @@ export default function Navbar() {
                       </>
                     )}
                   </div>
+                  )}
                 </motion.div>
               )}
             </AnimatePresence>
