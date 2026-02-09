@@ -53,6 +53,8 @@ export default function Auction() {
     // Subscribe to new bids
     const bidSubscription = AuctionService.subscribeToBids((bid) => {
       setBidHistory(prev => [bid, ...prev]);
+      // Also reload auction state to get updated highest bid
+      loadAuctionState();
     });
 
     // Subscribe to captain changes

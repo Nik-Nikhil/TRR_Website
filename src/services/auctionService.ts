@@ -270,8 +270,10 @@ export class AuctionService {
       const state = await this.getAuctionState();
       if (!state || state.status !== 'live') return false;
 
-      // Check if bid is higher than current
-      if (state.highest_bid && amount <= state.highest_bid) {
+      // Check if bid is higher than current (must be strictly greater)
+      const currentBid = state.highest_bid || 0;
+      if (amount <= currentBid) {
+        console.log(`Bid rejected: ${amount} is not higher than current bid ${currentBid}`);
         return false;
       }
 
