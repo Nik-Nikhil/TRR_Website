@@ -1,5 +1,8 @@
-// Captain Service - Manage captain designations
+// Captain Service - Manage captain designations with Supabase
+import { supabase } from '../lib/supabase';
+
 interface CaptainData {
+  id?: string;
   playerId: string;
   playerNickname: string;
   teamName: string;
@@ -9,63 +12,117 @@ interface CaptainData {
 }
 
 class CaptainService {
-  private readonly STORAGE_KEY = 'trr_captains';
+  // Get all captains from Supabase
+  async getCaptains(): Promise<CaptainData[]> {
+    try {
+      const { data, error } = await supabase
+        .from('captains')
+        .select('*')
+        .order('assigned_at', { ascending: false });
 
-  // Get all captains
-  getCaptains(): CaptainData[] {
-    const data = localStorage.getItem(this.STORAGE_KEY);
-    return data ? JSON.parse(data) : [];
+      if (error) {
+        console.error('Error fetching captains:', error);
+        return [];
+      }
+
+      return (data || []).map(c => ({
+        id: c.id,
+        playerId: c.player_id,
+        playerNickname: c.player_nickname,
+        teamName: c.team_name,
+        budget: c.budget,
+        assignedAt: c.assigned_at,
+        assignedBy: c.assigned_by
+      }));
+    } catch (error) {
+      console.error('Error fetching captains:', error);
+      return [];
+    }
   }
 
   // Check if player is a captain
-  isCaptain(playerId: string): boolean {
-    const captains = this.getCaptains();
-    return captains.some(c => c.playerId === playerId);
+  async isCaptain(playerId: string): Promise<boolean> {
+    try {
+      const { data, error } = await supabase
+        .from('captains')
+        .select('id')
+        .eq('player_id', playerId)
+        .single();
+
+      return !error && !!data;
+    } catch (error) {
+      return false;
+    }
   }
 
   // Get captain data for a player
-  getCaptainData(playerId: string): CaptainData | null {
-    const captains = this.getCaptains();
-    return captains.find(c => c.playerId === playerId) || null;
+  async getCaptainData(playerId: string): Promise<CaptainData | null> {
+    try {
+      const { data, error } = await supabase
+        .from('captains')
+        .select('*')
+        .eq('player_id', playerId)
+        .single();
+
+      if (error || !data) {
+        return null;
+      }
+
+      return {
+        id: data.id,
+        playerId: data.player_id,
+        playerNickname: data.player_nickname,
+        teamName: data.team_name,
+        budget: data.budget,
+        assignedAt: data.assigned_at,
+        assignedBy: data.assigned_by
+      };
+    } catch (error) {
+      console.error('Error fetching captain data:', error);
+      return null;
+    }
   }
 
   // Assign captain role to a player
-  assignCaptain(
+  async assignCaptain(
     playerId: string,
     playerNickname: string,
     teamName: string,
     budget: number,
     assignedBy: string
-  ): boolean {
+  ): Promise<boolean> {
     try {
-      const captains = this.getCaptains();
-      
       // Check if already a captain
-      if (this.isCaptain(playerId)) {
+      const exists = await this.isCaptain(playerId);
+      if (exists) {
         return false;
       }
 
       // Check if team name already exists
-      if (captains.some(c => c.teamName.toLowerCase() === teamName.toLowerCase())) {
+      const { data: existingTeam } = await supabase
+        .from('captains')
+        .select('id')
+        .ilike('team_name', teamName)
+        .single();
+
+      if (existingTeam) {
         return false;
       }
 
-      const newCaptain: CaptainData = {
-        playerId,
-        playerNickname,
-        teamName,
-        budget,
-        assignedAt: new Date().toISOString(),
-        assignedBy
-      };
+      const { error } = await supabase
+        .from('captains')
+        .insert([{
+          player_id: playerId,
+          player_nickname: playerNickname,
+          team_name: teamName,
+          budget: budget,
+          assigned_by: assignedBy
+        }]);
 
-      captains.push(newCaptain);
-      localStorage.setItem(this.STORAGE_KEY, JSON.stringify(captains));
-
-      // Dispatch event for real-time updates
-      window.dispatchEvent(new CustomEvent('captainAssigned', { 
-        detail: { captain: newCaptain } 
-      }));
+      if (error) {
+        console.error('Error assigning captain:', error);
+        return false;
+      }
 
       return true;
     } catch (error) {
@@ -75,21 +132,17 @@ class CaptainService {
   }
 
   // Remove captain role
-  removeCaptain(playerId: string): boolean {
+  async removeCaptain(playerId: string): Promise<boolean> {
     try {
-      const captains = this.getCaptains();
-      const filtered = captains.filter(c => c.playerId !== playerId);
-      
-      if (filtered.length === captains.length) {
-        return false; // Captain not found
+      const { error } = await supabase
+        .from('captains')
+        .delete()
+        .eq('player_id', playerId);
+
+      if (error) {
+        console.error('Error removing captain:', error);
+        return false;
       }
-
-      localStorage.setItem(this.STORAGE_KEY, JSON.stringify(filtered));
-
-      // Dispatch event for real-time updates
-      window.dispatchEvent(new CustomEvent('captainRemoved', { 
-        detail: { playerId } 
-      }));
 
       return true;
     } catch (error) {
@@ -99,17 +152,17 @@ class CaptainService {
   }
 
   // Update captain budget
-  updateBudget(playerId: string, newBudget: number): boolean {
+  async updateBudget(playerId: string, newBudget: number): Promise<boolean> {
     try {
-      const captains = this.getCaptains();
-      const captain = captains.find(c => c.playerId === playerId);
-      
-      if (!captain) {
+      const { error } = await supabase
+        .from('captains')
+        .update({ budget: newBudget })
+        .eq('player_id', playerId);
+
+      if (error) {
+        console.error('Error updating budget:', error);
         return false;
       }
-
-      captain.budget = newBudget;
-      localStorage.setItem(this.STORAGE_KEY, JSON.stringify(captains));
 
       return true;
     } catch (error) {
@@ -119,8 +172,33 @@ class CaptainService {
   }
 
   // Get all team names
-  getTeamNames(): string[] {
-    return this.getCaptains().map(c => c.teamName);
+  async getTeamNames(): Promise<string[]> {
+    const captains = await this.getCaptains();
+    return captains.map(c => c.teamName);
+  }
+
+  // Subscribe to captain changes
+  subscribeToCaptains(callback: () => void) {
+    const channel = supabase
+      .channel('captains-changes')
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'captains'
+        },
+        () => {
+          callback();
+        }
+      )
+      .subscribe();
+
+    return {
+      unsubscribe: () => {
+        supabase.removeChannel(channel);
+      }
+    };
   }
 }
 

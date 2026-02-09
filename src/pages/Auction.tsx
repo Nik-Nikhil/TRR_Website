@@ -7,6 +7,7 @@ import { AuctionService } from "../services/auctionService";
 import captainService from "../services/captainService";
 import type { AuctionState } from "../services/auctionService";
 import { AuthService } from "../services/auth";
+import { supabase } from "../lib/supabase";
 
 export default function Auction() {
   const [auctionState, setAuctionState] = useState<AuctionState | null>(null);
@@ -55,37 +56,14 @@ export default function Auction() {
     });
 
     // Subscribe to captain changes
-    const handleCaptainChange = () => {
+    const captainSubscription = captainService.subscribeToCaptains(() => {
       loadCaptains();
-    };
-    window.addEventListener('captainAssigned', handleCaptainChange);
-    window.addEventListener('captainRemoved', handleCaptainChange);
-
-    // Subscribe to bid history clear
-    const handleBidHistoryCleared = () => {
-      setBidHistory([]);
-    };
-    window.addEventListener('bidHistoryCleared', handleBidHistoryCleared);
-
-    // Subscribe to player sold
-    const handlePlayerSold = () => {
-      loadSoldPlayers();
-    };
-    window.addEventListener('playerSold', handlePlayerSold);
-
-    // Poll for auction state updates every 2 seconds
-    const pollInterval = setInterval(() => {
-      loadAuctionState();
-    }, 2000);
+    });
 
     return () => {
       stateSubscription.unsubscribe();
       bidSubscription.unsubscribe();
-      window.removeEventListener('captainAssigned', handleCaptainChange);
-      window.removeEventListener('captainRemoved', handleCaptainChange);
-      window.removeEventListener('bidHistoryCleared', handleBidHistoryCleared);
-      window.removeEventListener('playerSold', handlePlayerSold);
-      clearInterval(pollInterval);
+      captainSubscription.unsubscribe();
     };
   }, []);
 
@@ -99,13 +77,38 @@ export default function Auction() {
     }
   }, [auctionState?.current_player_id]);
 
-  const loadSoldPlayers = () => {
-    const sold = JSON.parse(localStorage.getItem('sold_players') || '[]');
-    setSoldPlayers([...sold].reverse()); // Most recent first (create new array to avoid mutation)
+  const loadSoldPlayers = async () => {
+    try {
+      const state = await AuctionService.getAuctionState();
+      if (!state) return;
+
+      const { data, error } = await supabase
+        .from('auction_results')
+        .select('*')
+        .eq('auction_id', state.id)
+        .order('sold_at', { ascending: false });
+
+      if (!error && data) {
+        setSoldPlayers(data.map((item: any) => ({
+          id: item.id,
+          playerId: item.player_id,
+          playerNickname: item.player_data?.nickname || 'Unknown',
+          playerData: item.player_data,
+          soldTo: item.sold_to_captain_name,
+          soldToCaptainId: item.sold_to_captain_id,
+          teamName: item.sold_to_team_name,
+          soldFor: item.final_price,
+          soldAt: item.sold_at,
+          auctionId: item.auction_id
+        })));
+      }
+    } catch (error) {
+      console.error('Error loading sold players:', error);
+    }
   };
 
-  const loadCaptains = () => {
-    const captainsList = captainService.getCaptains();
+  const loadCaptains = async () => {
+    const captainsList = await captainService.getCaptains();
     setCaptains(captainsList);
   };
 
@@ -190,54 +193,32 @@ export default function Auction() {
     const winningCaptain = captains.find(c => c.playerId === auctionState.highest_bidder_id);
     if (winningCaptain) {
       const newBudget = winningCaptain.budget - (auctionState.highest_bid || 0);
-      captainService.updateBudget(auctionState.highest_bidder_id, newBudget);
+      await captainService.updateBudget(auctionState.highest_bidder_id, newBudget);
     }
 
-    // Create sold player log with explicit values
-    const soldPlayer = {
-      id: Date.now().toString(),
-      playerId: auctionState.current_player_id || '',
-      playerNickname: playerNickname,
-      playerData: auctionState.current_player_data || {},
-      soldTo: auctionState.highest_bidder_name || 'Unknown',
-      soldToCaptainId: auctionState.highest_bidder_id || '',
-      teamName: auctionState.highest_bidder_team || 'Unknown Team',
-      soldFor: auctionState.highest_bid || 0,
-      soldAt: new Date().toISOString(),
-      auctionId: auctionState.id || ''
-    };
+    // Save to auction results in Supabase
+    const { error } = await supabase
+      .from('auction_results')
+      .insert([{
+        auction_id: auctionState.id,
+        player_id: auctionState.current_player_id,
+        player_data: auctionState.current_player_data,
+        sold_to_captain_id: auctionState.highest_bidder_id,
+        sold_to_captain_name: auctionState.highest_bidder_name,
+        sold_to_team_name: auctionState.highest_bidder_team,
+        final_price: auctionState.highest_bid
+      }]);
 
-    console.log('Saving sold player:', soldPlayer); // Debug log
-
-    // Save to sold players log
-    const soldPlayers = JSON.parse(localStorage.getItem('sold_players') || '[]');
-    soldPlayers.push(soldPlayer);
-    localStorage.setItem('sold_players', JSON.stringify(soldPlayers));
-
-    // Add player to captain's team
-    const teamKey = `team_${auctionState.highest_bidder_id}`;
-    const teamPlayers = JSON.parse(localStorage.getItem(teamKey) || '[]');
-    teamPlayers.push({
-      playerId: auctionState.current_player_id,
-      playerData: auctionState.current_player_data,
-      boughtFor: auctionState.highest_bid,
-      addedAt: new Date().toISOString()
-    });
-    localStorage.setItem(teamKey, JSON.stringify(teamPlayers));
-
-    // Remove player from auction pool
-    const auctionPool = JSON.parse(localStorage.getItem('auction_player_pool') || '[]');
-    const updatedPool = auctionPool.filter((p: any) => p.id !== auctionState.current_player_id);
-    localStorage.setItem('auction_player_pool', JSON.stringify(updatedPool));
+    if (error) {
+      console.error('Error saving auction result:', error);
+    }
 
     // Clear current player from auction
     await AuctionService.setCurrentPlayer('', null);
     
-    // Reload captains to show updated budgets
-    loadCaptains();
-    
-    // Dispatch event for UI updates
-    window.dispatchEvent(new CustomEvent('playerSold', { detail: soldPlayer }));
+    // Reload data
+    await loadCaptains();
+    await loadSoldPlayers();
     
     // Show success modal
     const newBudget = winningCaptain ? winningCaptain.budget - (auctionState.highest_bid || 0) : 0;
@@ -675,10 +656,11 @@ export default function Auction() {
                             </thead>
                             <tbody>
                               {captains.map((captain, index) => {
-                                // Get team players count (including captain)
-                                const teamKey = `team_${captain.playerId}`;
-                                const teamPlayers = JSON.parse(localStorage.getItem(teamKey) || '[]');
-                                const playerCount = teamPlayers.length + 1; // +1 for captain
+                                // Get team players count from auction results
+                                const teamPlayersCount = soldPlayers.filter(
+                                  p => p.soldToCaptainId === captain.playerId
+                                ).length;
+                                const playerCount = teamPlayersCount + 1; // +1 for captain
                                 
                                 // Standard starting budget
                                 const startingBudget = 1000;
