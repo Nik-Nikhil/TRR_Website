@@ -32,7 +32,6 @@ const AdminProfile: React.FC = () => {
 
   const handleApproval = (approvalId: string, action: 'approve' | 'reject', notes?: string) => {
     // In a real implementation, this would call an API
-    console.log(`${action} approval ${approvalId} with notes: ${notes}`);
     
     // Update local state for demo
     setPendingApprovals(prev => 

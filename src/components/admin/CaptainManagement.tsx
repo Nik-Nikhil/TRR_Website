@@ -21,6 +21,16 @@ export const CaptainManagement: React.FC<CaptainManagementProps> = ({ adminUsern
   useEffect(() => {
     loadCaptains();
     filterAvailablePlayers();
+
+    // Subscribe to captain changes for real-time updates
+    const subscription = captainService.subscribeToCaptains(() => {
+      loadCaptains();
+      filterAvailablePlayers();
+    });
+
+    return () => {
+      subscription.unsubscribe();
+    };
   }, []);
 
   useEffect(() => {

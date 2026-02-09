@@ -62,13 +62,8 @@ export default function SuperAdminLogin() {
         username: credentials.username
       };
       
-      console.log('Setting super admin session:', sessionData); // Debug log
       localStorage.setItem('superAdminSession', JSON.stringify(sessionData));
       
-      // Verify it was saved correctly
-      const savedSession = localStorage.getItem('superAdminSession');
-      console.log('Saved session:', JSON.parse(savedSession || '{}')); // Debug log
-
       // Navigate to super admin dashboard with state to force refresh
       navigate('/super-admin-dashboard', { replace: true, state: { forceRefresh: true } });
     } catch (error) {

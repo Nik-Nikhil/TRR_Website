@@ -57,11 +57,12 @@ export default function Navbar() {
       '/audio/roar2.mp3'
     ];
     
-    // Load all audio files
+    // Load all audio files with error handling
     audioPaths.forEach((path) => {
       const audio = new Audio(path);
       audio.volume = 0.5;
-      audio.preload = 'auto';
+      audio.preload = 'none'; // Changed from 'auto' to 'none' to avoid cache issues
+      audio.onerror = () => {}; // Silently handle errors
       audioRef.current.push(audio);
     });
     

@@ -65,7 +65,6 @@ export class AuctionService {
       // First check if there's already an active auction
       const existingAuction = await this.getAuctionState();
       if (existingAuction && existingAuction.status !== 'completed') {
-        console.log('Auction already exists, updating status to live');
         const { error } = await supabase
           .from('auctions')
           .update({ status: 'live' })
@@ -79,7 +78,6 @@ export class AuctionService {
       }
 
       // Create new auction
-      console.log('Creating new auction...');
       const { data, error } = await supabase
         .from('auctions')
         .insert([{
@@ -98,7 +96,6 @@ export class AuctionService {
         return false;
       }
 
-      console.log('Auction created successfully:', data);
       return true;
     } catch (error) {
       console.error('Exception starting auction:', error);

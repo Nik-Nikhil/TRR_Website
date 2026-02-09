@@ -60,10 +60,27 @@ export default function Auction() {
       loadCaptains();
     });
 
+    // Subscribe to sold players (auction_results) changes
+    const soldPlayersChannel = supabase
+      .channel('auction-results-changes')
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'auction_results'
+        },
+        () => {
+          loadSoldPlayers();
+        }
+      )
+      .subscribe();
+
     return () => {
       stateSubscription.unsubscribe();
       bidSubscription.unsubscribe();
       captainSubscription.unsubscribe();
+      supabase.removeChannel(soldPlayersChannel);
     };
   }, []);
 

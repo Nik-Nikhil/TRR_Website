@@ -152,7 +152,7 @@ export default function Home() {
               <div className="w-full max-w-[1100px] px-3 sm:px-4 md:px-6 relative">
                 <div className="grid grid-cols-1 md:grid-cols-4 lg:grid-cols-6 gap-3 sm:gap-4 md:gap-6 items-center w-full">
                   
-                  {/* Left Column - Announcements & Watch */}
+                  {/* Left Column - Announcements */}
                   <div className="space-y-2 md:col-span-1 lg:col-span-2">
                     
                     {/* Announcements Card with Slider */}
@@ -207,86 +207,91 @@ export default function Home() {
                         
                         <Link 
                           to="/announcements"
-                          className="inline-block px-2.5 py-1 bg-blue-600/30 hover:bg-blue-600/40 rounded-full text-blue-200 text-xs font-medium transition-all duration-300 border border-blue-400/30"
+                          className="inline-flex items-center justify-center rounded-full px-5 py-2 text-sm font-bold uppercase tracking-[0.2em] bg-gradient-to-r from-zinc-50 via-zinc-300 to-zinc-100 text-[#050608] shadow-[0_0_22px_rgba(148,163,184,0.85)] hover:brightness-110 transition"
                         >
                           LATEST UPDATES
                         </Link>
                       </div>
                     </div>
 
-                    {/* Watch Tab with Mini Player */}
-                    <div className="bg-gradient-to-br from-red-900/30 to-orange-900/20 backdrop-blur-xl border border-red-500/40 rounded-xl p-2.5 hover:border-red-400/60 hover:from-red-800/40 hover:to-orange-800/30 transition-all duration-300 group text-center relative h-48">
-                      {/* Subtle glow effect on hover */}
-                      <div className="absolute inset-0 bg-gradient-to-br from-red-400/10 to-orange-400/10 opacity-0 group-hover:opacity-100 transition-opacity duration-300 rounded-xl" />
+                  </div>
+
+                  {/* Center Column - Aegis + YouTube */}
+                  <div className="flex justify-center md:col-span-2 lg:col-span-2">
+                    <div className="text-center space-y-2">
+                      {/* Aegis */}
+                      <div className="w-48 h-48 md:w-56 md:h-56 lg:w-64 lg:h-64 xl:w-72 xl:h-72 mx-auto">
+                        <TrophyCanvas />
+                      </div>
                       
-                      <div className="relative z-10 h-full flex flex-col">
-                        <div className="flex items-center space-x-2 mb-2 justify-center">
-                          <div className="w-4 h-4 bg-red-500/30 rounded-lg flex items-center justify-center">
-                            <svg className="w-3 h-3 text-red-300" fill="currentColor" viewBox="0 0 20 20">
-                              <path fillRule="evenodd" d="M4 3a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V5a2 2 0 00-2-2H4zm3 2h6v4H7V5zm8 8v2h1v-2h-1zm-2-2H7v4h6v-4z" clipRule="evenodd" />
-                            </svg>
-                          </div>
-                          <h3 className="text-xs font-bold text-red-100">WATCH</h3>
-                        </div>
+                      <div className="text-xs font-bold text-white bg-blue-600/30 backdrop-blur-sm border border-blue-500/40 rounded-lg px-3 py-1.5 inline-block">
+                        AEGIS OF CHAMPIONS
+                      </div>
+
+                      {/* YouTube Tab Below Aegis */}
+                      <div className="bg-gradient-to-br from-red-900/30 to-orange-900/20 backdrop-blur-xl border border-red-500/40 rounded-xl p-2.5 hover:border-red-400/60 hover:from-red-800/40 hover:to-orange-800/30 transition-all duration-300 group text-center relative">
+                        {/* Subtle glow effect on hover */}
+                        <div className="absolute inset-0 bg-gradient-to-br from-red-400/10 to-orange-400/10 opacity-0 group-hover:opacity-100 transition-opacity duration-300 rounded-xl" />
                         
-                        {/* Mini Player - Reduced size */}
-                        <div className="mb-2 flex-1 flex flex-col justify-center relative">
-                          {/* Left Navigation Button */}
-                          <button
-                            onClick={prevVideo}
-                            className="absolute left-0 top-1/2 transform -translate-y-1/2 z-20 w-6 h-6 bg-red-600/40 hover:bg-red-600/60 border border-red-500/50 hover:border-red-400/70 rounded-full text-red-200 text-sm font-bold transition-all duration-300 flex items-center justify-center shadow-lg"
-                          >
-                            ‹
-                          </button>
-                          
-                          {/* Right Navigation Button */}
-                          <button
-                            onClick={nextVideo}
-                            className="absolute right-0 top-1/2 transform -translate-y-1/2 z-20 w-6 h-6 bg-red-600/40 hover:bg-red-600/60 border border-red-500/50 hover:border-red-400/70 rounded-full text-red-200 text-sm font-bold transition-all duration-300 flex items-center justify-center shadow-lg"
-                          >
-                            ›
-                          </button>
-                          
-                          <div className="bg-black/40 rounded-lg p-1 border border-red-500/30 mx-8">
-                            <div className="relative aspect-video rounded overflow-hidden group" style={{ maxHeight: '120px' }}>
-                              <iframe
-                                key={currentVideo} // Force re-render when video changes
-                                src={`https://www.youtube.com/embed/${roshanRumbleVideos[currentVideo].id}?autoplay=0&mute=0&controls=1&modestbranding=1&rel=0`}
-                                title={`Roshan Rumble - ${roshanRumbleVideos[currentVideo].title}`}
-                                className="w-full h-full"
-                                frameBorder="0"
-                                allow="accelerometer; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                                allowFullScreen
-                              />
+                        <div className="relative z-10 flex flex-col">
+                          <div className="flex items-center space-x-2 mb-2 justify-center">
+                            <div className="w-4 h-4 bg-red-500/30 rounded-lg flex items-center justify-center">
+                              <svg className="w-3 h-3 text-red-300" fill="currentColor" viewBox="0 0 20 20">
+                                <path fillRule="evenodd" d="M4 3a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V5a2 2 0 00-2-2H4zm3 2h6v4H7V5zm8 8v2h1v-2h-1zm-2-2H7v4h6v-4z" clipRule="evenodd" />
+                              </svg>
                             </div>
+                            <h3 className="text-xs font-bold text-red-100">WATCH</h3>
+                          </div>
+                          
+                          {/* Mini Player */}
+                          <div className="mb-2 flex-1 flex flex-col justify-center relative">
+                            {/* Left Navigation Button */}
+                            <button
+                              onClick={prevVideo}
+                              className="absolute left-0 top-1/2 transform -translate-y-1/2 z-20 w-6 h-6 bg-red-600/40 hover:bg-red-600/60 border border-red-500/50 hover:border-red-400/70 rounded-full text-red-200 text-sm font-bold transition-all duration-300 flex items-center justify-center shadow-lg"
+                            >
+                              ‹
+                            </button>
                             
-                            {/* Video indicator - Compact */}
-                            <div className="mt-1 text-center">
-                              <p className="text-red-100 text-xs font-medium truncate">{roshanRumbleVideos[currentVideo].title}</p>
-                              <div className="flex justify-center space-x-1 mt-0.5">
-                                {roshanRumbleVideos.map((_, index) => (
-                                  <button
-                                    key={index}
-                                    onClick={() => setCurrentVideo(index)}
-                                    className={`w-1 h-1 rounded-full transition-colors ${
-                                      index === currentVideo ? 'bg-red-300' : 'bg-red-300/30'
-                                    }`}
-                                  />
-                                ))}
+                            {/* Right Navigation Button */}
+                            <button
+                              onClick={nextVideo}
+                              className="absolute right-0 top-1/2 transform -translate-y-1/2 z-20 w-6 h-6 bg-red-600/40 hover:bg-red-600/60 border border-red-500/50 hover:border-red-400/70 rounded-full text-red-200 text-sm font-bold transition-all duration-300 flex items-center justify-center shadow-lg"
+                            >
+                              ›
+                            </button>
+                            
+                            <div className="bg-black/40 rounded-lg p-1 border border-red-500/30 mx-8">
+                              <div className="relative aspect-video rounded overflow-hidden group" style={{ maxHeight: '120px' }}>
+                                <iframe
+                                  key={currentVideo}
+                                  src={`https://www.youtube.com/embed/${roshanRumbleVideos[currentVideo].id}?autoplay=0&mute=0&controls=1&modestbranding=1&rel=0`}
+                                  title={`Roshan Rumble - ${roshanRumbleVideos[currentVideo].title}`}
+                                  className="w-full h-full"
+                                  frameBorder="0"
+                                  allow="accelerometer; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                                  allowFullScreen
+                                />
+                              </div>
+                              
+                              {/* Video indicator */}
+                              <div className="mt-1 text-center">
+                                <p className="text-red-100 text-xs font-medium truncate">{roshanRumbleVideos[currentVideo].title}</p>
+                                <div className="flex justify-center space-x-1 mt-0.5">
+                                  {roshanRumbleVideos.map((_, index) => (
+                                    <button
+                                      key={index}
+                                      onClick={() => setCurrentVideo(index)}
+                                      className={`w-1 h-1 rounded-full transition-colors ${
+                                        index === currentVideo ? 'bg-red-300' : 'bg-red-300/30'
+                                      }`}
+                                    />
+                                  ))}
+                                </div>
                               </div>
                             </div>
                           </div>
                         </div>
-                      </div>
-                    </div>
-
-                  </div>
-
-                  {/* Center Column - Aegis */}
-                  <div className="flex justify-center md:col-span-2 lg:col-span-2">
-                    <div className="text-center">
-                      <div className="w-48 h-48 md:w-56 md:h-56 lg:w-64 lg:h-64 xl:w-72 xl:h-72 mx-auto">
-                        <TrophyCanvas />
                       </div>
                     </div>
                   </div>
@@ -316,14 +321,14 @@ export default function Home() {
                         {registrationEnabled ? (
                           <Link 
                             to="/new-player-registration"
-                            className="inline-block px-2.5 py-1 bg-green-600/30 hover:bg-green-600/40 rounded-full text-green-200 text-xs font-medium transition-all duration-300 border border-green-400/30"
+                            className="inline-flex items-center justify-center rounded-full px-5 py-2 text-sm font-bold uppercase tracking-[0.2em] bg-gradient-to-r from-zinc-50 via-zinc-300 to-zinc-100 text-[#050608] shadow-[0_0_22px_rgba(148,163,184,0.85)] hover:brightness-110 transition"
                           >
                             REGISTER NOW
                           </Link>
                         ) : (
                           <button 
                             disabled
-                            className="inline-block px-2.5 py-1 bg-purple-600/30 rounded-full text-purple-300 text-xs font-medium border border-purple-400/30 cursor-not-allowed opacity-80"
+                            className="inline-flex items-center justify-center rounded-full px-5 py-2 text-sm font-bold uppercase tracking-[0.2em] bg-gradient-to-r from-zinc-400 via-zinc-500 to-zinc-400 text-zinc-800 shadow-[0_0_22px_rgba(100,100,100,0.5)] cursor-not-allowed opacity-60"
                           >
                             STARTING SOON
                           </button>
@@ -352,7 +357,7 @@ export default function Home() {
                         
                         <Link 
                           to="/hall-of-fame"
-                          className="inline-block px-2.5 py-1 bg-amber-600/30 hover:bg-amber-600/40 rounded-full text-amber-200 text-xs font-medium transition-all duration-300 border border-amber-400/30"
+                          className="inline-flex items-center justify-center rounded-full px-5 py-2 text-sm font-bold uppercase tracking-[0.2em] bg-gradient-to-r from-zinc-50 via-zinc-300 to-zinc-100 text-[#050608] shadow-[0_0_22px_rgba(148,163,184,0.85)] hover:brightness-110 transition"
                         >
                           VIEW HALL OF FAME
                         </Link>
@@ -380,7 +385,7 @@ export default function Home() {
                         
                         <Link 
                           to="/admins"
-                          className="inline-block px-2.5 py-1 bg-green-600/30 hover:bg-green-600/40 rounded-full text-green-200 text-xs font-medium transition-all duration-300 border border-green-400/30"
+                          className="inline-flex items-center justify-center rounded-full px-5 py-2 text-sm font-bold uppercase tracking-[0.2em] bg-gradient-to-r from-zinc-50 via-zinc-300 to-zinc-100 text-[#050608] shadow-[0_0_22px_rgba(148,163,184,0.85)] hover:brightness-110 transition"
                         >
                           ADMINS ↗
                         </Link>

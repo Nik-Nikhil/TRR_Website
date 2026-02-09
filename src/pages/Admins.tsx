@@ -380,7 +380,7 @@ export default function AdminsPage() {
     }
     
     audioRef.current = audio;
-    audio.play().catch(e => console.log("Audio failed:", e));
+    audio.play().catch(() => {});
   };
 
   const handleEyeClick = () => {
