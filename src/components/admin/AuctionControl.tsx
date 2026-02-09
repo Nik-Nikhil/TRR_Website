@@ -49,17 +49,25 @@ export const AuctionControl = () => {
 
     setLoading(true);
     setError(null);
-    const success = await AuctionService.startAuction();
-    if (success) {
-      setAuctionStatus('live');
-      // Store auction name in localStorage for display
-      localStorage.setItem('current_auction_name', auctionName.trim());
-      setShowNameInput(false);
-      setAuctionName('');
-    } else {
-      setError('Failed to start auction');
+    
+    try {
+      console.log('Starting auction...');
+      const success = await AuctionService.startAuction();
+      console.log('Start auction result:', success);
+      
+      if (success) {
+        setAuctionStatus('live');
+        setShowNameInput(false);
+        setAuctionName('');
+      } else {
+        setError('Failed to start auction. Check browser console for details.');
+      }
+    } catch (err: any) {
+      console.error('Exception in handleStartAuction:', err);
+      setError(`Error: ${err.message || 'Unknown error'}`);
+    } finally {
+      setLoading(false);
     }
-    setLoading(false);
   };
 
   const handleCancelNameInput = () => {

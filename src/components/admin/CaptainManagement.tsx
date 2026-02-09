@@ -32,10 +32,6 @@ export const CaptainManagement: React.FC<CaptainManagementProps> = ({ adminUsern
     const captainIds = captainsList.map(c => c.playerId);
     setAvailablePlayers(players.filter(p => !captainIds.includes(p.id)));
   };
-      window.removeEventListener('captainAssigned', handleCaptainAssigned);
-      window.removeEventListener('captainRemoved', handleCaptainRemoved);
-    };
-  }, []);
 
   const loadCaptains = async () => {
     const captainsList = await captainService.getCaptains();

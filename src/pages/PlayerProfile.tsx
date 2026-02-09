@@ -142,12 +142,15 @@ export const PlayerProfile: React.FC = () => {
       });
 
       // Check captain status
-      const captainStatus = await captainService.isCaptain(playerId);
-      setIsCaptain(captainStatus);
-      if (captainStatus) {
-        const captainInfo = await captainService.getCaptainData(playerId);
-        setCaptainData(captainInfo);
-      }
+      const checkCaptainStatus = async () => {
+        const captainStatus = await captainService.isCaptain(playerId);
+        setIsCaptain(captainStatus);
+        if (captainStatus) {
+          const captainInfo = await captainService.getCaptainData(playerId);
+          setCaptainData(captainInfo);
+        }
+      };
+      checkCaptainStatus();
     }
   }, [playerId, isAuthenticated, currentUser, navigate]);
 

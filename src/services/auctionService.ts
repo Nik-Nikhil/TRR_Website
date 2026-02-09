@@ -62,18 +62,30 @@ export class AuctionService {
   // Start auction
   static async startAuction(): Promise<boolean> {
     try {
+      // First check if there's already an active auction
+      const existingAuction = await this.getAuctionState();
+      if (existingAuction && existingAuction.status !== 'completed') {
+        console.log('Auction already exists, updating status to live');
+        const { error } = await supabase
+          .from('auctions')
+          .update({ status: 'live' })
+          .eq('id', existingAuction.id);
+
+        if (error) {
+          console.error('Error updating auction:', error);
+          return false;
+        }
+        return true;
+      }
+
+      // Create new auction
+      console.log('Creating new auction...');
       const { data, error } = await supabase
         .from('auctions')
         .insert([{
           name: `Auction ${new Date().toLocaleDateString()}`,
           season: 'Current',
           status: 'live',
-          current_player_id: null,
-          current_player_data: null,
-          highest_bid: null,
-          highest_bidder_id: null,
-          highest_bidder_name: null,
-          highest_bidder_team: null,
           created_by: 'admin',
           deletion_status: 'active'
         }])
@@ -82,12 +94,14 @@ export class AuctionService {
 
       if (error) {
         console.error('Error starting auction:', error);
+        console.error('Error details:', JSON.stringify(error, null, 2));
         return false;
       }
 
+      console.log('Auction created successfully:', data);
       return true;
     } catch (error) {
-      console.error('Error starting auction:', error);
+      console.error('Exception starting auction:', error);
       return false;
     }
   }
@@ -224,11 +238,16 @@ export class AuctionService {
       const state = await this.getAuctionState();
       if (!state) return false;
 
+      // Don't set current_player_id as foreign key since players might not be in DB yet
+      // Just store the player data in JSONB
       const { error } = await supabase
         .from('auctions')
         .update({
-          current_player_id: playerId || null,
-          current_player_data: playerData,
+          current_player_id: null, // Set to null to avoid foreign key constraint
+          current_player_data: {
+            id: playerId,
+            ...playerData
+          },
           highest_bid: playerData?.basePrice || 0,
           highest_bidder_id: null,
           highest_bidder_name: null,

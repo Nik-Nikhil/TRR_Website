@@ -14,6 +14,7 @@ import AuthService from '../services/auth';
 import RegistrationControl from '../components/admin/RegistrationControl';
 import { AuctionControl } from '../components/admin/AuctionControl';
 import { CaptainManagement } from '../components/admin/CaptainManagement';
+import { AuctionService } from '../services/auctionService';
 import messagingService from '../services/messagingService';
 
 interface ActivityLog {
@@ -618,86 +619,25 @@ export default function AdminDashboard() {
   // Render auction control
   const renderAuctionControl = () => {
     const handleClearAuctionData = async () => {
-      // Save current auction data to history before clearing
-      const auctionState = JSON.parse(localStorage.getItem('trr_auction_state') || 'null');
-      const soldPlayers = JSON.parse(localStorage.getItem('sold_players') || '[]');
-      const captains = JSON.parse(localStorage.getItem('captains') || '[]');
-      
-      if (auctionState || soldPlayers.length > 0) {
-        // Create auction history entry
-        const historyEntry = {
-          id: Date.now().toString(),
-          auctionName: localStorage.getItem('current_auction_name') || 'Unnamed Auction',
-          completedAt: new Date().toISOString(),
-          status: auctionState?.status || 'completed',
-          totalPlayers: soldPlayers.length,
-          soldPlayers: soldPlayers,
-          teams: captains.map((captain: any) => {
-            const teamKey = `team_${captain.playerId}`;
-            const teamPlayers = JSON.parse(localStorage.getItem(teamKey) || '[]');
-            return {
-              teamName: captain.teamName,
-              captainName: captain.playerNickname,
-              startingBudget: 1000,
-              remainingBudget: captain.budget,
-              spentBudget: 1000 - captain.budget,
-              players: teamPlayers,
-              playerCount: teamPlayers.length + 1 // +1 for captain
-            };
-          })
-        };
-        
-        // Get existing history
-        const history = JSON.parse(localStorage.getItem('auction_history') || '[]');
-        
-        // Add new entry at the beginning
-        history.unshift(historyEntry);
-        
-        // Keep only last 10 auctions
-        const limitedHistory = history.slice(0, 10);
-        
-        // Save history
-        localStorage.setItem('auction_history', JSON.stringify(limitedHistory));
+      if (!confirm('Are you sure you want to clear all auction data? This will reset the auction to Not Started.')) {
+        return;
       }
-      
-      // Get captains and reset their budgets to starting amount
-      const resetCaptains = captains.map((captain: any) => ({
-        ...captain,
-        budget: 1000 // Reset to starting budget
-      }));
-      
-      // Save reset captains back
-      if (resetCaptains.length > 0) {
-        localStorage.setItem('captains', JSON.stringify(resetCaptains));
+
+      try {
+        // Reset auction using the service
+        const success = await AuctionService.resetAuction();
+        
+        if (success) {
+          addActivityLog('Auction data cleared', 'auction');
+          alert('Auction data cleared successfully');
+        } else {
+          alert('Failed to clear auction data');
+        }
+      } catch (error) {
+        console.error('Error clearing auction data:', error);
+        alert('Error clearing auction data');
       }
-      
-      // Clear all team rosters
-      captains.forEach((captain: any) => {
-        localStorage.removeItem(`team_${captain.playerId}`);
-      });
-      
-      // Clear sold players
-      localStorage.removeItem('sold_players');
-      
-      // Clear bid history
-      localStorage.removeItem('bid_history');
-      localStorage.removeItem('trr_auction_bids');
-      
-      // Clear auction name
-      localStorage.removeItem('current_auction_name');
-      
-      // COMPLETELY REMOVE auction state to force fresh start (use correct key)
-      localStorage.removeItem('trr_auction_state');
-      localStorage.removeItem('auction_state'); // Also remove old key if exists
-      
-      // Clear any cached auction data
-      localStorage.removeItem('current_auction_player');
-      
-      // Dispatch events to update UI immediately
-      window.dispatchEvent(new Event('bidHistoryCleared'));
-      window.dispatchEvent(new Event('playerSold'));
-      window.dispatchEvent(new CustomEvent('auctionStateChanged', { detail: null }));
-      window.dispatchEvent(new Event('captainAssigned')); // Trigger captain update
+    };
       
       setShowClearModal(false);
       

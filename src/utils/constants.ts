@@ -7,7 +7,7 @@ export const APP_CONFIG = {
 
 // Database configuration
 export const DATABASE_CONFIG = {
-  supabaseUrl: import.meta.env.VITE_SUPABASE_URL || 'https://xdecako.supabase.co',
+  supabaseUrl: import.meta.env.VITE_SUPABASE_URL || 'https://qcsdshznxhhwtxdecako.supabase.co',
   supabaseAnonKey: import.meta.env.VITE_SUPABASE_ANON_KEY || 'sb_publishable_UmAag0GJGmffqvCRILpXNA_7bc7Cvtf'
 };
 
