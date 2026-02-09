@@ -121,18 +121,20 @@ class CaptainService {
         return false;
       }
 
+      // Insert captain - player_id can be a string (not UUID) since we're using local player data
       const { error } = await supabase
         .from('captains')
-        .insert([{
+        .insert({
           player_id: playerId,
           player_nickname: playerNickname,
           team_name: teamName,
           budget: budget,
           assigned_by: assignedBy
-        }]);
+        });
 
       if (error) {
         console.error('Error assigning captain:', error);
+        console.error('Error details:', JSON.stringify(error, null, 2));
         return false;
       }
 

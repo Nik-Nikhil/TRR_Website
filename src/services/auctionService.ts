@@ -345,10 +345,10 @@ export class AuctionService {
         {
           event: 'UPDATE',
           schema: 'public',
-          table: 'auctions',
-          filter: 'deletion_status=eq.active'
+          table: 'auctions'
         },
-        async () => {
+        async (payload) => {
+          console.log('🔔 Auction UPDATE detected:', payload);
           // Fetch the latest state when auction is updated
           const state = await this.getAuctionState();
           if (state) {
@@ -361,10 +361,10 @@ export class AuctionService {
         {
           event: 'INSERT',
           schema: 'public',
-          table: 'auctions',
-          filter: 'deletion_status=eq.active'
+          table: 'auctions'
         },
-        async () => {
+        async (payload) => {
+          console.log('🔔 Auction INSERT detected:', payload);
           // Fetch the latest state when new auction is created
           const state = await this.getAuctionState();
           if (state) {

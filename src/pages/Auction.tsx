@@ -83,11 +83,17 @@ export default function Auction() {
         }
       });
 
+    // Fallback: Poll for updates every 2 seconds as backup
+    const pollInterval = setInterval(() => {
+      loadAuctionState();
+    }, 2000);
+
     return () => {
       stateSubscription.unsubscribe();
       bidSubscription.unsubscribe();
       captainSubscription.unsubscribe();
       supabase.removeChannel(soldPlayersChannel);
+      clearInterval(pollInterval);
     };
   }, []);
 
