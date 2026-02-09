@@ -6,6 +6,7 @@ import { getPlayerById, type Player } from '../data/players';
 import AuthService from '../services/auth';
 import DatabaseService from '../services/database';
 import playerBanService from '../services/playerBanService';
+import captainService from '../services/captainService';
 import { getMedalFromMMR, type MedalInfo } from '../utils/mmrToMedal';
 
 export const PlayerProfile: React.FC = () => {
@@ -24,6 +25,8 @@ export const PlayerProfile: React.FC = () => {
   });
   const [roleChangeRequest, setRoleChangeRequest] = useState<string[]>([]);
   const [showRoleChangeModal, setShowRoleChangeModal] = useState(false);
+  const [isCaptain, setIsCaptain] = useState(false);
+  const [captainData, setCaptainData] = useState<any>(null);
 
   const availableRoles = [
     { id: 'carry', label: 'Carry', iconSrc: '/icons/pos_1.png' },
@@ -137,6 +140,13 @@ export const PlayerProfile: React.FC = () => {
         realName: foundPlayer.realName || '',
         roles: foundPlayer.roles?.map(role => role.label) || []
       });
+
+      // Check captain status
+      const captainStatus = captainService.isCaptain(playerId);
+      setIsCaptain(captainStatus);
+      if (captainStatus) {
+        setCaptainData(captainService.getCaptainData(playerId));
+      }
     }
   }, [playerId, isAuthenticated, currentUser, navigate]);
 
@@ -315,6 +325,15 @@ export const PlayerProfile: React.FC = () => {
 
                   {/* Enhanced Badges */}
                   <div className="flex flex-wrap gap-2 justify-center">
+                    {isCaptain && captainData && (
+                      <div className="flex items-center gap-2 px-3 py-2 bg-gradient-to-r from-amber-600/20 to-yellow-600/20 border border-amber-500/40 rounded-xl backdrop-blur-sm">
+                        <Shield className="w-4 h-4 text-amber-400" />
+                        <div className="text-left">
+                          <span className="text-sm text-amber-300 font-semibold block">Captain</span>
+                          <span className="text-xs text-amber-400/80">{captainData.teamName}</span>
+                        </div>
+                      </div>
+                    )}
                     {player.hasWonCup && (
                       <div className="flex items-center gap-2 px-3 py-2 bg-gradient-to-r from-yellow-600/20 to-amber-600/20 border border-yellow-500/40 rounded-xl backdrop-blur-sm">
                         <Trophy className="w-4 h-4 text-yellow-400" />

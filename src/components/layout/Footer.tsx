@@ -75,8 +75,7 @@ export default function Footer() {
   ];
 
   return (
-    <footer className="mt-0 border-t border-[#2a2c30]/60 bg-[#111216] relative overflow-hidden">
-      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_50%_20%,rgba(84,84,84,0.15),transparent_70%)]" />
+    <footer className="bg-[#111216] relative overflow-hidden" style={{ marginTop: '0', paddingTop: '0', borderTop: 'none', boxShadow: 'none' }}>
 
       <div className="relative z-10 w-full max-w-[880px] mx-auto px-4 py-3 sm:py-4 flex flex-col items-center gap-2 sm:gap-2.5 text-center">
         <div className="flex items-center justify-center gap-5 sm:gap-6 md:gap-8">

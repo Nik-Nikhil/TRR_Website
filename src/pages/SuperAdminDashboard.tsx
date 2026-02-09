@@ -6,13 +6,15 @@ import {
   Key, Search, Download, Upload,
   UserPlus, UserX, UserCheck, Activity, Trash2, Info,
   Settings, TrendingUp, AlertTriangle,
-  CheckCircle, XCircle, Zap, Eye, EyeOff, MessageSquare
+  CheckCircle, XCircle, Zap, Eye, EyeOff, MessageSquare, Gavel
 } from 'lucide-react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { admins } from '../data/admins';
 import { players } from '../data/players';
 import type { Player } from '../data/players';
 import RegistrationControl from '../components/admin/RegistrationControl';
+import { AuctionControl } from '../components/admin/AuctionControl';
+import { CaptainManagement } from '../components/admin/CaptainManagement';
 import playerBanService from '../services/playerBanService';
 import messagingService from '../services/messagingService';
 
@@ -43,6 +45,7 @@ interface QuickStat {
 
 export default function SuperAdminDashboard() {
   const navigate = useNavigate();
+  const location = useLocation();
   const [activeSection, setActiveSection] = useState('dashboard');
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedUser, setSelectedUser] = useState<Player | Admin | null>(null);
@@ -206,6 +209,8 @@ export default function SuperAdminDashboard() {
       }
 
       // Set current super admin info
+      console.log('Session username:', session.username); // Debug log
+      
       if (session.username === 'reyuk') {
         setCurrentSuperAdmin({
           username: 'reyuk',
@@ -213,10 +218,19 @@ export default function SuperAdminDashboard() {
           displayName: 'Reyuk',
           avatarUrl: '/avatars/admins/reyuk.png'
         });
-      } else {
-        // Default superadmin (Nikhil)
+      } else if (session.username === 'nikhil') {
+        // Nikhil
         setCurrentSuperAdmin({
-          username: 'superadmin',
+          username: 'nikhil',
+          role: 'Super Admin',
+          displayName: 'N1KHIL',
+          avatarUrl: '/avatars/admins/Nikhil.jpg'
+        });
+      } else {
+        // Default fallback (should not happen)
+        console.log('Using fallback for username:', session.username); // Debug log
+        setCurrentSuperAdmin({
+          username: session.username || 'superadmin',
           role: 'Super Admin',
           displayName: 'N1KHIL',
           avatarUrl: '/avatars/admins/Nikhil.jpg'
@@ -264,7 +278,7 @@ export default function SuperAdminDashboard() {
       window.removeEventListener('playerBanChanged', handleBanChange);
       window.removeEventListener('newAdminMessage', handleNewMessage);
     };
-  }, [navigate]);
+  }, [navigate, location.key]); // Re-run when navigation changes
 
   // Add activity log function
   const addActivityLog = (action: string, details: string, type: ActivityLog['type'] = 'info') => {
@@ -374,7 +388,9 @@ export default function SuperAdminDashboard() {
     { id: 'dashboard', label: 'Dashboard', icon: BarChart3, description: 'Overview & Analytics' },
     { id: 'messages', label: 'All Messages', icon: MessageSquare, description: 'All Admin Messages', badge: totalUnreadCount > 0 ? totalUnreadCount : undefined },
     { id: 'users', label: 'User Management', icon: Users, description: 'Players & Admins' },
+    { id: 'captains', label: 'Captain Management', icon: Shield, description: 'Assign Captains' },
     { id: 'registration', label: 'Registration', icon: UserPlus, description: 'Control Settings' },
+    { id: 'auction', label: 'Auction Control', icon: Gavel, description: 'Manage Auction' },
     { id: 'database', label: 'Database', icon: Database, description: 'Backup & Restore' },
     { id: 'activity', label: 'Activity Logs', icon: Activity, description: 'System Events' },
     { id: 'settings', label: 'Settings', icon: Settings, description: 'System Config' }
@@ -472,7 +488,9 @@ export default function SuperAdminDashboard() {
           <h2 className="text-2xl font-bold text-white capitalize">
             {activeSection === 'dashboard' ? 'Dashboard Overview' : 
              activeSection === 'users' ? 'User Management' :
+             activeSection === 'captains' ? 'Captain Management' :
              activeSection === 'registration' ? 'Registration Control' :
+             activeSection === 'auction' ? 'Auction Control' :
              activeSection === 'database' ? 'Database Management' :
              activeSection === 'activity' ? 'Activity Logs' :
              activeSection === 'settings' ? 'System Settings' : activeSection}
@@ -480,7 +498,9 @@ export default function SuperAdminDashboard() {
           <p className="text-orange-300/70 mt-1">
             {activeSection === 'dashboard' ? 'System overview and quick actions' :
              activeSection === 'users' ? 'Manage players and administrators' :
+             activeSection === 'captains' ? 'Assign and manage team captains' :
              activeSection === 'registration' ? 'Control player registration settings' :
+             activeSection === 'auction' ? 'Start and manage player auctions' :
              activeSection === 'database' ? 'Database operations and maintenance' :
              activeSection === 'activity' ? 'System activity and audit trail' :
              activeSection === 'settings' ? 'System configuration and preferences' : 'Manage your system'}
@@ -1068,6 +1088,20 @@ export default function SuperAdminDashboard() {
     </div>
   );
 
+  // Render captain management
+  const renderCaptainManagement = () => (
+    <div className="p-8">
+      <CaptainManagement adminUsername={currentSuperAdmin?.username || 'superadmin'} />
+    </div>
+  );
+
+  // Render auction control
+  const renderAuctionControl = () => (
+    <div className="p-8">
+      <AuctionControl />
+    </div>
+  );
+
   // Render database management
   const renderDatabaseManagement = () => (
     <div className="p-8 space-y-6">
@@ -1175,7 +1209,9 @@ export default function SuperAdminDashboard() {
               {activeSection === 'dashboard' && renderDashboard()}
               {activeSection === 'messages' && renderAllMessages()}
               {activeSection === 'users' && renderUserManagement()}
+              {activeSection === 'captains' && renderCaptainManagement()}
               {activeSection === 'registration' && renderRegistrationControl()}
+              {activeSection === 'auction' && renderAuctionControl()}
               {activeSection === 'database' && renderDatabaseManagement()}
               {activeSection === 'activity' && renderActivityLogs()}
               {activeSection === 'settings' && renderSettings()}

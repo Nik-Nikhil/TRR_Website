@@ -4,7 +4,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { 
   Database, Users, Settings, LogOut, Clock, CheckCircle, 
   AlertTriangle, Shield, BarChart3, UserPlus,
-  Activity, Eye, EyeOff, Info, XCircle, TrendingUp, Zap, MessageSquare
+  Activity, Eye, EyeOff, Info, XCircle, TrendingUp, Zap, MessageSquare, Gavel, History
 } from 'lucide-react';
 import { getPendingApprovals } from '../data/pendingApprovals';
 import { getAdminByUsername } from '../data/admins';
@@ -12,6 +12,8 @@ import { players } from '../data/players';
 import { admins } from '../data/admins';
 import AuthService from '../services/auth';
 import RegistrationControl from '../components/admin/RegistrationControl';
+import { AuctionControl } from '../components/admin/AuctionControl';
+import { CaptainManagement } from '../components/admin/CaptainManagement';
 import messagingService from '../services/messagingService';
 
 interface ActivityLog {
@@ -42,6 +44,7 @@ export default function AdminDashboard() {
   const [quickStats, setQuickStats] = useState<QuickStat[]>([]);
   const [messages, setMessages] = useState<any[]>([]);
   const [unreadCount, setUnreadCount] = useState(0);
+  const [showClearModal, setShowClearModal] = useState(false);
 
   // Calculate real database size
   const calculateDatabaseSize = () => {
@@ -199,7 +202,10 @@ export default function AdminDashboard() {
     { id: 'dashboard', label: 'Dashboard', icon: BarChart3, description: 'Overview & Analytics' },
     { id: 'messages', label: 'Messages', icon: MessageSquare, description: 'Player Messages', badge: unreadCount > 0 ? unreadCount : undefined },
     { id: 'players', label: 'Player Management', icon: Users, description: 'Manage Players' },
+    { id: 'captains', label: 'Captain Management', icon: Shield, description: 'Assign Captains' },
     { id: 'registration', label: 'Registration', icon: UserPlus, description: 'Control Settings' },
+    { id: 'auction', label: 'Auction Control', icon: Gavel, description: 'Manage Auction' },
+    { id: 'auction-history', label: 'Auction History', icon: History, description: 'Past Auctions' },
     { id: 'database', label: 'Database', icon: Database, description: 'Backup & Restore' },
     { id: 'activity', label: 'Activity Logs', icon: Activity, description: 'System Events' },
     { id: 'settings', label: 'Settings', icon: Settings, description: 'System Config' }
@@ -297,7 +303,10 @@ export default function AdminDashboard() {
           <h2 className="text-2xl font-bold text-white capitalize">
             {activeSection === 'dashboard' ? 'Dashboard Overview' : 
              activeSection === 'players' ? 'Player Management' :
+             activeSection === 'captains' ? 'Captain Management' :
              activeSection === 'registration' ? 'Registration Control' :
+             activeSection === 'auction' ? 'Auction Control' :
+             activeSection === 'auction-history' ? 'Auction History' :
              activeSection === 'database' ? 'Database Management' :
              activeSection === 'activity' ? 'Activity Logs' :
              activeSection === 'settings' ? 'System Settings' : activeSection}
@@ -305,7 +314,10 @@ export default function AdminDashboard() {
           <p className="text-blue-300/70 mt-1">
             {activeSection === 'dashboard' ? 'System overview and quick actions' :
              activeSection === 'players' ? 'Manage registered players' :
+             activeSection === 'captains' ? 'Assign and manage team captains' :
              activeSection === 'registration' ? 'Control player registration settings' :
+             activeSection === 'auction' ? 'Start and manage player auctions' :
+             activeSection === 'auction-history' ? 'View past auction results and data' :
              activeSection === 'database' ? 'Database operations and maintenance' :
              activeSection === 'activity' ? 'System activity and audit trail' :
              activeSection === 'settings' ? 'System configuration and preferences' : 'Manage your system'}
@@ -576,6 +588,13 @@ export default function AdminDashboard() {
     </div>
   );
 
+  // Render captain management
+  const renderCaptainManagement = () => (
+    <div className="p-8">
+      <CaptainManagement adminUsername={currentAdmin?.username || 'admin'} />
+    </div>
+  );
+
   // Render registration control
   const renderRegistrationControl = () => (
     <div className="p-8">
@@ -595,6 +614,341 @@ export default function AdminDashboard() {
       </div>
     </div>
   );
+
+  // Render auction control
+  const renderAuctionControl = () => {
+    const handleClearAuctionData = async () => {
+      // Save current auction data to history before clearing
+      const auctionState = JSON.parse(localStorage.getItem('trr_auction_state') || 'null');
+      const soldPlayers = JSON.parse(localStorage.getItem('sold_players') || '[]');
+      const captains = JSON.parse(localStorage.getItem('captains') || '[]');
+      
+      if (auctionState || soldPlayers.length > 0) {
+        // Create auction history entry
+        const historyEntry = {
+          id: Date.now().toString(),
+          auctionName: localStorage.getItem('current_auction_name') || 'Unnamed Auction',
+          completedAt: new Date().toISOString(),
+          status: auctionState?.status || 'completed',
+          totalPlayers: soldPlayers.length,
+          soldPlayers: soldPlayers,
+          teams: captains.map((captain: any) => {
+            const teamKey = `team_${captain.playerId}`;
+            const teamPlayers = JSON.parse(localStorage.getItem(teamKey) || '[]');
+            return {
+              teamName: captain.teamName,
+              captainName: captain.playerNickname,
+              startingBudget: 1000,
+              remainingBudget: captain.budget,
+              spentBudget: 1000 - captain.budget,
+              players: teamPlayers,
+              playerCount: teamPlayers.length + 1 // +1 for captain
+            };
+          })
+        };
+        
+        // Get existing history
+        const history = JSON.parse(localStorage.getItem('auction_history') || '[]');
+        
+        // Add new entry at the beginning
+        history.unshift(historyEntry);
+        
+        // Keep only last 10 auctions
+        const limitedHistory = history.slice(0, 10);
+        
+        // Save history
+        localStorage.setItem('auction_history', JSON.stringify(limitedHistory));
+      }
+      
+      // Get captains and reset their budgets to starting amount
+      const resetCaptains = captains.map((captain: any) => ({
+        ...captain,
+        budget: 1000 // Reset to starting budget
+      }));
+      
+      // Save reset captains back
+      if (resetCaptains.length > 0) {
+        localStorage.setItem('captains', JSON.stringify(resetCaptains));
+      }
+      
+      // Clear all team rosters
+      captains.forEach((captain: any) => {
+        localStorage.removeItem(`team_${captain.playerId}`);
+      });
+      
+      // Clear sold players
+      localStorage.removeItem('sold_players');
+      
+      // Clear bid history
+      localStorage.removeItem('bid_history');
+      localStorage.removeItem('trr_auction_bids');
+      
+      // Clear auction name
+      localStorage.removeItem('current_auction_name');
+      
+      // COMPLETELY REMOVE auction state to force fresh start (use correct key)
+      localStorage.removeItem('trr_auction_state');
+      localStorage.removeItem('auction_state'); // Also remove old key if exists
+      
+      // Clear any cached auction data
+      localStorage.removeItem('current_auction_player');
+      
+      // Dispatch events to update UI immediately
+      window.dispatchEvent(new Event('bidHistoryCleared'));
+      window.dispatchEvent(new Event('playerSold'));
+      window.dispatchEvent(new CustomEvent('auctionStateChanged', { detail: null }));
+      window.dispatchEvent(new Event('captainAssigned')); // Trigger captain update
+      
+      setShowClearModal(false);
+      
+      // Reload the page to reflect changes
+      setTimeout(() => {
+        window.location.reload();
+      }, 300);
+    };
+
+    return (
+      <>
+        <div className="p-8">
+          <div className="mb-6 flex justify-end">
+            <button
+              onClick={() => setShowClearModal(true)}
+              className="flex items-center gap-2 px-4 py-2 bg-red-600/20 hover:bg-red-600/30 border border-red-500/50 text-red-300 rounded-lg text-sm font-semibold transition-colors outline-none focus:outline-none"
+            >
+              <XCircle className="w-4 h-4" />
+              <span>Clear All Auction Data</span>
+            </button>
+          </div>
+          <AuctionControl />
+        </div>
+
+        {/* Clear Data Confirmation Modal */}
+        <AnimatePresence>
+          {showClearModal && (
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              className="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4"
+              onClick={() => setShowClearModal(false)}
+            >
+              <motion.div
+                initial={{ scale: 0.9, opacity: 0 }}
+                animate={{ scale: 1, opacity: 1 }}
+                exit={{ scale: 0.9, opacity: 0 }}
+                className="bg-gradient-to-br from-red-900/90 to-orange-900/90 rounded-xl p-6 max-w-md w-full border border-red-500/40"
+                onClick={(e) => e.stopPropagation()}
+              >
+                <div className="text-center mb-4">
+                  <div className="text-6xl mb-4">⚠️</div>
+                  <h3 className="text-2xl font-bold text-white mb-2">Clear All Auction Data?</h3>
+                  <p className="text-red-200 text-sm mb-4">
+                    This action cannot be undone!
+                  </p>
+                </div>
+                
+                <div className="bg-black/40 rounded-lg p-4 mb-6 border border-red-500/30">
+                  <p className="text-white text-sm font-semibold mb-2">This will clear:</p>
+                  <ul className="text-red-200 text-xs space-y-1">
+                    <li>• All bid history</li>
+                    <li>• All assignment logs</li>
+                    <li>• All sold players</li>
+                    <li>• All team rosters</li>
+                    <li>• Current player card</li>
+                    <li>• Reset auction to initial state</li>
+                  </ul>
+                </div>
+
+                <div className="flex gap-3">
+                  <button
+                    onClick={handleClearAuctionData}
+                    className="flex-1 px-4 py-2 bg-gradient-to-r from-red-600 to-orange-600 hover:from-red-500 hover:to-orange-500 text-white font-semibold rounded-lg transition-all duration-300 outline-none focus:outline-none"
+                  >
+                    Yes, Clear Everything
+                  </button>
+                  <button
+                    onClick={() => setShowClearModal(false)}
+                    className="flex-1 px-4 py-2 bg-gray-600 hover:bg-gray-500 text-white font-semibold rounded-lg transition-all duration-300 outline-none focus:outline-none"
+                  >
+                    Cancel
+                  </button>
+                </div>
+              </motion.div>
+            </motion.div>
+          )}
+        </AnimatePresence>
+      </>
+    );
+  };
+
+  // Render auction history
+  const renderAuctionHistory = () => {
+    const [auctionHistory, setAuctionHistory] = useState<any[]>([]);
+    const [selectedAuction, setSelectedAuction] = useState<any>(null);
+
+    useEffect(() => {
+      const history = JSON.parse(localStorage.getItem('auction_history') || '[]');
+      setAuctionHistory(history);
+    }, []);
+
+    const handleDeleteHistory = (auctionId: string) => {
+      if (window.confirm('Are you sure you want to delete this auction record?')) {
+        const updatedHistory = auctionHistory.filter(a => a.id !== auctionId);
+        localStorage.setItem('auction_history', JSON.stringify(updatedHistory));
+        setAuctionHistory(updatedHistory);
+        if (selectedAuction?.id === auctionId) {
+          setSelectedAuction(null);
+        }
+      }
+    };
+
+    const handleClearAllHistory = () => {
+      if (window.confirm('Are you sure you want to clear ALL auction history? This cannot be undone!')) {
+        localStorage.removeItem('auction_history');
+        setAuctionHistory([]);
+        setSelectedAuction(null);
+      }
+    };
+
+    return (
+      <div className="p-8">
+        <div className="mb-6 flex justify-between items-center">
+          <div>
+            <h2 className="text-2xl font-bold text-white">Auction History</h2>
+            <p className="text-gray-400 text-sm">View past auction results and data</p>
+          </div>
+          {auctionHistory.length > 0 && (
+            <button
+              onClick={handleClearAllHistory}
+              className="flex items-center gap-2 px-4 py-2 bg-red-600/20 hover:bg-red-600/30 border border-red-500/50 text-red-300 rounded-lg text-sm font-semibold transition-colors outline-none focus:outline-none"
+            >
+              <XCircle className="w-4 h-4" />
+              <span>Clear All History</span>
+            </button>
+          )}
+        </div>
+
+        {auctionHistory.length === 0 ? (
+          <div className="bg-black/60 backdrop-blur-sm rounded-xl p-12 border border-gray-500/40 text-center">
+            <History className="w-16 h-16 text-gray-500 mx-auto mb-4" />
+            <p className="text-gray-400 text-lg">No auction history yet</p>
+            <p className="text-gray-500 text-sm mt-2">Completed auctions will appear here</p>
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            {/* Auction List */}
+            <div className="lg:col-span-1 space-y-4">
+              {auctionHistory.map((auction) => (
+                <motion.div
+                  key={auction.id}
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  className={`bg-black/60 backdrop-blur-sm rounded-xl p-4 border cursor-pointer transition-all ${
+                    selectedAuction?.id === auction.id
+                      ? 'border-purple-500/60 bg-purple-900/20'
+                      : 'border-gray-500/40 hover:border-gray-400/60'
+                  }`}
+                  onClick={() => setSelectedAuction(auction)}
+                >
+                  <div className="flex items-start justify-between mb-2">
+                    <div className="flex-1">
+                      <h3 className="text-white font-bold text-lg">{auction.auctionName}</h3>
+                      <p className="text-gray-400 text-xs">
+                        {new Date(auction.completedAt).toLocaleDateString()} at{' '}
+                        {new Date(auction.completedAt).toLocaleTimeString()}
+                      </p>
+                    </div>
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleDeleteHistory(auction.id);
+                      }}
+                      className="text-red-400 hover:text-red-300 transition-colors"
+                    >
+                      <XCircle className="w-5 h-5" />
+                    </button>
+                  </div>
+                  <div className="flex items-center gap-4 text-sm">
+                    <span className="text-green-400">
+                      {auction.totalPlayers} Players
+                    </span>
+                    <span className="text-blue-400">
+                      {auction.teams?.length || 0} Teams
+                    </span>
+                  </div>
+                </motion.div>
+              ))}
+            </div>
+
+            {/* Auction Details */}
+            <div className="lg:col-span-2">
+              {selectedAuction ? (
+                <div className="bg-black/60 backdrop-blur-sm rounded-xl p-6 border border-purple-500/40">
+                  <h3 className="text-2xl font-bold text-white mb-4">{selectedAuction.auctionName}</h3>
+                  
+                  {/* Teams Summary */}
+                  <div className="mb-6">
+                    <h4 className="text-lg font-semibold text-purple-400 mb-3">Teams</h4>
+                    <div className="space-y-3">
+                      {selectedAuction.teams?.map((team: any, idx: number) => (
+                        <div key={idx} className="bg-black/40 rounded-lg p-4 border border-gray-600/40">
+                          <div className="flex items-center justify-between mb-2">
+                            <div>
+                              <h5 className="text-white font-bold">{team.teamName}</h5>
+                              <p className="text-gray-400 text-sm">Captain: {team.captainName}</p>
+                            </div>
+                            <div className="text-right">
+                              <p className="text-green-400 font-bold">{team.playerCount} Players</p>
+                              <p className="text-yellow-400 text-sm">Spent: {team.spentBudget}</p>
+                            </div>
+                          </div>
+                          {team.players && team.players.length > 0 && (
+                            <div className="mt-2 pt-2 border-t border-gray-700">
+                              <p className="text-gray-500 text-xs mb-1">Players:</p>
+                              <div className="flex flex-wrap gap-2">
+                                {team.players.map((player: any, pIdx: number) => (
+                                  <span key={pIdx} className="text-xs bg-gray-800 px-2 py-1 rounded text-gray-300">
+                                    {player.playerData?.nickname || 'Unknown'} (🪙{player.boughtFor})
+                                  </span>
+                                ))}
+                              </div>
+                            </div>
+                          )}
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* Sold Players */}
+                  <div>
+                    <h4 className="text-lg font-semibold text-green-400 mb-3">All Sold Players</h4>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                      {selectedAuction.soldPlayers?.map((player: any, idx: number) => (
+                        <div key={idx} className="bg-black/40 rounded-lg p-3 border border-gray-600/40">
+                          <div className="flex items-center justify-between">
+                            <div>
+                              <p className="text-white font-semibold">{player.playerNickname}</p>
+                              <p className="text-gray-400 text-xs">{player.teamName}</p>
+                            </div>
+                            <p className="text-yellow-400 font-bold">🪙 {player.soldFor}</p>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+              ) : (
+                <div className="bg-black/60 backdrop-blur-sm rounded-xl p-12 border border-gray-500/40 text-center">
+                  <Info className="w-16 h-16 text-gray-500 mx-auto mb-4" />
+                  <p className="text-gray-400">Select an auction to view details</p>
+                </div>
+              )}
+            </div>
+          </div>
+        )}
+      </div>
+    );
+  };
 
   // Render activity logs
   const renderActivityLogs = () => (
@@ -730,7 +1084,10 @@ export default function AdminDashboard() {
               {activeSection === 'dashboard' && renderDashboard()}
               {activeSection === 'messages' && renderMessages()}
               {activeSection === 'players' && <div className="p-8"><div className="bg-black/60 backdrop-blur-sm rounded-xl p-6 border border-blue-500/40 text-center"><p className="text-white">Player Management - Coming Soon</p></div></div>}
+              {activeSection === 'captains' && renderCaptainManagement()}
               {activeSection === 'registration' && renderRegistrationControl()}
+              {activeSection === 'auction' && renderAuctionControl()}
+              {activeSection === 'auction-history' && renderAuctionHistory()}
               {activeSection === 'database' && <div className="p-8"><div className="bg-black/60 backdrop-blur-sm rounded-xl p-6 border border-blue-500/40 text-center"><p className="text-white">Database Management - Coming Soon</p></div></div>}
               {activeSection === 'activity' && renderActivityLogs()}
               {activeSection === 'settings' && <div className="p-8"><div className="bg-black/60 backdrop-blur-sm rounded-xl p-6 border border-blue-500/40 text-center"><p className="text-white">Settings - Coming Soon</p></div></div>}

@@ -34,10 +34,10 @@ import Playoff from "./pages/Playoff";
 
 function App() {
   return (
-    <div className="min-h-screen flex flex-col text-gray-100 relative">
+    <div className="min-h-screen flex flex-col text-gray-100 relative border-0" style={{ gap: '0' }}>
       <Navbar />
 
-      <div className="flex-1 flex flex-col">
+      <div className="flex-1 flex flex-col border-0" style={{ gap: '0', marginBottom: '0', paddingBottom: '0' }}>
         <Routes>
           <Route path="/" element={<Home />} />
 

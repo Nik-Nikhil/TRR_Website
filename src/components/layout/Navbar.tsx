@@ -11,18 +11,44 @@ export default function Navbar() {
   const navigate = useNavigate();
   const [mobileNavOpen, setMobileNavOpen] = useState(false);
   const [loginDropdownOpen, setLoginDropdownOpen] = useState(false);
+  const [authChecked, setAuthChecked] = useState(false);
   const closeTimeout = useRef<number | null>(null);
   const loginDropdownRef = useRef<HTMLDivElement>(null);
   const audioRef = useRef<HTMLAudioElement[]>([]);
   const lastPlayedIndexRef = useRef<number>(-1);
 
-  // Get current user
-  const currentUser = AuthService.getCurrentUser();
-  const isLoggedIn = AuthService.isSessionValid();
+  // Get current user - will be checked in useEffect
+  const [currentUser, setCurrentUser] = useState<any>(null);
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [isSuperAdmin, setIsSuperAdmin] = useState(false);
   
-  // Check for super admin session
-  const superAdminSession = localStorage.getItem('superAdminSession');
-  const isSuperAdmin = superAdminSession ? JSON.parse(superAdminSession).authenticated : false;
+  // Check auth status on mount and when pathname changes
+  useEffect(() => {
+    const checkAuth = () => {
+      const user = AuthService.getCurrentUser();
+      const loggedIn = AuthService.isSessionValid();
+      const adminSession = AuthService.getCurrentAdminSession();
+      const superAdmin = adminSession && (adminSession.username === 'reyuk' || adminSession.username === 'nikhil');
+      
+      setCurrentUser(user);
+      setIsLoggedIn(loggedIn);
+      setIsSuperAdmin(superAdmin || false);
+      setAuthChecked(true);
+    };
+    
+    checkAuth();
+  }, [pathname]);
+  
+  // Get user role display
+  const getUserRole = () => {
+    if (currentUser?.type === 'admin') {
+      const adminSession = AuthService.getCurrentAdminSession();
+      if (adminSession?.username === 'reyuk') return 'Founder';
+      if (adminSession?.username === 'nikhil') return 'Super Admin';
+      return 'Admin';
+    }
+    return currentUser?.type;
+  };
 
   // Initialize audio
   useEffect(() => {
@@ -205,7 +231,7 @@ export default function Navbar() {
               />
               
               {/* Profile Link - Only show for logged-in players */}
-              {isLoggedIn && currentUser?.type === 'player' && (
+              {authChecked && isLoggedIn && currentUser?.type === 'player' && (
                 <NavItem
                   to={`/players/${currentUser.playerId}`}
                   icon={<UserCircle className="w-3.5 h-3.5 md:w-4 md:h-4 lg:w-[18px] lg:h-[18px]" />}
@@ -214,28 +240,8 @@ export default function Navbar() {
                 />
               )}
               
-              {/* Super Admin Logout Button - Only show for super admins */}
-              {isSuperAdmin && (
-                <button
-                  onClick={() => {
-                    localStorage.removeItem('superAdminSession');
-                    navigate('/');
-                  }}
-                  className="relative inline-flex items-center gap-[0.3rem] md:gap-[0.35rem] px-1.5 md:px-2 lg:px-3 py-1 md:py-1.5 
-                    text-[0.65rem] md:text-[0.7rem] lg:text-[0.75rem] xl:text-[0.8rem] uppercase tracking-[0.12em] md:tracking-[0.15em] lg:tracking-[0.18em] 
-                    transition-all duration-300 group rounded-lg text-red-300 hover:text-red-200 hover:bg-red-500/10"
-                >
-                  <LogIn className="w-3.5 h-3.5 md:w-4 md:h-4 lg:w-[18px] lg:h-[18px] transition-colors duration-300 text-red-300 group-hover:text-red-200 rotate-180" />
-                  
-                  <span className="relative whitespace-nowrap">
-                    Logout
-                    <span className="pointer-events-none absolute left-0 right-0 -bottom-1 lg:-bottom-1.5 block h-0.5 rounded-full origin-left transition-all duration-300 bg-gradient-to-r from-red-300 to-red-400 scale-x-0 group-hover:scale-x-100" />
-                  </span>
-                </button>
-              )}
-              
-              {/* Login Dropdown - Hide for super admins */}
-              {!isSuperAdmin && pathname !== '/super-admin-dashboard' && (
+              {/* Login Dropdown - Show for everyone except on super-admin-dashboard page */}
+              {authChecked && pathname !== '/super-admin-dashboard' && (
                 <div className="relative" ref={loginDropdownRef}>
                   <button
                     onClick={() => setLoginDropdownOpen(!loginDropdownOpen)}
@@ -247,10 +253,17 @@ export default function Navbar() {
                   >
                     {loginDropdownOpen && <ActiveHighlight color="white" />}
 
-                    <LogIn className="w-3.5 h-3.5 md:w-4 md:h-4 lg:w-[18px] lg:h-[18px] transition-colors duration-300 text-zinc-200 group-hover:text-white" />
+                    {isLoggedIn ? (
+                      <UserCircle className="w-3.5 h-3.5 md:w-4 md:h-4 lg:w-[18px] lg:h-[18px] transition-colors duration-300 text-zinc-200 group-hover:text-white" />
+                    ) : (
+                      <LogIn className="w-3.5 h-3.5 md:w-4 md:h-4 lg:w-[18px] lg:h-[18px] transition-colors duration-300 text-zinc-200 group-hover:text-white" />
+                    )}
                     
                     <span className="relative whitespace-nowrap">
-                      Login
+                      {isLoggedIn 
+                        ? (currentUser?.type === 'player' ? currentUser.nickname : currentUser?.username)
+                        : 'Login'
+                      }
                       <span className={`pointer-events-none absolute left-0 right-0 -bottom-1 lg:-bottom-1.5 block h-0.5 rounded-full origin-left transition-all duration-300 bg-gradient-to-r from-zinc-300 to-zinc-400 ${
                         loginDropdownOpen ? 'scale-x-100' : 'scale-x-0 group-hover:scale-x-100'
                       }`} />
@@ -279,7 +292,7 @@ export default function Navbar() {
                             <p className="text-sm text-white font-medium">
                               {currentUser?.type === 'player' ? currentUser.nickname : currentUser?.username}
                             </p>
-                            <p className="text-xs text-gray-500 capitalize">{currentUser?.type}</p>
+                            <p className="text-xs text-gray-500 capitalize">{getUserRole()}</p>
                           </div>
                           {currentUser?.type === 'player' && (
                             <Link
@@ -293,7 +306,7 @@ export default function Navbar() {
                           )}
                           {currentUser?.type === 'admin' && (
                             <Link
-                              to="/admin-dashboard"
+                              to={isSuperAdmin ? "/super-admin-dashboard" : "/admin-dashboard"}
                               onClick={() => setLoginDropdownOpen(false)}
                               className="flex items-center gap-3 px-4 py-2.5 text-sm text-gray-200 hover:bg-white/5 transition-colors"
                             >
@@ -305,6 +318,9 @@ export default function Navbar() {
                             onClick={() => {
                               AuthService.logout();
                               setLoginDropdownOpen(false);
+                              setIsLoggedIn(false);
+                              setCurrentUser(null);
+                              setIsSuperAdmin(false);
                               navigate('/');
                             }}
                             className="flex items-center gap-3 px-4 py-2.5 text-sm text-red-300 hover:bg-red-500/10 transition-colors w-full text-left"
@@ -407,23 +423,7 @@ export default function Navbar() {
                     />
                   )}
                   
-                  {/* Super Admin Logout Button - Mobile */}
-                  {isSuperAdmin && (
-                    <button
-                      onClick={() => {
-                        localStorage.removeItem('superAdminSession');
-                        setMobileNavOpen(false);
-                        navigate('/');
-                      }}
-                      className="flex items-center gap-3 px-3 py-2.5 text-sm text-red-300 hover:bg-red-500/10 rounded-lg transition-colors w-full text-left"
-                    >
-                      <LogIn className="w-[18px] h-[18px] text-red-400 rotate-180" />
-                      <span>Logout</span>
-                    </button>
-                  )}
-                  
-                  {/* Mobile Login Section - Hide for super admins */}
-                  {!isSuperAdmin && (
+                  {/* Mobile Login Section - Show for everyone */}
                   <div className="border-t border-gray-600/30 mt-2 pt-2">
                     {isLoggedIn ? (
                       // Logged in - show user info and logout
@@ -433,11 +433,11 @@ export default function Navbar() {
                           <div className="text-sm text-white font-medium">
                             {currentUser?.type === 'player' ? currentUser.nickname : currentUser?.username}
                           </div>
-                          <div className="text-xs text-gray-500 capitalize">{currentUser?.type}</div>
+                          <div className="text-xs text-gray-500 capitalize">{getUserRole()}</div>
                         </div>
                         {currentUser?.type === 'admin' && (
                           <Link
-                            to="/admin-dashboard"
+                            to={isSuperAdmin ? "/super-admin-dashboard" : "/admin-dashboard"}
                             onClick={() => setMobileNavOpen(false)}
                             className="flex items-center gap-3 px-3 py-2.5 text-sm text-gray-200 hover:bg-white/5 rounded-lg transition-colors"
                           >
@@ -449,6 +449,9 @@ export default function Navbar() {
                           onClick={() => {
                             AuthService.logout();
                             setMobileNavOpen(false);
+                            setIsLoggedIn(false);
+                            setCurrentUser(null);
+                            setIsSuperAdmin(false);
                             navigate('/');
                           }}
                           className="flex items-center gap-3 px-3 py-2.5 text-sm text-red-300 hover:bg-red-500/10 rounded-lg transition-colors w-full text-left"
@@ -480,7 +483,6 @@ export default function Navbar() {
                       </>
                     )}
                   </div>
-                  )}
                 </motion.div>
               )}
             </AnimatePresence>
