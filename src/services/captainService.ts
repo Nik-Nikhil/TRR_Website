@@ -47,7 +47,7 @@ class CaptainService {
         .from('captains')
         .select('id')
         .eq('player_id', playerId)
-        .single();
+        .maybeSingle();
 
       return !error && !!data;
     } catch (error) {
@@ -62,7 +62,7 @@ class CaptainService {
         .from('captains')
         .select('*')
         .eq('player_id', playerId)
-        .single();
+        .maybeSingle();
 
       if (error || !data) {
         return null;
@@ -95,17 +95,23 @@ class CaptainService {
       // Check if already a captain
       const exists = await this.isCaptain(playerId);
       if (exists) {
+        console.error('Player is already a captain');
         return false;
       }
 
-      // Check if team name already exists
-      const { data: existingTeam } = await supabase
+      // Check if team name already exists (without .single() to avoid error)
+      const { data: existingTeams, error: teamCheckError } = await supabase
         .from('captains')
         .select('id')
-        .ilike('team_name', teamName)
-        .single();
+        .ilike('team_name', teamName);
 
-      if (existingTeam) {
+      if (teamCheckError) {
+        console.error('Error checking team name:', teamCheckError);
+        return false;
+      }
+
+      if (existingTeams && existingTeams.length > 0) {
+        console.error('Team name already exists');
         return false;
       }
 

@@ -343,20 +343,40 @@ export class AuctionService {
       .on(
         'postgres_changes',
         {
-          event: '*',
+          event: 'UPDATE',
           schema: 'public',
           table: 'auctions',
           filter: 'deletion_status=eq.active'
         },
-        async (payload) => {
-          // Fetch the latest state
+        async () => {
+          // Fetch the latest state when auction is updated
           const state = await this.getAuctionState();
           if (state) {
             callback(state);
           }
         }
       )
-      .subscribe();
+      .on(
+        'postgres_changes',
+        {
+          event: 'INSERT',
+          schema: 'public',
+          table: 'auctions',
+          filter: 'deletion_status=eq.active'
+        },
+        async () => {
+          // Fetch the latest state when new auction is created
+          const state = await this.getAuctionState();
+          if (state) {
+            callback(state);
+          }
+        }
+      )
+      .subscribe((status) => {
+        if (status === 'SUBSCRIBED') {
+          // Successfully subscribed
+        }
+      });
 
     return {
       unsubscribe: () => {
