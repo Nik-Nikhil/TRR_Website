@@ -16,28 +16,33 @@ export const CaptainManagement: React.FC<CaptainManagementProps> = ({ adminUsern
   const [teamName, setTeamName] = useState('');
   const [budget, setBudget] = useState(1000);
   const [error, setError] = useState('');
+  const [availablePlayers, setAvailablePlayers] = useState<any[]>([]);
 
   useEffect(() => {
     loadCaptains();
+    filterAvailablePlayers();
+  }, []);
 
-    // Listen for captain changes
-    const handleCaptainAssigned = () => loadCaptains();
-    const handleCaptainRemoved = () => loadCaptains();
+  useEffect(() => {
+    filterAvailablePlayers();
+  }, [captains]);
 
-    window.addEventListener('captainAssigned', handleCaptainAssigned);
-    window.addEventListener('captainRemoved', handleCaptainRemoved);
-
-    return () => {
+  const filterAvailablePlayers = async () => {
+    const captainsList = await captainService.getCaptains();
+    const captainIds = captainsList.map(c => c.playerId);
+    setAvailablePlayers(players.filter(p => !captainIds.includes(p.id)));
+  };
       window.removeEventListener('captainAssigned', handleCaptainAssigned);
       window.removeEventListener('captainRemoved', handleCaptainRemoved);
     };
   }, []);
 
-  const loadCaptains = () => {
-    setCaptains(captainService.getCaptains());
+  const loadCaptains = async () => {
+    const captainsList = await captainService.getCaptains();
+    setCaptains(captainsList);
   };
 
-  const handleAddCaptain = () => {
+  const handleAddCaptain = async () => {
     setError('');
 
     if (!selectedPlayer) {
@@ -61,7 +66,7 @@ export const CaptainManagement: React.FC<CaptainManagementProps> = ({ adminUsern
       return;
     }
 
-    const success = captainService.assignCaptain(
+    const success = await captainService.assignCaptain(
       player.id,
       player.nickname,
       teamName.trim(),
@@ -75,19 +80,21 @@ export const CaptainManagement: React.FC<CaptainManagementProps> = ({ adminUsern
       setTeamName('');
       setBudget(1000);
       setError('');
+      await loadCaptains();
     } else {
       setError('Failed to assign captain. Player may already be a captain or team name exists.');
     }
   };
 
-  const handleRemoveCaptain = (playerId: string) => {
+  const handleRemoveCaptain = async (playerId: string) => {
     if (confirm('Are you sure you want to remove this captain?')) {
-      captainService.removeCaptain(playerId);
+      await captainService.removeCaptain(playerId);
+      await loadCaptains();
     }
   };
 
   // Filter out players who are already captains
-  const availablePlayers = players.filter(p => !captainService.isCaptain(p.id));
+  // (handled by state and useEffect above)
 
   return (
     <div className="bg-black/60 backdrop-blur-sm rounded-xl border border-amber-500/40">
