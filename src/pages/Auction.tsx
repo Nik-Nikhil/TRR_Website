@@ -74,7 +74,14 @@ export default function Auction() {
           loadSoldPlayers();
         }
       )
-      .subscribe();
+      .subscribe((status, err) => {
+        if (status === 'SUBSCRIBED') {
+          console.log('✅ Subscribed to sold players changes');
+        }
+        if (status === 'CHANNEL_ERROR') {
+          console.error('❌ Sold players subscription error:', err);
+        }
+      });
 
     return () => {
       stateSubscription.unsubscribe();

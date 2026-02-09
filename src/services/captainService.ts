@@ -49,8 +49,14 @@ class CaptainService {
         .eq('player_id', playerId)
         .maybeSingle();
 
-      return !error && !!data;
+      if (error) {
+        console.error('Error checking if player is captain:', error);
+        return false;
+      }
+
+      return !!data;
     } catch (error) {
+      console.error('Exception checking if player is captain:', error);
       return false;
     }
   }
@@ -198,7 +204,17 @@ class CaptainService {
           callback();
         }
       )
-      .subscribe();
+      .subscribe((status, err) => {
+        if (status === 'SUBSCRIBED') {
+          console.log('✅ Subscribed to captain changes');
+        }
+        if (status === 'CHANNEL_ERROR') {
+          console.error('❌ Captain subscription error:', err);
+        }
+        if (status === 'TIMED_OUT') {
+          console.error('⏱️ Captain subscription timed out');
+        }
+      });
 
     return {
       unsubscribe: () => {

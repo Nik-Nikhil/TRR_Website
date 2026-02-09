@@ -372,9 +372,15 @@ export class AuctionService {
           }
         }
       )
-      .subscribe((status) => {
+      .subscribe((status, err) => {
         if (status === 'SUBSCRIBED') {
-          // Successfully subscribed
+          console.log('✅ Subscribed to auction state changes');
+        }
+        if (status === 'CHANNEL_ERROR') {
+          console.error('❌ Auction subscription error:', err);
+        }
+        if (status === 'TIMED_OUT') {
+          console.error('⏱️ Auction subscription timed out');
         }
       });
 
