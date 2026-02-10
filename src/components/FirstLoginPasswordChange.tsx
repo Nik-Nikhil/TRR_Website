@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Lock, Eye, EyeOff, AlertCircle, CheckCircle, Shield } from 'lucide-react';
+import { Lock, Eye, EyeOff, AlertCircle, CheckCircle, Shield, X } from 'lucide-react';
 import passwordService from '../services/passwordService';
 import type { UserType } from '../services/passwordService';
 
@@ -32,6 +32,20 @@ export default function FirstLoginPasswordChange({
     checkIfDefaultPassword();
   }, [userId]);
 
+  // Handle ESC key press
+  useEffect(() => {
+    const handleEscape = (e: KeyboardEvent) => {
+      if (e.key === 'Escape' && !loading && !success) {
+        handleSkip();
+      }
+    };
+
+    if (show) {
+      window.addEventListener('keydown', handleEscape);
+      return () => window.removeEventListener('keydown', handleEscape);
+    }
+  }, [show, loading, success]);
+
   const checkIfDefaultPassword = async () => {
     setChecking(true);
     try {
@@ -48,6 +62,13 @@ export default function FirstLoginPasswordChange({
     }
   };
 
+  const handleSkip = () => {
+    if (confirm('Are you sure you want to skip changing your password? You can change it later from your profile.')) {
+      setShow(false);
+      onPasswordChanged();
+    }
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
@@ -59,8 +80,29 @@ export default function FirstLoginPasswordChange({
       return;
     }
 
-    if (newPassword.length < 6) {
-      setError('New password must be at least 6 characters long');
+    if (newPassword.length < 8) {
+      setError('New password must be at least 8 characters long');
+      return;
+    }
+
+    // Check for at least one symbol
+    const symbolRegex = /[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/;
+    if (!symbolRegex.test(newPassword)) {
+      setError('Password must contain at least one symbol (!@#$%^&* etc.)');
+      return;
+    }
+
+    // Check for at least one number
+    const numberRegex = /[0-9]/;
+    if (!numberRegex.test(newPassword)) {
+      setError('Password must contain at least one number');
+      return;
+    }
+
+    // Check for at least one uppercase letter
+    const uppercaseRegex = /[A-Z]/;
+    if (!uppercaseRegex.test(newPassword)) {
+      setError('Password must contain at least one uppercase letter');
       return;
     }
 
@@ -99,33 +141,43 @@ export default function FirstLoginPasswordChange({
 
   return (
     <AnimatePresence>
-      <div className="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4 z-[9999]">
+      <div className="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4 z-[9999] overflow-y-auto">
         <motion.div
           initial={{ opacity: 0, scale: 0.9 }}
           animate={{ opacity: 1, scale: 1 }}
           exit={{ opacity: 0, scale: 0.9 }}
-          className="bg-gradient-to-br from-orange-900/90 to-red-900/90 border-2 border-orange-500/60 rounded-2xl p-8 max-w-md w-full relative shadow-2xl"
+          className="bg-gradient-to-br from-orange-900/90 to-red-900/90 border-2 border-orange-500/60 rounded-2xl p-6 max-w-md w-full relative shadow-2xl my-8"
         >
+          {/* Close Button */}
+          <button
+            onClick={handleSkip}
+            disabled={loading || success}
+            className="absolute top-4 right-4 text-gray-400 hover:text-white transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+            title="Skip for now (ESC)"
+          >
+            <X className="w-6 h-6" />
+          </button>
+
           {/* Header */}
-          <div className="flex items-center space-x-3 mb-6">
-            <div className="p-3 bg-orange-500/30 rounded-lg">
-              <Shield className="w-8 h-8 text-orange-300" />
+          <div className="flex items-center space-x-3 mb-4">
+            <div className="p-2 bg-orange-500/30 rounded-lg">
+              <Shield className="w-6 h-6 text-orange-300" />
             </div>
             <div>
-              <h3 className="text-2xl font-bold text-white">Security Alert</h3>
-              <p className="text-sm text-orange-200">First time login detected</p>
+              <h3 className="text-xl font-bold text-white">Security Alert</h3>
+              <p className="text-xs text-orange-200">First time login detected</p>
             </div>
           </div>
 
           {/* Warning Message */}
-          <div className="mb-6 p-4 bg-yellow-900/30 border border-yellow-500/50 rounded-lg">
-            <div className="flex items-start space-x-3">
-              <AlertCircle className="w-5 h-5 text-yellow-400 mt-0.5 flex-shrink-0" />
+          <div className="mb-4 p-3 bg-yellow-900/30 border border-yellow-500/50 rounded-lg">
+            <div className="flex items-start space-x-2">
+              <AlertCircle className="w-4 h-4 text-yellow-400 mt-0.5 flex-shrink-0" />
               <div className="flex-1">
-                <h4 className="text-sm font-semibold text-yellow-300 mb-2">Change Your Password</h4>
+                <h4 className="text-xs font-semibold text-yellow-300 mb-1">Change Your Password</h4>
                 <p className="text-xs text-yellow-200 leading-relaxed">
-                  You are using the default password. For security reasons, you must change it before continuing.
-                  Your current password is: <span className="font-bold">player123</span>
+                  You are using the default password. For security reasons, please change it.
+                  Current password: <span className="font-bold">player123</span>
                 </p>
               </div>
             </div>
@@ -136,10 +188,10 @@ export default function FirstLoginPasswordChange({
             <motion.div
               initial={{ opacity: 0, y: -10 }}
               animate={{ opacity: 1, y: 0 }}
-              className="mb-4 p-4 bg-green-900/30 border border-green-500/50 rounded-lg flex items-center space-x-3"
+              className="mb-3 p-3 bg-green-900/30 border border-green-500/50 rounded-lg flex items-center space-x-2"
             >
-              <CheckCircle className="w-5 h-5 text-green-400" />
-              <span className="text-green-300">Password changed successfully!</span>
+              <CheckCircle className="w-4 h-4 text-green-400" />
+              <span className="text-green-300 text-sm">Password changed successfully!</span>
             </motion.div>
           )}
 
@@ -148,127 +200,143 @@ export default function FirstLoginPasswordChange({
             <motion.div
               initial={{ opacity: 0, y: -10 }}
               animate={{ opacity: 1, y: 0 }}
-              className="mb-4 p-4 bg-red-900/30 border border-red-500/50 rounded-lg flex items-center space-x-3"
+              className="mb-3 p-3 bg-red-900/30 border border-red-500/50 rounded-lg flex items-center space-x-2"
             >
-              <AlertCircle className="w-5 h-5 text-red-400" />
-              <span className="text-red-300">{error}</span>
+              <AlertCircle className="w-4 h-4 text-red-400" />
+              <span className="text-red-300 text-sm">{error}</span>
             </motion.div>
           )}
 
           {/* Form */}
-          <form onSubmit={handleSubmit} className="space-y-4">
+          <form onSubmit={handleSubmit} className="space-y-3">
             {/* Current Password */}
             <div>
-              <label className="block text-orange-200 text-sm mb-2 font-medium">Current Password</label>
+              <label className="block text-orange-200 text-xs mb-1 font-medium">Current Password</label>
               <div className="relative">
                 <input
                   type={showCurrentPassword ? 'text' : 'password'}
                   value={currentPassword}
                   onChange={(e) => setCurrentPassword(e.target.value)}
-                  className="w-full px-4 py-3 bg-black/40 border border-orange-500/50 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-orange-500 pr-12"
-                  placeholder="Enter player123"
+                  className="w-full px-3 py-2 text-sm bg-black/40 border border-orange-500/50 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-orange-500 pr-10"
+                  placeholder="Enter current password"
                   disabled={loading || success}
                   autoFocus
                 />
                 <button
                   type="button"
                   onClick={() => setShowCurrentPassword(!showCurrentPassword)}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-white transition-colors"
+                  className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-400 hover:text-white transition-colors"
                 >
-                  {showCurrentPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
+                  {showCurrentPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                 </button>
               </div>
             </div>
 
             {/* New Password */}
             <div>
-              <label className="block text-orange-200 text-sm mb-2 font-medium">New Password</label>
+              <label className="block text-orange-200 text-xs mb-1 font-medium">New Password</label>
               <div className="relative">
                 <input
                   type={showNewPassword ? 'text' : 'password'}
                   value={newPassword}
                   onChange={(e) => setNewPassword(e.target.value)}
-                  className="w-full px-4 py-3 bg-black/40 border border-orange-500/50 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-orange-500 pr-12"
-                  placeholder="Enter new password (min 6 characters)"
+                  className="w-full px-3 py-2 text-sm bg-black/40 border border-orange-500/50 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-orange-500 pr-10"
+                  placeholder="Enter new password"
                   disabled={loading || success}
                 />
                 <button
                   type="button"
                   onClick={() => setShowNewPassword(!showNewPassword)}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-white transition-colors"
+                  className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-400 hover:text-white transition-colors"
                 >
-                  {showNewPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
+                  {showNewPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                 </button>
               </div>
             </div>
 
             {/* Confirm Password */}
             <div>
-              <label className="block text-orange-200 text-sm mb-2 font-medium">Confirm New Password</label>
+              <label className="block text-orange-200 text-xs mb-1 font-medium">Confirm New Password</label>
               <div className="relative">
                 <input
                   type={showConfirmPassword ? 'text' : 'password'}
                   value={confirmPassword}
                   onChange={(e) => setConfirmPassword(e.target.value)}
-                  className="w-full px-4 py-3 bg-black/40 border border-orange-500/50 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-orange-500 pr-12"
+                  className="w-full px-3 py-2 text-sm bg-black/40 border border-orange-500/50 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-orange-500 pr-10"
                   placeholder="Confirm new password"
                   disabled={loading || success}
                 />
                 <button
                   type="button"
                   onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-white transition-colors"
+                  className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-400 hover:text-white transition-colors"
                 >
-                  {showConfirmPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
+                  {showConfirmPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                 </button>
               </div>
             </div>
 
             {/* Password Requirements */}
-            <div className="bg-blue-900/30 border border-blue-500/40 rounded-lg p-3">
-              <p className="text-xs text-blue-300 mb-2 font-semibold">Password Requirements:</p>
-              <ul className="text-xs text-blue-200 space-y-1">
-                <li className={newPassword.length >= 6 ? 'text-green-400' : ''}>
-                  • At least 6 characters
+            <div className="bg-blue-900/30 border border-blue-500/40 rounded-lg p-2">
+              <p className="text-xs text-blue-300 mb-1 font-semibold">Password Requirements:</p>
+              <ul className="text-xs text-blue-200 space-y-0.5">
+                <li className={newPassword.length >= 8 ? 'text-green-400' : ''}>
+                  • At least 8 characters
+                </li>
+                <li className={/[A-Z]/.test(newPassword) ? 'text-green-400' : ''}>
+                  • One uppercase letter (A-Z)
+                </li>
+                <li className={/[0-9]/.test(newPassword) ? 'text-green-400' : ''}>
+                  • One number (0-9)
+                </li>
+                <li className={/[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/.test(newPassword) ? 'text-green-400' : ''}>
+                  • One symbol (!@#$%^&* etc.)
                 </li>
                 <li className={newPassword === confirmPassword && newPassword ? 'text-green-400' : ''}>
                   • Passwords match
                 </li>
-                <li className={newPassword !== currentPassword && newPassword ? 'text-green-400' : ''}>
-                  • Different from current password
-                </li>
               </ul>
             </div>
 
-            {/* Submit Button */}
-            <button
-              type="submit"
-              disabled={loading || success}
-              className="w-full px-4 py-3 bg-gradient-to-r from-orange-600 to-red-600 hover:from-orange-500 hover:to-red-500 disabled:from-gray-600 disabled:to-gray-700 disabled:cursor-not-allowed text-white rounded-lg transition-all duration-300 flex items-center justify-center space-x-2 font-semibold shadow-lg"
-            >
-              {loading ? (
-                <>
-                  <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                  <span>Changing Password...</span>
-                </>
-              ) : success ? (
-                <>
-                  <CheckCircle className="w-5 h-5" />
-                  <span>Success!</span>
-                </>
-              ) : (
-                <>
-                  <Lock className="w-5 h-5" />
-                  <span>Change Password Now</span>
-                </>
-              )}
-            </button>
+            {/* Buttons */}
+            <div className="flex gap-2 pt-2">
+              <button
+                type="button"
+                onClick={handleSkip}
+                disabled={loading || success}
+                className="flex-1 px-3 py-2 bg-gray-600 hover:bg-gray-500 disabled:bg-gray-700 disabled:cursor-not-allowed text-white rounded-lg transition-all duration-300 text-sm font-medium"
+              >
+                Skip for Now
+              </button>
+              <button
+                type="submit"
+                disabled={loading || success}
+                className="flex-1 px-3 py-2 bg-gradient-to-r from-orange-600 to-red-600 hover:from-orange-500 hover:to-red-500 disabled:from-gray-600 disabled:to-gray-700 disabled:cursor-not-allowed text-white rounded-lg transition-all duration-300 flex items-center justify-center space-x-2 font-medium text-sm shadow-lg"
+              >
+                {loading ? (
+                  <>
+                    <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                    <span>Changing...</span>
+                  </>
+                ) : success ? (
+                  <>
+                    <CheckCircle className="w-4 h-4" />
+                    <span>Success!</span>
+                  </>
+                ) : (
+                  <>
+                    <Lock className="w-4 h-4" />
+                    <span>Change Password</span>
+                  </>
+                )}
+              </button>
+            </div>
           </form>
 
           {/* Footer Note */}
-          <div className="mt-6 p-3 bg-black/30 border border-gray-500/30 rounded-lg">
+          <div className="mt-3 p-2 bg-black/30 border border-gray-500/30 rounded-lg">
             <p className="text-xs text-gray-400 text-center">
-              This is a one-time security measure. You won't see this again after changing your password.
+              Press ESC or click Skip to change later. Recommended to change now for security.
             </p>
           </div>
         </motion.div>

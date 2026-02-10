@@ -152,18 +152,17 @@ export class DatabaseService {
    */
   static async authenticatePlayer(nickname: string, password: string) {
     try {
-      // For now, we'll use a simple password check
-      // In production, you should hash passwords and store them securely
       const player = await this.getPlayerByNickname(nickname);
       
-      if (!player.success) {
+      if (!player.success || !player.data) {
         return { success: false, error: 'Player not found' };
       }
 
-      // Simple password validation (you should implement proper password hashing)
-      const validPassword = password === 'player123'; // Default password for demo
+      // Use encrypted password service for authentication
+      const { default: passwordService } = await import('./passwordService');
+      const verification = await passwordService.verifyUserPassword(player.data.id, password);
       
-      if (!validPassword) {
+      if (!verification.success) {
         return { success: false, error: 'Invalid password' };
       }
 
@@ -236,6 +235,8 @@ export class DatabaseService {
 
   /**
    * Authenticate admin login
+  /**
+   * Authenticate admin login
    */
   static async authenticateAdmin(username: string, password: string) {
     try {
@@ -245,7 +246,11 @@ export class DatabaseService {
         return { success: false, error: 'Admin not found' };
       }
 
-      if (admin.data.password !== password) {
+      // Use encrypted password service for authentication
+      const { default: passwordService } = await import('./passwordService');
+      const verification = await passwordService.verifyUserPassword(username, password);
+      
+      if (!verification.success) {
         return { success: false, error: 'Invalid password' };
       }
 

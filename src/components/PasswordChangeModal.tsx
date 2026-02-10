@@ -37,8 +37,29 @@ export default function PasswordChangeModal({
     setSuccess(false);
 
     // Validation
-    if (newPassword.length < 6) {
-      setError('Password must be at least 6 characters long');
+    if (newPassword.length < 8) {
+      setError('Password must be at least 8 characters long');
+      return;
+    }
+
+    // Check for at least one symbol
+    const symbolRegex = /[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/;
+    if (!symbolRegex.test(newPassword)) {
+      setError('Password must contain at least one symbol (!@#$%^&* etc.)');
+      return;
+    }
+
+    // Check for at least one number
+    const numberRegex = /[0-9]/;
+    if (!numberRegex.test(newPassword)) {
+      setError('Password must contain at least one number');
+      return;
+    }
+
+    // Check for at least one uppercase letter
+    const uppercaseRegex = /[A-Z]/;
+    if (!uppercaseRegex.test(newPassword)) {
+      setError('Password must contain at least one uppercase letter');
       return;
     }
 
@@ -179,7 +200,7 @@ export default function PasswordChangeModal({
                   value={newPassword}
                   onChange={(e) => setNewPassword(e.target.value)}
                   className="w-full px-4 py-3 bg-black/60 border border-orange-500/40 rounded-lg text-orange-200 focus:outline-none focus:ring-2 focus:ring-orange-500 pr-12"
-                  placeholder="Enter new password (min 6 characters)"
+                  placeholder="Enter new password"
                   disabled={loading || success}
                 />
                 <button
@@ -218,8 +239,17 @@ export default function PasswordChangeModal({
             <div className="bg-blue-900/20 border border-blue-500/30 rounded-lg p-3">
               <p className="text-xs text-blue-300 mb-2 font-semibold">Password Requirements:</p>
               <ul className="text-xs text-blue-400 space-y-1">
-                <li className={newPassword.length >= 6 ? 'text-green-400' : ''}>
-                  • At least 6 characters
+                <li className={newPassword.length >= 8 ? 'text-green-400' : ''}>
+                  • At least 8 characters
+                </li>
+                <li className={/[A-Z]/.test(newPassword) ? 'text-green-400' : ''}>
+                  • One uppercase letter (A-Z)
+                </li>
+                <li className={/[0-9]/.test(newPassword) ? 'text-green-400' : ''}>
+                  • One number (0-9)
+                </li>
+                <li className={/[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/.test(newPassword) ? 'text-green-400' : ''}>
+                  • One symbol (!@#$%^&* etc.)
                 </li>
                 <li className={newPassword === confirmPassword && newPassword ? 'text-green-400' : ''}>
                   • Passwords match

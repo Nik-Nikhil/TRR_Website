@@ -32,8 +32,24 @@ class PasswordService {
     password: string
   ): Promise<{ success: boolean; error?: string }> {
     try {
-      if (!password || password.length < 6) {
-        return { success: false, error: 'Password must be at least 6 characters long' };
+      // Validation
+      if (!password || password.length < 8) {
+        return { success: false, error: 'Password must be at least 8 characters long' };
+      }
+
+      // Check for at least one uppercase letter
+      if (!/[A-Z]/.test(password)) {
+        return { success: false, error: 'Password must contain at least one uppercase letter' };
+      }
+
+      // Check for at least one number
+      if (!/[0-9]/.test(password)) {
+        return { success: false, error: 'Password must contain at least one number' };
+      }
+
+      // Check for at least one symbol
+      if (!/[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/.test(password)) {
+        return { success: false, error: 'Password must contain at least one symbol (!@#$%^&* etc.)' };
       }
 
       const passwordHash = await this.hashPassword(password);
@@ -43,7 +59,7 @@ class PasswordService {
         .from('user_passwords')
         .select('id')
         .eq('user_id', userId)
-        .single();
+        .maybeSingle();
 
       if (existing) {
         // Update existing password
