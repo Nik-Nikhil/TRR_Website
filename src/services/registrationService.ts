@@ -1,5 +1,8 @@
+import { supabase } from '../lib/supabase';
+
 // Registration control service
 interface RegistrationSettings {
+  id?: string;
   isEnabled: boolean;
   superAdminOverride: boolean;
   lastModifiedBy: string;
@@ -8,8 +11,6 @@ interface RegistrationSettings {
 }
 
 class RegistrationService {
-  private storageKey = 'registrationSettings';
-  
   // Default settings
   private defaultSettings: RegistrationSettings = {
     isEnabled: false,
@@ -19,12 +20,28 @@ class RegistrationService {
     message: 'Registration starting soon. Stay tuned for updates.'
   };
 
-  // Get current registration settings
-  getSettings(): RegistrationSettings {
+  // Get current registration settings from Supabase
+  async getSettings(): Promise<RegistrationSettings> {
     try {
-      const stored = localStorage.getItem(this.storageKey);
-      if (stored) {
-        return JSON.parse(stored);
+      const { data, error } = await supabase
+        .from('registration_settings')
+        .select('*')
+        .single();
+
+      if (error) {
+        console.error('Error loading registration settings:', error);
+        return this.defaultSettings;
+      }
+
+      if (data) {
+        return {
+          id: data.id,
+          isEnabled: data.is_enabled,
+          superAdminOverride: data.super_admin_override,
+          lastModifiedBy: data.last_modified_by,
+          lastModifiedAt: data.last_modified_at,
+          message: data.message
+        };
       }
     } catch (error) {
       console.error('Error loading registration settings:', error);
@@ -33,14 +50,14 @@ class RegistrationService {
   }
 
   // Update registration settings (admin level)
-  updateSettings(
+  async updateSettings(
     isEnabled: boolean, 
     modifiedBy: string, 
     userRole: 'admin' | 'superadmin',
     message?: string
-  ): { success: boolean; error?: string } {
+  ): Promise<{ success: boolean; error?: string }> {
     try {
-      const currentSettings = this.getSettings();
+      const currentSettings = await this.getSettings();
       
       // Check if super admin has disabled and current user is not super admin
       if (currentSettings.superAdminOverride && userRole !== 'superadmin') {
@@ -50,19 +67,30 @@ class RegistrationService {
         };
       }
 
-      const newSettings: RegistrationSettings = {
-        isEnabled,
-        superAdminOverride: userRole === 'superadmin' ? !isEnabled : currentSettings.superAdminOverride,
-        lastModifiedBy: modifiedBy,
-        lastModifiedAt: new Date().toISOString(),
+      const updateData = {
+        is_enabled: isEnabled,
+        super_admin_override: userRole === 'superadmin' ? !isEnabled : currentSettings.superAdminOverride,
+        last_modified_by: modifiedBy,
+        last_modified_at: new Date().toISOString(),
         message: message || currentSettings.message
       };
 
-      localStorage.setItem(this.storageKey, JSON.stringify(newSettings));
-      
+      const { error } = await supabase
+        .from('registration_settings')
+        .update(updateData)
+        .eq('id', currentSettings.id || '');
+
+      if (error) {
+        console.error('Error updating registration settings:', error);
+        return {
+          success: false,
+          error: 'Failed to update registration settings'
+        };
+      }
+
       // Dispatch custom event to notify components
       window.dispatchEvent(new CustomEvent('registrationSettingsChanged', {
-        detail: newSettings
+        detail: { ...currentSettings, ...updateData }
       }));
 
       return { success: true };
@@ -76,26 +104,39 @@ class RegistrationService {
   }
 
   // Super admin override (can force disable and prevent admins from enabling)
-  setSuperAdminOverride(
+  async setSuperAdminOverride(
     isEnabled: boolean,
     modifiedBy: string
-  ): { success: boolean; error?: string } {
+  ): Promise<{ success: boolean; error?: string }> {
     try {
-      const newSettings: RegistrationSettings = {
-        isEnabled,
-        superAdminOverride: !isEnabled, // If disabled, set override to true
-        lastModifiedBy: modifiedBy,
-        lastModifiedAt: new Date().toISOString(),
+      const currentSettings = await this.getSettings();
+
+      const updateData = {
+        is_enabled: isEnabled,
+        super_admin_override: !isEnabled, // If disabled, set override to true
+        last_modified_by: modifiedBy,
+        last_modified_at: new Date().toISOString(),
         message: isEnabled 
           ? 'Registration is now open! Join the tournament and build your legendary team.'
           : 'Registration is currently disabled by Super Admin.'
       };
 
-      localStorage.setItem(this.storageKey, JSON.stringify(newSettings));
-      
+      const { error } = await supabase
+        .from('registration_settings')
+        .update(updateData)
+        .eq('id', currentSettings.id || '');
+
+      if (error) {
+        console.error('Error setting super admin override:', error);
+        return {
+          success: false,
+          error: 'Failed to set super admin override'
+        };
+      }
+
       // Dispatch custom event to notify components
       window.dispatchEvent(new CustomEvent('registrationSettingsChanged', {
-        detail: newSettings
+        detail: { ...currentSettings, ...updateData }
       }));
 
       return { success: true };
@@ -109,21 +150,52 @@ class RegistrationService {
   }
 
   // Check if registration is currently enabled
-  isRegistrationEnabled(): boolean {
-    const settings = this.getSettings();
+  async isRegistrationEnabled(): Promise<boolean> {
+    const settings = await this.getSettings();
     return settings.isEnabled;
   }
 
   // Check if super admin has overridden settings
-  isSuperAdminOverride(): boolean {
-    const settings = this.getSettings();
+  async isSuperAdminOverride(): Promise<boolean> {
+    const settings = await this.getSettings();
     return settings.superAdminOverride;
   }
 
   // Get registration message
-  getRegistrationMessage(): string {
-    const settings = this.getSettings();
+  async getRegistrationMessage(): Promise<string> {
+    const settings = await this.getSettings();
     return settings.message || this.defaultSettings.message!;
+  }
+
+  // Subscribe to real-time changes
+  subscribeToChanges(callback: (settings: RegistrationSettings) => void) {
+    const channel = supabase
+      .channel('registration_settings_changes')
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'registration_settings'
+        },
+        (payload) => {
+          if (payload.new) {
+            const data = payload.new as any;
+            const settings: RegistrationSettings = {
+              id: data.id,
+              isEnabled: data.is_enabled,
+              superAdminOverride: data.super_admin_override,
+              lastModifiedBy: data.last_modified_by,
+              lastModifiedAt: data.last_modified_at,
+              message: data.message
+            };
+            callback(settings);
+          }
+        }
+      )
+      .subscribe();
+
+    return channel;
   }
 }
 

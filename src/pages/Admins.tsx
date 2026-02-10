@@ -3,8 +3,6 @@ import { useNavigate } from "react-router-dom";
 import { useToast } from "../hooks/useToast";
 import ToastContainer from "../components/ui/ToastContainer";
 import MessageModal from "../components/ui/MessageModal";
-import PasswordChangeModal from "../components/ui/PasswordChangeModal";
-import { Lock } from "lucide-react";
 
 /* ================= THEME ================= */
 const NEON_RED = "#FF0040";
@@ -356,13 +354,38 @@ export default function AdminsPage() {
     adminName: '',
     adminDisplayName: ''
   });
-  const [showPasswordModal, setShowPasswordModal] = useState(false);
+  const [disabledAdmins, setDisabledAdmins] = useState<string[]>([]);
   const { toasts, info, success, error, removeToast } = useToast();
   const timeoutRef = useRef<number | null>(null);
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const navigate = useNavigate();
 
   const currentEye = EYE_PHASES[currentEyePhase];
+
+  // Load disabled admins from localStorage
+  useEffect(() => {
+    const storedAdmins = localStorage.getItem('admins');
+    if (storedAdmins) {
+      try {
+        const adminsList = JSON.parse(storedAdmins);
+        const disabled = adminsList
+          .filter((a: any) => a.isDisabled)
+          .map((a: any) => a.username.toLowerCase());
+        setDisabledAdmins(disabled);
+      } catch (e) {
+        console.error('Failed to load disabled admins:', e);
+      }
+    }
+  }, []);
+
+  // Filter out disabled admins
+  const activeAdmins = admins.filter(admin => 
+    !disabledAdmins.includes(admin.name.toLowerCase())
+  );
+  
+  const activeMiniAdmins = miniAdmins.filter(miniAdmin => 
+    !disabledAdmins.includes(miniAdmin.name.toLowerCase())
+  );
 
   const playSound = (soundPath: string) => {
     if (audioRef.current) {
@@ -448,15 +471,6 @@ export default function AdminsPage() {
         adminName={messageModal.adminName}
         adminDisplayName={messageModal.adminDisplayName}
       />
-      <PasswordChangeModal
-        isOpen={showPasswordModal}
-        onClose={() => setShowPasswordModal(false)}
-        onSuccess={(message) => {
-          success('Password Changed', message);
-          setShowPasswordModal(false);
-        }}
-        onError={(message) => error('Error', message)}
-      />
       
       <CyberpunkBackground />
 
@@ -497,17 +511,6 @@ export default function AdminsPage() {
 
       <main className="relative py-1 pt-24">
         <div className="relative z-10">
-          {/* Password Change Button */}
-          <div className="absolute top-4 right-4 z-20">
-            <button
-              onClick={() => setShowPasswordModal(true)}
-              className="flex items-center gap-2 px-4 py-2 bg-purple-600/20 hover:bg-purple-600/30 border border-purple-500/50 text-purple-300 hover:text-purple-200 rounded-lg text-sm font-medium transition-all duration-200"
-            >
-              <Lock className="w-4 h-4" />
-              <span>Change Password</span>
-            </button>
-          </div>
-
           <div className="max-w-[1400px] mx-auto px-5">
             {/* Founder Section */}
             <section className="mb-[50px]">
@@ -526,7 +529,7 @@ export default function AdminsPage() {
             <section className="mb-[50px]">
               <CyberpunkHeader color={ELECTRIC_BLUE}>◢ ADMINS ◣</CyberpunkHeader>
               <div className="grid grid-cols-3 gap-8 max-w-[800px] mx-auto justify-items-center">
-                {admins.map((admin, idx) => (
+                {activeAdmins.map((admin, idx) => (
                   <CyberpunkCard
                     key={admin.name}
                     m={admin}
@@ -546,12 +549,12 @@ export default function AdminsPage() {
             <section className="mb-[50px]">
               <CyberpunkHeader color={NEON_VIOLET}>◢ MINI ADMINS ◣</CyberpunkHeader>
               <div className="grid grid-cols-2 sm:grid-cols-4 gap-8 max-w-[1050px] mx-auto justify-items-center">
-                {miniAdmins.map((miniAdmin, idx) => (
+                {activeMiniAdmins.map((miniAdmin, idx) => (
                   <CyberpunkCard
                     key={miniAdmin.name}
                     m={miniAdmin}
                     isSmall={true}
-                    index={admins.length + 1 + idx}
+                    index={activeAdmins.length + 1 + idx}
                     onEyeClick={handleEyeClick}
                     onEyeHover={handleEyeHover}
                     onEyeLeave={handleEyeLeave}

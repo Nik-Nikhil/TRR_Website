@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
+import { Link } from "react-router-dom";
 import { Gavel } from "lucide-react";
 import { AuctionGavel } from "../components/ui/AuctionGavel";
 import { Avatar } from "../components/ui/Avatar";
@@ -8,8 +9,10 @@ import captainService from "../services/captainService";
 import type { AuctionState } from "../services/auctionService";
 import { AuthService } from "../services/auth";
 import { supabase } from "../lib/supabase";
+import { useModal } from "../hooks/useModal";
 
 export default function Auction() {
+  const { confirm, alert, ModalComponent } = useModal();
   const [auctionState, setAuctionState] = useState<AuctionState | null>(null);
   const [bidHistory, setBidHistory] = useState<any[]>([]);
   const [bidAmount, setBidAmount] = useState('');
@@ -22,6 +25,8 @@ export default function Auction() {
   const [successMessage, setSuccessMessage] = useState('');
 
   const [soldPlayers, setSoldPlayers] = useState<any[]>([]);
+  const [selectedTeamForManualAssign, setSelectedTeamForManualAssign] = useState<string>('');
+  const [manualAssignPrice, setManualAssignPrice] = useState<string>('1');
 
   useEffect(() => {
     // Load initial data
@@ -45,17 +50,62 @@ export default function Auction() {
     const stateSubscription = AuctionService.subscribeToAuctionState((state) => {
       setAuctionState(state);
       
-      if (state.id) {
-        loadBidHistory(state.id);
+      // When player changes, clear bid history (will be reloaded by the other useEffect)
+      if (state.current_player_id !== auctionState?.current_player_id) {
+        setBidHistory([]);
       }
     });
 
-    // Subscribe to new bids
-    const bidSubscription = AuctionService.subscribeToBids((bid) => {
-      setBidHistory(prev => [bid, ...prev]);
-      // Also reload auction state to get updated highest bid
-      loadAuctionState();
-    });
+    // Subscribe to new bids - using a unique channel name with timestamp
+    const bidChannelName = `auction-bids-${Date.now()}`;
+    const bidChannel = supabase
+      .channel(bidChannelName)
+      .on(
+        'postgres_changes',
+        {
+          event: 'INSERT',
+          schema: 'public',
+          table: 'auction_bids'
+        },
+        async (payload) => {
+          const bid = payload.new as any;
+          
+          // Get current state to check if bid is for current player
+          const currentState = await AuctionService.getAuctionState();
+          const currentPlayerId = currentState?.current_player_id;
+          const currentPlayerDataId = currentState?.current_player_data?.id;
+          
+          // Only add bid if it's for the current player
+          const isForCurrentPlayer = bid.player_id === currentPlayerId || 
+                                     bid.player_id === currentPlayerDataId;
+          
+          if (!isForCurrentPlayer) {
+            return;
+          }
+          
+          // Add bid to history
+          setBidHistory(prev => {
+            // Check if bid already exists to avoid duplicates
+            if (prev.some(b => b.id === bid.id)) {
+              return prev;
+            }
+            return [bid, ...prev];
+          });
+          // Reload auction state to get updated highest bid
+          loadAuctionState();
+        }
+      )
+      .subscribe((status, err) => {
+        if (status === 'SUBSCRIBED') {
+          // Subscribed successfully
+        }
+        if (status === 'CHANNEL_ERROR') {
+          console.error('❌ Bid subscription error:', err);
+        }
+        if (status === 'TIMED_OUT') {
+          console.error('⏱️ Bid subscription timed out');
+        }
+      });
 
     // Subscribe to captain changes
     const captainSubscription = captainService.subscribeToCaptains(() => {
@@ -78,7 +128,7 @@ export default function Auction() {
       )
       .subscribe((status, err) => {
         if (status === 'SUBSCRIBED') {
-          console.log('✅ Subscribed to sold players changes');
+          // Subscribed successfully
         }
         if (status === 'CHANNEL_ERROR') {
           console.error('❌ Sold players subscription error:', err);
@@ -86,13 +136,20 @@ export default function Auction() {
       });
 
     // Fallback: Poll for updates every 2 seconds as backup
-    const pollInterval = setInterval(() => {
-      loadAuctionState();
+    const pollInterval = setInterval(async () => {
+      await loadAuctionState();
+      await loadCaptains(); // Also poll captains for budget updates
+      
+      // Poll for bids - get current state
+      const currentState = await AuctionService.getAuctionState();
+      if (currentState?.id) {
+        await pollBidsForCurrentAuction(currentState.id);
+      }
     }, 2000);
 
     return () => {
       stateSubscription.unsubscribe();
-      bidSubscription.unsubscribe();
+      supabase.removeChannel(bidChannel);
       captainSubscription.unsubscribe();
       supabase.removeChannel(soldPlayersChannel);
       clearInterval(pollInterval);
@@ -102,10 +159,8 @@ export default function Auction() {
   // Reset bid history when current player changes
   useEffect(() => {
     if (auctionState?.current_player_id) {
+      // Clear bid history for new player - bids start fresh for each player
       setBidHistory([]);
-      if (auctionState.id) {
-        loadBidHistory(auctionState.id);
-      }
     }
   }, [auctionState?.current_player_id]);
 
@@ -147,14 +202,50 @@ export default function Auction() {
   const loadAuctionState = async () => {
     const state = await AuctionService.getAuctionState();
     setAuctionState(state);
-    if (state?.id) {
-      loadBidHistory(state.id);
-    }
+    // Bids will be populated by the real-time subscription
   };
 
-  const loadBidHistory = async (auctionId: string) => {
-    const history = await AuctionService.getBidHistory(auctionId);
-    setBidHistory(history);
+  const pollBidsForCurrentAuction = async (auctionId: string) => {
+    try {
+      // Get current auction state to know which player we're showing
+      const currentState = await AuctionService.getAuctionState();
+      if (!currentState?.current_player_id) {
+        // No current player, clear bids
+        setBidHistory([]);
+        return;
+      }
+
+      const { data, error } = await supabase
+        .from('auction_bids')
+        .select('*')
+        .eq('auction_id', auctionId)
+        .order('created_at', { ascending: false });
+
+      if (!error && data) {
+        // Filter bids to only show those for the current player
+        // The player_id in bids might be stored in different formats, so we need to check
+        const currentPlayerId = currentState.current_player_id;
+        const currentPlayerDataId = currentState.current_player_data?.id;
+        
+        const filteredBids = data.filter(bid => {
+          // Check if bid's player_id matches current player
+          return bid.player_id === currentPlayerId || 
+                 bid.player_id === currentPlayerDataId ||
+                 (currentState.current_player_data && 
+                  bid.player_id === currentState.current_player_data.id);
+        });
+
+        // Only update if the data is different to avoid unnecessary re-renders
+        setBidHistory(prev => {
+          if (JSON.stringify(prev) !== JSON.stringify(filteredBids)) {
+            return filteredBids;
+          }
+          return prev;
+        });
+      }
+    } catch (error) {
+      console.error('Error polling bids:', error);
+    }
   };
 
   const handlePlaceBid = async () => {
@@ -183,6 +274,13 @@ export default function Auction() {
       setBidError('You are not registered as a captain');
       return;
     }
+
+    // ✅ CHECK IF TEAM IS ALREADY FULL (5 PLAYERS)
+    const teamPlayerCount = soldPlayers.filter(p => p.teamName === captain.teamName).length;
+    if (teamPlayerCount >= 5) {
+      setBidError(`Your team is full (5/5 players). Cannot bid on more players.`);
+      return;
+    }
     
     if (captain.budget < amount) {
       setBidError(`Insufficient budget. Available: ${captain.budget}`);
@@ -207,7 +305,31 @@ export default function Auction() {
   };
 
   const handleSellPlayer = async () => {
-    if (!auctionState || !auctionState.highest_bidder_id) {
+    if (!auctionState) return;
+
+    // If there's a highest bidder, proceed normally
+    if (auctionState.highest_bidder_id) {
+      setShowConfirmModal(true);
+      return;
+    }
+
+    // If no bids, check if admin selected a team for manual assignment
+    if (!selectedTeamForManualAssign) {
+      await alert('Please select a team to assign this player to', 'Selection Required', 'warning');
+      return;
+    }
+
+    // Validate manual price
+    const price = parseInt(manualAssignPrice);
+    if (isNaN(price) || price < 1) {
+      await alert('Please enter a valid price (minimum 1)', 'Invalid Price', 'warning');
+      return;
+    }
+
+    // Check if selected team has enough budget
+    const selectedCaptain = captains.find(c => c.teamName === selectedTeamForManualAssign);
+    if (selectedCaptain && selectedCaptain.budget < price) {
+      await alert(`${selectedTeamForManualAssign} doesn't have enough budget. Available: ${selectedCaptain.budget}`, 'Insufficient Budget', 'warning');
       return;
     }
 
@@ -215,17 +337,54 @@ export default function Auction() {
   };
 
   const confirmFinalize = async () => {
-    if (!auctionState || !auctionState.highest_bidder_id) return;
+    if (!auctionState) return;
 
     setShowConfirmModal(false);
 
     const playerNickname = auctionState.current_player_data?.nickname || 'Unknown Player';
 
+    let finalCaptainId: string;
+    let finalCaptainName: string;
+    let finalTeamName: string;
+    let finalPrice: number;
+
+    // Check if there's a highest bidder or manual assignment
+    if (auctionState.highest_bidder_id) {
+      // Normal auction flow with bids
+      finalCaptainId = auctionState.highest_bidder_id;
+      finalCaptainName = auctionState.highest_bidder_name || '';
+      finalTeamName = auctionState.highest_bidder_team || '';
+      finalPrice = auctionState.highest_bid || 0;
+    } else {
+      // Manual assignment by admin (no bids)
+      const selectedCaptain = captains.find(c => c.teamName === selectedTeamForManualAssign);
+      if (!selectedCaptain) {
+        await alert('Selected team not found', 'Error', 'warning');
+        return;
+      }
+      finalCaptainId = selectedCaptain.playerId;
+      finalCaptainName = selectedCaptain.playerNickname;
+      finalTeamName = selectedCaptain.teamName;
+      finalPrice = parseInt(manualAssignPrice) || 1; // Use admin-specified price
+    }
+
+    // ✅ CHECK 5-PLAYER LIMIT PER TEAM
+    const teamPlayerCount = soldPlayers.filter(p => p.teamName === finalTeamName).length;
+    if (teamPlayerCount >= 5) {
+      await alert(
+        `${finalTeamName} already has 5 players!\n\nTeams cannot have more than 5 players.\n\nCurrent roster: ${teamPlayerCount}/5`,
+        'Team Full',
+        'warning'
+      );
+      return;
+    }
+
     // Deduct budget from winning captain
-    const winningCaptain = captains.find(c => c.playerId === auctionState.highest_bidder_id);
+    const winningCaptain = captains.find(c => c.playerId === finalCaptainId);
+    const newBudget = winningCaptain ? winningCaptain.budget - finalPrice : 0;
+    
     if (winningCaptain) {
-      const newBudget = winningCaptain.budget - (auctionState.highest_bid || 0);
-      await captainService.updateBudget(auctionState.highest_bidder_id, newBudget);
+      await captainService.updateBudget(finalCaptainId, newBudget);
     }
 
     // Save to auction results in Supabase
@@ -235,10 +394,10 @@ export default function Auction() {
         auction_id: auctionState.id,
         player_id: auctionState.current_player_id,
         player_data: auctionState.current_player_data,
-        sold_to_captain_id: auctionState.highest_bidder_id,
-        sold_to_captain_name: auctionState.highest_bidder_name,
-        sold_to_team_name: auctionState.highest_bidder_team,
-        final_price: auctionState.highest_bid
+        sold_to_captain_id: finalCaptainId,
+        sold_to_captain_name: finalCaptainName,
+        sold_to_team_name: finalTeamName,
+        final_price: finalPrice
       }]);
 
     if (error) {
@@ -248,13 +407,18 @@ export default function Auction() {
     // Clear current player from auction
     await AuctionService.setCurrentPlayer('', null);
     
-    // Reload data
-    await loadCaptains();
-    await loadSoldPlayers();
+    // Force immediate reload of all data to ensure UI updates
+    await Promise.all([
+      loadCaptains(),
+      loadSoldPlayers()
+    ]);
+    
+    // Reset manual assignment selection
+    setSelectedTeamForManualAssign('');
+    setManualAssignPrice('1');
     
     // Show success modal
-    const newBudget = winningCaptain ? winningCaptain.budget - (auctionState.highest_bid || 0) : 0;
-    setSuccessMessage(`${playerNickname} assigned to ${auctionState.highest_bidder_team}! Budget updated to ${newBudget}.`);
+    setSuccessMessage(`${playerNickname} assigned to ${finalTeamName}! Budget updated to ${newBudget}.`);
     setShowSuccessModal(true);
   };
 
@@ -263,6 +427,7 @@ export default function Auction() {
 
   return (
     <>
+      <ModalComponent />
       {/* Main Content - Full Page */}
       <div className="min-h-screen bg-gradient-to-br from-gray-900 via-black to-gray-900 flex flex-col" style={{ paddingTop: '80px', paddingBottom: '60px' }}>
         <div className="flex-1 flex flex-col px-4 sm:px-6 lg:px-8 py-6" style={{ maxWidth: '100%', minHeight: 0 }}>
@@ -361,6 +526,10 @@ export default function Auction() {
                                   }`}>
                                     {bid.team_name}
                                   </p>
+                                  {/* Timestamp */}
+                                  <p className="text-gray-500 text-[0.65rem] mt-1">
+                                    {new Date(bid.created_at).toLocaleTimeString()}
+                                  </p>
                                 </div>
                               </div>
                             </motion.div>
@@ -393,25 +562,26 @@ export default function Auction() {
                         {/* Player Header with MMR on sides */}
                         <div className="flex items-center justify-between gap-3 mb-3">
                           {/* Left: Current MMR */}
-                          <div className="bg-gradient-to-br from-cyan-900/40 to-blue-900/40 border border-cyan-500/50 rounded-lg p-1.5 flex-shrink-0 w-24">
-                            <p className="text-cyan-400 text-[0.6rem] font-bold mb-0.5 text-center">CURRENT</p>
-                            <div className="flex flex-col items-center gap-0.5">
+                          <div className="bg-gradient-to-br from-cyan-900/40 to-blue-900/40 border border-cyan-500/50 rounded-lg p-2 flex-shrink-0 w-28">
+                            <p className="text-cyan-400 text-[0.65rem] font-bold mb-1 text-center">CURRENT</p>
+                            <div className="flex flex-col items-center gap-1">
                               {currentPlayer.currentMedalLabel && (
                                 <div className="relative group">
                                   <img 
                                     src={`/medals/${currentPlayer.currentMedalLabel.replace(' ', '_')}.png`}
                                     alt={currentPlayer.currentMedalLabel}
-                                    className="w-6 h-6 object-contain cursor-pointer"
+                                    title={currentPlayer.currentMedalLabel}
+                                    className="w-10 h-10 object-contain cursor-pointer transition-transform hover:scale-110"
                                     onError={(e) => {
                                       e.currentTarget.style.display = 'none';
                                     }}
                                   />
-                                  <span className="pointer-events-none absolute -bottom-8 left-1/2 -translate-x-1/2 px-2 py-1 rounded-lg bg-black/90 border border-cyan-500/60 text-[0.65rem] text-cyan-200 opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap z-20">
+                                  <span className="pointer-events-none absolute -bottom-9 left-1/2 -translate-x-1/2 px-2 py-1 rounded-lg bg-black/95 border border-cyan-500/70 text-[0.7rem] text-cyan-200 opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap z-20 shadow-lg">
                                     {currentPlayer.currentMedalLabel}
                                   </span>
                                 </div>
                               )}
-                              <p className="text-cyan-300 text-xs font-bold">{currentPlayer.currentMMR || 'N/A'}</p>
+                              <p className="text-cyan-300 text-sm font-bold">{currentPlayer.currentMMR || 'N/A'}</p>
                             </div>
                           </div>
 
@@ -429,8 +599,8 @@ export default function Auction() {
                             </div>
                             
                             {/* Name and Star Badge */}
-                            <div className="flex items-center gap-2">
-                              <h3 className="text-2xl font-bold text-white drop-shadow-lg">{currentPlayer.nickname}</h3>
+                            <div className="flex items-center gap-2 max-w-full">
+                              <h3 className="text-2xl font-bold text-white drop-shadow-lg truncate max-w-[200px]" style={{ fontSize: (currentPlayer.nickname?.length || 0) > 15 ? '1.25rem' : '1.5rem' }}>{currentPlayer.nickname}</h3>
                               
                               {/* Website Contributor Star Badge */}
                               {(currentPlayer.specialBadge === 'contributor' || currentPlayer.isContributor) && (
@@ -461,24 +631,6 @@ export default function Auction() {
                               )}
                             </div>
                             
-                            {/* Role Preferences - Icons only with tooltip */}
-                            {currentPlayer.roles && currentPlayer.roles.length > 0 && (
-                              <div className="flex items-center gap-2">
-                                {currentPlayer.roles.map((role: any, idx: number) => (
-                                  <div key={idx} className="relative group">
-                                    <img
-                                      src={role.iconSrc}
-                                      alt={role.label}
-                                      className="w-6 h-6 object-contain cursor-pointer"
-                                    />
-                                    <span className="pointer-events-none absolute -bottom-8 left-1/2 -translate-x-1/2 px-2 py-1 rounded-lg bg-black/90 border border-cyan-500/60 text-[0.65rem] text-cyan-200 opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap z-20">
-                                      {role.label}
-                                    </span>
-                                  </div>
-                                ))}
-                              </div>
-                            )}
-
                             {/* Dotabuff Icon */}
                             {currentPlayer.dotabuffUrl && (
                               <a
@@ -498,128 +650,147 @@ export default function Auction() {
                           </div>
 
                           {/* Right: Peak MMR */}
-                          <div className="bg-gradient-to-br from-purple-900/40 to-pink-900/40 border border-purple-500/50 rounded-lg p-1.5 flex-shrink-0 w-24">
-                            <p className="text-purple-400 text-[0.6rem] font-bold mb-0.5 text-center">PEAK</p>
-                            <div className="flex flex-col items-center gap-0.5">
+                          <div className="bg-gradient-to-br from-purple-900/40 to-pink-900/40 border border-purple-500/50 rounded-lg p-2 flex-shrink-0 w-28">
+                            <p className="text-purple-400 text-[0.65rem] font-bold mb-1 text-center">PEAK</p>
+                            <div className="flex flex-col items-center gap-1">
                               {currentPlayer.peakMedalLabel && (
                                 <div className="relative group">
                                   <img 
                                     src={`/medals/${currentPlayer.peakMedalLabel.replace(' ', '_')}.png`}
                                     alt={currentPlayer.peakMedalLabel}
-                                    className="w-6 h-6 object-contain cursor-pointer"
+                                    title={currentPlayer.peakMedalLabel}
+                                    className="w-10 h-10 object-contain cursor-pointer transition-transform hover:scale-110"
                                     onError={(e) => {
                                       e.currentTarget.style.display = 'none';
                                     }}
                                   />
-                                  <span className="pointer-events-none absolute -bottom-8 left-1/2 -translate-x-1/2 px-2 py-1 rounded-lg bg-black/90 border border-purple-500/60 text-[0.65rem] text-purple-200 opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap z-20">
+                                  <span className="pointer-events-none absolute -bottom-9 left-1/2 -translate-x-1/2 px-2 py-1 rounded-lg bg-black/95 border border-purple-500/70 text-[0.7rem] text-purple-200 opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap z-20 shadow-lg">
                                     {currentPlayer.peakMedalLabel}
                                   </span>
                                 </div>
                               )}
-                              <p className="text-purple-300 text-xs font-bold">{currentPlayer.peakMMR || 'N/A'}</p>
+                              <p className="text-purple-300 text-sm font-bold">{currentPlayer.peakMMR || 'N/A'}</p>
                             </div>
                           </div>
                         </div>
 
-                        {/* Seasons Played - Left Side */}
-                        {currentPlayer.seasonBadges && currentPlayer.seasonBadges.length > 0 && (
-                          <div className="mb-2 bg-gradient-to-br from-purple-900/30 to-indigo-900/30 rounded-lg p-2 border border-purple-500/40">
-                            <div className="flex items-center justify-center gap-2 flex-wrap">
-                              {currentPlayer.seasonBadges.map((badge: any, idx: number) => {
-                                const seasonNum = typeof badge === 'string' ? parseInt(badge.replace('s', '')) : badge;
-                                const seasonStyles: Record<number, string> = {
-                                  1: "bg-gradient-to-br from-cyan-400 via-blue-500 to-indigo-600 border border-cyan-300/50",
-                                  2: "bg-gradient-to-br from-emerald-400 via-green-500 to-teal-600 border border-emerald-300/50",
-                                  3: "bg-gradient-to-br from-fuchsia-400 via-purple-500 to-violet-600 border border-fuchsia-300/50",
-                                  4: "bg-gradient-to-br from-rose-400 via-pink-500 to-red-600 border border-rose-300/50",
-                                  5: "bg-gradient-to-br from-amber-400 via-orange-500 to-yellow-600 border border-amber-300/50",
-                                };
-                                
-                                return (
-                                  <div 
-                                    key={idx}
-                                    className={`flex items-center justify-center w-8 h-8 rounded-full transition-all duration-300 cursor-pointer hover:scale-110 ${
-                                      seasonStyles[seasonNum] || seasonStyles[1]
-                                    }`}
-                                    title={`Season ${seasonNum}`}
-                                  >
-                                    <span className="text-white text-[0.65rem] font-bold">S{seasonNum}</span>
+                        {/* Preferred Roles - Horizontal Layout */}
+                        {currentPlayer.roles && currentPlayer.roles.length > 0 && (
+                          <div className="mb-2 bg-gradient-to-br from-cyan-900/30 to-blue-900/30 rounded-lg p-2 border border-cyan-500/40">
+                            <div className="flex items-center gap-3">
+                              <p className="text-cyan-400 text-[0.65rem] font-bold whitespace-nowrap w-32">PREFERRED ROLES</p>
+                              <div className="flex items-center gap-2">
+                                {currentPlayer.roles.map((role: any, idx: number) => (
+                                  <div key={idx} className="relative group">
+                                    <img
+                                      src={role.iconSrc}
+                                      alt={role.label}
+                                      title={role.label}
+                                      className="w-6 h-6 object-contain cursor-pointer hover:scale-110 transition-transform"
+                                    />
+                                    <span className="pointer-events-none absolute -bottom-8 left-1/2 -translate-x-1/2 px-2 py-1 rounded-lg bg-black/95 border border-cyan-500/70 text-[0.65rem] text-cyan-200 opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap z-20 shadow-lg">
+                                      {role.label}
+                                    </span>
                                   </div>
-                                );
-                              })}
-                            </div>
-                          </div>
-                        )}
-
-                        {/* Trophy Cabinet - Only if player has won */}
-                        {currentPlayer.hasWonCup && (
-                          <div className="mb-2">
-                            <motion.div
-                              initial={{ opacity: 0, y: 10 }}
-                              animate={{ opacity: 1, y: 0 }}
-                              transition={{ delay: 0.6 }}
-                              whileHover={{ scale: 1.05 }}
-                              className={`flex items-center justify-center gap-1.5 px-3 py-1.5 rounded-lg border transition-all duration-300 cursor-pointer ${
-                                currentPlayer.cupRank === 'gold' ? 'bg-gradient-to-br from-yellow-900/30 to-amber-900/30 border-yellow-400' :
-                                currentPlayer.cupRank === 'silver' ? 'bg-gradient-to-br from-gray-800/30 to-gray-700/30 border-gray-400' :
-                                currentPlayer.cupRank === 'bronze' ? 'bg-gradient-to-br from-orange-900/30 to-amber-900/30 border-orange-400' :
-                                'bg-gradient-to-br from-yellow-900/30 to-amber-900/30 border-yellow-400'
-                              }`}
-                              title={currentPlayer.cupTooltip || `Season ${currentPlayer.cupSeason || ''} Champion`}
-                            >
-                              <span className="text-base">
-                                {currentPlayer.cupRank === 'gold' && '🏆'}
-                                {currentPlayer.cupRank === 'silver' && '🥈'}
-                                {currentPlayer.cupRank === 'bronze' && '🥉'}
-                                {!currentPlayer.cupRank && '🏆'}
-                              </span>
-                              <span className="text-white font-bold text-sm">Season {currentPlayer.cupSeason || '?'} Champion</span>
-                            </motion.div>
-                          </div>
-                        )}
-
-                        {/* Bid Info - Only Current Bid and Highest Bidder */}
-                        <div className="bg-black/50 rounded-lg p-2 border border-yellow-500/40 shadow-lg mb-2">
-                          {/* Current Bid */}
-                          <div className="text-center mb-2">
-                            <p className="text-gray-400 text-[0.65rem] mb-1">Current Bid</p>
-                            <motion.p 
-                              className="text-2xl font-bold text-green-400"
-                              animate={{ 
-                                scale: (auctionState.highest_bid || 0) > 0 ? [1, 1.1, 1] : 1
-                              }}
-                              transition={{ 
-                                duration: 0.5,
-                              }}
-                            >
-                              🪙 {auctionState.highest_bid || 0}
-                            </motion.p>
-                          </div>
-                          
-                          {/* Highest Bidder */}
-                          {auctionState.highest_bidder_name ? (
-                            <div className="pt-2 border-t border-yellow-500/30">
-                              <p className="text-gray-400 text-[0.65rem] mb-1 text-center">Highest Bidder</p>
-                              <div className="flex items-center justify-center gap-1.5">
-                                <Avatar
-                                  src=""
-                                  alt={auctionState.highest_bidder_name}
-                                  name={auctionState.highest_bidder_name}
-                                  size="sm"
-                                  className="border border-green-400"
-                                />
-                                <div>
-                                  <p className="text-white font-semibold text-[0.65rem]">{auctionState.highest_bidder_name}</p>
-                                  <p className="text-green-400 text-[0.65rem]">{auctionState.highest_bidder_team}</p>
-                                </div>
+                                ))}
                               </div>
                             </div>
-                          ) : (
-                            <div className="pt-2 border-t border-yellow-500/30">
-                              <p className="text-gray-500 text-[0.65rem] text-center italic">No bids yet</p>
+                          </div>
+                        )}
+
+                        {/* Best Heroes Section */}
+                        {currentPlayer.favoriteHeroes && currentPlayer.favoriteHeroes.length > 0 && (
+                          <div className="mb-2 bg-gradient-to-br from-red-900/30 to-orange-900/30 rounded-lg p-2 border border-red-500/40">
+                            <div className="flex items-center gap-3">
+                              <p className="text-red-400 text-[0.65rem] font-bold whitespace-nowrap w-32">BEST HEROES</p>
+                              <div className="flex items-center gap-2">
+                                {currentPlayer.favoriteHeroes.slice(0, 3).map((hero: any, idx: number) => (
+                                  <div 
+                                    key={idx}
+                                    className="relative group"
+                                    title={hero.name}
+                                  >
+                                    <video
+                                      src={hero.videoSrc}
+                                      autoPlay
+                                      loop
+                                      muted
+                                      playsInline
+                                      className="w-10 h-10 rounded-lg object-cover border-2 border-red-500/50 hover:border-red-400 transition-all cursor-pointer hover:scale-110"
+                                    />
+                                    <span className="pointer-events-none absolute -bottom-8 left-1/2 -translate-x-1/2 px-2 py-1 rounded-lg bg-black/95 border border-red-500/70 text-[0.65rem] text-red-200 opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap z-20 shadow-lg">
+                                      {hero.name}
+                                    </span>
+                                  </div>
+                                ))}
+                              </div>
                             </div>
-                          )}
-                        </div>
+                          </div>
+                        )}
+
+                        {/* Seasons Played - Horizontal Layout */}
+                        {currentPlayer.seasonBadges && currentPlayer.seasonBadges.length > 0 && (
+                          <div className="mb-2 bg-gradient-to-br from-purple-900/30 to-indigo-900/30 rounded-lg p-2 border border-purple-500/40">
+                            <div className="flex items-center gap-3">
+                              <p className="text-purple-400 text-[0.65rem] font-bold whitespace-nowrap w-32">SEASONS PLAYED</p>
+                              <div className="flex items-center gap-2">
+                                {currentPlayer.seasonBadges.map((badge: any, idx: number) => {
+                                  const seasonNum = typeof badge === 'string' ? parseInt(badge.replace('s', '')) : badge;
+                                  const seasonStyles: Record<number, string> = {
+                                    1: "bg-gradient-to-br from-cyan-400 via-blue-500 to-indigo-600 border border-cyan-300/50",
+                                    2: "bg-gradient-to-br from-emerald-400 via-green-500 to-teal-600 border border-emerald-300/50",
+                                    3: "bg-gradient-to-br from-fuchsia-400 via-purple-500 to-violet-600 border border-fuchsia-300/50",
+                                    4: "bg-gradient-to-br from-rose-400 via-pink-500 to-red-600 border border-rose-300/50",
+                                    5: "bg-gradient-to-br from-amber-400 via-orange-500 to-yellow-600 border border-amber-300/50",
+                                  };
+                                  
+                                  return (
+                                    <div 
+                                      key={idx}
+                                      className={`flex items-center justify-center w-7 h-7 rounded-full transition-all duration-300 cursor-pointer hover:scale-110 ${
+                                        seasonStyles[seasonNum] || seasonStyles[1]
+                                      }`}
+                                      title={`Season ${seasonNum}`}
+                                    >
+                                      <span className="text-white text-[0.6rem] font-bold">S{seasonNum}</span>
+                                    </div>
+                                  );
+                                })}
+                              </div>
+                            </div>
+                          </div>
+                        )}
+
+                        {/* Achievements - Only if player has won */}
+                        {currentPlayer.hasWonCup && (
+                          <div className="mb-2 bg-gradient-to-br from-amber-900/30 to-yellow-900/30 rounded-lg p-2 border border-yellow-500/40">
+                            <div className="flex items-center gap-3">
+                              <p className="text-yellow-400 text-[0.65rem] font-bold whitespace-nowrap w-32">ACHIEVEMENTS</p>
+                              <div className="flex items-center gap-2">
+                                {/* Achievement Badge */}
+                                <motion.div
+                                  initial={{ opacity: 0, scale: 0.8 }}
+                                  animate={{ opacity: 1, scale: 1 }}
+                                  transition={{ delay: 0.3 }}
+                                  whileHover={{ scale: 1.05 }}
+                                  className="flex items-center gap-1.5 px-2 py-1 rounded-lg bg-gradient-to-br from-yellow-900/40 to-amber-900/40 border border-yellow-500/50 cursor-pointer transition-all"
+                                  title={currentPlayer.cupTooltip || `Season ${currentPlayer.cupSeason || ''} Champion`}
+                                >
+                                  {/* Ranking Medal */}
+                                  <span className="text-base">
+                                    {currentPlayer.cupRank === 'gold' && '🏆'}
+                                    {currentPlayer.cupRank === 'silver' && '🥈'}
+                                    {currentPlayer.cupRank === 'bronze' && '🥉'}
+                                    {!currentPlayer.cupRank && '🏆'}
+                                  </span>
+                                  {/* Season Text */}
+                                  <span className="text-yellow-300 font-bold text-[0.65rem]">Season {currentPlayer.cupSeason || '?'}</span>
+                                </motion.div>
+                                {/* Future achievements can be added here */}
+                              </div>
+                            </div>
+                          </div>
+                        )}
 
                         {/* Notes for Captain - More Compact */}
                         <div className="mb-2 bg-gradient-to-br from-indigo-900/30 to-purple-900/30 rounded-lg p-1.5 border border-indigo-500/40">
@@ -651,16 +822,63 @@ export default function Auction() {
                             initial={{ opacity: 0, y: 10 }}
                             animate={{ opacity: 1, y: 0 }}
                             transition={{ delay: 0.3 }}
+                            className="space-y-2"
                           >
+                            {/* Team Selector - Only show when no bids */}
+                            {!auctionState?.highest_bidder_id && (
+                              <div className="bg-black/40 rounded-lg p-2 border border-purple-500/40 space-y-2">
+                                <div>
+                                  <label className="text-purple-300 text-xs font-semibold mb-1 block">
+                                    Select Team for Manual Assignment
+                                  </label>
+                                  <select
+                                    value={selectedTeamForManualAssign}
+                                    onChange={(e) => setSelectedTeamForManualAssign(e.target.value)}
+                                    className="w-full px-2 py-1.5 bg-black/60 border border-purple-500/40 rounded text-white text-xs focus:outline-none focus:ring-2 focus:ring-purple-500"
+                                  >
+                                    <option value="">-- Select Team --</option>
+                                    {captains.map((captain) => (
+                                      <option key={captain.playerId} value={captain.teamName}>
+                                        {captain.teamName} (Budget: {captain.budget})
+                                      </option>
+                                    ))}
+                                  </select>
+                                </div>
+                                
+                                <div>
+                                  <label className="text-yellow-300 text-xs font-semibold mb-1 block">
+                                    Set Price (Gold)
+                                  </label>
+                                  <input
+                                    type="text"
+                                    inputMode="numeric"
+                                    pattern="[0-9]*"
+                                    value={manualAssignPrice}
+                                    onChange={(e) => {
+                                      const value = e.target.value.replace(/[^0-9]/g, '');
+                                      setManualAssignPrice(value || '1');
+                                    }}
+                                    placeholder="Enter price"
+                                    className="w-full px-2 py-1.5 bg-black/60 border border-yellow-500/40 rounded text-white text-xs font-bold focus:outline-none focus:ring-2 focus:ring-yellow-500 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                                  />
+                                </div>
+                              </div>
+                            )}
+                            
                             <button
                               onClick={handleSellPlayer}
-                              className="w-full px-3 py-2 bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-500 hover:to-emerald-500 text-white text-sm font-bold rounded-lg transition-all duration-300 shadow-lg hover:shadow-green-500/50 flex items-center justify-center gap-2"
+                              disabled={!auctionState?.highest_bidder_id && !selectedTeamForManualAssign}
+                              className="w-full px-3 py-2 bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-500 hover:to-emerald-500 disabled:from-gray-600 disabled:to-gray-700 disabled:cursor-not-allowed text-white text-sm font-bold rounded-lg transition-all duration-300 shadow-lg hover:shadow-green-500/50 flex items-center justify-center gap-2"
                             >
                               <span className="text-base">🎯</span>
                               <span>Assign to Team</span>
                             </button>
                             {!auctionState?.highest_bidder_id && (
-                              <p className="text-gray-400 text-xs mt-1 text-center">No bids - Select team to assign manually</p>
+                              <p className="text-gray-400 text-xs text-center">
+                                {selectedTeamForManualAssign 
+                                  ? `Will assign to ${selectedTeamForManualAssign} for 🪙 ${manualAssignPrice}`
+                                  : 'No bids - Select team above'}
+                              </p>
                             )}
                           </motion.div>
                         )}
@@ -708,9 +926,12 @@ export default function Auction() {
                                     {/* Team Name & Captain */}
                                     <td className="py-2 px-2">
                                       <div className="flex flex-col">
-                                        <span className="text-blue-300 font-semibold truncate text-xs">
+                                        <Link 
+                                          to={`/team/${encodeURIComponent(captain.teamName)}`}
+                                          className="text-blue-300 font-semibold truncate text-xs hover:text-blue-200 hover:underline transition-colors"
+                                        >
                                           {captain.teamName}
-                                        </span>
+                                        </Link>
                                         <span className="text-gray-400 text-[0.65rem] truncate">
                                           {captain.playerNickname}
                                         </span>
@@ -742,6 +963,9 @@ export default function Auction() {
                                       }`}>
                                         {playerCount}/5
                                       </span>
+                                      {playerCount >= 5 && (
+                                        <div className="text-[0.6rem] text-green-400">✓ FULL</div>
+                                      )}
                                     </td>
                                   </motion.tr>
                                 );
@@ -792,7 +1016,7 @@ export default function Auction() {
 
                               {/* Buyer Info */}
                               <div className="bg-black/30 rounded-lg p-2 border border-green-500/30">
-                                <div className="text-xs mb-1 text-center">
+                                <div className="text-xs text-center">
                                   <span className="text-gray-400 block mb-1">Will play in team</span>
                                   <span className="text-emerald-300 font-semibold">
                                     {sold.teamName || 'Unknown Team'}
@@ -800,12 +1024,54 @@ export default function Auction() {
                                 </div>
                               </div>
 
-                              {/* Timestamp */}
-                              <div className="mt-1.5 text-center">
-                                <span className="text-gray-500 text-xs">
-                                  {new Date(sold.soldAt).toLocaleTimeString()}
-                                </span>
-                              </div>
+                              {/* Admin Reassignment Button */}
+                              {adminSession && (
+                                <button
+                                  onClick={async () => {
+                                    const confirmed = await confirm(
+                                      `Reassign ${sold.playerNickname} to a different team?\n\nThis will:\n• Refund ${sold.soldFor} to ${sold.teamName}\n• Allow you to assign to another team`,
+                                      'Reassign Player'
+                                    );
+                                    
+                                    if (!confirmed) return;
+
+                                    // Refund budget to original team
+                                    const originalCaptain = captains.find(c => c.teamName === sold.teamName);
+                                    if (originalCaptain) {
+                                      await captainService.updateBudget(
+                                        originalCaptain.playerId,
+                                        originalCaptain.budget + sold.soldFor
+                                      );
+                                    }
+
+                                    // Delete from auction_results
+                                    const { error } = await supabase
+                                      .from('auction_results')
+                                      .delete()
+                                      .eq('id', sold.id);
+
+                                    if (error) {
+                                      await alert('Failed to remove player from team', 'Error', 'warning');
+                                      return;
+                                    }
+
+                                    // Reload data
+                                    await Promise.all([
+                                      loadCaptains(),
+                                      loadSoldPlayers()
+                                    ]);
+
+                                    await alert(
+                                      `${sold.playerNickname} removed from ${sold.teamName}.\n\nBudget refunded: 🪙${sold.soldFor}\n\nYou can now reassign this player.`,
+                                      'Player Removed',
+                                      'success'
+                                    );
+                                  }}
+                                  className="mt-2 w-full px-2 py-1 bg-orange-600/20 hover:bg-orange-600/30 border border-orange-500/50 text-orange-300 rounded text-xs font-semibold transition-colors"
+                                >
+                                  🔄 Reassign
+                                </button>
+                              )}
                             </motion.div>
                           ))
                         )}
@@ -910,11 +1176,19 @@ export default function Auction() {
               className="bg-gradient-to-br from-purple-900/90 to-indigo-900/90 rounded-xl p-6 max-w-md w-full border border-purple-500/40"
               onClick={(e) => e.stopPropagation()}
             >
-              <h3 className="text-2xl font-bold text-white mb-4">Finalize Auction?</h3>
+              <h3 className="text-2xl font-bold text-white mb-4">Finalize Assignment?</h3>
               <p className="text-gray-300 text-sm mb-4">
                 Assign <span className="text-yellow-400 font-bold">{auctionState.current_player_data?.nickname}</span> to{' '}
-                <span className="text-green-400 font-bold">{auctionState.highest_bidder_team}</span> for{' '}
-                <span className="text-yellow-400 font-bold">🪙 {auctionState.highest_bid}</span>?
+                <span className="text-green-400 font-bold">
+                  {auctionState.highest_bidder_team || selectedTeamForManualAssign}
+                </span> for{' '}
+                <span className="text-yellow-400 font-bold">
+                  🪙 {auctionState.highest_bid || manualAssignPrice}
+                </span>
+                {!auctionState.highest_bidder_id && (
+                  <span className="text-purple-300"> (Manual Assignment)</span>
+                )}
+                ?
               </p>
               <div className="flex gap-3 mt-6">
                 <button

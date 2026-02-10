@@ -3,11 +3,12 @@ import { Link } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import TrophyCanvas from "../components/3d/TrophyCanvas";
 import registrationService from "../services/registrationService";
+import { supabase } from "../lib/supabase";
 
 export default function Home() {
   const [currentBg, setCurrentBg] = useState(1);
-  const [currentAnnouncement, setCurrentAnnouncement] = useState(0);
   const [currentVideo, setCurrentVideo] = useState(0);
+  const [currentAnnouncement, setCurrentAnnouncement] = useState(0);
   const [registrationEnabled, setRegistrationEnabled] = useState(false);
   const [registrationMessage, setRegistrationMessage] = useState('');
   
@@ -17,7 +18,6 @@ export default function Home() {
     { id: 3, url: '/bg3.jpg', name: 'BG3' }
   ];
 
-  // Roshan Rumble channel videos - you can add more video IDs here
   const roshanRumbleVideos = [
     { id: 'dAtqNgL9uEI', title: 'Season 5 Grand Final' },
     { id: '8M5u3HSr3wI', title: 'Season 5 Auction' },
@@ -25,7 +25,7 @@ export default function Home() {
 
   const announcements = [
     {
-      title: "Season 6 Comming Soon",
+      title: "Season 6 Coming Soon",
       description: "Registration will start soon",
       color: "from-green-500/20 to-emerald-500/20",
       border: "border-green-500/30"
@@ -38,7 +38,7 @@ export default function Home() {
     },
     {
       title: "New Season Starting Soon",
-      description: "Registerion will start soon",
+      description: "Registration will start soon",
       color: "from-blue-500/20 to-cyan-500/20",
       border: "border-blue-500/30"
     },
@@ -50,7 +50,14 @@ export default function Home() {
     }
   ];
 
-  // Auto-cycle backgrounds every 15 seconds
+  const nextVideo = () => {
+    setCurrentVideo((prev) => (prev + 1) % roshanRumbleVideos.length);
+  };
+
+  const prevVideo = () => {
+    setCurrentVideo((prev) => (prev - 1 + roshanRumbleVideos.length) % roshanRumbleVideos.length);
+  };
+
   useEffect(() => {
     const interval = setInterval(() => {
       setCurrentBg(prev => {
@@ -62,7 +69,6 @@ export default function Home() {
     return () => clearInterval(interval);
   }, []);
 
-  // Auto-cycle announcements every 4 seconds
   useEffect(() => {
     const interval = setInterval(() => {
       setCurrentAnnouncement(prev => (prev + 1) % announcements.length);
@@ -70,7 +76,6 @@ export default function Home() {
     return () => clearInterval(interval);
   }, [announcements.length]);
 
-  // Auto-cycle videos every 30 seconds to show different Roshan Rumble content
   useEffect(() => {
     const interval = setInterval(() => {
       setCurrentVideo(prev => (prev + 1) % roshanRumbleVideos.length);
@@ -78,45 +83,42 @@ export default function Home() {
     return () => clearInterval(interval);
   }, [roshanRumbleVideos.length]);
 
-  // Initialize with a random video on component mount
   useEffect(() => {
     setCurrentVideo(Math.floor(Math.random() * roshanRumbleVideos.length));
   }, [roshanRumbleVideos.length]);
 
-  // Load registration settings
   useEffect(() => {
-    const updateRegistrationState = () => {
-      setRegistrationEnabled(registrationService.isRegistrationEnabled());
-      setRegistrationMessage(registrationService.getRegistrationMessage());
+    const loadRegistrationState = async () => {
+      const enabled = await registrationService.isRegistrationEnabled();
+      const message = await registrationService.getRegistrationMessage();
+      setRegistrationEnabled(enabled);
+      setRegistrationMessage(message);
     };
 
-    // Initial load
-    updateRegistrationState();
+    loadRegistrationState();
 
-    // Listen for changes
+    // Subscribe to real-time changes
+    const channel = registrationService.subscribeToChanges((settings) => {
+      setRegistrationEnabled(settings.isEnabled);
+      setRegistrationMessage(settings.message || 'Registration starting soon. Stay tuned for updates.');
+    });
+
+    // Also listen for local custom events (for immediate UI updates)
     const handleSettingsChange = () => {
-      updateRegistrationState();
+      loadRegistrationState();
     };
 
     window.addEventListener('registrationSettingsChanged', handleSettingsChange);
     
     return () => {
       window.removeEventListener('registrationSettingsChanged', handleSettingsChange);
+      supabase.removeChannel(channel);
     };
   }, []);
 
-  // Navigation functions for video slider
-  const nextVideo = () => {
-    setCurrentVideo(prev => (prev + 1) % roshanRumbleVideos.length);
-  };
-
-  const prevVideo = () => {
-    setCurrentVideo(prev => prev === 0 ? roshanRumbleVideos.length - 1 : prev - 1);
-  };
-
   return (
     <>
-      {/* Fixed Background - Same pattern as AdminLogin and HallOfFame */}
+      {/* Fixed Background */}
       <div className="fixed inset-0 z-0">
         <div 
           className="absolute inset-0 bg-cover bg-center bg-no-repeat transition-all duration-1000 ease-in-out"
@@ -124,7 +126,6 @@ export default function Home() {
             backgroundImage: `url(${backgrounds.find(bg => bg.id === currentBg)?.url})`,
           }}
         />
-        {/* Much lighter overlay to make background visible */}
         <div 
           className="absolute inset-0"
           style={{
@@ -132,270 +133,235 @@ export default function Home() {
           }}
         />
         <div className="absolute inset-0 bg-gradient-to-br from-gray-800/10 via-slate-900/15 to-gray-900/20" />
-        {/* Subtle animated orbs with reduced opacity */}
         <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-gradient-to-r from-gray-400/5 to-slate-400/5 rounded-full blur-3xl animate-pulse" />
         <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-gradient-to-r from-slate-500/5 to-gray-500/5 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '1s' }} />
       </div>
 
-      {/* Main Content - Same pattern as AdminLogin and HallOfFame */}
+      {/* Main Content */}
       <main className="home-page relative py-1 pt-24">
         <div className="relative z-10 min-h-0">
-          <div className="max-w-5xl mx-auto px-2 sm:px-4 lg:px-6">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full">
             
-            {/* Header - Same pattern as HallOfFame */}
-            <div className="text-center mb-6 relative pt-4">
-              <p className="text-base md:text-lg lg:text-xl xl:text-2xl text-gray-400">India's premier amateur league for all ranks.</p>
+            {/* Header */}
+            <div className="text-center mb-3 pt-2">
+              <h1 className="text-xl md:text-2xl lg:text-3xl font-bold text-white">
+                India's premier amateur league for all ranks.
+              </h1>
             </div>
 
-            {/* Main Content Grid - Same pattern as AdminLogin */}
-            <div className="w-full flex justify-center pb-4">
-              <div className="w-full max-w-[1100px] px-3 sm:px-4 md:px-6 relative">
-                <div className="grid grid-cols-1 md:grid-cols-4 lg:grid-cols-6 gap-3 sm:gap-4 md:gap-6 items-center w-full">
-                  
-                  {/* Left Column - Announcements */}
-                  <div className="space-y-2 md:col-span-1 lg:col-span-2">
-                    
-                    {/* Announcements Card with Slider */}
-                    <div className="bg-gradient-to-br from-blue-900/30 to-cyan-900/20 backdrop-blur-xl border border-blue-500/40 rounded-xl p-2.5 hover:border-blue-400/60 hover:from-blue-800/40 hover:to-cyan-800/30 transition-all duration-300 group text-center relative h-48">
-                      {/* Subtle glow effect on hover */}
-                      <div className="absolute inset-0 bg-gradient-to-br from-blue-400/10 to-cyan-400/10 opacity-0 group-hover:opacity-100 transition-opacity duration-300 rounded-xl" />
-                      
-                      <div className="relative z-10 h-full flex flex-col">
-                        <div className="flex items-center space-x-2 mb-2 justify-center">
-                          <div className="w-4 h-4 bg-blue-500/30 rounded-lg flex items-center justify-center">
-                            <svg className="w-3 h-3 text-blue-300" fill="currentColor" viewBox="0 0 20 20">
-                              <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
-                            </svg>
-                          </div>
-                          <h3 className="text-xs font-bold text-blue-100">ANNOUNCEMENTS</h3>
-                        </div>
-                        
-                        {/* Announcement Slider */}
-                        <div className="mb-2 flex-1 flex flex-col justify-center">
-                          <AnimatePresence mode="wait">
-                            <motion.div
-                              key={currentAnnouncement}
-                              initial={{ opacity: 0, x: 20 }}
-                              animate={{ opacity: 1, x: 0 }}
-                              exit={{ opacity: 0, x: -20 }}
-                              transition={{ duration: 0.5 }}
-                              className={`p-1.5 rounded-lg bg-gradient-to-br ${announcements[currentAnnouncement].color} border ${announcements[currentAnnouncement].border} mb-1`}
-                            >
-                              <div className="flex items-center space-x-1 mb-1">
-                                <svg className="w-3 h-3 text-yellow-300" fill="currentColor" viewBox="0 0 20 20">
-                                  <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
-                                </svg>
-                                <h4 className="font-bold text-white text-xs">{announcements[currentAnnouncement].title}</h4>
-                              </div>
-                              <p className="text-gray-300 text-xs">{announcements[currentAnnouncement].description}</p>
-                            </motion.div>
-                          </AnimatePresence>
-
-                          {/* Slider Dots */}
-                          <div className="flex justify-center space-x-1 mb-1">
-                            {announcements.map((_, index) => (
-                              <button
-                                key={index}
-                                onClick={() => setCurrentAnnouncement(index)}
-                                className={`w-1 h-1 rounded-full transition-colors ${
-                                  index === currentAnnouncement ? 'bg-blue-300' : 'bg-blue-300/30'
-                                }`}
-                              />
-                            ))}
-                          </div>
-                        </div>
-                        
-                        <Link 
-                          to="/announcements"
-                          className="inline-flex items-center justify-center rounded-full px-5 py-2 text-sm font-bold uppercase tracking-[0.2em] bg-gradient-to-r from-zinc-50 via-zinc-300 to-zinc-100 text-[#050608] shadow-[0_0_22px_rgba(148,163,184,0.85)] hover:brightness-110 transition"
-                        >
-                          LATEST UPDATES
-                        </Link>
+            {/* Main Content - 3 Column Layout */}
+            <div className="flex flex-col items-center space-y-2 pb-4">
+              
+              {/* Top Row - Announcements, Empty Space, Registration */}
+              <div className="grid grid-cols-1 lg:grid-cols-[1fr_1.5fr_1fr] gap-2 w-full">
+                
+                {/* Announcements Card - Left */}
+                <Link 
+                  to="/announcements"
+                  className="block bg-gradient-to-br from-blue-900/40 to-cyan-900/30 backdrop-blur-xl border border-blue-500/50 rounded-2xl p-4 hover:border-blue-400/70 transition-all duration-300 group h-52 cursor-pointer"
+                >
+                  <div className="h-full flex flex-col">
+                    <div className="flex items-center space-x-3 mb-2">
+                      <div className="w-8 h-8 bg-blue-500/30 rounded-lg flex items-center justify-center">
+                        <svg className="w-5 h-5 text-blue-300" fill="currentColor" viewBox="0 0 20 20">
+                          <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
+                        </svg>
                       </div>
+                      <h3 className="text-base font-bold text-blue-100">ANNOUNCEMENTS</h3>
                     </div>
-
-                  </div>
-
-                  {/* Center Column - Aegis + YouTube */}
-                  <div className="flex justify-center md:col-span-2 lg:col-span-2">
-                    <div className="text-center space-y-2">
-                      {/* Aegis */}
-                      <div className="w-48 h-48 md:w-56 md:h-56 lg:w-64 lg:h-64 xl:w-72 xl:h-72 mx-auto">
-                        <TrophyCanvas />
-                      </div>
-                      
-                      <div className="text-xs font-bold text-white bg-blue-600/30 backdrop-blur-sm border border-blue-500/40 rounded-lg px-3 py-1.5 inline-block">
-                        AEGIS OF CHAMPIONS
-                      </div>
-
-                      {/* YouTube Tab Below Aegis */}
-                      <div className="bg-gradient-to-br from-red-900/30 to-orange-900/20 backdrop-blur-xl border border-red-500/40 rounded-xl p-2.5 hover:border-red-400/60 hover:from-red-800/40 hover:to-orange-800/30 transition-all duration-300 group text-center relative">
-                        {/* Subtle glow effect on hover */}
-                        <div className="absolute inset-0 bg-gradient-to-br from-red-400/10 to-orange-400/10 opacity-0 group-hover:opacity-100 transition-opacity duration-300 rounded-xl" />
-                        
-                        <div className="relative z-10 flex flex-col">
-                          <div className="flex items-center space-x-2 mb-2 justify-center">
-                            <div className="w-4 h-4 bg-red-500/30 rounded-lg flex items-center justify-center">
-                              <svg className="w-3 h-3 text-red-300" fill="currentColor" viewBox="0 0 20 20">
-                                <path fillRule="evenodd" d="M4 3a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V5a2 2 0 00-2-2H4zm3 2h6v4H7V5zm8 8v2h1v-2h-1zm-2-2H7v4h6v-4z" clipRule="evenodd" />
-                              </svg>
-                            </div>
-                            <h3 className="text-xs font-bold text-red-100">WATCH</h3>
-                          </div>
-                          
-                          {/* Mini Player */}
-                          <div className="mb-2 flex-1 flex flex-col justify-center relative">
-                            {/* Left Navigation Button */}
-                            <button
-                              onClick={prevVideo}
-                              className="absolute left-0 top-1/2 transform -translate-y-1/2 z-20 w-6 h-6 bg-red-600/40 hover:bg-red-600/60 border border-red-500/50 hover:border-red-400/70 rounded-full text-red-200 text-sm font-bold transition-all duration-300 flex items-center justify-center shadow-lg"
-                            >
-                              ‹
-                            </button>
-                            
-                            {/* Right Navigation Button */}
-                            <button
-                              onClick={nextVideo}
-                              className="absolute right-0 top-1/2 transform -translate-y-1/2 z-20 w-6 h-6 bg-red-600/40 hover:bg-red-600/60 border border-red-500/50 hover:border-red-400/70 rounded-full text-red-200 text-sm font-bold transition-all duration-300 flex items-center justify-center shadow-lg"
-                            >
-                              ›
-                            </button>
-                            
-                            <div className="bg-black/40 rounded-lg p-1 border border-red-500/30 mx-8">
-                              <div className="relative aspect-video rounded overflow-hidden group" style={{ maxHeight: '120px' }}>
-                                <iframe
-                                  key={currentVideo}
-                                  src={`https://www.youtube.com/embed/${roshanRumbleVideos[currentVideo].id}?autoplay=0&mute=0&controls=1&modestbranding=1&rel=0`}
-                                  title={`Roshan Rumble - ${roshanRumbleVideos[currentVideo].title}`}
-                                  className="w-full h-full"
-                                  frameBorder="0"
-                                  allow="accelerometer; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                                  allowFullScreen
-                                />
-                              </div>
-                              
-                              {/* Video indicator */}
-                              <div className="mt-1 text-center">
-                                <p className="text-red-100 text-xs font-medium truncate">{roshanRumbleVideos[currentVideo].title}</p>
-                                <div className="flex justify-center space-x-1 mt-0.5">
-                                  {roshanRumbleVideos.map((_, index) => (
-                                    <button
-                                      key={index}
-                                      onClick={() => setCurrentVideo(index)}
-                                      className={`w-1 h-1 rounded-full transition-colors ${
-                                        index === currentVideo ? 'bg-red-300' : 'bg-red-300/30'
-                                      }`}
-                                    />
-                                  ))}
-                                </div>
-                              </div>
-                            </div>
-                          </div>
-                        </div>
+                    
+                    <div className="flex-1 relative overflow-hidden mb-2">
+                      <AnimatePresence mode="wait">
+                        <motion.div
+                          key={currentAnnouncement}
+                          initial={{ opacity: 0, x: 50 }}
+                          animate={{ opacity: 1, x: 0 }}
+                          exit={{ opacity: 0, x: -50 }}
+                          transition={{ duration: 0.5 }}
+                          className={`absolute inset-0 bg-gradient-to-br ${announcements[currentAnnouncement].color} border ${announcements[currentAnnouncement].border} rounded-xl p-4 flex flex-col justify-center`}
+                        >
+                          <h4 className="text-white font-bold text-base mb-1">
+                            {announcements[currentAnnouncement].title}
+                          </h4>
+                          <p className="text-gray-200 text-xs">
+                            {announcements[currentAnnouncement].description}
+                          </p>
+                        </motion.div>
+                      </AnimatePresence>
+                    </div>
+                    
+                    <div className="w-full flex justify-center">
+                      <div className="inline-flex items-center justify-center rounded-full px-6 py-1.5 text-xs font-bold uppercase tracking-wider bg-white text-gray-900 shadow-lg group-hover:brightness-95 transition cursor-pointer">
+                        VIEW ALL
                       </div>
                     </div>
                   </div>
+                </Link>
 
-                  {/* Right Column - Registration, Champions & Admin Panel */}
-                  <div className="space-y-2 md:col-span-1 lg:col-span-2">
-                    
-                    {/* Registration Card */}
-                    <div className="bg-gradient-to-br from-purple-900/30 to-pink-900/20 backdrop-blur-xl border border-purple-500/40 rounded-xl p-2.5 hover:border-purple-400/60 hover:from-purple-800/40 hover:to-pink-800/30 transition-all duration-300 group text-center relative h-32">
-                      {/* Subtle glow effect on hover */}
-                      <div className="absolute inset-0 bg-gradient-to-br from-purple-400/10 to-pink-400/10 opacity-0 group-hover:opacity-100 transition-opacity duration-300 rounded-xl" />
-                      
-                      <div className="relative z-10 h-full flex flex-col justify-center">
-                        <div className="flex items-center space-x-2 mb-1 justify-center">
-                          <div className="w-4 h-4 bg-purple-500/30 rounded-lg flex items-center justify-center">
-                            <svg className="w-3 h-3 text-purple-300" fill="currentColor" viewBox="0 0 20 20">
-                              <path fillRule="evenodd" d="M6 2a2 2 0 00-2 2v12a2 2 0 002 2h8a2 2 0 002-2V4a2 2 0 00-2-2H6zm1 2a1 1 0 000 2h6a1 1 0 100-2H7zm6 7a1 1 0 011 1v3a1 1 0 11-2 0v-3a1 1 0 011-1zm-3 3a1 1 0 100 2h.01a1 1 0 100-2H10zm-4 1a1 1 0 011-1h.01a1 1 0 110 2H7a1 1 0 01-1-1zm1-4a1 1 0 100 2h.01a1 1 0 100-2H7zm2 0a1 1 0 100 2h.01a1 1 0 100-2H9zm2 0a1 1 0 100 2h.01a1 1 0 100-2H11z" clipRule="evenodd" />
-                            </svg>
-                          </div>
-                          <h3 className="text-xs font-bold text-purple-100">REGISTRATION</h3>
-                        </div>
-                        
-                        <p className="text-purple-200 text-xs mb-2 flex-1 flex items-center justify-center">
-                          {registrationMessage}
-                        </p>
-                        
-                        {registrationEnabled ? (
-                          <Link 
-                            to="/new-player-registration"
-                            className="inline-flex items-center justify-center rounded-full px-5 py-2 text-sm font-bold uppercase tracking-[0.2em] bg-gradient-to-r from-zinc-50 via-zinc-300 to-zinc-100 text-[#050608] shadow-[0_0_22px_rgba(148,163,184,0.85)] hover:brightness-110 transition"
-                          >
-                            REGISTER NOW
-                          </Link>
-                        ) : (
-                          <button 
-                            disabled
-                            className="inline-flex items-center justify-center rounded-full px-5 py-2 text-sm font-bold uppercase tracking-[0.2em] bg-gradient-to-r from-zinc-400 via-zinc-500 to-zinc-400 text-zinc-800 shadow-[0_0_22px_rgba(100,100,100,0.5)] cursor-not-allowed opacity-60"
-                          >
-                            STARTING SOON
-                          </button>
-                        )}
-                      </div>
-                    </div>
+                {/* Empty Middle Space */}
+                <div></div>
 
-                    {/* Champions Card */}
-                    <div className="bg-gradient-to-br from-amber-900/30 to-yellow-900/20 backdrop-blur-xl border border-amber-500/40 rounded-xl p-2.5 hover:border-amber-400/60 hover:from-amber-800/40 hover:to-yellow-800/30 transition-all duration-300 group text-center relative h-32">
-                      {/* Subtle glow effect on hover */}
-                      <div className="absolute inset-0 bg-gradient-to-br from-amber-400/10 to-yellow-400/10 opacity-0 group-hover:opacity-100 transition-opacity duration-300 rounded-xl" />
-                      
-                      <div className="relative z-10 h-full flex flex-col justify-center">
-                        <div className="flex items-center space-x-2 mb-1 justify-center">
-                          <div className="w-4 h-4 bg-amber-500/30 rounded-lg flex items-center justify-center">
-                            <svg className="w-3 h-3 text-amber-300" fill="currentColor" viewBox="0 0 20 20">
-                              <path fillRule="evenodd" d="M6.267 3.455a3.066 3.066 0 001.745-.723 3.066 3.066 0 013.976 0 3.066 3.066 0 001.745.723 3.066 3.066 0 012.812 2.812c.051.643.304 1.254.723 1.745a3.066 3.066 0 010 3.976 3.066 3.066 0 00-.723 1.745 3.066 3.066 0 01-2.812 2.812 3.066 3.066 0 00-1.745.723 3.066 3.066 0 01-3.976 0 3.066 3.066 0 00-1.745-.723 3.066 3.066 0 01-2.812-2.812 3.066 3.066 0 00-.723-1.745 3.066 3.066 0 010-3.976 3.066 3.066 0 00.723-1.745 3.066 3.066 0 012.812-2.812zm7.44 5.252a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
-                            </svg>
-                          </div>
-                          <h3 className="text-xs font-bold text-amber-100">CHAMPION</h3>
-                        </div>
-                        
-                        <p className="text-amber-200 text-xs mb-2 flex-1 flex items-center justify-center">
-                          Champions across all seasons.
-                        </p>
-                        
-                        <Link 
-                          to="/hall-of-fame"
-                          className="inline-flex items-center justify-center rounded-full px-5 py-2 text-sm font-bold uppercase tracking-[0.2em] bg-gradient-to-r from-zinc-50 via-zinc-300 to-zinc-100 text-[#050608] shadow-[0_0_22px_rgba(148,163,184,0.85)] hover:brightness-110 transition"
-                        >
-                          VIEW HALL OF FAME
-                        </Link>
+                {/* Registration Card - Right */}
+                <div className="bg-gradient-to-br from-purple-900/40 to-pink-900/30 backdrop-blur-xl border border-purple-500/50 rounded-2xl p-4 hover:border-purple-400/70 transition-all duration-300 group h-52">
+                  <div className="h-full flex flex-col">
+                    <div className="flex items-center space-x-3 mb-2">
+                      <div className="w-8 h-8 bg-purple-500/30 rounded-lg flex items-center justify-center">
+                        <svg className="w-5 h-5 text-purple-300" fill="currentColor" viewBox="0 0 20 20">
+                          <path fillRule="evenodd" d="M6 2a2 2 0 00-2 2v12a2 2 0 002 2h8a2 2 0 002-2V4a2 2 0 00-2-2H6zm1 2a1 1 0 000 2h6a1 1 0 100-2H7zm6 7a1 1 0 011 1v3a1 1 0 11-2 0v-3a1 1 0 011-1zm-3 3a1 1 0 100 2h.01a1 1 0 100-2H10zm-4 1a1 1 0 011-1h.01a1 1 0 110 2H7a1 1 0 01-1-1zm1-4a1 1 0 100 2h.01a1 1 0 100-2H7zm2 0a1 1 0 100 2h.01a1 1 0 100-2H9zm2 0a1 1 0 100 2h.01a1 1 0 100-2H11z" clipRule="evenodd" />
+                        </svg>
                       </div>
+                      <h3 className="text-base font-bold text-purple-100">REGISTRATION</h3>
                     </div>
                     
-                    {/* Admin Panel Card */}
-                    <div className="bg-gradient-to-br from-green-900/30 to-emerald-900/20 backdrop-blur-xl border border-green-500/40 rounded-xl p-2.5 hover:border-green-400/60 hover:from-green-800/40 hover:to-emerald-800/30 transition-all duration-300 group text-center relative h-32">
-                      {/* Subtle glow effect on hover */}
-                      <div className="absolute inset-0 bg-gradient-to-br from-green-400/10 to-emerald-400/10 opacity-0 group-hover:opacity-100 transition-opacity duration-300 rounded-xl" />
-                      
-                      <div className="relative z-10 h-full flex flex-col justify-center">
-                        <div className="flex items-center space-x-2 mb-1 justify-center">
-                          <div className="w-4 h-4 bg-green-500/30 rounded-lg flex items-center justify-center">
-                            <svg className="w-3 h-3 text-green-300" fill="currentColor" viewBox="0 0 20 20">
-                              <path fillRule="evenodd" d="M11.49 3.17c-.38-1.56-2.6-1.56-2.98 0a1.532 1.532 0 01-2.286.948c-1.372-.836-2.942.734-2.106 2.106.54.886.061 2.042-.947 2.287-1.561.379-1.561 2.6 0 2.978a1.532 1.532 0 01.947 2.287c-.836 1.372.734 2.942 2.106 2.106a1.532 1.532 0 012.287.947c.379 1.561 2.6 1.561 2.978 0a1.533 1.533 0 012.287-.947c1.372.836 2.942-.734 2.106-2.106a1.533 1.533 0 01.947-2.287c1.561-.379 1.561-2.6 0-2.978a1.532 1.532 0 01-.947-2.287c.836-1.372-.734-2.942-2.106-2.106a1.532 1.532 0 01-2.287-.947zM10 13a3 3 0 100-6 3 3 0 000 6z" clipRule="evenodd" />
-                            </svg>
-                          </div>
-                          <h3 className="text-xs font-bold text-green-100">ADMIN PANEL</h3>
-                        </div>
-                        
-                        <p className="text-green-200 text-xs mb-2 flex-1 flex items-center justify-center">
-                          Connect or Contact with admins for support.
-                        </p>
-                        
+                    <div className="flex-1 flex flex-col justify-center mb-2">
+                      <p className="text-purple-200 text-xs mb-2">
+                        {registrationMessage}
+                      </p>
+                    </div>
+                    
+                    {registrationEnabled ? (
+                      <div className="w-full flex justify-center">
                         <Link 
-                          to="/admins"
-                          className="inline-flex items-center justify-center rounded-full px-5 py-2 text-sm font-bold uppercase tracking-[0.2em] bg-gradient-to-r from-zinc-50 via-zinc-300 to-zinc-100 text-[#050608] shadow-[0_0_22px_rgba(148,163,184,0.85)] hover:brightness-110 transition"
+                          to="/new-player-registration"
+                          className="inline-flex items-center justify-center rounded-full px-6 py-1.5 text-xs font-bold uppercase tracking-wider bg-white text-gray-900 shadow-lg hover:brightness-95 transition cursor-pointer"
                         >
-                          ADMINS ↗
+                          REGISTER NOW
                         </Link>
                       </div>
-                    </div>
-
+                    ) : (
+                      <div className="w-full flex justify-center">
+                        <button 
+                          disabled
+                          className="inline-flex items-center justify-center rounded-full px-6 py-1.5 text-xs font-bold uppercase tracking-wider bg-gray-400 text-gray-700 shadow-lg cursor-not-allowed opacity-60"
+                        >
+                          STARTING SOON
+                        </button>
+                      </div>
+                    )}
                   </div>
+                </div>
 
+              </div>
+
+              {/* Middle Row - Aegis */}
+              <div className="flex justify-center -mt-32">
+                <div className="w-64 h-64">
+                  <TrophyCanvas />
                 </div>
               </div>
+
+              {/* Bottom Row - Champions, YouTube, Admin Panel */}
+              <div className="grid grid-cols-1 lg:grid-cols-[1fr_1.5fr_1fr] gap-2 w-full -mt-32">
+                
+                {/* Champions Card - First */}
+                <div className="bg-gradient-to-br from-amber-900/40 to-yellow-900/30 backdrop-blur-xl border border-amber-500/50 rounded-2xl p-3 hover:border-amber-400/70 transition-all duration-300 group h-44">
+                  <div className="h-full flex flex-col">
+                    <div className="flex items-center space-x-3 mb-2">
+                      <div className="w-8 h-8 bg-amber-500/30 rounded-lg flex items-center justify-center">
+                        <svg className="w-5 h-5 text-amber-300" fill="currentColor" viewBox="0 0 20 20">
+                          <path fillRule="evenodd" d="M6.267 3.455a3.066 3.066 0 001.745-.723 3.066 3.066 0 013.976 0 3.066 3.066 0 001.745.723 3.066 3.066 0 012.812 2.812c.051.643.304 1.254.723 1.745a3.066 3.066 0 010 3.976 3.066 3.066 0 00-.723 1.745 3.066 3.066 0 01-2.812 2.812 3.066 3.066 0 00-1.745.723 3.066 3.066 0 01-3.976 0 3.066 3.066 0 00-1.745-.723 3.066 3.066 0 01-2.812-2.812 3.066 3.066 0 00-.723-1.745 3.066 3.066 0 010-3.976 3.066 3.066 0 00.723-1.745 3.066 3.066 0 012.812-2.812zm7.44 5.252a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+                        </svg>
+                      </div>
+                      <h3 className="text-base font-bold text-amber-100">CHAMPION</h3>
+                    </div>
+                    
+                    <div className="flex-1 flex flex-col justify-center mb-2">
+                      <p className="text-amber-200 text-xs">
+                        Champions across all seasons.
+                      </p>
+                    </div>
+                    
+                    <div className="w-full flex justify-center">
+                      <Link 
+                        to="/hall-of-fame"
+                        className="inline-flex items-center justify-center rounded-full px-6 py-1.5 text-xs font-bold uppercase tracking-wider bg-white text-gray-900 shadow-lg hover:brightness-95 transition cursor-pointer"
+                      >
+                        VIEW HALL OF FAME
+                      </Link>
+                    </div>
+                  </div>
+                </div>
+
+                {/* YouTube - Second */}
+                <div className="bg-gradient-to-br from-red-900/40 to-orange-900/30 backdrop-blur-xl border border-red-500/50 rounded-2xl p-3 hover:border-red-400/70 transition-all duration-300 h-44 flex flex-col">
+                  {/* Video Player with Navigation */}
+                  <div className="flex-1 flex items-center gap-2 mb-1 min-h-0">
+                    {/* Previous Button */}
+                    <button
+                      onClick={prevVideo}
+                      className="flex-shrink-0 w-6 h-6 flex items-center justify-center bg-black/50 hover:bg-black/70 rounded-full transition-colors cursor-pointer"
+                      aria-label="Previous video"
+                    >
+                      <svg className="w-3 h-3 text-white" fill="currentColor" viewBox="0 0 20 20">
+                        <path fillRule="evenodd" d="M12.707 5.293a1 1 0 010 1.414L9.414 10l3.293 3.293a1 1 0 01-1.414 1.414l-4-4a1 1 0 010-1.414l4-4a1 1 0 011.414 0z" clipRule="evenodd" />
+                      </svg>
+                    </button>
+
+                    {/* Video */}
+                    <div className="flex-1 bg-black/50 rounded-lg overflow-hidden min-h-0 h-full">
+                      <div className="relative w-full h-full">
+                        <iframe
+                          key={currentVideo}
+                          src={`https://www.youtube.com/embed/${roshanRumbleVideos[currentVideo].id}?autoplay=0&mute=0&controls=1&modestbranding=1&rel=0`}
+                          title={`Roshan Rumble - ${roshanRumbleVideos[currentVideo].title}`}
+                          className="w-full h-full border-0"
+                          allow="accelerometer; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                          allowFullScreen
+                        />
+                      </div>
+                    </div>
+
+                    {/* Next Button */}
+                    <button
+                      onClick={nextVideo}
+                      className="flex-shrink-0 w-6 h-6 flex items-center justify-center bg-black/50 hover:bg-black/70 rounded-full transition-colors cursor-pointer"
+                      aria-label="Next video"
+                    >
+                      <svg className="w-3 h-3 text-white" fill="currentColor" viewBox="0 0 20 20">
+                        <path fillRule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clipRule="evenodd" />
+                      </svg>
+                    </button>
+                  </div>
+
+                  {/* Video Description */}
+                  <div className="text-center flex-shrink-0">
+                    <p className="text-red-200 text-xs font-medium truncate">
+                      {roshanRumbleVideos[currentVideo].title}
+                    </p>
+                  </div>
+                </div>
+
+                {/* Admin Panel Card - Third */}
+                <div className="bg-gradient-to-br from-green-900/40 to-emerald-900/30 backdrop-blur-xl border border-green-500/50 rounded-2xl p-3 hover:border-green-400/70 transition-all duration-300 group h-44">
+                  <div className="h-full flex flex-col">
+                    <div className="flex items-center space-x-3 mb-2">
+                      <div className="w-8 h-8 bg-green-500/30 rounded-lg flex items-center justify-center">
+                        <svg className="w-5 h-5 text-green-300" fill="currentColor" viewBox="0 0 20 20">
+                          <path fillRule="evenodd" d="M11.49 3.17c-.38-1.56-2.6-1.56-2.98 0a1.532 1.532 0 01-2.286.948c-1.372-.836-2.942.734-2.106 2.106.54.886.061 2.042-.947 2.287-1.561.379-1.561 2.6 0 2.978a1.532 1.532 0 01.947 2.287c-.836 1.372.734 2.942 2.106 2.106a1.532 1.532 0 012.287.947c.379 1.561 2.6 1.561 2.978 0a1.533 1.533 0 012.287-.947c1.372.836 2.942-.734 2.106-2.106a1.533 1.533 0 01.947-2.287c1.561-.379 1.561-2.6 0-2.978a1.532 1.532 0 01-.947-2.287c.836-1.372-.734-2.942-2.106-2.106a1.532 1.532 0 01-2.287-.947zM10 13a3 3 0 100-6 3 3 0 000 6z" clipRule="evenodd" />
+                        </svg>
+                      </div>
+                      <h3 className="text-base font-bold text-green-100">ADMIN PANEL</h3>
+                    </div>
+                    
+                    <div className="flex-1 flex flex-col justify-center mb-2">
+                      <p className="text-green-200 text-xs">
+                        Connect or Contact with admins for support.
+                      </p>
+                    </div>
+                    
+                    <div className="w-full flex justify-center">
+                      <Link 
+                        to="/admins"
+                        className="inline-flex items-center justify-center rounded-full px-6 py-1.5 text-xs font-bold uppercase tracking-wider bg-white text-gray-900 shadow-lg hover:brightness-95 transition cursor-pointer"
+                      >
+                        ADMINS ↗
+                      </Link>
+                    </div>
+                  </div>
+                </div>
+
+              </div>
+
             </div>
 
           </div>

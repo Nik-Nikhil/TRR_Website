@@ -13,9 +13,13 @@ import { admins } from '../data/admins';
 import AuthService from '../services/auth';
 import RegistrationControl from '../components/admin/RegistrationControl';
 import { AuctionControl } from '../components/admin/AuctionControl';
+import { AuctionHistory } from '../components/admin/AuctionHistory';
 import { CaptainManagement } from '../components/admin/CaptainManagement';
+import { AdminSettings } from '../components/admin/AdminSettings';
+import { ProfileUpdateRequests } from '../components/admin/ProfileUpdateRequests';
 import { AuctionService } from '../services/auctionService';
 import messagingService from '../services/messagingService';
+import profileUpdateService from '../services/profileUpdateService';
 
 interface ActivityLog {
   id: string;
@@ -202,6 +206,7 @@ export default function AdminDashboard() {
   const navigationItems = [
     { id: 'dashboard', label: 'Dashboard', icon: BarChart3, description: 'Overview & Analytics' },
     { id: 'messages', label: 'Messages', icon: MessageSquare, description: 'Player Messages', badge: unreadCount > 0 ? unreadCount : undefined },
+    { id: 'profile-updates', label: 'Profile Updates', icon: UserPlus, description: 'Approve Changes', badge: profileUpdateService.getPendingCount() > 0 ? profileUpdateService.getPendingCount() : undefined },
     { id: 'players', label: 'Player Management', icon: Users, description: 'Manage Players' },
     { id: 'captains', label: 'Captain Management', icon: Shield, description: 'Assign Captains' },
     { id: 'registration', label: 'Registration', icon: UserPlus, description: 'Control Settings' },
@@ -722,171 +727,7 @@ export default function AdminDashboard() {
 
   // Render auction history
   const renderAuctionHistory = () => {
-    const [auctionHistory, setAuctionHistory] = useState<any[]>([]);
-    const [selectedAuction, setSelectedAuction] = useState<any>(null);
-
-    useEffect(() => {
-      const history = JSON.parse(localStorage.getItem('auction_history') || '[]');
-      setAuctionHistory(history);
-    }, []);
-
-    const handleDeleteHistory = (auctionId: string) => {
-      if (window.confirm('Are you sure you want to delete this auction record?')) {
-        const updatedHistory = auctionHistory.filter(a => a.id !== auctionId);
-        localStorage.setItem('auction_history', JSON.stringify(updatedHistory));
-        setAuctionHistory(updatedHistory);
-        if (selectedAuction?.id === auctionId) {
-          setSelectedAuction(null);
-        }
-      }
-    };
-
-    const handleClearAllHistory = () => {
-      if (window.confirm('Are you sure you want to clear ALL auction history? This cannot be undone!')) {
-        localStorage.removeItem('auction_history');
-        setAuctionHistory([]);
-        setSelectedAuction(null);
-      }
-    };
-
-    return (
-      <div className="p-8">
-        <div className="mb-6 flex justify-between items-center">
-          <div>
-            <h2 className="text-2xl font-bold text-white">Auction History</h2>
-            <p className="text-gray-400 text-sm">View past auction results and data</p>
-          </div>
-          {auctionHistory.length > 0 && (
-            <button
-              onClick={handleClearAllHistory}
-              className="flex items-center gap-2 px-4 py-2 bg-red-600/20 hover:bg-red-600/30 border border-red-500/50 text-red-300 rounded-lg text-sm font-semibold transition-colors outline-none focus:outline-none"
-            >
-              <XCircle className="w-4 h-4" />
-              <span>Clear All History</span>
-            </button>
-          )}
-        </div>
-
-        {auctionHistory.length === 0 ? (
-          <div className="bg-black/60 backdrop-blur-sm rounded-xl p-12 border border-gray-500/40 text-center">
-            <History className="w-16 h-16 text-gray-500 mx-auto mb-4" />
-            <p className="text-gray-400 text-lg">No auction history yet</p>
-            <p className="text-gray-500 text-sm mt-2">Completed auctions will appear here</p>
-          </div>
-        ) : (
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-            {/* Auction List */}
-            <div className="lg:col-span-1 space-y-4">
-              {auctionHistory.map((auction) => (
-                <motion.div
-                  key={auction.id}
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  className={`bg-black/60 backdrop-blur-sm rounded-xl p-4 border cursor-pointer transition-all ${
-                    selectedAuction?.id === auction.id
-                      ? 'border-purple-500/60 bg-purple-900/20'
-                      : 'border-gray-500/40 hover:border-gray-400/60'
-                  }`}
-                  onClick={() => setSelectedAuction(auction)}
-                >
-                  <div className="flex items-start justify-between mb-2">
-                    <div className="flex-1">
-                      <h3 className="text-white font-bold text-lg">{auction.auctionName}</h3>
-                      <p className="text-gray-400 text-xs">
-                        {new Date(auction.completedAt).toLocaleDateString()} at{' '}
-                        {new Date(auction.completedAt).toLocaleTimeString()}
-                      </p>
-                    </div>
-                    <button
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        handleDeleteHistory(auction.id);
-                      }}
-                      className="text-red-400 hover:text-red-300 transition-colors"
-                    >
-                      <XCircle className="w-5 h-5" />
-                    </button>
-                  </div>
-                  <div className="flex items-center gap-4 text-sm">
-                    <span className="text-green-400">
-                      {auction.totalPlayers} Players
-                    </span>
-                    <span className="text-blue-400">
-                      {auction.teams?.length || 0} Teams
-                    </span>
-                  </div>
-                </motion.div>
-              ))}
-            </div>
-
-            {/* Auction Details */}
-            <div className="lg:col-span-2">
-              {selectedAuction ? (
-                <div className="bg-black/60 backdrop-blur-sm rounded-xl p-6 border border-purple-500/40">
-                  <h3 className="text-2xl font-bold text-white mb-4">{selectedAuction.auctionName}</h3>
-                  
-                  {/* Teams Summary */}
-                  <div className="mb-6">
-                    <h4 className="text-lg font-semibold text-purple-400 mb-3">Teams</h4>
-                    <div className="space-y-3">
-                      {selectedAuction.teams?.map((team: any, idx: number) => (
-                        <div key={idx} className="bg-black/40 rounded-lg p-4 border border-gray-600/40">
-                          <div className="flex items-center justify-between mb-2">
-                            <div>
-                              <h5 className="text-white font-bold">{team.teamName}</h5>
-                              <p className="text-gray-400 text-sm">Captain: {team.captainName}</p>
-                            </div>
-                            <div className="text-right">
-                              <p className="text-green-400 font-bold">{team.playerCount} Players</p>
-                              <p className="text-yellow-400 text-sm">Spent: {team.spentBudget}</p>
-                            </div>
-                          </div>
-                          {team.players && team.players.length > 0 && (
-                            <div className="mt-2 pt-2 border-t border-gray-700">
-                              <p className="text-gray-500 text-xs mb-1">Players:</p>
-                              <div className="flex flex-wrap gap-2">
-                                {team.players.map((player: any, pIdx: number) => (
-                                  <span key={pIdx} className="text-xs bg-gray-800 px-2 py-1 rounded text-gray-300">
-                                    {player.playerData?.nickname || 'Unknown'} (🪙{player.boughtFor})
-                                  </span>
-                                ))}
-                              </div>
-                            </div>
-                          )}
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-
-                  {/* Sold Players */}
-                  <div>
-                    <h4 className="text-lg font-semibold text-green-400 mb-3">All Sold Players</h4>
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                      {selectedAuction.soldPlayers?.map((player: any, idx: number) => (
-                        <div key={idx} className="bg-black/40 rounded-lg p-3 border border-gray-600/40">
-                          <div className="flex items-center justify-between">
-                            <div>
-                              <p className="text-white font-semibold">{player.playerNickname}</p>
-                              <p className="text-gray-400 text-xs">{player.teamName}</p>
-                            </div>
-                            <p className="text-yellow-400 font-bold">🪙 {player.soldFor}</p>
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                </div>
-              ) : (
-                <div className="bg-black/60 backdrop-blur-sm rounded-xl p-12 border border-gray-500/40 text-center">
-                  <Info className="w-16 h-16 text-gray-500 mx-auto mb-4" />
-                  <p className="text-gray-400">Select an auction to view details</p>
-                </div>
-              )}
-            </div>
-          </div>
-        )}
-      </div>
-    );
+    return <AuctionHistory />;
   };
 
   // Render activity logs
@@ -1022,6 +863,7 @@ export default function AdminDashboard() {
             >
               {activeSection === 'dashboard' && renderDashboard()}
               {activeSection === 'messages' && renderMessages()}
+              {activeSection === 'profile-updates' && <div className="p-8"><ProfileUpdateRequests /></div>}
               {activeSection === 'players' && <div className="p-8"><div className="bg-black/60 backdrop-blur-sm rounded-xl p-6 border border-blue-500/40 text-center"><p className="text-white">Player Management - Coming Soon</p></div></div>}
               {activeSection === 'captains' && renderCaptainManagement()}
               {activeSection === 'registration' && renderRegistrationControl()}
@@ -1029,7 +871,7 @@ export default function AdminDashboard() {
               {activeSection === 'auction-history' && renderAuctionHistory()}
               {activeSection === 'database' && <div className="p-8"><div className="bg-black/60 backdrop-blur-sm rounded-xl p-6 border border-blue-500/40 text-center"><p className="text-white">Database Management - Coming Soon</p></div></div>}
               {activeSection === 'activity' && renderActivityLogs()}
-              {activeSection === 'settings' && <div className="p-8"><div className="bg-black/60 backdrop-blur-sm rounded-xl p-6 border border-blue-500/40 text-center"><p className="text-white">Settings - Coming Soon</p></div></div>}
+              {activeSection === 'settings' && <AdminSettings />}
             </motion.div>
           </AnimatePresence>
         </div>

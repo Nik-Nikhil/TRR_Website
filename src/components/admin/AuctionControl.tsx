@@ -1,11 +1,14 @@
 import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { Gavel, Play, Pause, Square, Loader2, Users, ArrowRight, RotateCcw } from 'lucide-react';
+import { Gavel, Play, Pause, Square, Loader2, Users, ArrowRight, RotateCcw, Archive } from 'lucide-react';
 import { AuctionService } from '../../services/auctionService';
+import { AuctionHistoryService } from '../../services/auctionHistoryService';
 import { Avatar } from '../ui/Avatar';
 import { players } from '../../data/players';
+import { useModal } from '../../hooks/useModal';
 
 export const AuctionControl = () => {
+  const { confirm, alert, ModalComponent } = useModal();
   const [auctionStatus, setAuctionStatus] = useState<'not-started' | 'live' | 'paused' | 'completed'>('not-started');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -51,9 +54,7 @@ export const AuctionControl = () => {
     setError(null);
     
     try {
-      console.log('Starting auction...');
       const success = await AuctionService.startAuction();
-      console.log('Start auction result:', success);
       
       if (success) {
         setAuctionStatus('live');
@@ -113,9 +114,12 @@ export const AuctionControl = () => {
   };
 
   const handleReset = async () => {
-    if (!confirm('Are you sure you want to reset the auction to Not Started? This will clear all current auction data.')) {
-      return;
-    }
+    const confirmed = await confirm(
+      'Are you sure you want to reset the auction to Not Started? This will clear all current auction data.',
+      'Reset Auction'
+    );
+    
+    if (!confirmed) return;
     
     setLoading(true);
     setError(null);
@@ -181,6 +185,7 @@ export const AuctionControl = () => {
 
   return (
     <div className="space-y-6">
+      <ModalComponent />
       {/* Quick State Switcher */}
       <motion.div
         initial={{ opacity: 0, y: 20 }}
@@ -484,6 +489,225 @@ export const AuctionControl = () => {
           </div>
         </motion.div>
       )}
+
+      {/* Data Management Section */}
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        className="bg-gradient-to-br from-red-900/40 to-rose-900/40 backdrop-blur-xl border border-red-500/30 rounded-2xl p-6 shadow-2xl"
+      >
+        <div className="flex items-center gap-3 mb-6">
+          <div className="w-12 h-12 bg-gradient-to-br from-red-500 to-rose-600 rounded-xl flex items-center justify-center shadow-lg">
+            <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+            </svg>
+          </div>
+          <div>
+            <h3 className="text-xl font-bold text-white">Data Management</h3>
+            <p className="text-sm text-gray-400">Delete auction data selectively</p>
+          </div>
+        </div>
+
+        <div className="bg-yellow-500/10 border border-yellow-500/30 rounded-lg p-3 mb-4">
+          <p className="text-yellow-300 text-xs">
+            ⚠️ Warning: These actions cannot be undone. Please be careful when deleting data.
+          </p>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+          {/* Delete All Data */}
+          <button
+            onClick={async () => {
+              const confirmed = await confirm(
+                '⚠️ DELETE ALL DATA?\n\nThis will permanently delete:\n• All captains\n• All bids\n• All results\n• Auction state\n\nThis action CANNOT be undone!\n\nAre you absolutely sure?',
+                'Delete All Data'
+              );
+              
+              if (!confirmed) return;
+              
+              setLoading(true);
+              setError(null);
+              const success = await AuctionService.deleteAllAuctionData();
+              if (success) {
+                await alert('All auction data deleted successfully', 'Success', 'success');
+                await loadAuctionState();
+              } else {
+                setError('Failed to delete all data');
+              }
+              setLoading(false);
+            }}
+            disabled={loading}
+            className="col-span-1 md:col-span-2 flex items-center justify-center gap-2 px-4 py-3 bg-gradient-to-r from-red-600 to-rose-600 hover:from-red-500 hover:to-rose-500 disabled:from-gray-600 disabled:to-gray-700 text-white font-semibold rounded-xl transition-all duration-300 shadow-lg"
+          >
+            {loading ? <Loader2 className="w-5 h-5 animate-spin" /> : (
+              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+              </svg>
+            )}
+            Delete All Data
+          </button>
+
+          {/* Archive & Delete All Data */}
+          <button
+            onClick={async () => {
+              const confirmed = await confirm(
+                '📦 ARCHIVE & DELETE?\n\nThis will:\n1. Save current auction to history\n2. Delete all current data\n\nYou can view archived data in Auction History.\n\nContinue?',
+                'Archive & Delete'
+              );
+              
+              if (!confirmed) return;
+              
+              setLoading(true);
+              setError(null);
+              
+              // Archive first
+              const auctionState = await AuctionService.getAuctionState();
+              const auctionName = auctionState?.id ? `Auction ${new Date().toLocaleDateString()}` : 'Unnamed Auction';
+              const archived = await AuctionHistoryService.archiveCurrentAuction(
+                auctionName,
+                'Current Season',
+                'admin'
+              );
+              
+              if (!archived) {
+                await alert('Failed to archive auction. Deletion cancelled.', 'Error', 'warning');
+                setLoading(false);
+                return;
+              }
+              
+              // Then delete
+              const success = await AuctionService.deleteAllAuctionData();
+              if (success) {
+                await alert('Auction archived and data deleted successfully', 'Success', 'success');
+                await loadAuctionState();
+              } else {
+                await alert('Archived successfully but failed to delete data', 'Warning', 'warning');
+              }
+              setLoading(false);
+            }}
+            disabled={loading}
+            className="col-span-1 md:col-span-2 flex items-center justify-center gap-2 px-4 py-3 bg-gradient-to-r from-orange-600 to-amber-600 hover:from-orange-500 hover:to-amber-500 disabled:from-gray-600 disabled:to-gray-700 text-white font-semibold rounded-xl transition-all duration-300 shadow-lg"
+          >
+            {loading ? <Loader2 className="w-5 h-5 animate-spin" /> : <Archive className="w-5 h-5" />}
+            Archive & Delete All
+          </button>
+
+          {/* Delete Captains */}
+          <button
+            onClick={async () => {
+              const confirmed = await confirm(
+                'Delete all captains?\n\nThis will remove all captain assignments and budgets.\n\nContinue?',
+                'Delete Captains'
+              );
+              
+              if (!confirmed) return;
+              
+              setLoading(true);
+              setError(null);
+              const success = await AuctionService.deleteCaptains();
+              if (success) {
+                await alert('Captains deleted successfully', 'Success', 'success');
+              } else {
+                setError('Failed to delete captains');
+              }
+              setLoading(false);
+            }}
+            disabled={loading}
+            className="flex items-center justify-center gap-2 px-4 py-2 bg-orange-600/80 hover:bg-orange-600 disabled:bg-gray-600 text-white font-semibold rounded-lg transition-all duration-300"
+          >
+            {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : '👥'}
+            Delete Captains
+          </button>
+
+          {/* Delete Bids */}
+          <button
+            onClick={async () => {
+              const confirmed = await confirm(
+                'Delete all bids?\n\nThis will remove all bid history.\n\nContinue?',
+                'Delete Bids'
+              );
+              
+              if (!confirmed) return;
+              
+              setLoading(true);
+              setError(null);
+              const success = await AuctionService.deleteBids();
+              if (success) {
+                await alert('Bids deleted successfully', 'Success', 'success');
+              } else {
+                setError('Failed to delete bids');
+              }
+              setLoading(false);
+            }}
+            disabled={loading}
+            className="flex items-center justify-center gap-2 px-4 py-2 bg-yellow-600/80 hover:bg-yellow-600 disabled:bg-gray-600 text-white font-semibold rounded-lg transition-all duration-300"
+          >
+            {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : '🪙'}
+            Delete Bids
+          </button>
+
+          {/* Delete Results */}
+          <button
+            onClick={async () => {
+              const confirmed = await confirm(
+                'Delete all results?\n\nThis will remove all sold player records.\n\nContinue?',
+                'Delete Results'
+              );
+              
+              if (!confirmed) return;
+              
+              setLoading(true);
+              setError(null);
+              const success = await AuctionService.deleteResults();
+              if (success) {
+                await alert('Results deleted successfully', 'Success', 'success');
+              } else {
+                setError('Failed to delete results');
+              }
+              setLoading(false);
+            }}
+            disabled={loading}
+            className="flex items-center justify-center gap-2 px-4 py-2 bg-green-600/80 hover:bg-green-600 disabled:bg-gray-600 text-white font-semibold rounded-lg transition-all duration-300"
+          >
+            {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : '📋'}
+            Delete Results
+          </button>
+
+          {/* Delete Auction State */}
+          <button
+            onClick={async () => {
+              const confirmed = await confirm(
+                'Delete auction state?\n\nThis will remove the current auction status and player.\n\nContinue?',
+                'Delete Auction State'
+              );
+              
+              if (!confirmed) return;
+              
+              setLoading(true);
+              setError(null);
+              const success = await AuctionService.deleteAuctionState();
+              if (success) {
+                await alert('Auction state deleted successfully', 'Success', 'success');
+                await loadAuctionState();
+              } else {
+                setError('Failed to delete auction state');
+              }
+              setLoading(false);
+            }}
+            disabled={loading}
+            className="flex items-center justify-center gap-2 px-4 py-2 bg-purple-600/80 hover:bg-purple-600 disabled:bg-gray-600 text-white font-semibold rounded-lg transition-all duration-300"
+          >
+            {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : '⚙️'}
+            Delete Auction State
+          </button>
+        </div>
+
+        <div className="mt-4 bg-red-500/10 border border-red-500/30 rounded-lg p-3">
+          <p className="text-red-300 text-xs">
+            <strong>Note:</strong> Individual deletions do not affect other tables. Use "Delete All Data" to clear everything at once.
+          </p>
+        </div>
+      </motion.div>
     </div>
   );
 };

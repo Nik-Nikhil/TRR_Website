@@ -6,7 +6,7 @@ import {
   Key, Search, Download, Upload,
   UserPlus, UserX, UserCheck, Activity, Trash2, Info,
   Settings, TrendingUp, AlertTriangle,
-  CheckCircle, XCircle, Zap, Eye, EyeOff, MessageSquare, Gavel
+  CheckCircle, XCircle, Zap, Eye, EyeOff, MessageSquare, Gavel, History, Megaphone
 } from 'lucide-react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { admins } from '../data/admins';
@@ -14,9 +14,16 @@ import { players } from '../data/players';
 import type { Player } from '../data/players';
 import RegistrationControl from '../components/admin/RegistrationControl';
 import { AuctionControl } from '../components/admin/AuctionControl';
+import { AuctionHistory } from '../components/admin/AuctionHistory';
 import { CaptainManagement } from '../components/admin/CaptainManagement';
+import { AdminSettings } from '../components/admin/AdminSettings';
+import { AdminManagement } from '../components/admin/AdminManagement';
+import { ProfileUpdateRequests } from '../components/admin/ProfileUpdateRequests';
+import AnnouncementManagement from '../components/admin/AnnouncementManagement';
+import PasswordMigration from '../components/admin/PasswordMigration';
 import playerBanService from '../services/playerBanService';
 import messagingService from '../services/messagingService';
+import profileUpdateService from '../services/profileUpdateService';
 
 interface Admin {
   id: string;
@@ -64,8 +71,8 @@ export default function SuperAdminDashboard() {
   const [showActivityDetails, setShowActivityDetails] = useState(false);
 
   // Messages states
-  const [allMessages, setAllMessages] = useState<any[]>([]);
-  const [totalUnreadCount, setTotalUnreadCount] = useState(0);
+  const [myMessages, setMyMessages] = useState<any[]>([]);
+  const [myUnreadCount, setMyUnreadCount] = useState(0);
 
   // Quick stats
   const [quickStats, setQuickStats] = useState<QuickStat[]>([]);
@@ -209,8 +216,6 @@ export default function SuperAdminDashboard() {
       }
 
       // Set current super admin info
-      console.log('Session username:', session.username); // Debug log
-      
       if (session.username === 'reyuk') {
         setCurrentSuperAdmin({
           username: 'reyuk',
@@ -219,7 +224,6 @@ export default function SuperAdminDashboard() {
           avatarUrl: '/avatars/admins/reyuk.png'
         });
       } else if (session.username === 'nikhil') {
-        // Nikhil
         setCurrentSuperAdmin({
           username: 'nikhil',
           role: 'Super Admin',
@@ -227,8 +231,6 @@ export default function SuperAdminDashboard() {
           avatarUrl: '/avatars/admins/Nikhil.jpg'
         });
       } else {
-        // Default fallback (should not happen)
-        console.log('Using fallback for username:', session.username); // Debug log
         setCurrentSuperAdmin({
           username: session.username || 'superadmin',
           role: 'Super Admin',
@@ -249,36 +251,43 @@ export default function SuperAdminDashboard() {
 
     loadBannedPlayers();
 
-    // Load all messages for super admin
-    const loadAllMessages = () => {
-      const messages = messagingService.getAllMessages();
-      setAllMessages(messages);
-      
-      // Calculate total unread count across all admins
-      const unreadCount = messages.filter(msg => !msg.isRead).length;
-      setTotalUnreadCount(unreadCount);
-    };
-
-    loadAllMessages();
-
     // Listen for ban changes
     const handleBanChange = () => {
       loadBannedPlayers();
     };
 
-    // Listen for new messages
-    const handleNewMessage = () => {
-      loadAllMessages();
-    };
-
     window.addEventListener('playerBanChanged', handleBanChange);
-    window.addEventListener('newAdminMessage', handleNewMessage);
     
     return () => {
       window.removeEventListener('playerBanChanged', handleBanChange);
-      window.removeEventListener('newAdminMessage', handleNewMessage);
     };
-  }, [navigate, location.key]); // Re-run when navigation changes
+  }, [navigate, location.key]);
+
+  // Separate effect for loading messages (runs when currentSuperAdmin is set)
+  useEffect(() => {
+    if (!currentSuperAdmin) return;
+
+    const loadMyMessages = async () => {
+      const messages = await messagingService.getMessagesForAdmin(currentSuperAdmin.username);
+      setMyMessages(messages);
+      const unreadCount = await messagingService.getUnreadCount(currentSuperAdmin.username);
+      setMyUnreadCount(unreadCount);
+    };
+
+    loadMyMessages();
+
+    // Subscribe to real-time messages
+    const messageChannel = messagingService.subscribeToMessages(currentSuperAdmin.username, (newMessage) => {
+      setMyMessages(prev => [newMessage, ...prev]);
+      setMyUnreadCount(prev => prev + 1);
+    });
+
+    return () => {
+      import('../lib/supabase').then(({ supabase }) => {
+        supabase.removeChannel(messageChannel);
+      });
+    };
+  }, [currentSuperAdmin?.username]); // Only re-run when username changes
 
   // Add activity log function
   const addActivityLog = (action: string, details: string, type: ActivityLog['type'] = 'info') => {
@@ -386,14 +395,19 @@ export default function SuperAdminDashboard() {
   // Sidebar navigation items
   const navigationItems = [
     { id: 'dashboard', label: 'Dashboard', icon: BarChart3, description: 'Overview & Analytics' },
-    { id: 'messages', label: 'All Messages', icon: MessageSquare, description: 'All Admin Messages', badge: totalUnreadCount > 0 ? totalUnreadCount : undefined },
+    { id: 'messages', label: 'My Messages', icon: MessageSquare, description: 'My Messages', badge: myUnreadCount > 0 ? myUnreadCount : undefined },
+    { id: 'profile-updates', label: 'Profile Updates', icon: UserCheck, description: 'Approve Changes', badge: profileUpdateService.getPendingCount() > 0 ? profileUpdateService.getPendingCount() : undefined },
     { id: 'users', label: 'User Management', icon: Users, description: 'Players & Admins' },
+    { id: 'admin-management', label: 'Admin Management', icon: Shield, description: 'Add/Manage Admins' },
+    { id: 'announcements', label: 'Announcements', icon: Megaphone, description: 'Manage Announcements' },
+    { id: 'password-migration', label: 'Password Migration', icon: Database, description: 'Migrate Passwords' },
     { id: 'captains', label: 'Captain Management', icon: Shield, description: 'Assign Captains' },
     { id: 'registration', label: 'Registration', icon: UserPlus, description: 'Control Settings' },
     { id: 'auction', label: 'Auction Control', icon: Gavel, description: 'Manage Auction' },
+    { id: 'auction-history', label: 'Auction History', icon: History, description: 'Past Auctions' },
     { id: 'database', label: 'Database', icon: Database, description: 'Backup & Restore' },
     { id: 'activity', label: 'Activity Logs', icon: Activity, description: 'System Events' },
-    { id: 'settings', label: 'Settings', icon: Settings, description: 'System Config' }
+    { id: 'settings', label: 'Settings', icon: Settings, description: 'My Settings' }
   ];
 
   // Quick action cards
@@ -488,9 +502,12 @@ export default function SuperAdminDashboard() {
           <h2 className="text-2xl font-bold text-white capitalize">
             {activeSection === 'dashboard' ? 'Dashboard Overview' : 
              activeSection === 'users' ? 'User Management' :
+             activeSection === 'announcements' ? 'Announcement Management' :
+             activeSection === 'password-migration' ? 'Password Migration' :
              activeSection === 'captains' ? 'Captain Management' :
              activeSection === 'registration' ? 'Registration Control' :
              activeSection === 'auction' ? 'Auction Control' :
+             activeSection === 'auction-history' ? 'Auction History' :
              activeSection === 'database' ? 'Database Management' :
              activeSection === 'activity' ? 'Activity Logs' :
              activeSection === 'settings' ? 'System Settings' : activeSection}
@@ -498,9 +515,12 @@ export default function SuperAdminDashboard() {
           <p className="text-orange-300/70 mt-1">
             {activeSection === 'dashboard' ? 'System overview and quick actions' :
              activeSection === 'users' ? 'Manage players and administrators' :
+             activeSection === 'announcements' ? 'Create and manage announcements' :
+             activeSection === 'password-migration' ? 'Migrate default passwords to encrypted storage' :
              activeSection === 'captains' ? 'Assign and manage team captains' :
              activeSection === 'registration' ? 'Control player registration settings' :
              activeSection === 'auction' ? 'Start and manage player auctions' :
+             activeSection === 'auction-history' ? 'View past auction results and data' :
              activeSection === 'database' ? 'Database operations and maintenance' :
              activeSection === 'activity' ? 'System activity and audit trail' :
              activeSection === 'settings' ? 'System configuration and preferences' : 'Manage your system'}
@@ -654,8 +674,8 @@ export default function SuperAdminDashboard() {
     </div>
   );
 
-  // Render all messages section
-  const renderAllMessages = () => (
+  // Render my messages section
+  const renderMyMessages = () => (
     <div className="p-8">
       <div className="bg-black/60 backdrop-blur-sm rounded-xl border border-orange-500/40">
         <div className="p-6 border-b border-orange-500/20">
@@ -663,15 +683,15 @@ export default function SuperAdminDashboard() {
             <div className="flex items-center space-x-3">
               <MessageSquare className="w-6 h-6 text-orange-400" />
               <div>
-                <h3 className="text-lg font-semibold text-white">All Admin Messages</h3>
-                <p className="text-sm text-gray-400">Messages from players to all admins</p>
+                <h3 className="text-lg font-semibold text-white">My Messages</h3>
+                <p className="text-sm text-gray-400">Messages sent to {currentSuperAdmin?.username || 'you'}</p>
               </div>
             </div>
             <div className="flex items-center space-x-3">
-              <span className="text-sm text-orange-400">{allMessages.length} total messages</span>
-              {totalUnreadCount > 0 && (
+              <span className="text-sm text-orange-400">{myMessages.length} total messages</span>
+              {myUnreadCount > 0 && (
                 <span className="px-2 py-1 bg-red-600 text-white text-xs rounded-full">
-                  {totalUnreadCount} unread
+                  {myUnreadCount} unread
                 </span>
               )}
             </div>
@@ -680,14 +700,14 @@ export default function SuperAdminDashboard() {
         
         <div className="p-6">
           <div className="max-h-96 overflow-y-auto space-y-3">
-            {allMessages.length === 0 ? (
+            {myMessages.length === 0 ? (
               <div className="text-center py-12 text-gray-400">
                 <MessageSquare className="w-12 h-12 mx-auto mb-3 opacity-50" />
                 <p>No messages yet</p>
-                <p className="text-sm">Player messages will appear here</p>
+                <p className="text-sm">Messages sent to you will appear here</p>
               </div>
             ) : (
-              allMessages.map((message) => (
+              myMessages.map((message) => (
                 <motion.div
                   key={message.id}
                   initial={{ opacity: 0, x: -20 }}
@@ -708,7 +728,6 @@ export default function SuperAdminDashboard() {
                         {message.priority.toUpperCase()}
                       </span>
                       <span className="text-sm font-medium text-white">{message.fromPlayerNickname}</span>
-                      <span className="text-xs text-orange-400">→ {message.toAdmin}</span>
                       {!message.isRead && (
                         <span className="w-2 h-2 bg-orange-400 rounded-full"></span>
                       )}
@@ -726,11 +745,14 @@ export default function SuperAdminDashboard() {
                     <div className="flex space-x-2">
                       {!message.isRead && (
                         <button
-                          onClick={() => {
-                            messagingService.markAsRead(message.id);
-                            const updatedMessages = messagingService.getAllMessages();
-                            setAllMessages(updatedMessages);
-                            setTotalUnreadCount(updatedMessages.filter(msg => !msg.isRead).length);
+                          onClick={async () => {
+                            await messagingService.markAsRead(message.id);
+                            if (currentSuperAdmin) {
+                              const updatedMessages = await messagingService.getMessagesForAdmin(currentSuperAdmin.username);
+                              setMyMessages(updatedMessages);
+                              const unreadCount = await messagingService.getUnreadCount(currentSuperAdmin.username);
+                              setMyUnreadCount(unreadCount);
+                            }
                             addActivityLog('Message', `Marked message from ${message.fromPlayerNickname} as read`, 'info');
                           }}
                           className="px-3 py-1 bg-orange-600/20 hover:bg-orange-600/30 border border-orange-500/50 text-orange-300 rounded text-xs transition-colors"
@@ -739,11 +761,14 @@ export default function SuperAdminDashboard() {
                         </button>
                       )}
                       <button
-                        onClick={() => {
-                          messagingService.deleteMessage(message.id);
-                          const updatedMessages = messagingService.getAllMessages();
-                          setAllMessages(updatedMessages);
-                          setTotalUnreadCount(updatedMessages.filter(msg => !msg.isRead).length);
+                        onClick={async () => {
+                          await messagingService.deleteMessage(message.id);
+                          if (currentSuperAdmin) {
+                            const updatedMessages = await messagingService.getMessagesForAdmin(currentSuperAdmin.username);
+                            setMyMessages(updatedMessages);
+                            const unreadCount = await messagingService.getUnreadCount(currentSuperAdmin.username);
+                            setMyUnreadCount(unreadCount);
+                          }
                           addActivityLog('Message', `Deleted message from ${message.fromPlayerNickname}`, 'warning');
                         }}
                         className="px-3 py-1 bg-red-600/20 hover:bg-red-600/30 border border-red-500/50 text-red-300 rounded text-xs transition-colors"
@@ -986,85 +1011,6 @@ export default function SuperAdminDashboard() {
           </div>
         </div>
       </div>
-
-      {/* Admin Management */}
-      <div className="bg-black/60 backdrop-blur-sm rounded-xl border border-purple-500/40">
-        <div className="p-6 border-b border-purple-500/20">
-          <h3 className="text-lg font-semibold text-white flex items-center">
-            <Shield className="w-5 h-5 mr-2 text-purple-400" />
-            Admin Management ({admins.filter(admin => 
-              admin.displayName.toLowerCase().includes(searchQuery.toLowerCase()) ||
-              admin.username.toLowerCase().includes(searchQuery.toLowerCase())
-            ).length})
-          </h3>
-        </div>
-        
-        <div className="p-6">
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 max-h-96 overflow-y-auto">
-            {admins
-              .filter(admin => 
-                admin.displayName.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                admin.username.toLowerCase().includes(searchQuery.toLowerCase())
-              )
-              .map((admin) => (
-                <motion.div 
-                  key={admin.id} 
-                  initial={{ opacity: 0, scale: 0.9 }}
-                  animate={{ opacity: 1, scale: 1 }}
-                  className="rounded-lg p-4 border bg-black/40 border-purple-500/20 hover:border-purple-500/50 transition-all duration-300"
-                >
-                  <div className="flex justify-between items-start mb-3">
-                    <span className={`px-2 py-1 text-xs rounded-full ${
-                      admin.role === 'Founder' ? 'bg-yellow-600 text-white' :
-                      admin.role === 'Admin' ? 'bg-purple-600 text-white' :
-                      'bg-blue-600 text-white'
-                    }`}>
-                      {admin.role.toUpperCase()}
-                    </span>
-                  </div>
-
-                  <div className="text-center mb-4">
-                    <img 
-                      src={admin.avatarUrl} 
-                      alt={admin.displayName}
-                      className="w-12 h-12 rounded-full object-cover border-2 border-purple-500 mx-auto mb-2"
-                      onError={(e) => {
-                        e.currentTarget.src = "/avatars/default.jpg";
-                      }}
-                    />
-                    <h4 className="text-white font-bold text-sm truncate">{admin.displayName}</h4>
-                    <p className="text-purple-300/70 text-xs truncate">@{admin.username}</p>
-                    <p className="text-purple-400/60 text-xs">{admin.role}</p>
-                  </div>
-
-                  <div className="flex gap-2">
-                    {admin.role !== 'Founder' && (
-                      <button
-                        onClick={() => {
-                          addActivityLog('Admin Action', `Demoted admin "${admin.displayName}"`, 'warning');
-                          alert(`Admin ${admin.displayName} has been demoted`);
-                        }}
-                        className="flex-1 px-3 py-2 bg-red-600/20 hover:bg-red-600/30 border border-red-500/50 text-red-300 rounded text-xs transition-colors cursor-pointer flex items-center justify-center gap-1"
-                      >
-                        <UserX className="w-3 h-3" />
-                        Demote
-                      </button>
-                    )}
-                    <button
-                      onClick={() => {
-                        setSelectedUser(admin);
-                        setShowPasswordReset(true);
-                      }}
-                      className="px-3 py-2 bg-purple-600/20 hover:bg-purple-600/30 border border-purple-500/50 text-purple-300 rounded text-xs transition-colors cursor-pointer"
-                    >
-                      <Key className="w-3 h-3" />
-                    </button>
-                  </div>
-                </motion.div>
-              ))}
-          </div>
-        </div>
-      </div>
     </div>
   );
 
@@ -1207,14 +1153,19 @@ export default function SuperAdminDashboard() {
               transition={{ duration: 0.3 }}
             >
               {activeSection === 'dashboard' && renderDashboard()}
-              {activeSection === 'messages' && renderAllMessages()}
+              {activeSection === 'messages' && renderMyMessages()}
+              {activeSection === 'profile-updates' && <div className="p-8"><ProfileUpdateRequests /></div>}
               {activeSection === 'users' && renderUserManagement()}
+              {activeSection === 'admin-management' && <AdminManagement />}
+              {activeSection === 'announcements' && <div className="p-8"><AnnouncementManagement /></div>}
+              {activeSection === 'password-migration' && <PasswordMigration />}
               {activeSection === 'captains' && renderCaptainManagement()}
               {activeSection === 'registration' && renderRegistrationControl()}
               {activeSection === 'auction' && renderAuctionControl()}
+              {activeSection === 'auction-history' && <div className="p-8"><AuctionHistory /></div>}
               {activeSection === 'database' && renderDatabaseManagement()}
               {activeSection === 'activity' && renderActivityLogs()}
-              {activeSection === 'settings' && renderSettings()}
+              {activeSection === 'settings' && <AdminSettings />}
             </motion.div>
           </AnimatePresence>
         </div>

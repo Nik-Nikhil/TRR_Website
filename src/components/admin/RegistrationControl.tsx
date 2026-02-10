@@ -6,6 +6,7 @@ import {
   Clock, Settings
 } from 'lucide-react';
 import registrationService from '../../services/registrationService';
+import { supabase } from '../../lib/supabase';
 
 interface RegistrationSettings {
   isEnabled: boolean;
@@ -21,12 +22,33 @@ interface RegistrationControlProps {
 }
 
 export default function RegistrationControl({ userRole, username }: RegistrationControlProps) {
-  const [settings, setSettings] = useState<RegistrationSettings>(registrationService.getSettings());
+  const [settings, setSettings] = useState<RegistrationSettings>({
+    isEnabled: false,
+    superAdminOverride: false,
+    lastModifiedBy: 'system',
+    lastModifiedAt: new Date().toISOString(),
+    message: 'Registration starting soon. Stay tuned for updates.'
+  });
   const [isLoading, setIsLoading] = useState(false);
-  const [message, setMessage] = useState(settings.message || '');
+  const [message, setMessage] = useState('');
   const [showMessageEditor, setShowMessageEditor] = useState(false);
 
   useEffect(() => {
+    // Load initial settings
+    const loadSettings = async () => {
+      const currentSettings = await registrationService.getSettings();
+      setSettings(currentSettings);
+      setMessage(currentSettings.message || '');
+    };
+    
+    loadSettings();
+
+    // Subscribe to real-time changes
+    const channel = registrationService.subscribeToChanges((newSettings) => {
+      setSettings(newSettings);
+      setMessage(newSettings.message || '');
+    });
+
     // Listen for settings changes
     const handleSettingsChange = (event: CustomEvent) => {
       setSettings(event.detail);
@@ -37,6 +59,9 @@ export default function RegistrationControl({ userRole, username }: Registration
     
     return () => {
       window.removeEventListener('registrationSettingsChanged', handleSettingsChange as EventListener);
+      if (channel) {
+        supabase.removeChannel(channel);
+      }
     };
   }, []);
 
@@ -44,7 +69,7 @@ export default function RegistrationControl({ userRole, username }: Registration
     setIsLoading(true);
     
     const newState = !settings.isEnabled;
-    const result = registrationService.updateSettings(
+    const result = await registrationService.updateSettings(
       newState, 
       username, 
       userRole,
@@ -66,7 +91,7 @@ export default function RegistrationControl({ userRole, username }: Registration
     setIsLoading(true);
     
     const newState = !settings.isEnabled;
-    const result = registrationService.setSuperAdminOverride(newState, username);
+    const result = await registrationService.setSuperAdminOverride(newState, username);
 
     if (result.success) {
       // Settings will be updated via event listener
@@ -77,8 +102,8 @@ export default function RegistrationControl({ userRole, username }: Registration
     setIsLoading(false);
   };
 
-  const handleUpdateMessage = () => {
-    const result = registrationService.updateSettings(
+  const handleUpdateMessage = async () => {
+    const result = await registrationService.updateSettings(
       settings.isEnabled,
       username,
       userRole,

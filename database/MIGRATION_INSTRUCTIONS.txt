@@ -1,0 +1,56 @@
+SUPABASE DATABASE MIGRATION INSTRUCTIONS
+========================================
+
+To complete the messaging and announcements feature, you need to run the SQL migration in your Supabase database.
+
+STEPS:
+------
+
+1. Go to your Supabase project dashboard
+2. Navigate to the SQL Editor (left sidebar)
+3. Click "New Query"
+4. Copy and paste the contents of: database/messages_and_announcements_tables.sql
+5. Click "Run" to execute the SQL
+
+WHAT THIS CREATES:
+------------------
+
+1. admin_messages table:
+   - Stores messages from players to admins
+   - Real-time sync enabled
+   - Includes priority levels (low, medium, high)
+   - Tracks read/unread status
+
+2. announcements table:
+   - Stores admin-created announcements
+   - Status workflow: draft -> published -> archived
+   - Tracks author, timestamps, and publication date
+
+3. Indexes for performance:
+   - Message queries by admin and read status
+   - Announcement queries by status and publication date
+
+4. Row Level Security (RLS) policies:
+   - Public read/write access (adjust as needed for your security requirements)
+
+VERIFICATION:
+-------------
+
+After running the migration:
+1. Check the "Table Editor" in Supabase to see the new tables
+2. Try sending a message from a player profile
+3. Check if it appears in the admin dashboard in real-time
+4. Try creating an announcement in the admin panel
+5. Check if it appears on the public Announcements page
+
+TROUBLESHOOTING:
+----------------
+
+If you get errors about tables already existing:
+- The tables may have been created in a previous attempt
+- You can drop them first with: DROP TABLE IF EXISTS admin_messages, announcements CASCADE;
+- Then run the migration again
+
+If real-time updates don't work:
+- Check that Supabase Realtime is enabled for your project
+- Verify the tables are listed in Database > Replication settings

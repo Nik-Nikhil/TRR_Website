@@ -4,13 +4,15 @@ import { getPlayerById } from "../../data/players";
 import { FaSteam } from "react-icons/fa";
 import { motion } from "framer-motion";
 import { useState, useEffect } from "react";
-import { Edit3, LogOut, Plus, Minus, Save, X } from "lucide-react";
+import { Edit3, LogOut, Plus, Minus, Save, X, Lock } from "lucide-react";
 import AuthService from "../../services/auth";
 import { DOTA_ROLES } from "../../utils/constants";
 import { DOTA_HEROES, findHeroByName } from "../../data/heroes";
 import { useToast } from "../../hooks/useToast";
 import ToastContainer from "../../components/ui/ToastContainer";
 import { getMedalFromMMR } from "../../utils/mmrToMedal";
+import PasswordChangeModal from "../../components/PasswordChangeModal";
+import FirstLoginPasswordChange from "../../components/FirstLoginPasswordChange";
 
 // Colored season badge styles
 const coloredSeasonBadgeStyles: Record<number, string> = {
@@ -58,6 +60,8 @@ export default function PlayerDetailPage() {
   const [heroSearchTerm, setHeroSearchTerm] = useState('');
   const [mmrProof, setMmrProof] = useState<string>('');
   const [mmrValidation, setMmrValidation] = useState({ isValid: true, message: '' });
+  const [showPasswordModal, setShowPasswordModal] = useState(false);
+  const [passwordChanged, setPasswordChanged] = useState(false);
   
   // Get current user from auth service
   const currentUser = AuthService.getCurrentUser();
@@ -123,7 +127,6 @@ export default function PlayerDetailPage() {
 
   const saveAllChanges = async () => {
     try {
-      console.log('Saving all changes:', editedData, editedRoles, editedAvatar, editedHeroes, mmrProof);
       
       // Special handling for role changes - submit as request for approval
       if (currentUser?.type === 'player' && player) {
@@ -302,17 +305,28 @@ export default function PlayerDetailPage() {
           </div>
           {/* Edit Button - Above the entire profile card */}
           {canEdit && currentUser?.type === 'player' && currentUser.playerId === playerId && (
-            <div className="flex justify-center mb-6">
+            <div className="flex justify-center mb-6 gap-3">
               {!isEditMode ? (
-                <motion.button
-                  whileHover={{ scale: 1.05 }}
-                  whileTap={{ scale: 0.95 }}
-                  onClick={toggleEditMode}
-                  className="flex items-center gap-2 px-4 py-2 rounded-lg bg-blue-600/90 hover:bg-blue-600 border border-blue-500/50 hover:border-blue-400 transition-all duration-300 text-white font-medium text-sm shadow-lg"
-                >
-                  <Edit3 className="w-4 h-4" />
-                  <span>Request an Edit</span>
-                </motion.button>
+                <>
+                  <motion.button
+                    whileHover={{ scale: 1.05 }}
+                    whileTap={{ scale: 0.95 }}
+                    onClick={toggleEditMode}
+                    className="flex items-center gap-2 px-4 py-2 rounded-lg bg-blue-600/90 hover:bg-blue-600 border border-blue-500/50 hover:border-blue-400 transition-all duration-300 text-white font-medium text-sm shadow-lg"
+                  >
+                    <Edit3 className="w-4 h-4" />
+                    <span>Request an Edit</span>
+                  </motion.button>
+                  <motion.button
+                    whileHover={{ scale: 1.05 }}
+                    whileTap={{ scale: 0.95 }}
+                    onClick={() => setShowPasswordModal(true)}
+                    className="flex items-center gap-2 px-4 py-2 rounded-lg bg-orange-600/90 hover:bg-orange-600 border border-orange-500/50 hover:border-orange-400 transition-all duration-300 text-white font-medium text-sm shadow-lg"
+                  >
+                    <Lock className="w-4 h-4" />
+                    <span>Change Password</span>
+                  </motion.button>
+                </>
               ) : (
                 <div className="flex gap-3">
                   <motion.button
@@ -1075,6 +1089,30 @@ export default function PlayerDetailPage() {
           </motion.section>
         </div>
       </main>
+
+      {/* Password Change Modal */}
+      {player && (
+        <>
+          <PasswordChangeModal
+            isOpen={showPasswordModal}
+            onClose={() => setShowPasswordModal(false)}
+            userId={player.id}
+            userType="player"
+            userName={player.nickname}
+            requireOldPassword={true}
+          />
+          
+          {/* First Login Password Change - Only for logged in player viewing their own profile */}
+          {canEdit && currentUser?.type === 'player' && currentUser.playerId === playerId && !passwordChanged && (
+            <FirstLoginPasswordChange
+              userId={player.id}
+              userType="player"
+              userName={player.nickname}
+              onPasswordChanged={() => setPasswordChanged(true)}
+            />
+          )}
+        </>
+      )}
     </>
   );
 }

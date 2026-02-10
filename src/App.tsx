@@ -6,6 +6,7 @@ import Home from "./pages/Home";
 
 import Teams from "./pages/Team";
 import TeamDetail from "./pages/TeamDeatail";
+import TeamDetailAuction from "./pages/TeamDetail";
 import AdminsPage from "./pages/Admins";
 import NewPlayerRegistration from "./pages/NewPlayerRegistration";
 
@@ -50,6 +51,7 @@ function App() {
 
           <Route path="/teams" element={<Teams />} />
           <Route path="/teams/:teamId" element={<TeamDetail />} />
+          <Route path="/team/:teamName" element={<TeamDetailAuction />} />
 
           <Route path="/seasons" element={<SeasonShowCase />} />
           <Route path="/auction" element={<Auction />} />

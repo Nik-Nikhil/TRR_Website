@@ -268,7 +268,10 @@ export class AuctionService {
   static async placeBid(captainId: string, captainName: string, teamName: string, amount: number): Promise<boolean> {
     try {
       const state = await this.getAuctionState();
-      if (!state || state.status !== 'live') return false;
+      if (!state || state.status !== 'live') {
+        console.log('Cannot place bid: auction not live or not found');
+        return false;
+      }
 
       // Check if bid is higher than current (must be strictly greater)
       const currentBid = state.highest_bid || 0;
@@ -276,6 +279,8 @@ export class AuctionService {
         console.log(`Bid rejected: ${amount} is not higher than current bid ${currentBid}`);
         return false;
       }
+
+      console.log(`Placing bid: ${amount} (current: ${currentBid})`);
 
       // Update auction state
       const { error: updateError } = await supabase
@@ -290,26 +295,28 @@ export class AuctionService {
 
       if (updateError) {
         console.error('Error updating auction state:', updateError);
+        console.error('Update details:', { amount, captainId, captainName, teamName });
         return false;
       }
 
       // Record bid in history
       const { error: bidError } = await supabase
         .from('auction_bids')
-        .insert([{
+        .insert({
           auction_id: state.id,
-          player_id: state.current_player_id,
+          player_id: state.current_player_data?.id || null,
           captain_id: captainId,
           captain_name: captainName,
           team_name: teamName,
           amount: amount
-        }]);
+        });
 
       if (bidError) {
         console.error('Error recording bid:', bidError);
-        return false;
+        // Don't return false here - the bid was placed, just not recorded in history
       }
 
+      console.log('✅ Bid placed successfully');
       return true;
     } catch (error) {
       console.error('Error placing bid:', error);
@@ -416,5 +423,177 @@ export class AuctionService {
         supabase.removeChannel(channel);
       }
     };
+  }
+
+  // =====================================================
+  // DATA MANAGEMENT - DELETE FUNCTIONS
+  // =====================================================
+
+  // Delete all auction-related data
+  static async deleteAllAuctionData(): Promise<boolean> {
+    try {
+      console.log('🗑️ Deleting all auction data...');
+      
+      // Delete in order: bids, results, captains, auctions
+      const { error: bidsError } = await supabase
+        .from('auction_bids')
+        .delete()
+        .neq('id', '00000000-0000-0000-0000-000000000000'); // Delete all
+
+      if (bidsError) {
+        console.error('Error deleting bids:', bidsError);
+        return false;
+      }
+
+      const { error: resultsError } = await supabase
+        .from('auction_results')
+        .delete()
+        .neq('id', '00000000-0000-0000-0000-000000000000');
+
+      if (resultsError) {
+        console.error('Error deleting results:', resultsError);
+        return false;
+      }
+
+      const { error: captainsError } = await supabase
+        .from('captains')
+        .delete()
+        .neq('id', '00000000-0000-0000-0000-000000000000');
+
+      if (captainsError) {
+        console.error('Error deleting captains:', captainsError);
+        return false;
+      }
+
+      const { error: auctionsError } = await supabase
+        .from('auctions')
+        .delete()
+        .neq('id', '00000000-0000-0000-0000-000000000000');
+
+      if (auctionsError) {
+        console.error('Error deleting auctions:', auctionsError);
+        return false;
+      }
+
+      // Create a new auction in "not-started" state
+      const { error: createError } = await supabase
+        .from('auctions')
+        .insert([{
+          name: `Auction ${new Date().toLocaleDateString()}`,
+          season: 'Current',
+          status: 'not-started',
+          current_player_id: null,
+          current_player_data: null,
+          highest_bid: null,
+          highest_bidder_id: null,
+          highest_bidder_name: null,
+          highest_bidder_team: null,
+          created_by: 'admin',
+          deletion_status: 'active'
+        }]);
+
+      if (createError) {
+        console.error('Error creating new auction:', createError);
+        return false;
+      }
+
+      console.log('✅ All auction data deleted and reset to Not Started');
+      return true;
+    } catch (error) {
+      console.error('Exception deleting all data:', error);
+      return false;
+    }
+  }
+
+  // Delete only captains
+  static async deleteCaptains(): Promise<boolean> {
+    try {
+      console.log('🗑️ Deleting captains...');
+      
+      const { error } = await supabase
+        .from('captains')
+        .delete()
+        .neq('id', '00000000-0000-0000-0000-000000000000');
+
+      if (error) {
+        console.error('Error deleting captains:', error);
+        return false;
+      }
+
+      console.log('✅ Captains deleted successfully');
+      return true;
+    } catch (error) {
+      console.error('Exception deleting captains:', error);
+      return false;
+    }
+  }
+
+  // Delete only bids
+  static async deleteBids(): Promise<boolean> {
+    try {
+      console.log('🗑️ Deleting bids...');
+      
+      const { error } = await supabase
+        .from('auction_bids')
+        .delete()
+        .neq('id', '00000000-0000-0000-0000-000000000000');
+
+      if (error) {
+        console.error('Error deleting bids:', error);
+        return false;
+      }
+
+      console.log('✅ Bids deleted successfully');
+      return true;
+    } catch (error) {
+      console.error('Exception deleting bids:', error);
+      return false;
+    }
+  }
+
+  // Delete only results
+  static async deleteResults(): Promise<boolean> {
+    try {
+      console.log('🗑️ Deleting results...');
+      
+      const { error } = await supabase
+        .from('auction_results')
+        .delete()
+        .neq('id', '00000000-0000-0000-0000-000000000000');
+
+      if (error) {
+        console.error('Error deleting results:', error);
+        return false;
+      }
+
+      console.log('✅ Results deleted successfully');
+      return true;
+    } catch (error) {
+      console.error('Exception deleting results:', error);
+      return false;
+    }
+  }
+
+  // Delete only auction state
+  static async deleteAuctionState(): Promise<boolean> {
+    try {
+      console.log('🗑️ Deleting auction state...');
+      
+      const { error } = await supabase
+        .from('auctions')
+        .delete()
+        .neq('id', '00000000-0000-0000-0000-000000000000');
+
+      if (error) {
+        console.error('Error deleting auction state:', error);
+        return false;
+      }
+
+      console.log('✅ Auction state deleted successfully');
+      return true;
+    } catch (error) {
+      console.error('Exception deleting auction state:', error);
+      return false;
+    }
   }
 }

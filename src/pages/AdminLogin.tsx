@@ -148,6 +148,19 @@ export default function AdminLogin() {
         return;
       }
 
+      // Check if admin is disabled in localStorage
+      const storedAdmins = localStorage.getItem('admins');
+      if (storedAdmins) {
+        const adminsList = JSON.parse(storedAdmins);
+        const storedAdmin = adminsList.find((a: any) => a.username.toLowerCase() === admin.name.toLowerCase());
+        
+        if (storedAdmin && storedAdmin.isDisabled) {
+          setError('This account has been disabled by SuperAdmin. Please contact administration.');
+          setIsLoading(false);
+          return;
+        }
+      }
+
       // Authenticate with database service
       const result = await AuthService.loginAdmin(admin.name.toLowerCase(), password);
       
