@@ -207,9 +207,6 @@ class CaptainService {
         }
       )
       .subscribe((status, err) => {
-        if (status === 'SUBSCRIBED') {
-          console.log('✅ Subscribed to captain changes');
-        }
         if (status === 'CHANNEL_ERROR') {
           console.error('❌ Captain subscription error:', err);
         }

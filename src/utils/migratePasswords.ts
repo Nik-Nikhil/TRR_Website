@@ -6,6 +6,13 @@ import { admins } from '../data/admins';
 const DEFAULT_PLAYER_PASSWORD = 'player123';
 const DEFAULT_ADMIN_PASSWORD = 'admin123';
 
+// Super admin passwords (should match login passwords)
+const SUPER_ADMIN_PASSWORDS: Record<string, string> = {
+  'reyuk': '12345',
+  'nikhil': 'SuperAdmin2024!',
+  'banner': 'banner123'
+};
+
 interface MigrationResult {
   success: number;
   failed: number;
@@ -69,11 +76,13 @@ export async function migrateAdminPasswords(): Promise<MigrationResult> {
       const hasPassword = await passwordService.hasPassword(admin.username);
       
       if (!hasPassword) {
-        // Get password from admin object or use default
-        const password = (admin as any).password || DEFAULT_ADMIN_PASSWORD;
+        // Get password - use super admin password if available, otherwise use admin password or default
+        const password = SUPER_ADMIN_PASSWORDS[admin.username] || 
+                        (admin as any).password || 
+                        DEFAULT_ADMIN_PASSWORD;
         
         // Determine user type based on role
-        const userType = admin.role === 'Founder' ? 'superadmin' : 'admin';
+        const userType = (admin.role === 'Founder' || admin.role === 'Super Admin') ? 'superadmin' : 'admin';
         
         // Set password (encrypted)
         const setResult = await passwordService.setPassword(

@@ -38,7 +38,36 @@ export const AdminSettings = () => {
   }, []);
 
   const loadAdminProfile = () => {
-    const session = AuthService.getCurrentAdminSession();
+    // Check for super admin session first, then regular admin session
+    const superAdminSession = localStorage.getItem('superAdminSession');
+    let session: any = null;
+    
+    if (superAdminSession) {
+      try {
+        const superAdmin = JSON.parse(superAdminSession);
+        // Convert super admin session to admin profile format
+        session = {
+          username: superAdmin.username,
+          displayName: superAdmin.username === 'reyuk' ? 'Reyuk' : 
+                      superAdmin.username === 'nikhil' ? 'N1KHIL' : 
+                      superAdmin.username,
+          email: '',
+          bio: '',
+          role: superAdmin.role || 'Super Admin',
+          avatarUrl: superAdmin.username === 'reyuk' ? '/avatars/admins/reyuk.png' :
+                    superAdmin.username === 'nikhil' ? '/avatars/admins/Nikhil.jpg' :
+                    ''
+        };
+      } catch (error) {
+        console.error('Error parsing super admin session:', error);
+      }
+    }
+    
+    // If no super admin session, check for regular admin session
+    if (!session) {
+      session = AuthService.getCurrentAdminSession();
+    }
+    
     if (session) {
       setCurrentAdmin({
         username: session.username,
@@ -66,27 +95,57 @@ export const AdminSettings = () => {
 
     setLoading(true);
 
-    // Update admin profile in localStorage
-    const session = AuthService.getCurrentAdminSession();
+    // Check for super admin session first
+    const superAdminSession = localStorage.getItem('superAdminSession');
+    let session: any = null;
+    let isSuperAdmin = false;
+    
+    if (superAdminSession) {
+      try {
+        session = JSON.parse(superAdminSession);
+        isSuperAdmin = true;
+      } catch (error) {
+        console.error('Error parsing super admin session:', error);
+      }
+    }
+    
+    // If no super admin session, get regular admin session
+    if (!session) {
+      session = AuthService.getCurrentAdminSession();
+    }
+    
     if (session) {
-      const updatedSession = {
-        ...session,
-        displayName,
-        email,
-        bio,
-        avatarUrl
-      };
-      
-      localStorage.setItem('adminSession', JSON.stringify(updatedSession));
-      
-      // Update in admins list
-      const admins = JSON.parse(localStorage.getItem('admins') || '[]');
-      const updatedAdmins = admins.map((admin: any) => 
-        admin.username === session.username 
-          ? { ...admin, displayName, email, bio, avatarUrl }
-          : admin
-      );
-      localStorage.setItem('admins', JSON.stringify(updatedAdmins));
+      if (isSuperAdmin) {
+        // Update super admin session
+        const updatedSession = {
+          ...session,
+          displayName,
+          email,
+          bio,
+          avatarUrl
+        };
+        localStorage.setItem('superAdminSession', JSON.stringify(updatedSession));
+      } else {
+        // Update regular admin session
+        const updatedSession = {
+          ...session,
+          displayName,
+          email,
+          bio,
+          avatarUrl
+        };
+        
+        localStorage.setItem('adminSession', JSON.stringify(updatedSession));
+        
+        // Update in admins list
+        const admins = JSON.parse(localStorage.getItem('admins') || '[]');
+        const updatedAdmins = admins.map((admin: any) => 
+          admin.username === session.username 
+            ? { ...admin, displayName, email, bio, avatarUrl }
+            : admin
+        );
+        localStorage.setItem('admins', JSON.stringify(updatedAdmins));
+      }
       
       await alert('Profile updated successfully!', 'Success', 'success');
       loadAdminProfile();
@@ -102,8 +161,26 @@ export const AdminSettings = () => {
       return;
     }
 
-    if (newPassword.length < 6) {
-      await alert('New password must be at least 6 characters long', 'Invalid Password', 'warning');
+    if (newPassword.length < 8) {
+      await alert('New password must be at least 8 characters long', 'Invalid Password', 'warning');
+      return;
+    }
+
+    // Check for uppercase letter
+    if (!/[A-Z]/.test(newPassword)) {
+      await alert('Password must contain at least one uppercase letter', 'Invalid Password', 'warning');
+      return;
+    }
+
+    // Check for number
+    if (!/[0-9]/.test(newPassword)) {
+      await alert('Password must contain at least one number', 'Invalid Password', 'warning');
+      return;
+    }
+
+    // Check for symbol
+    if (!/[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/.test(newPassword)) {
+      await alert('Password must contain at least one symbol (!@#$%^&* etc.)', 'Invalid Password', 'warning');
       return;
     }
 
@@ -121,8 +198,20 @@ export const AdminSettings = () => {
 
     setLoading(true);
 
-    const session = AuthService.getCurrentAdminSession();
-    if (!session) {
+    // Check if super admin or regular admin
+    const superAdminSession = localStorage.getItem('superAdminSession');
+    const adminSession = AuthService.getCurrentAdminSession();
+    
+    let session: any;
+    let userType: 'admin' | 'superadmin' = 'admin';
+    
+    if (superAdminSession) {
+      session = JSON.parse(superAdminSession);
+      userType = 'superadmin';
+    } else if (adminSession) {
+      session = adminSession;
+      userType = 'admin';
+    } else {
       await alert('Session not found. Please log in again.', 'Error', 'warning');
       setLoading(false);
       return;
@@ -131,7 +220,7 @@ export const AdminSettings = () => {
     // Use password service to change password with encryption
     const result = await passwordService.changePassword(
       session.username,
-      'admin',
+      userType,
       currentPassword,
       newPassword
     );
@@ -335,7 +424,7 @@ export const AdminSettings = () => {
                   type={showNewPassword ? 'text' : 'password'}
                   value={newPassword}
                   onChange={(e) => setNewPassword(e.target.value)}
-                  placeholder="Enter new password (min 6 characters)"
+                  placeholder="Enter new password (min 8 chars, uppercase, number, symbol)"
                   className="w-full px-4 py-3 pr-12 bg-black/60 border border-red-500/40 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-red-500"
                 />
                 <button
@@ -375,9 +464,21 @@ export const AdminSettings = () => {
             <div className="bg-yellow-500/10 border border-yellow-500/30 rounded-lg p-3">
               <p className="text-yellow-300 text-xs font-semibold mb-2">Password Requirements:</p>
               <ul className="text-yellow-200 text-xs space-y-1">
-                <li>• Minimum 6 characters</li>
-                <li>• Must match confirmation</li>
-                <li>• Different from current password</li>
+                <li className={newPassword.length >= 8 ? 'text-green-400' : ''}>
+                  {newPassword.length >= 8 ? '✓' : '•'} Minimum 8 characters
+                </li>
+                <li className={/[A-Z]/.test(newPassword) ? 'text-green-400' : ''}>
+                  {/[A-Z]/.test(newPassword) ? '✓' : '•'} At least one uppercase letter (A-Z)
+                </li>
+                <li className={/[0-9]/.test(newPassword) ? 'text-green-400' : ''}>
+                  {/[0-9]/.test(newPassword) ? '✓' : '•'} At least one number (0-9)
+                </li>
+                <li className={/[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/.test(newPassword) ? 'text-green-400' : ''}>
+                  {/[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/.test(newPassword) ? '✓' : '•'} At least one symbol (!@#$%^&* etc.)
+                </li>
+                <li className={newPassword && newPassword === confirmPassword ? 'text-green-400' : ''}>
+                  {newPassword && newPassword === confirmPassword ? '✓' : '•'} Passwords match
+                </li>
               </ul>
             </div>
 

@@ -47,12 +47,17 @@ export default function Auction() {
     }
 
     // Subscribe to auction state changes
-    const stateSubscription = AuctionService.subscribeToAuctionState((state) => {
+    const stateSubscription = AuctionService.subscribeToAuctionState(async (state) => {
       setAuctionState(state);
       
       // When player changes, clear bid history (will be reloaded by the other useEffect)
       if (state.current_player_id !== auctionState?.current_player_id) {
         setBidHistory([]);
+      }
+      
+      // Also reload bid history when auction state changes to ensure sync
+      if (state.id) {
+        await pollBidsForCurrentAuction(state.id);
       }
     });
 
@@ -77,7 +82,9 @@ export default function Auction() {
           
           // Only add bid if it's for the current player
           const isForCurrentPlayer = bid.player_id === currentPlayerId || 
-                                     bid.player_id === currentPlayerDataId;
+                                     bid.player_id === currentPlayerDataId ||
+                                     (currentState?.current_player_data && 
+                                      bid.player_id === currentState.current_player_data.id);
           
           if (!isForCurrentPlayer) {
             return;
@@ -96,9 +103,6 @@ export default function Auction() {
         }
       )
       .subscribe((status, err) => {
-        if (status === 'SUBSCRIBED') {
-          // Subscribed successfully
-        }
         if (status === 'CHANNEL_ERROR') {
           console.error('❌ Bid subscription error:', err);
         }
@@ -209,7 +213,11 @@ export default function Auction() {
     try {
       // Get current auction state to know which player we're showing
       const currentState = await AuctionService.getAuctionState();
-      if (!currentState?.current_player_id) {
+      
+      // Check if there's a current player (either via current_player_id or current_player_data)
+      const hasCurrentPlayer = currentState?.current_player_id || currentState?.current_player_data?.id;
+      
+      if (!hasCurrentPlayer) {
         // No current player, clear bids
         setBidHistory([]);
         return;

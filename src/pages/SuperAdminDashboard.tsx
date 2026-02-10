@@ -20,7 +20,6 @@ import { AdminSettings } from '../components/admin/AdminSettings';
 import { AdminManagement } from '../components/admin/AdminManagement';
 import { ProfileUpdateRequests } from '../components/admin/ProfileUpdateRequests';
 import AnnouncementManagement from '../components/admin/AnnouncementManagement';
-import PasswordMigration from '../components/admin/PasswordMigration';
 import playerBanService from '../services/playerBanService';
 import messagingService from '../services/messagingService';
 import profileUpdateService from '../services/profileUpdateService';
@@ -400,7 +399,6 @@ export default function SuperAdminDashboard() {
     { id: 'users', label: 'User Management', icon: Users, description: 'Players & Admins' },
     { id: 'admin-management', label: 'Admin Management', icon: Shield, description: 'Add/Manage Admins' },
     { id: 'announcements', label: 'Announcements', icon: Megaphone, description: 'Manage Announcements' },
-    { id: 'password-migration', label: 'Password Migration', icon: Database, description: 'Migrate Passwords' },
     { id: 'captains', label: 'Captain Management', icon: Shield, description: 'Assign Captains' },
     { id: 'registration', label: 'Registration', icon: UserPlus, description: 'Control Settings' },
     { id: 'auction', label: 'Auction Control', icon: Gavel, description: 'Manage Auction' },
@@ -503,7 +501,6 @@ export default function SuperAdminDashboard() {
             {activeSection === 'dashboard' ? 'Dashboard Overview' : 
              activeSection === 'users' ? 'User Management' :
              activeSection === 'announcements' ? 'Announcement Management' :
-             activeSection === 'password-migration' ? 'Password Migration' :
              activeSection === 'captains' ? 'Captain Management' :
              activeSection === 'registration' ? 'Registration Control' :
              activeSection === 'auction' ? 'Auction Control' :
@@ -516,7 +513,6 @@ export default function SuperAdminDashboard() {
             {activeSection === 'dashboard' ? 'System overview and quick actions' :
              activeSection === 'users' ? 'Manage players and administrators' :
              activeSection === 'announcements' ? 'Create and manage announcements' :
-             activeSection === 'password-migration' ? 'Migrate default passwords to encrypted storage' :
              activeSection === 'captains' ? 'Assign and manage team captains' :
              activeSection === 'registration' ? 'Control player registration settings' :
              activeSection === 'auction' ? 'Start and manage player auctions' :
@@ -1158,7 +1154,6 @@ export default function SuperAdminDashboard() {
               {activeSection === 'users' && renderUserManagement()}
               {activeSection === 'admin-management' && <AdminManagement />}
               {activeSection === 'announcements' && <div className="p-8"><AnnouncementManagement /></div>}
-              {activeSection === 'password-migration' && <PasswordMigration />}
               {activeSection === 'captains' && renderCaptainManagement()}
               {activeSection === 'registration' && renderRegistrationControl()}
               {activeSection === 'auction' && renderAuctionControl()}

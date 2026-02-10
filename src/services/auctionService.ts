@@ -269,18 +269,14 @@ export class AuctionService {
     try {
       const state = await this.getAuctionState();
       if (!state || state.status !== 'live') {
-        console.log('Cannot place bid: auction not live or not found');
         return false;
       }
 
       // Check if bid is higher than current (must be strictly greater)
       const currentBid = state.highest_bid || 0;
       if (amount <= currentBid) {
-        console.log(`Bid rejected: ${amount} is not higher than current bid ${currentBid}`);
         return false;
       }
-
-      console.log(`Placing bid: ${amount} (current: ${currentBid})`);
 
       // Update auction state
       const { error: updateError } = await supabase
@@ -295,7 +291,6 @@ export class AuctionService {
 
       if (updateError) {
         console.error('Error updating auction state:', updateError);
-        console.error('Update details:', { amount, captainId, captainName, teamName });
         return false;
       }
 
@@ -316,7 +311,6 @@ export class AuctionService {
         // Don't return false here - the bid was placed, just not recorded in history
       }
 
-      console.log('✅ Bid placed successfully');
       return true;
     } catch (error) {
       console.error('Error placing bid:', error);
@@ -357,7 +351,6 @@ export class AuctionService {
           table: 'auctions'
         },
         async (payload) => {
-          console.log('🔔 Auction UPDATE detected:', payload);
           // Fetch the latest state when auction is updated
           const state = await this.getAuctionState();
           if (state) {
@@ -373,7 +366,6 @@ export class AuctionService {
           table: 'auctions'
         },
         async (payload) => {
-          console.log('🔔 Auction INSERT detected:', payload);
           // Fetch the latest state when new auction is created
           const state = await this.getAuctionState();
           if (state) {
@@ -382,9 +374,6 @@ export class AuctionService {
         }
       )
       .subscribe((status, err) => {
-        if (status === 'SUBSCRIBED') {
-          console.log('✅ Subscribed to auction state changes');
-        }
         if (status === 'CHANNEL_ERROR') {
           console.error('❌ Auction subscription error:', err);
         }
@@ -432,8 +421,6 @@ export class AuctionService {
   // Delete all auction-related data
   static async deleteAllAuctionData(): Promise<boolean> {
     try {
-      console.log('🗑️ Deleting all auction data...');
-      
       // Delete in order: bids, results, captains, auctions
       const { error: bidsError } = await supabase
         .from('auction_bids')
@@ -497,7 +484,6 @@ export class AuctionService {
         return false;
       }
 
-      console.log('✅ All auction data deleted and reset to Not Started');
       return true;
     } catch (error) {
       console.error('Exception deleting all data:', error);
@@ -508,8 +494,6 @@ export class AuctionService {
   // Delete only captains
   static async deleteCaptains(): Promise<boolean> {
     try {
-      console.log('🗑️ Deleting captains...');
-      
       const { error } = await supabase
         .from('captains')
         .delete()
@@ -520,7 +504,6 @@ export class AuctionService {
         return false;
       }
 
-      console.log('✅ Captains deleted successfully');
       return true;
     } catch (error) {
       console.error('Exception deleting captains:', error);
@@ -531,8 +514,6 @@ export class AuctionService {
   // Delete only bids
   static async deleteBids(): Promise<boolean> {
     try {
-      console.log('🗑️ Deleting bids...');
-      
       const { error } = await supabase
         .from('auction_bids')
         .delete()
@@ -543,7 +524,6 @@ export class AuctionService {
         return false;
       }
 
-      console.log('✅ Bids deleted successfully');
       return true;
     } catch (error) {
       console.error('Exception deleting bids:', error);
@@ -554,8 +534,6 @@ export class AuctionService {
   // Delete only results
   static async deleteResults(): Promise<boolean> {
     try {
-      console.log('🗑️ Deleting results...');
-      
       const { error } = await supabase
         .from('auction_results')
         .delete()
@@ -566,7 +544,6 @@ export class AuctionService {
         return false;
       }
 
-      console.log('✅ Results deleted successfully');
       return true;
     } catch (error) {
       console.error('Exception deleting results:', error);
@@ -577,8 +554,6 @@ export class AuctionService {
   // Delete only auction state
   static async deleteAuctionState(): Promise<boolean> {
     try {
-      console.log('🗑️ Deleting auction state...');
-      
       const { error } = await supabase
         .from('auctions')
         .delete()
@@ -589,7 +564,6 @@ export class AuctionService {
         return false;
       }
 
-      console.log('✅ Auction state deleted successfully');
       return true;
     } catch (error) {
       console.error('Exception deleting auction state:', error);
