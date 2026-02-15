@@ -6,6 +6,7 @@ import { AuctionGavel } from "../components/ui/AuctionGavel";
 import { Avatar } from "../components/ui/Avatar";
 import { AuctionService } from "../services/auctionService";
 import captainService from "../services/captainService";
+import auctionChatService from "../services/auctionChatService";
 import type { AuctionState } from "../services/auctionService";
 import { AuthService } from "../services/auth";
 import { supabase } from "../lib/supabase";
@@ -173,6 +174,53 @@ export default function Auction() {
     };
   }, []);
 
+  // Separate effect for chat subscription based on auction state
+  useEffect(() => {
+    if (!auctionState?.id) return;
+
+    console.log('🔔 Setting up chat subscription for auction:', auctionState.id);
+
+    // Load initial messages
+    const loadMessages = async () => {
+      const messages = await auctionChatService.getMessages(auctionState.id);
+      setChatMessages(messages);
+      console.log('📨 Loaded', messages.length, 'chat messages');
+    };
+    loadMessages();
+
+    // Subscribe to new messages
+    const chatSubscription = auctionChatService.subscribeToMessages(auctionState.id, (newMessage) => {
+      console.log('📨 New chat message received via subscription:', newMessage);
+      setChatMessages(prev => {
+        // Avoid duplicates
+        if (prev.some(m => m.id === newMessage.id)) {
+          console.log('⚠️ Duplicate message detected, skipping:', newMessage.id);
+          return prev;
+        }
+        return [...prev, newMessage];
+      });
+    });
+
+    // Polling fallback - check for new messages every 3 seconds
+    const pollInterval = setInterval(async () => {
+      const messages = await auctionChatService.getMessages(auctionState.id);
+      setChatMessages(prev => {
+        // Only update if there are new messages
+        if (messages.length > prev.length) {
+          console.log('📨 Polling found new messages:', messages.length - prev.length);
+          return messages;
+        }
+        return prev;
+      });
+    }, 3000);
+
+    return () => {
+      console.log('🔕 Cleaning up chat subscription and polling');
+      chatSubscription.unsubscribe();
+      clearInterval(pollInterval);
+    };
+  }, [auctionState?.id]);
+
   // Hammer countdown effect
   useEffect(() => {
     if (!isHammerActive || hammerStage === 0) return;
@@ -234,6 +282,43 @@ export default function Auction() {
       }
     } catch (error) {
       console.error('Error loading sold players:', error);
+    }
+  };
+
+  const handleSendMessage = async () => {
+    if (!chatInput.trim() || !currentCaptainSession || !auctionState?.id) return;
+
+    const captainId = currentCaptainSession.playerId || currentCaptainSession.id;
+    const captain = captains.find(c => c.playerId === captainId);
+
+    // Optimistic update - add message immediately to UI
+    const tempMessage = {
+      id: `temp-${Date.now()}`,
+      auction_id: auctionState.id,
+      sender_id: captainId,
+      sender_name: currentCaptainSession.nickname,
+      sender_team: captain?.teamName,
+      message: chatInput,
+      created_at: new Date().toISOString()
+    };
+
+    setChatMessages(prev => [...prev, tempMessage]);
+    const messageToSend = chatInput;
+    setChatInput(''); // Clear input immediately
+
+    // Send to database
+    const success = await auctionChatService.sendMessage(
+      auctionState.id,
+      captainId,
+      currentCaptainSession.nickname,
+      captain?.teamName,
+      messageToSend
+    );
+
+    if (!success) {
+      // Remove optimistic message if send failed
+      setChatMessages(prev => prev.filter(m => m.id !== tempMessage.id));
+      setChatInput(messageToSend); // Restore input
     }
   };
 
@@ -1066,21 +1151,28 @@ export default function Auction() {
                         ) : (
                           chatMessages.map((msg, index) => (
                             <motion.div
-                              key={index}
+                              key={msg.id || index}
                               initial={{ opacity: 0, x: -10 }}
                               animate={{ opacity: 1, x: 0 }}
                               className="bg-purple-900/20 border border-purple-500/30 rounded-lg p-2"
                             >
                               <div className="flex items-start gap-2">
                                 <div className="flex-1 min-w-0">
-                                  <p className="text-purple-300 font-semibold text-xs truncate">
-                                    {msg.senderName}
-                                  </p>
+                                  <div className="flex items-center gap-2">
+                                    <p className="text-purple-300 font-semibold text-xs truncate">
+                                      {msg.sender_name}
+                                    </p>
+                                    {msg.sender_team && (
+                                      <span className="text-purple-400 text-[0.6rem] bg-purple-900/40 px-1.5 py-0.5 rounded">
+                                        {msg.sender_team}
+                                      </span>
+                                    )}
+                                  </div>
                                   <p className="text-white text-xs mt-0.5 break-words">
                                     {msg.message}
                                   </p>
                                   <p className="text-gray-500 text-[0.6rem] mt-1">
-                                    {new Date(msg.timestamp).toLocaleTimeString()}
+                                    {new Date(msg.created_at).toLocaleTimeString()}
                                   </p>
                                 </div>
                               </div>
@@ -1098,20 +1190,14 @@ export default function Auction() {
                             onChange={(e) => setChatInput(e.target.value)}
                             onKeyPress={(e) => {
                               if (e.key === 'Enter' && chatInput.trim()) {
-                                // Send message logic here
-                                setChatInput('');
+                                handleSendMessage();
                               }
                             }}
                             placeholder="Type a message..."
                             className="flex-1 px-2 py-1.5 bg-black/60 border border-purple-500/40 rounded text-white text-xs placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-500"
                           />
                           <button
-                            onClick={() => {
-                              if (chatInput.trim()) {
-                                // Send message logic here
-                                setChatInput('');
-                              }
-                            }}
+                            onClick={handleSendMessage}
                             disabled={!chatInput.trim()}
                             className="px-3 py-1.5 bg-purple-600 hover:bg-purple-500 disabled:bg-gray-600 disabled:cursor-not-allowed text-white text-xs font-semibold rounded transition-colors"
                           >
