@@ -1,6 +1,6 @@
 import React, { useState, useMemo, useEffect } from 'react';
-import { motion } from 'framer-motion';
-import { Search, Lock, Eye, EyeOff, User, LogIn } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { Search, Lock, Eye, EyeOff, User, LogIn, Users } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import DatabaseService from '../services/database';
 import AuthService from '../services/auth';
@@ -240,6 +240,19 @@ export default function PlayerLogin() {
                         <p className="text-gray-500 text-sm mt-1">Enter your nickname or real name</p>
                       </div>
                     )}
+
+                    {/* Browse All Players Button */}
+                    <div className="mt-6 pt-6 border-t border-gray-600/30">
+                      <button
+                        onClick={() => navigate('/players')}
+                        className="w-full flex items-center justify-center gap-2 py-3 px-4 bg-gray-700/30 hover:bg-gray-600/40 border border-gray-600/40 hover:border-gray-500/60 rounded-xl transition-all duration-300 group cursor-pointer backdrop-blur-sm"
+                      >
+                        <Users className="w-5 h-5 text-gray-400 group-hover:text-gray-300 transition-colors" />
+                        <span className="text-gray-300 group-hover:text-white font-medium transition-colors">
+                          Browse All Players
+                        </span>
+                      </button>
+                    </div>
                   </motion.div>
                 </div>
               </div>

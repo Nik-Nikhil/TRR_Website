@@ -26,29 +26,14 @@ export type BracketData = {
 
 
 /* ===================== RESPONSIVE CONSTANTS ===================== */
-const getResponsiveConstants = () => {
-  if (typeof window === 'undefined') {
-    return { CARD_W: 180, CARD_H: 74, COL_GAP: 60, ROW_GAP: 28 }
-  }
-  
-  const width = window.innerWidth
-  if (width < 640) {
-    return { CARD_W: 140, CARD_H: 65, COL_GAP: 45, ROW_GAP: 22 }
-  } else if (width < 768) {
-    return { CARD_W: 155, CARD_H: 68, COL_GAP: 50, ROW_GAP: 24 }
-  } else if (width < 1024) {
-    return { CARD_W: 165, CARD_H: 70, COL_GAP: 55, ROW_GAP: 26 }
-  } else if (width < 1440) {
-    return { CARD_W: 180, CARD_H: 74, COL_GAP: 60, ROW_GAP: 28 }
-  } else {
-    return { CARD_W: 190, CARD_H: 76, COL_GAP: 65, ROW_GAP: 30 }
-  }
-}
+const CARD_W = 220
+const CARD_H = 80
+const COL_GAP = 60
+const ROW_GAP = 25
 
 const GOLD = "#f5c542"
 const FINAL_MERGE_ID = "__FINAL_MERGE__"
-const ELBOW = 14
-const HEADER_HEIGHT = 56
+const ELBOW = 10
 
 
 /* ===================== HELPERS ===================== */
@@ -166,7 +151,6 @@ function useNodePositions() {
 function Header({
   title,
   background,
-  glow,
 }: {
   title: string
   background: string
@@ -174,11 +158,11 @@ function Header({
 }) {
   return (
     <div
-      className="mb-4 sm:mb-6 py-2 sm:py-3 text-center font-extrabold rounded-md text-xs sm:text-sm tracking-wide"
+      className="mb-6 py-3 px-6 text-center font-black rounded-lg text-base tracking-wide border border-slate-700/50 shadow-lg"
       style={{
         backgroundImage: background,
-        color: "#06130a",
-        boxShadow: glow ?? "none",
+        color: "#0f172a",
+        textShadow: "0 2px 4px rgba(0,0,0,0.3)"
       }}
     >
       {title}
@@ -193,121 +177,72 @@ function MatchNode({
   winner,
   register,
   isGrandFinal,
-  dimensions,
 }: {
   id: string
   teams: (Team | null)[]
   winner?: string
   isGrandFinal?: boolean
   register: (id: string, el: HTMLElement | null) => void
-  dimensions: { CARD_W: number; CARD_H: number }
 }) {
 
   return (
     <motion.div
       ref={el => register(id, el)}
-      whileHover={{ scale: 1.04 }}
-      className="rounded-md bg-linear-to-b from-[#2b2e36] to-[#1f2128] border border-white/10 shadow-lg"
-      style={{ width: dimensions.CARD_W, height: dimensions.CARD_H }}
+      whileHover={{ scale: 1.03, boxShadow: "0 8px 30px rgba(0,0,0,0.5)" }}
+      className="rounded-lg border border-slate-500/40 bg-slate-800 shadow-xl overflow-hidden"
+      style={{ width: CARD_W, height: CARD_H }}
     >
-      <div className="p-2 flex flex-col gap-1 justify-center h-full">
+      <div className="flex flex-col h-full divide-y divide-slate-600/30">
         {teams.map((t, i) => {
-        const win = t?.id === winner
-const hasWinner = !!winner
-const isSingle = teams.length === 1
-const isDQ = id === "UB_F_M1" && t?.id === "kolly"
-const isLoser = hasWinner && !win
-const isGFLoser = isGrandFinal && isLoser
-const isGFWinner = isGrandFinal && win
-
+          const win = t?.id === winner
+          const isSingle = teams.length === 1
+          const isDQ = id === "UB_F_M1" && t?.id === "kolly"
+          const isGFWinner = isGrandFinal && win
 
           return (
             <div
               key={i}
-              className={`flex items-center gap-2 px-2 py-1 rounded transition-all
-  ${win || isSingle ? "bg-white/10" : "opacity-60"}
-
- ${(win || isSingle) && !isGrandFinal
-  ? "hover:shadow-[0_0_18px_rgba(34,197,94,0.85)]"
-  : ""
-}
-
-${isGFWinner
-  ? "hover:shadow-[0_0_22px_rgba(245,197,66,0.95)]"
-  : ""
-}
-
-${isGFLoser
-  ? "hover:shadow-[0_0_18px_rgba(159,166,173,0.9)]"
-  : ""
-}
-
-${isLoser && !isDQ && !isGrandFinal
-  ? "hover:shadow-[0_0_18px_rgba(239,68,68,0.8)]"
-  : ""
-}
-
-
-  ${isDQ
-    ? "hover:bg-red-950/50 hover:shadow-[0_0_24px_rgba(127,29,29,1)]"
-    : ""
-  }
-`}
-
+              className={`flex items-center gap-3 px-4 py-3 transition-all ${
+                win || isSingle 
+                  ? 'bg-slate-700/60' 
+                  : 'bg-slate-800/80'
+              }`}
             >
               {/* Team color bar */}
-              <span
-                className="w-1.5 h-5 rounded-full"
-                style={{ background: t?.color ?? "#555" }}
+              <div
+                className="w-1 h-8 rounded-full flex-shrink-0"
+                style={{ background: t?.color ?? "#64748b" }}
               />
 
               {/* Team name */}
-              <span className="text-xs truncate flex-1">
+              <span className={`text-base font-bold flex-1 ${
+                win || isSingle ? 'text-white' : 'text-slate-400'
+              }`}>
                 {t?.name ?? "TBD"}
               </span>
 
-              {/* 🏆 Grand Final Champion (Season-style medal) */}
-             {win && isGrandFinal && (
-  <div className="relative group cursor-pointer flex items-center">
-    <div
-      className="h-5 w-5 rounded-md
-                 bg-[#facc15]
-                 shadow-[0_0_12px_rgba(250,204,21,0.9)]
-                 flex items-center justify-center
-                 text-xs leading-none"
-    >
-      🏆
-    </div>
+              {/* Winner badges */}
+              {win && isGrandFinal && (
+                <div className="relative group">
+                  <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-yellow-400 to-yellow-600 shadow-lg shadow-yellow-500/50 flex items-center justify-center text-base">
+                    🏆
+                  </div>
+                  <div className="hidden group-hover:block">
+                    <Tooltip text="Champion" />
+                  </div>
+                </div>
+              )}
 
-    <div className="hidden group-hover:block">
-      <Tooltip text="Champion" />
-    </div>
-  </div>
-)}
-
-
-
-              {/* 🔴 DQ medal (ONLY UB Final, darker red) */}
               {isDQ && (
-  <div className="relative group cursor-pointer flex items-center">
-    <div
-      className="h-5 w-5 rounded-md
-                 bg-[#7f1d1d]
-                 shadow-[0_0_14px_rgba(127,29,29,1)]
-                 flex items-center justify-center
-                 text-[10px] font-bold leading-none text-white"
-    >
-      DQ
-    </div>
-
-    <div className="hidden group-hover:block">
-      <Tooltip text="Disqualified due to smurfing" />
-    </div>
-  </div>
-)}
-
-
-
+                <div className="relative group">
+                  <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-red-800 to-red-950 shadow-lg shadow-red-900/50 flex items-center justify-center text-xs font-black text-white">
+                    DQ
+                  </div>
+                  <div className="hidden group-hover:block">
+                    <Tooltip text="Disqualified" />
+                  </div>
+                </div>
+              )}
             </div>
           )
         })}
@@ -329,11 +264,10 @@ type Flow = {
   handoff?: boolean
 }
 
-function Connectors({ pos, flows, COL_GAP }: { pos: Record<string, Pos>; flows: Flow[]; COL_GAP: number }) {
+function Connectors({ pos, flows }: { pos: Record<string, Pos>; flows: Flow[] }) {
   const STEP = COL_GAP / 2
-  const MERGE_SILVER = "#9fa6ad" // silver-ish for the short horizontal join
+  const MERGE_COLOR = "#6b7280"
 
-  // Group incoming flows by target (to) so we can detect merges (2 incoming)
   const incomingMap = useMemo(() => {
     const map = new Map<string, Flow[]>()
     flows.forEach(f => {
@@ -360,7 +294,7 @@ function Connectors({ pos, flows, COL_GAP }: { pos: Record<string, Pos>; flows: 
                   L ${b.x} ${b.y}`}
               fill="none"
               stroke={f.color}
-              strokeWidth="2"
+              strokeWidth="3"
             />
           )
         }
@@ -388,7 +322,7 @@ function Connectors({ pos, flows, COL_GAP }: { pos: Record<string, Pos>; flows: 
               d={`M ${a.x} ${a.y} L ${b.x} ${a.y}`}
               fill="none"
               stroke={f.color}
-              strokeWidth="2"
+              strokeWidth="3"
             />
           )
         }
@@ -408,24 +342,21 @@ function Connectors({ pos, flows, COL_GAP }: { pos: Record<string, Pos>; flows: 
                 d={`M ${a.x} ${a.y} L ${midX} ${a.y}`}
                 fill="none"
                 stroke={f.color}
-                strokeWidth="2"
+                strokeWidth="3"
                 strokeLinejoin="round"
                 strokeLinecap="round"
               />
-              {/* vertical from parent's Y down/up to child's Y in parent's color
-                  (both parents will draw this; visually they'll overlap) */}
               <path
                 d={`M ${midX} ${a.y} L ${midX} ${b.y}`}
                 fill="none"
                 stroke={f.color}
-                strokeWidth="2"
+                strokeWidth="3"
                 strokeLinecap="round"
               />
-              {/* the short horizontal from midX at child Y to child X — silver */}
               <path
                 d={`M ${midX} ${b.y} L ${b.x} ${b.y}`}
                 fill="none"
-                stroke={MERGE_SILVER}
+                stroke={MERGE_COLOR}
                 strokeWidth="3"
                 strokeLinecap="round"
               />
@@ -443,7 +374,7 @@ function Connectors({ pos, flows, COL_GAP }: { pos: Record<string, Pos>; flows: 
                 L ${b.x} ${b.y}`}
             fill="none"
             stroke={f.color}
-            strokeWidth="2"
+            strokeWidth="3"
           />
         )
       })}
@@ -453,26 +384,17 @@ function Connectors({ pos, flows, COL_GAP }: { pos: Record<string, Pos>; flows: 
 
 /* ===================== MAIN ===================== */
 export default function BracketDotaStyle({ data }: { data: BracketData }) {
-  const [dimensions, setDimensions] = useState(getResponsiveConstants())
   const { pos, register } = useNodePositions()
+  const navigate = useNavigate()
 
-  useLayoutEffect(() => {
-    const handleResize = () => {
-      setDimensions(getResponsiveConstants())
-    }
-    window.addEventListener('resize', handleResize)
-    return () => window.removeEventListener('resize', handleResize)
-  }, [])
-
-  const { CARD_W, CARD_H, COL_GAP, ROW_GAP } = dimensions
   const STACK = CARD_H + ROW_GAP
-  const GF_HEADER_WIDTH = CARD_W * 1.5
+  const GF_HEADER_WIDTH = CARD_W * 1.3
 
   const HEADER_COLS = Math.max(
     data.upperBracket.rounds.length,
     data.lowerBracket.rounds.length
   )
-  const FINAL_STAGE_GAP = COL_GAP * 1.5
+  const FINAL_STAGE_GAP = COL_GAP * 1.2
 
   const FINAL_X =
     HEADER_COLS * CARD_W +
@@ -619,132 +541,43 @@ export default function BracketDotaStyle({ data }: { data: BracketData }) {
 
   // position for grand final node:
   const gfLeft = FINAL_X + (GF_HEADER_WIDTH - CARD_W) / 2
- const GF_SCALE = 1.15
+  const GF_SCALE = 1.1
 
-const gfTop = mergePos
-  ? mergePos.y - (CARD_H * GF_SCALE) / 2
-  : HEADER_HEIGHT - (CARD_H * GF_SCALE) / 2
-  const navigate = useNavigate()
+  const gfTop = mergePos
+    ? mergePos.y - (CARD_H * GF_SCALE) / 2
+    : 0
 
 
   return (
-    <div className="min-h-screen w-full relative overflow-hidden bg-gradient-to-br from-slate-950 via-indigo-950/20 to-slate-950">
-      {/* Enhanced Background */}
-      <div className="fixed inset-0 z-0 pointer-events-none">
-        {/* Base gradient overlay */}
-        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-purple-900/20 via-slate-950/50 to-slate-950" />
-        
-        {/* Animated grid pattern */}
-        <motion.div 
-          className="absolute inset-0 opacity-[0.03]"
-          animate={{
-            backgroundPosition: ["0% 0%", "100% 100%"],
-          }}
-          transition={{
-            duration: 30,
-            repeat: Infinity,
-            repeatType: "reverse",
-            ease: "linear"
-          }}
-          style={{
-            backgroundImage: `
-              repeating-linear-gradient(0deg, transparent, transparent 49px, rgba(139, 92, 246, 0.1) 49px, rgba(139, 92, 246, 0.1) 50px),
-              repeating-linear-gradient(90deg, transparent, transparent 49px, rgba(139, 92, 246, 0.1) 49px, rgba(139, 92, 246, 0.1) 50px)
-            `,
-            backgroundSize: "100px 100px",
-          }}
-        />
-
-        {/* Glowing orbs */}
-        <motion.div 
-          className="absolute -top-40 -left-40 w-[600px] h-[600px] rounded-full blur-[120px]"
-          style={{ background: "radial-gradient(circle, rgba(139, 92, 246, 0.15), transparent 70%)" }}
-          animate={{
-            scale: [1, 1.1, 1],
-            opacity: [0.3, 0.5, 0.3],
-          }}
-          transition={{ duration: 10, repeat: Infinity, ease: "easeInOut" }}
-        />
-        <motion.div 
-          className="absolute -bottom-40 -right-40 w-[600px] h-[600px] rounded-full blur-[120px]"
-          style={{ background: "radial-gradient(circle, rgba(236, 72, 153, 0.15), transparent 70%)" }}
-          animate={{
-            scale: [1.1, 1, 1.1],
-            opacity: [0.5, 0.3, 0.5],
-          }}
-          transition={{ duration: 12, repeat: Infinity, ease: "easeInOut" }}
-        />
-
-        {/* Floating particles */}
-        <div className="absolute inset-0">
-          {[...Array(15)].map((_, i) => (
-            <motion.div
-              key={i}
-              className="absolute rounded-full"
-              style={{
-                width: Math.random() * 2 + 0.5,
-                height: Math.random() * 2 + 0.5,
-                left: `${Math.random() * 100}%`,
-                top: `${Math.random() * 100}%`,
-                background: `rgba(${Math.random() * 50 + 200}, ${Math.random() * 50 + 200}, 255, ${Math.random() * 0.3 + 0.2})`,
-                boxShadow: `0 0 ${Math.random() * 10 + 5}px rgba(139, 92, 246, 0.3)`
-              }}
-              animate={{
-                opacity: [0.2, 0.6, 0.2],
-                scale: [1, 1.2, 1],
-                y: [0, -20, 0]
-              }}
-              transition={{
-                duration: Math.random() * 4 + 3,
-                repeat: Infinity,
-                delay: Math.random() * 2,
-                ease: "easeInOut"
-              }}
-            />
-          ))}
-        </div>
+    <div className="min-h-screen w-full bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950 py-24 px-6">
+      {/* Background effects */}
+      <div className="fixed inset-0 pointer-events-none opacity-30">
+        <div className="absolute top-20 left-20 w-96 h-96 bg-purple-500/20 rounded-full blur-3xl" />
+        <div className="absolute bottom-20 right-20 w-96 h-96 bg-pink-500/20 rounded-full blur-3xl" />
       </div>
 
-      <div className="bracket-root relative p-4 sm:p-6 lg:p-10 z-10">
-          {/* Back button */}
-    <button
-  onClick={() => navigate("/seasons")}
-  className="
-    fixed
-    left-4 sm:left-6
-    top-20 sm:top-24
-    z-50
+      {/* Back button */}
+      <button
+        onClick={() => navigate("/seasons")}
+        className="fixed left-6 top-24 z-50 px-5 py-2 rounded-full text-[11px] font-semibold tracking-wider bg-gradient-to-r from-gray-200 to-gray-300 text-slate-900 shadow-lg hover:shadow-xl hover:scale-105 transition-all"
+      >
+        ← BACK
+      </button>
 
-    px-4 sm:px-5 py-1.5 sm:py-2
-    rounded-full
-    text-[10px] sm:text-[11px]
-    font-semibold
-    tracking-[0.2em]
-
-    bg-gradient-to-tr from-zinc-200 via-zinc-100 to-zinc-300
-    text-[#050608]
-    shadow-[0_8px_26px_rgba(2,6,23,0.55)]
-
-    hover:brightness-105
-    transition-all
-  "
->
-  ← BACK
-</button>
-
-
-      <Connectors
-        pos={{
-          ...pos,
-          ...elbowPos,
-          ...(mergePos ? { [FINAL_MERGE_ID]: mergePos } : {}),
-        }}
-        flows={flows}
-        COL_GAP={COL_GAP}
-      />
+      {/* Bracket container */}
+      <div className="relative max-w-[1800px] mx-auto">
+        <div className="bracket-root relative">
+          <Connectors
+            pos={{
+              ...pos,
+              ...elbowPos,
+              ...(mergePos ? { [FINAL_MERGE_ID]: mergePos } : {}),
+            }}
+            flows={flows}
+          />
 
       {/* HEADERS */}
-      <div className="flex items-center relative">
+      <div className="flex items-center relative mb-4">
         {/* Upper Bracket Header */}
         <div
           style={{
@@ -754,12 +587,10 @@ const gfTop = mergePos
           }}
         >
           <Header
-  title="Upper Bracket"
-  background="linear-gradient(90deg, #a3ff12 0%, #f5f542 100%)"
-  glow="0 0 40px rgba(163,255,18,0.55), 0 0 20px rgba(245,245,66,0.4)"
-/>
-
-         </div>
+            title="Upper Bracket"
+            background="linear-gradient(90deg, #a3ff12 0%, #f5f542 100%)"
+          />
+        </div>
 
         {/* Spacer to reach FINAL_X */}
         <div
@@ -770,31 +601,28 @@ const gfTop = mergePos
           }}
         />
 
-       {/* Grand Final Header */}
-<div
-  style={{
-    position: "absolute",
-    left: FINAL_X - CARD_W * 0.25,
-    width: CARD_W * 1.5,
-  }}
->
-  <Header
-  title="Grand Final"
-  background={`linear-gradient(90deg, ${GOLD}, ${GOLD})`}
-  glow="0 0 35px rgba(245,197,66,0.7)"
-/>
-
-</div>
-
+        {/* Grand Final Header */}
+        <div
+          style={{
+            position: "absolute",
+            left: FINAL_X - CARD_W * 0.25,
+            width: CARD_W * 1.5,
+          }}
+        >
+          <Header
+            title="Grand Final"
+            background={`linear-gradient(90deg, ${GOLD}, ${GOLD})`}
+          />
+        </div>
       </div>
 
       {/* UPPER BRACKET */}
-      <div className="flex overflow-x-auto pb-4">
+      <div className="flex">
         {data.upperBracket.rounds.map((r, ri) => {
           const cache = new Map<string, number>()
           return (
             <div key={r.id} style={{ marginLeft: ri ? COL_GAP : 0 }}>
-              <p className="text-[10px] sm:text-xs text-center mb-3 sm:mb-4 text-gray-300">{r.label}</p>
+              <p className="text-sm text-center mb-4 text-slate-300 font-bold uppercase tracking-wider">{r.label}</p>
               <div
                 className="relative"
                 style={{
@@ -829,7 +657,6 @@ const gfTop = mergePos
                       }
                       winner={m.winner}
                       register={register}
-                      dimensions={{ CARD_W, CARD_H }}
                     />
                   </div>
                 ))}
@@ -840,7 +667,7 @@ const gfTop = mergePos
       </div>
 
       {/* LOWER BRACKET */}
-      <div style={{ marginTop: STACK * 0.8 }}>
+      <div style={{ marginTop: STACK * 1.5 }}>
         <div
           style={{
             width:
@@ -849,19 +676,17 @@ const gfTop = mergePos
           }}
         >
           <Header
-  title="Lower Bracket"
-  background="linear-gradient(90deg, #ff007f 0%, #ffd84d 100%)"
-  glow="0 0 40px rgba(255,0,127,0.55), 0 0 20px rgba(255,216,77,0.45)"
-/>
+            title="Lower Bracket"
+            background="linear-gradient(90deg, #ff007f 0%, #ffd84d 100%)"
+          />
+        </div>
 
-          </div>
-
-        <div className="flex overflow-x-auto pb-4">
+        <div className="flex">
           {data.lowerBracket.rounds.map((r, ri) => {
             const cache = new Map<string, number>()
             return (
               <div key={r.id} style={{ marginLeft: ri ? COL_GAP : 0 }}>
-                <p className="text-[10px] sm:text-xs text-center mb-3 sm:mb-4 text-gray-300">{r.label}</p>
+                <p className="text-sm text-center mb-4 text-slate-300 font-bold uppercase tracking-wider">{r.label}</p>
                 <div
                   className="relative"
                   style={{
@@ -897,7 +722,6 @@ const gfTop = mergePos
                         }
                         winner={m.winner}
                         register={register}
-                        dimensions={{ CARD_W, CARD_H }}
                       />
                     </div>
                   ))}
@@ -914,7 +738,7 @@ const gfTop = mergePos
           position: "absolute",
           left: gfLeft,
           top: gfTop,
-          transform: "scale(1.15)",
+          transform: `scale(${GF_SCALE})`,
           transformOrigin: "left center",
         }}
       >
@@ -928,10 +752,10 @@ const gfTop = mergePos
           }
           winner={data.grandFinal.winner}
           register={register}
-          dimensions={{ CARD_W, CARD_H }}
         />
       </div>
 
+        </div>
       </div>
     </div>
   )

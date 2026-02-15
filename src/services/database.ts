@@ -56,8 +56,9 @@ export class DatabaseService {
    */
   static async getPlayerByNickname(nickname: string) {
     try {
-      // Use direct import instead of dynamic import
-      const player = players.find(p => p.nickname.toLowerCase() === nickname.toLowerCase());
+      // Query Supabase database
+      const { PlayerService } = await import('./supabaseService');
+      const player = await PlayerService.getPlayerByNickname(nickname);
       
       if (!player) {
         return { success: false, error: 'Player not found' };

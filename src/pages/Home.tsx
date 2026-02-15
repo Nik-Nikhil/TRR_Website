@@ -153,7 +153,7 @@ export default function Home() {
             <div className="flex flex-col items-center space-y-2 pb-4">
               
               {/* Top Row - Announcements, Empty Space, Registration */}
-              <div className="grid grid-cols-1 lg:grid-cols-[1fr_1.5fr_1fr] gap-2 w-full">
+              <div className="grid grid-cols-1 lg:grid-cols-[1fr_auto_1fr] gap-2 w-full">
                 
                 {/* Announcements Card - Left */}
                 <Link 
@@ -198,8 +198,8 @@ export default function Home() {
                   </div>
                 </Link>
 
-                {/* Empty Middle Space */}
-                <div></div>
+                {/* Empty Middle Space for Aegis */}
+                <div className="w-80 mx-auto"></div>
 
                 {/* Registration Card - Right */}
                 <div className="bg-gradient-to-br from-purple-900/40 to-pink-900/30 backdrop-blur-xl border border-purple-500/50 rounded-2xl p-4 hover:border-purple-400/70 transition-all duration-300 group h-52">
@@ -251,7 +251,7 @@ export default function Home() {
               </div>
 
               {/* Bottom Row - Champions, YouTube, Admin Panel */}
-              <div className="grid grid-cols-1 lg:grid-cols-[1fr_1.5fr_1fr] gap-2 w-full -mt-32">
+              <div className="grid grid-cols-1 lg:grid-cols-[1fr_auto_1fr] gap-2 w-full -mt-32">
                 
                 {/* Champions Card - First */}
                 <div className="bg-gradient-to-br from-amber-900/40 to-yellow-900/30 backdrop-blur-xl border border-amber-500/50 rounded-2xl p-3 hover:border-amber-400/70 transition-all duration-300 group h-44">
@@ -282,8 +282,8 @@ export default function Home() {
                   </div>
                 </div>
 
-                {/* YouTube - Second */}
-                <div className="bg-gradient-to-br from-red-900/40 to-orange-900/30 backdrop-blur-xl border border-red-500/50 rounded-2xl p-3 hover:border-red-400/70 transition-all duration-300 h-44 flex flex-col">
+                {/* YouTube - Second (with max-width for square appearance) */}
+                <div className="bg-gradient-to-br from-red-900/40 to-orange-900/30 backdrop-blur-xl border border-red-500/50 rounded-2xl p-3 hover:border-red-400/70 transition-all duration-300 h-44 flex flex-col w-full max-w-xs mx-auto">
                   {/* Video Player with Navigation */}
                   <div className="flex-1 flex items-center gap-2 mb-1 min-h-0">
                     {/* Previous Button */}

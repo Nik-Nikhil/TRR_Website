@@ -1,6 +1,5 @@
 // src/pages/Players/PlayerDetailPage.tsx
 import { useParams, useNavigate } from "react-router-dom";
-import { getPlayerById } from "../../data/players";
 import { FaSteam } from "react-icons/fa";
 import { motion } from "framer-motion";
 import { useState, useEffect } from "react";
@@ -13,6 +12,9 @@ import ToastContainer from "../../components/ui/ToastContainer";
 import { getMedalFromMMR } from "../../utils/mmrToMedal";
 import PasswordChangeModal from "../../components/PasswordChangeModal";
 import FirstLoginPasswordChange from "../../components/FirstLoginPasswordChange";
+import { PlayerService } from "../../services/supabaseService";
+import { supabase } from "../../lib/supabase";
+import type { Player } from "../../data/players";
 
 // Colored season badge styles
 const coloredSeasonBadgeStyles: Record<number, string> = {
@@ -43,6 +45,8 @@ export default function PlayerDetailPage() {
   const { toasts, success, error, warning, removeToast } = useToast();
   const [selectedSeason, setSelectedSeason] = useState<number | null>(null);
   const [isEditMode, setIsEditMode] = useState(false);
+  const [player, setPlayer] = useState<Player | null>(null);
+  const [loading, setLoading] = useState(true);
   const [editedData, setEditedData] = useState({
     bio: '',
     currentMedalLabel: '',
@@ -67,8 +71,6 @@ export default function PlayerDetailPage() {
   const currentUser = AuthService.getCurrentUser();
   const isAuthenticated = AuthService.isSessionValid();
   
-  const player = playerId ? getPlayerById(playerId) : undefined;
-  
   // Check if current user can edit this profile
   const canEdit = isAuthenticated && currentUser && (
     currentUser.type === 'admin' || 
@@ -78,6 +80,76 @@ export default function PlayerDetailPage() {
   const effectiveCupRank: CupRank | undefined = player?.hasWonCup
     ? player.cupRank ?? "gold"
     : undefined;
+
+  // Load player data from Supabase
+  useEffect(() => {
+    const loadPlayer = async () => {
+      if (!playerId) return;
+      
+      setLoading(true);
+      try {
+        // Try to fetch from Supabase first
+        const playerData = await PlayerService.getPlayerById(playerId);
+        
+        if (playerData) {
+          setPlayer(playerData);
+        } else {
+          // Player not found in Supabase, try local data
+          throw new Error('Player not found in Supabase');
+        }
+      } catch (err) {
+        console.error('Error loading player from Supabase:', err);
+        
+        // Fallback to local data
+        try {
+          const { getPlayerById: getLocalPlayer } = await import('../../data/players');
+          const localPlayer = getLocalPlayer(playerId);
+          if (localPlayer) {
+            setPlayer(localPlayer);
+          } else {
+            error('Player not found', 'Please check the player ID');
+          }
+        } catch (localErr) {
+          console.error('Error loading player from local data:', localErr);
+          error('Failed to load player data', 'Please try again');
+        }
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    loadPlayer();
+  }, [playerId]);
+
+  // Subscribe to real-time player updates
+  useEffect(() => {
+    if (!playerId || !player) return;
+
+    // Subscribe using the actual player data we loaded
+    // If player has a UUID id, use that; otherwise use nickname
+    const filterField = player.id && player.id !== playerId ? 'id' : 'nickname';
+    const filterValue = player.id && player.id !== playerId ? player.id : playerId;
+
+    const channel = supabase
+      .channel(`player-${playerId}`)
+      .on(
+        'postgres_changes',
+        {
+          event: 'UPDATE',
+          schema: 'public',
+          table: 'players',
+          filter: `${filterField}=eq.${filterValue}`
+        },
+        (payload) => {
+          setPlayer(payload.new as Player);
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [playerId, player?.id]);
 
   // Initialize edit data when player loads
   useEffect(() => {
@@ -93,9 +165,9 @@ export default function PlayerDetailPage() {
         realName: player.realName || '',
         nickname: player.nickname || ''
       });
-      setEditedRoles(player.roles.map(role => role.label));
+      setEditedRoles(player.roles?.map(role => role.label) || []);
       setEditedAvatar(player.avatarUrl || '');
-      setEditedHeroes(player.favoriteHeroes.map(hero => hero.name));
+      setEditedHeroes(player.favoriteHeroes?.map(hero => hero.name) || []);
     }
   }, [player]);
 
@@ -128,6 +200,27 @@ export default function PlayerDetailPage() {
   const saveAllChanges = async () => {
     try {
       
+      // Check if avatar was changed
+      const avatarChanged = editedAvatar !== player?.avatarUrl;
+      
+      // If avatar changed, submit to profile image service
+      if (avatarChanged && player && currentUser?.type === 'player') {
+        const { default: profileImageService } = await import('../../services/profileImageService');
+        
+        const result = await profileImageService.submitImageUpdate(
+          player.id,
+          'player',
+          player.avatarUrl || null,
+          editedAvatar,
+          editedAvatar.startsWith('data:') ? 'upload' : 'link'
+        );
+
+        if (!result.success) {
+          error("Avatar Update Failed", result.error || "Failed to submit avatar change request");
+          return;
+        }
+      }
+      
       // Special handling for role changes - submit as request for approval
       if (currentUser?.type === 'player' && player) {
         // Import DatabaseService for role change requests
@@ -142,7 +235,10 @@ export default function PlayerDetailPage() {
         });
 
         if (result.success) {
-          success("Profile Updated!", "Your profile changes have been saved. Role changes and MMR updates sent to admins for approval.");
+          const message = avatarChanged 
+            ? "Your profile changes have been saved. Role changes, avatar updates, and MMR updates sent to admins for approval."
+            : "Your profile changes have been saved. Role changes and MMR updates sent to admins for approval.";
+          success("Profile Updated!", message);
           setIsEditMode(false);
           return;
         } else {
@@ -210,9 +306,11 @@ export default function PlayerDetailPage() {
   
   // Get seasons in ascending order (S1, S2, S3...)
   const playerSeasons = player?.seasonBadges
-    .map(s => typeof s === "number" ? s : parseInt(s.toString().replace(/\D/g, ''), 10))
-    .filter(s => !isNaN(s))
-    .sort((a, b) => a - b) || [];
+    ? player.seasonBadges
+        .map(s => typeof s === "number" ? s : parseInt(s.toString().replace(/\D/g, ''), 10))
+        .filter(s => !isNaN(s))
+        .sort((a, b) => a - b)
+    : [];
   
   // Default to latest season (last in ascending array)
   const latestSeason = playerSeasons[playerSeasons.length - 1] || null;
@@ -221,6 +319,27 @@ export default function PlayerDetailPage() {
     AuthService.logout();
     navigate('/');
   };
+
+  if (loading) {
+    return (
+      <>
+        <div className="fixed inset-0 z-0">
+          <div
+            className="absolute inset-0 bg-cover bg-center bg-no-repeat"
+            style={{ backgroundImage: 'url(/bg5.jpg)' }}
+          />
+          <div className="absolute inset-0 bg-gradient-to-br from-slate-950/90 via-cyan-950/80 to-teal-950/90" />
+        </div>
+
+        <main className="relative z-10 w-full min-h-screen flex justify-center items-center pt-24 pb-16 px-4">
+          <div className="text-center">
+            <div className="animate-spin rounded-full h-16 w-16 border-t-2 border-b-2 border-cyan-400 mx-auto mb-4"></div>
+            <p className="text-cyan-300 text-lg">Loading player data...</p>
+          </div>
+        </main>
+      </>
+    );
+  }
 
   if (!player) {
     return (
@@ -693,7 +812,7 @@ export default function PlayerDetailPage() {
                     </div>
                   )}
                   {/* Signature Heroes with Edit */}
-                  {(player.favoriteHeroes.length > 0 || (canEdit && currentUser?.type === 'player' && currentUser.playerId === playerId)) && (
+                  {((player.favoriteHeroes && player.favoriteHeroes.length > 0) || (canEdit && currentUser?.type === 'player' && currentUser.playerId === playerId)) && (
                     <div className="hidden lg:flex flex-col gap-2 flex-shrink-0 relative">
                       <div className="flex items-center gap-2 mb-1">
                         <div className="flex-1 h-px bg-gradient-to-r from-transparent via-cyan-500/30 to-cyan-500/30" />
@@ -866,7 +985,7 @@ export default function PlayerDetailPage() {
                             </motion.div>
                           ))}
                           
-                          {player.favoriteHeroes.length === 0 && !isEditMode && (
+                          {player.favoriteHeroes && player.favoriteHeroes.length === 0 && !isEditMode && (
                             <div className="text-center text-cyan-300/60 text-xs italic py-4">
                               No signature heroes set
                             </div>
@@ -980,7 +1099,7 @@ export default function PlayerDetailPage() {
                       )}
                       
                       {/* Show message when no roles and not editing */}
-                      {!isEditMode && player.roles.length === 0 && (
+                      {!isEditMode && player.roles && player.roles.length === 0 && (
                         <span className="text-xs text-cyan-300/50 italic">
                           No preferred roles set
                         </span>

@@ -28,10 +28,37 @@ export default function Navbar() {
       const user = AuthService.getCurrentUser();
       const loggedIn = AuthService.isSessionValid();
       const adminSession = AuthService.getCurrentAdminSession();
-      const superAdmin = adminSession && (adminSession.username === 'reyuk' || adminSession.username === 'nikhil');
       
-      setCurrentUser(user);
-      setIsLoggedIn(loggedIn);
+      // Also check for super admin session
+      const superAdminSessionStr = localStorage.getItem('superAdminSession');
+      let superAdminSession = null;
+      if (superAdminSessionStr) {
+        try {
+          superAdminSession = JSON.parse(superAdminSessionStr);
+        } catch (e) {
+          // Invalid JSON
+        }
+      }
+      
+      const superAdmin = (adminSession && (adminSession.username === 'reyuk' || adminSession.username === 'nikhil')) ||
+                        (superAdminSession && superAdminSession.authenticated);
+      
+      // If super admin session exists, use it as current user
+      if (superAdminSession && superAdminSession.authenticated) {
+        setCurrentUser({
+          type: 'admin',
+          username: superAdminSession.username,
+          displayName: superAdminSession.username === 'reyuk' ? 'Reyuk' : 
+                      superAdminSession.username === 'nikhil' ? 'N1KHIL' : 
+                      superAdminSession.username,
+          role: superAdminSession.role
+        });
+        setIsLoggedIn(true);
+      } else {
+        setCurrentUser(user);
+        setIsLoggedIn(loggedIn);
+      }
+      
       setIsSuperAdmin(superAdmin || false);
       setAuthChecked(true);
     };
@@ -43,6 +70,22 @@ export default function Navbar() {
   const getUserRole = () => {
     if (currentUser?.type === 'admin') {
       const adminSession = AuthService.getCurrentAdminSession();
+      
+      // Also check super admin session
+      const superAdminSessionStr = localStorage.getItem('superAdminSession');
+      let superAdminSession = null;
+      if (superAdminSessionStr) {
+        try {
+          superAdminSession = JSON.parse(superAdminSessionStr);
+        } catch (e) {
+          // Invalid JSON
+        }
+      }
+      
+      if (superAdminSession && superAdminSession.authenticated) {
+        return superAdminSession.role;
+      }
+      
       if (adminSession?.username === 'reyuk') return 'Founder';
       if (adminSession?.username === 'nikhil') return 'Super Admin';
       return 'Admin';
@@ -318,6 +361,8 @@ export default function Navbar() {
                           <button
                             onClick={() => {
                               AuthService.logout();
+                              // Also clear super admin session
+                              localStorage.removeItem('superAdminSession');
                               setLoginDropdownOpen(false);
                               setIsLoggedIn(false);
                               setCurrentUser(null);
@@ -449,6 +494,8 @@ export default function Navbar() {
                         <button
                           onClick={() => {
                             AuthService.logout();
+                            // Also clear super admin session
+                            localStorage.removeItem('superAdminSession');
                             setMobileNavOpen(false);
                             setIsLoggedIn(false);
                             setCurrentUser(null);

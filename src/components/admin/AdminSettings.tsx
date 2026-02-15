@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { User, Lock, Mail, Shield, Save, Eye, EyeOff, Loader2 } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 import { AuthService } from '../../services/auth';
 import { useModal } from '../../hooks/useModal';
 import passwordService from '../../services/passwordService';
@@ -16,6 +17,7 @@ interface AdminProfile {
 
 export const AdminSettings = () => {
   const { confirm, alert, ModalComponent } = useModal();
+  const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
   const [currentAdmin, setCurrentAdmin] = useState<AdminProfile | null>(null);
   
@@ -231,7 +233,18 @@ export const AdminSettings = () => {
       setNewPassword('');
       setConfirmPassword('');
       
-      await alert('Password changed successfully!', 'Success', 'success');
+      await alert('Password changed successfully!\n\nYou will be logged out and need to login with your new password.', 'Success', 'success');
+      
+      // Logout user immediately
+      AuthService.logout();
+      localStorage.removeItem('superAdminSession');
+      
+      // Redirect to appropriate login page
+      if (userType === 'superadmin') {
+        navigate('/super-admin-login');
+      } else {
+        navigate('/admin-login');
+      }
     } else {
       await alert(result.error || 'Failed to change password', 'Error', 'warning');
     }
@@ -401,12 +414,14 @@ export const AdminSettings = () => {
                   type={showCurrentPassword ? 'text' : 'password'}
                   value={currentPassword}
                   onChange={(e) => setCurrentPassword(e.target.value)}
-                  placeholder="Enter current password"
+                  placeholder="Current password"
+                  tabIndex={0}
                   className="w-full px-4 py-3 pr-12 bg-black/60 border border-red-500/40 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-red-500"
                 />
                 <button
                   type="button"
                   onClick={() => setShowCurrentPassword(!showCurrentPassword)}
+                  tabIndex={-1}
                   className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-white transition-colors"
                 >
                   {showCurrentPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
@@ -424,12 +439,14 @@ export const AdminSettings = () => {
                   type={showNewPassword ? 'text' : 'password'}
                   value={newPassword}
                   onChange={(e) => setNewPassword(e.target.value)}
-                  placeholder="Enter new password (min 8 chars, uppercase, number, symbol)"
+                  placeholder="New password"
+                  tabIndex={0}
                   className="w-full px-4 py-3 pr-12 bg-black/60 border border-red-500/40 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-red-500"
                 />
                 <button
                   type="button"
                   onClick={() => setShowNewPassword(!showNewPassword)}
+                  tabIndex={-1}
                   className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-white transition-colors"
                 >
                   {showNewPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
@@ -447,12 +464,14 @@ export const AdminSettings = () => {
                   type={showConfirmPassword ? 'text' : 'password'}
                   value={confirmPassword}
                   onChange={(e) => setConfirmPassword(e.target.value)}
-                  placeholder="Confirm new password"
+                  placeholder="Confirm password"
+                  tabIndex={0}
                   className="w-full px-4 py-3 pr-12 bg-black/60 border border-red-500/40 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-red-500"
                 />
                 <button
                   type="button"
                   onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                  tabIndex={-1}
                   className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-white transition-colors"
                 >
                   {showConfirmPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}

@@ -19,6 +19,7 @@ import { CaptainManagement } from '../components/admin/CaptainManagement';
 import { AdminSettings } from '../components/admin/AdminSettings';
 import { AdminManagement } from '../components/admin/AdminManagement';
 import { ProfileUpdateRequests } from '../components/admin/ProfileUpdateRequests';
+import { ProfileImageRequests } from '../components/admin/ProfileImageRequests';
 import AnnouncementManagement from '../components/admin/AnnouncementManagement';
 import playerBanService from '../services/playerBanService';
 import messagingService from '../services/messagingService';
@@ -395,7 +396,7 @@ export default function SuperAdminDashboard() {
   const navigationItems = [
     { id: 'dashboard', label: 'Dashboard', icon: BarChart3, description: 'Overview & Analytics' },
     { id: 'messages', label: 'My Messages', icon: MessageSquare, description: 'My Messages', badge: myUnreadCount > 0 ? myUnreadCount : undefined },
-    { id: 'profile-updates', label: 'Profile Updates', icon: UserCheck, description: 'Approve Changes', badge: profileUpdateService.getPendingCount() > 0 ? profileUpdateService.getPendingCount() : undefined },
+    { id: 'profile-requests', label: 'Profile Requests', icon: UserCheck, description: 'Approve Changes', badge: profileUpdateService.getPendingCount() > 0 ? profileUpdateService.getPendingCount() : undefined },
     { id: 'users', label: 'User Management', icon: Users, description: 'Players & Admins' },
     { id: 'admin-management', label: 'Admin Management', icon: Shield, description: 'Add/Manage Admins' },
     { id: 'announcements', label: 'Announcements', icon: Megaphone, description: 'Manage Announcements' },
@@ -500,6 +501,7 @@ export default function SuperAdminDashboard() {
           <h2 className="text-2xl font-bold text-white capitalize">
             {activeSection === 'dashboard' ? 'Dashboard Overview' : 
              activeSection === 'users' ? 'User Management' :
+             activeSection === 'profile-requests' ? 'Profile Requests' :
              activeSection === 'announcements' ? 'Announcement Management' :
              activeSection === 'captains' ? 'Captain Management' :
              activeSection === 'registration' ? 'Registration Control' :
@@ -512,6 +514,7 @@ export default function SuperAdminDashboard() {
           <p className="text-orange-300/70 mt-1">
             {activeSection === 'dashboard' ? 'System overview and quick actions' :
              activeSection === 'users' ? 'Manage players and administrators' :
+             activeSection === 'profile-requests' ? 'Review and approve profile updates and images' :
              activeSection === 'announcements' ? 'Create and manage announcements' :
              activeSection === 'captains' ? 'Assign and manage team captains' :
              activeSection === 'registration' ? 'Control player registration settings' :
@@ -1150,7 +1153,12 @@ export default function SuperAdminDashboard() {
             >
               {activeSection === 'dashboard' && renderDashboard()}
               {activeSection === 'messages' && renderMyMessages()}
-              {activeSection === 'profile-updates' && <div className="p-8"><ProfileUpdateRequests /></div>}
+              {activeSection === 'profile-requests' && (
+                <div className="p-8 space-y-8">
+                  <ProfileUpdateRequests />
+                  <ProfileImageRequests adminUsername={currentSuperAdmin?.username || 'superadmin'} />
+                </div>
+              )}
               {activeSection === 'users' && renderUserManagement()}
               {activeSection === 'admin-management' && <AdminManagement />}
               {activeSection === 'announcements' && <div className="p-8"><AnnouncementManagement /></div>}

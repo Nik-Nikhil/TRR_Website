@@ -112,13 +112,55 @@ export class PlayerService {
   }
 
   static async getPlayerById(id: string): Promise<Player | null> {
+    console.log('🔍 Fetching player by id:', id);
+    
+    // Check if id looks like a UUID (contains hyphens and is 36 chars)
+    const isUUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(id);
+    
+    if (isUUID) {
+      // Try to get by UUID id
+      const { data, error } = await supabase
+        .from('players')
+        .select('*')
+        .eq('id', id)
+        .maybeSingle();
+      
+      console.log('Query by UUID:', { data, error });
+      
+      if (error) {
+        console.error('❌ Error fetching by UUID:', error);
+        return null;
+      }
+      
+      if (data) {
+        console.log('✅ Found player by UUID:', data.nickname);
+        return data;
+      }
+    }
+    
+    // Try by nickname (either because it's not a UUID or UUID lookup failed)
+    // Use case-insensitive search
+    console.log('🔄 Trying by nickname (case-insensitive):', id);
+    
     const { data, error } = await supabase
       .from('players')
       .select('*')
-      .eq('id', id)
-      .single();
+      .ilike('nickname', id)
+      .maybeSingle();
     
-    if (error) throw error;
+    console.log('Query by nickname:', { data, error });
+    
+    if (error) {
+      console.error('❌ Error fetching by nickname:', error);
+      return null;
+    }
+    
+    if (data) {
+      console.log('✅ Found player by nickname:', data.nickname);
+    } else {
+      console.log('❌ Player not found in database');
+    }
+    
     return data;
   }
 
@@ -175,4 +217,85 @@ export class AdminService {
     const { data, error } = await supabase
       .from('admins')
       .select('*')
-   
+      .eq('username', username)
+      .single();
+    
+    if (error) return null;
+    return data;
+  }
+
+  static async getAllAdmins(): Promise<Admin[]> {
+    const { data, error } = await supabase
+      .from('admins')
+      .select('*')
+      .order('display_name');
+    
+    if (error) throw error;
+    return data || [];
+  }
+
+  static async updateAdmin(username: string, updates: Partial<Admin>): Promise<Admin> {
+    const { data, error } = await supabase
+      .from('admins')
+      .update({ ...updates, updated_at: new Date().toISOString() })
+      .eq('username', username)
+      .select()
+      .single();
+    
+    if (error) throw error;
+    return data;
+  }
+}
+
+// ==================== CAPTAIN OPERATIONS ====================
+
+export class CaptainService {
+  static async getAllCaptains(): Promise<Captain[]> {
+    const { data, error } = await supabase
+      .from('captains')
+      .select('*')
+      .order('team_name');
+    
+    if (error) throw error;
+    return data || [];
+  }
+
+  static async getCaptainById(id: string): Promise<Captain | null> {
+    const { data, error } = await supabase
+      .from('captains')
+      .select('*')
+      .eq('id', id)
+      .single();
+    
+    if (error) return null;
+    return data;
+  }
+}
+
+// ==================== AUCTION OPERATIONS ====================
+
+export class AuctionService {
+  static async getActiveAuction(): Promise<Auction | null> {
+    const { data, error } = await supabase
+      .from('auctions')
+      .select('*')
+      .in('status', ['live', 'paused'])
+      .order('created_at', { ascending: false })
+      .limit(1)
+      .single();
+    
+    if (error) return null;
+    return data;
+  }
+
+  static async getAuctionById(id: string): Promise<Auction | null> {
+    const { data, error } = await supabase
+      .from('auctions')
+      .select('*')
+      .eq('id', id)
+      .single();
+    
+    if (error) return null;
+    return data;
+  }
+}

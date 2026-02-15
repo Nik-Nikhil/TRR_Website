@@ -2,12 +2,13 @@ import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { Shield, Lock, Eye, EyeOff, Crown, Zap, AlertCircle } from 'lucide-react';
 import { useNavigate, useLocation } from 'react-router-dom';
+import passwordService from '../services/passwordService';
 
-// Super Admin credentials - in production, this should be more secure
-const SUPER_ADMIN_CREDENTIALS: Record<string, { role: string; username: string }> = {
-  'SuperAdmin2024!': { role: 'SuperAdmin', username: 'nikhil' }, // Nikhil's password
-  '12345': { role: 'Founder', username: 'reyuk' }, // Reyuk's password
-  'banner123': { role: 'Admin', username: 'banner' } // Banner's password
+// Super admin usernames and their roles
+const SUPER_ADMIN_USERS: Record<string, { role: string }> = {
+  'nikhil': { role: 'Super Admin' },
+  'reyuk': { role: 'Founder' },
+  'banner': { role: 'Admin' }
 };
 
 export default function SuperAdminLogin() {
@@ -35,16 +36,39 @@ export default function SuperAdminLogin() {
     setError('');
 
     try {
-      // Validate super admin password
-      const credentials = SUPER_ADMIN_CREDENTIALS[password];
-      if (!credentials) {
+      // Determine which user to authenticate
+      let username = '';
+      
+      if (isNikhilLogin) {
+        username = 'nikhil';
+      } else {
+        // Try all super admin users to find matching password
+        for (const [user] of Object.entries(SUPER_ADMIN_USERS)) {
+          const result = await passwordService.verifyUserPassword(user, password);
+          if (result.success) {
+            username = user;
+            break;
+          }
+        }
+      }
+
+      // If nikhil login, verify nikhil's password
+      if (isNikhilLogin) {
+        const result = await passwordService.verifyUserPassword('nikhil', password);
+        if (!result.success) {
+          setError('Wrong password');
+          setIsLoading(false);
+          return;
+        }
+      } else if (!username) {
+        // No matching user found
         setError('Wrong password');
         setIsLoading(false);
         return;
       }
 
-      // If on Nikhil's login page, only accept Nikhil's password
-      if (isNikhilLogin && credentials.username !== 'nikhil') {
+      const userInfo = SUPER_ADMIN_USERS[username];
+      if (!userInfo) {
         setError('Wrong password');
         setIsLoading(false);
         return;
@@ -58,8 +82,8 @@ export default function SuperAdminLogin() {
         authenticated: true,
         loginTime: new Date().toISOString(),
         type: 'superadmin',
-        role: credentials.role,
-        username: credentials.username
+        role: userInfo.role,
+        username: username
       };
       
       localStorage.setItem('superAdminSession', JSON.stringify(sessionData));
