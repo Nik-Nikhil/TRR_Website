@@ -23,10 +23,23 @@ export default function Auction() {
   const [showConfirmModal, setShowConfirmModal] = useState(false);
   const [showSuccessModal, setShowSuccessModal] = useState(false);
   const [successMessage, setSuccessMessage] = useState('');
+  const [isBidding, setIsBidding] = useState(false); // Prevent simultaneous bids
 
   const [soldPlayers, setSoldPlayers] = useState<any[]>([]);
   const [selectedTeamForManualAssign, setSelectedTeamForManualAssign] = useState<string>('');
   const [manualAssignPrice, setManualAssignPrice] = useState<string>('1');
+  
+  // Auction pool state
+  const [auctionPool, setAuctionPool] = useState<any[]>([]);
+  
+  // Captain chat state
+  const [chatMessages, setChatMessages] = useState<any[]>([]);
+  const [chatInput, setChatInput] = useState('');
+  
+  // Hammer countdown state
+  const [hammerStage, setHammerStage] = useState<0 | 1 | 2 | 3>(0); // 0=none, 1=once, 2=twice, 3=sold
+  const [hammerCountdown, setHammerCountdown] = useState(5);
+  const [isHammerActive, setIsHammerActive] = useState(false);
 
   useEffect(() => {
     // Load initial data
@@ -160,6 +173,32 @@ export default function Auction() {
     };
   }, []);
 
+  // Hammer countdown effect
+  useEffect(() => {
+    if (!isHammerActive || hammerStage === 0) return;
+
+    if (hammerCountdown > 0) {
+      const timer = setTimeout(() => {
+        setHammerCountdown(hammerCountdown - 1);
+      }, 1000);
+      return () => clearTimeout(timer);
+    } else {
+      // Countdown finished, move to next stage
+      if (hammerStage === 1) {
+        // Going Once -> Going Twice
+        setHammerStage(2);
+        setHammerCountdown(5);
+      } else if (hammerStage === 2) {
+        // Going Twice -> SOLD!
+        setHammerStage(3);
+        setHammerCountdown(2); // Short delay for SOLD animation
+      } else if (hammerStage === 3) {
+        // SOLD! -> Execute sale
+        executeSale();
+      }
+    }
+  }, [isHammerActive, hammerStage, hammerCountdown]);
+
   // Reset bid history when current player changes
   useEffect(() => {
     if (auctionState?.current_player_id) {
@@ -258,6 +297,12 @@ export default function Auction() {
 
   const handlePlaceBid = async () => {
     if (!currentCaptainSession || !bidAmount || !auctionState) return;
+    
+    // Prevent simultaneous bids
+    if (isBidding) {
+      setBidError('Please wait, processing bid...');
+      return;
+    }
 
     setBidError('');
     const amount = parseInt(bidAmount);
@@ -282,6 +327,17 @@ export default function Auction() {
       setBidError('You are not registered as a captain');
       return;
     }
+    
+    // Check if captain has enough budget
+    if (captain.budget <= 0) {
+      setBidError('You have no budget left');
+      return;
+    }
+    
+    if (amount > captain.budget) {
+      setBidError(`Insufficient budget. You have ${captain.budget} gold left`);
+      return;
+    }
 
     // ✅ CHECK IF TEAM IS ALREADY FULL (5 PLAYERS)
     const teamPlayerCount = soldPlayers.filter(p => p.teamName === captain.teamName).length;
@@ -289,11 +345,8 @@ export default function Auction() {
       setBidError(`Your team is full (5/5 players). Cannot bid on more players.`);
       return;
     }
-    
-    if (captain.budget < amount) {
-      setBidError(`Insufficient budget. Available: ${captain.budget}`);
-      return;
-    }
+
+    setIsBidding(true); // Lock bidding
 
     const success = await AuctionService.placeBid(
       captainId,
@@ -310,42 +363,70 @@ export default function Auction() {
       const currentBid = auctionState.highest_bid || 0;
       setBidError(`Your bid must be higher than the current bid of ${currentBid}`);
     }
+    
+    setIsBidding(false); // Unlock bidding
+  };
+
+  // Start hammer countdown
+  const handleStartHammer = () => {
+    if (!auctionState?.highest_bidder_id && !selectedTeamForManualAssign) {
+      alert('No bids placed and no team selected for manual assignment', 'Cannot Start Hammer', 'warning');
+      return;
+    }
+
+    setHammerStage(1);
+    setHammerCountdown(5);
+    setIsHammerActive(true);
+  };
+
+  // Cancel hammer countdown
+  const handleCancelHammer = () => {
+    setHammerStage(0);
+    setHammerCountdown(5);
+    setIsHammerActive(false);
+  };
+
+  // Execute the sale after SOLD animation
+  const executeSale = async () => {
+    setIsHammerActive(false);
+    setHammerStage(0);
+    setHammerCountdown(5);
+    
+    // Call the actual sell function
+    await confirmFinalize();
   };
 
   const handleSellPlayer = async () => {
     if (!auctionState) return;
 
-    // If there's a highest bidder, proceed normally
-    if (auctionState.highest_bidder_id) {
-      setShowConfirmModal(true);
-      return;
-    }
-
-    // If no bids, check if admin selected a team for manual assignment
-    if (!selectedTeamForManualAssign) {
-      await alert('Please select a team to assign this player to', 'Selection Required', 'warning');
-      return;
-    }
-
-    // Validate manual price
-    const price = parseInt(manualAssignPrice);
-    if (isNaN(price) || price < 1) {
-      await alert('Please enter a valid price (minimum 1)', 'Invalid Price', 'warning');
-      return;
-    }
-
-    // Check if selected team has enough budget
-    const selectedCaptain = captains.find(c => c.teamName === selectedTeamForManualAssign);
-    if (selectedCaptain && selectedCaptain.budget < price) {
-      await alert(`${selectedTeamForManualAssign} doesn't have enough budget. Available: ${selectedCaptain.budget}`, 'Insufficient Budget', 'warning');
-      return;
-    }
-
-    setShowConfirmModal(true);
+    // Start hammer countdown instead of immediate sale
+    handleStartHammer();
   };
 
   const confirmFinalize = async () => {
     if (!auctionState) return;
+
+    // Validation checks
+    if (!auctionState.highest_bidder_id && !selectedTeamForManualAssign) {
+      await alert('Please select a team to assign this player to', 'Selection Required', 'warning');
+      return;
+    }
+
+    // Validate manual price if no bids
+    if (!auctionState.highest_bidder_id) {
+      const price = parseInt(manualAssignPrice);
+      if (isNaN(price) || price < 1) {
+        await alert('Please enter a valid price (minimum 1)', 'Invalid Price', 'warning');
+        return;
+      }
+
+      // Check if selected team has enough budget
+      const selectedCaptain = captains.find(c => c.teamName === selectedTeamForManualAssign);
+      if (selectedCaptain && selectedCaptain.budget < price) {
+        await alert(`${selectedTeamForManualAssign} doesn't have enough budget. Available: ${selectedCaptain.budget}`, 'Insufficient Budget', 'warning');
+        return;
+      }
+    }
 
     setShowConfirmModal(false);
 
@@ -858,12 +939,16 @@ export default function Auction() {
                             )}
                             
                             <button
-                              onClick={handleSellPlayer}
-                              disabled={!auctionState?.highest_bidder_id && !selectedTeamForManualAssign}
-                              className="w-full px-3 py-2 bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-500 hover:to-emerald-500 disabled:from-gray-600 disabled:to-gray-700 disabled:cursor-not-allowed text-white text-sm font-bold rounded-lg transition-all duration-300 shadow-lg hover:shadow-green-500/50 flex items-center justify-center gap-2"
+                              onClick={isHammerActive ? handleCancelHammer : handleSellPlayer}
+                              disabled={!isHammerActive && !auctionState?.highest_bidder_id && !selectedTeamForManualAssign}
+                              className={`w-full px-3 py-2 ${
+                                isHammerActive 
+                                  ? 'bg-gradient-to-r from-red-600 to-orange-600 hover:from-red-500 hover:to-orange-500'
+                                  : 'bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-500 hover:to-emerald-500'
+                              } disabled:from-gray-600 disabled:to-gray-700 disabled:cursor-not-allowed text-white text-sm font-bold rounded-lg transition-all duration-300 shadow-lg flex items-center justify-center gap-2`}
                             >
-                              <span className="text-base">🎯</span>
-                              <span>Assign to Team</span>
+                              <span className="text-base">{isHammerActive ? '❌' : '🔨'}</span>
+                              <span>{isHammerActive ? 'Cancel Hammer' : 'Start Hammer'}</span>
                             </button>
                             {!auctionState?.highest_bidder_id && (
                               <p className="text-gray-400 text-xs text-center">
@@ -968,106 +1053,72 @@ export default function Auction() {
                       )}
                     </div>
 
-                    {/* Section 4: Sold Players Log - Scrollable with Neon Glow */}
-                    <div className="bg-black/40 backdrop-blur-sm rounded-xl p-3 border-2 border-green-500/60 flex flex-col overflow-hidden shadow-[0_0_20px_rgba(34,197,94,0.3)]">
-                      <h3 className="text-white font-bold mb-2 text-sm text-center flex-shrink-0">Assignment Logs</h3>
+                    {/* Section 4: Captain Chat - Scrollable with Neon Glow */}
+                    <div className="bg-black/40 backdrop-blur-sm rounded-xl p-3 border-2 border-purple-500/60 flex flex-col overflow-hidden shadow-[0_0_20px_rgba(168,85,247,0.3)]">
+                      <h3 className="text-white font-bold mb-2 text-sm text-center flex-shrink-0">Captain Chat</h3>
                       
-                      {/* Sold Players List */}
-                      <div className="flex-1 overflow-y-auto custom-standings-scroll pr-1 space-y-2" style={{ minHeight: '0' }}>
-                        {soldPlayers.length === 0 ? (
+                      {/* Chat Messages */}
+                      <div className="flex-1 overflow-y-auto custom-standings-scroll pr-1 space-y-2 mb-2" style={{ minHeight: '0' }}>
+                        {chatMessages.length === 0 ? (
                           <div className="text-gray-400 text-xs text-center py-8">
-                            No players sold yet
+                            No messages yet
                           </div>
                         ) : (
-                          soldPlayers.map((sold, index) => (
+                          chatMessages.map((msg, index) => (
                             <motion.div
-                              key={sold.id}
-                              initial={{ opacity: 0, scale: 0.9 }}
-                              animate={{ opacity: 1, scale: 1 }}
-                              transition={{ delay: index * 0.05 }}
-                              className="bg-gradient-to-br from-green-900/30 to-emerald-900/30 border-2 border-green-500/50 rounded-lg p-2.5 shadow-lg"
+                              key={index}
+                              initial={{ opacity: 0, x: -10 }}
+                              animate={{ opacity: 1, x: 0 }}
+                              className="bg-purple-900/20 border border-purple-500/30 rounded-lg p-2"
                             >
-                              {/* Player Info */}
-                              <div className="flex items-center gap-2 mb-2">
-                                <Avatar
-                                  src={sold.playerData?.avatarUrl || ''}
-                                  alt={sold.playerNickname || 'Unknown Player'}
-                                  name={sold.playerNickname || 'Unknown Player'}
-                                  size="sm"
-                                  className="border-2 border-green-400"
-                                />
+                              <div className="flex items-start gap-2">
                                 <div className="flex-1 min-w-0">
-                                  <p className="text-white font-bold text-xs truncate">
-                                    {sold.playerNickname || 'Unknown Player'}
+                                  <p className="text-purple-300 font-semibold text-xs truncate">
+                                    {msg.senderName}
                                   </p>
-                                  <p className="text-green-300 text-xs truncate">
-                                    🪙 {sold.soldFor || 0}
+                                  <p className="text-white text-xs mt-0.5 break-words">
+                                    {msg.message}
+                                  </p>
+                                  <p className="text-gray-500 text-[0.6rem] mt-1">
+                                    {new Date(msg.timestamp).toLocaleTimeString()}
                                   </p>
                                 </div>
                               </div>
-
-                              {/* Buyer Info */}
-                              <div className="bg-black/30 rounded-lg p-2 border border-green-500/30">
-                                <div className="text-xs text-center">
-                                  <span className="text-gray-400 block mb-1">Will play in team</span>
-                                  <span className="text-emerald-300 font-semibold">
-                                    {sold.teamName || 'Unknown Team'}
-                                  </span>
-                                </div>
-                              </div>
-
-                              {/* Admin Reassignment Button */}
-                              {adminSession && (
-                                <button
-                                  onClick={async () => {
-                                    const confirmed = await confirm(
-                                      `Reassign ${sold.playerNickname} to a different team?\n\nThis will:\n• Refund ${sold.soldFor} to ${sold.teamName}\n• Allow you to assign to another team`,
-                                      'Reassign Player'
-                                    );
-                                    
-                                    if (!confirmed) return;
-
-                                    // Refund budget to original team
-                                    const originalCaptain = captains.find(c => c.teamName === sold.teamName);
-                                    if (originalCaptain) {
-                                      await captainService.updateBudget(
-                                        originalCaptain.playerId,
-                                        originalCaptain.budget + sold.soldFor
-                                      );
-                                    }
-
-                                    // Delete from auction_results
-                                    const { error } = await supabase
-                                      .from('auction_results')
-                                      .delete()
-                                      .eq('id', sold.id);
-
-                                    if (error) {
-                                      await alert('Failed to remove player from team', 'Error', 'warning');
-                                      return;
-                                    }
-
-                                    // Reload data
-                                    await Promise.all([
-                                      loadCaptains(),
-                                      loadSoldPlayers()
-                                    ]);
-
-                                    await alert(
-                                      `${sold.playerNickname} removed from ${sold.teamName}.\n\nBudget refunded: 🪙${sold.soldFor}\n\nYou can now reassign this player.`,
-                                      'Player Removed',
-                                      'success'
-                                    );
-                                  }}
-                                  className="mt-2 w-full px-2 py-1 bg-orange-600/20 hover:bg-orange-600/30 border border-orange-500/50 text-orange-300 rounded text-xs font-semibold transition-colors"
-                                >
-                                  🔄 Reassign
-                                </button>
-                              )}
                             </motion.div>
                           ))
                         )}
                       </div>
+                      
+                      {/* Chat Input - Only for captains */}
+                      {currentCaptainSession && (
+                        <div className="flex gap-2 flex-shrink-0">
+                          <input
+                            type="text"
+                            value={chatInput}
+                            onChange={(e) => setChatInput(e.target.value)}
+                            onKeyPress={(e) => {
+                              if (e.key === 'Enter' && chatInput.trim()) {
+                                // Send message logic here
+                                setChatInput('');
+                              }
+                            }}
+                            placeholder="Type a message..."
+                            className="flex-1 px-2 py-1.5 bg-black/60 border border-purple-500/40 rounded text-white text-xs placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-500"
+                          />
+                          <button
+                            onClick={() => {
+                              if (chatInput.trim()) {
+                                // Send message logic here
+                                setChatInput('');
+                              }
+                            }}
+                            disabled={!chatInput.trim()}
+                            className="px-3 py-1.5 bg-purple-600 hover:bg-purple-500 disabled:bg-gray-600 disabled:cursor-not-allowed text-white text-xs font-semibold rounded transition-colors"
+                          >
+                            Send
+                          </button>
+                        </div>
+                      )}
                     </div>
                   </div>
 
@@ -1100,11 +1151,11 @@ export default function Auction() {
                           />
                           <button
                             onClick={handlePlaceBid}
-                            disabled={!bidAmount || status === 'paused'}
-                            className="px-6 py-2.5 bg-gradient-to-r from-yellow-600 to-orange-600 hover:from-yellow-500 hover:to-orange-500 disabled:from-gray-600 disabled:to-gray-700 text-white font-bold rounded-lg transition-all duration-300 flex items-center justify-center gap-2 shadow-lg flex-shrink-0"
+                            disabled={!bidAmount || status === 'paused' || isBidding || (currentCaptainSession && captains.find(c => c.playerId === (currentCaptainSession.playerId || currentCaptainSession.id))?.budget <= 0)}
+                            className="px-6 py-2.5 bg-gradient-to-r from-yellow-600 to-orange-600 hover:from-yellow-500 hover:to-orange-500 disabled:from-gray-600 disabled:to-gray-700 disabled:cursor-not-allowed text-white font-bold rounded-lg transition-all duration-300 flex items-center justify-center gap-2 shadow-lg flex-shrink-0"
                           >
                             <span className="text-base">🪙</span>
-                            <span className="text-sm">PLACE BID</span>
+                            <span className="text-sm">{isBidding ? 'BIDDING...' : 'PLACE BID'}</span>
                           </button>
                         </div>
                         {bidError && (
@@ -1118,6 +1169,102 @@ export default function Auction() {
                   )}
                   </>
                 )}
+
+                {/* Hammer Countdown Overlay - Visible to Everyone */}
+                <AnimatePresence>
+                  {isHammerActive && hammerStage > 0 && (
+                    <motion.div
+                      initial={{ opacity: 0 }}
+                      animate={{ opacity: 1 }}
+                      exit={{ opacity: 0 }}
+                      className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm"
+                    >
+                      <motion.div
+                        initial={{ scale: 0.5, rotate: -10 }}
+                        animate={{ 
+                          scale: hammerStage === 3 ? [1, 1.2, 1] : 1,
+                          rotate: hammerStage === 3 ? [0, 5, -5, 0] : 0
+                        }}
+                        transition={{ duration: 0.5 }}
+                        className="text-center"
+                      >
+                        {/* Hammer Icon */}
+                        <motion.div
+                          animate={{ 
+                            rotate: hammerStage === 3 ? [0, -30, 0] : 0,
+                            scale: hammerStage === 3 ? [1, 1.3, 1] : 1
+                          }}
+                          transition={{ duration: 0.3, repeat: hammerStage === 3 ? 3 : 0 }}
+                          className="text-9xl mb-6"
+                        >
+                          🔨
+                        </motion.div>
+
+                        {/* Stage Text */}
+                        {hammerStage === 1 && (
+                          <motion.div
+                            animate={{ scale: [1, 1.1, 1] }}
+                            transition={{ duration: 1, repeat: Infinity }}
+                          >
+                            <h2 className="text-6xl font-bold text-yellow-400 mb-4">
+                              GOING ONCE!
+                            </h2>
+                            <p className="text-3xl text-yellow-300">
+                              {hammerCountdown}
+                            </p>
+                          </motion.div>
+                        )}
+
+                        {hammerStage === 2 && (
+                          <motion.div
+                            animate={{ scale: [1, 1.1, 1] }}
+                            transition={{ duration: 0.8, repeat: Infinity }}
+                          >
+                            <h2 className="text-6xl font-bold text-orange-400 mb-4">
+                              GOING TWICE!
+                            </h2>
+                            <p className="text-3xl text-orange-300">
+                              {hammerCountdown}
+                            </p>
+                          </motion.div>
+                        )}
+
+                        {hammerStage === 3 && (
+                          <motion.div
+                            initial={{ scale: 0 }}
+                            animate={{ scale: [0, 1.5, 1] }}
+                            transition={{ duration: 0.5 }}
+                          >
+                            <h2 className="text-8xl font-bold bg-gradient-to-r from-yellow-400 via-orange-500 to-red-500 bg-clip-text text-transparent mb-4">
+                              SOLD!
+                            </h2>
+                            <motion.div
+                              animate={{ scale: [1, 1.2, 1], rotate: [0, 360] }}
+                              transition={{ duration: 1 }}
+                              className="text-6xl"
+                            >
+                              🎉
+                            </motion.div>
+                          </motion.div>
+                        )}
+
+                        {/* Player Info */}
+                        {currentPlayer && hammerStage < 3 && (
+                          <div className="mt-8 bg-black/60 backdrop-blur-sm rounded-xl p-6 border-2 border-yellow-500/50">
+                            <p className="text-white text-2xl font-semibold mb-2">
+                              {currentPlayer.nickname}
+                            </p>
+                            {auctionState?.highest_bidder_name && (
+                              <p className="text-yellow-300 text-xl">
+                                Current Bid: 🪙 {auctionState.highest_bid} by {auctionState.highest_bidder_name}
+                              </p>
+                            )}
+                          </div>
+                        )}
+                      </motion.div>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
 
                 {status === 'completed' && (
                   <motion.div

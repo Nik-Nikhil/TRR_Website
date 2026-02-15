@@ -16,6 +16,7 @@ import RegistrationControl from '../components/admin/RegistrationControl';
 import { AuctionControl } from '../components/admin/AuctionControl';
 import { AuctionHistory } from '../components/admin/AuctionHistory';
 import { CaptainManagement } from '../components/admin/CaptainManagement';
+import { AuctionPoolManagement } from '../components/admin/AuctionPoolManagement';
 import { AdminSettings } from '../components/admin/AdminSettings';
 import { AdminManagement } from '../components/admin/AdminManagement';
 import { ProfileUpdateRequests } from '../components/admin/ProfileUpdateRequests';
@@ -76,6 +77,9 @@ export default function SuperAdminDashboard() {
 
   // Quick stats
   const [quickStats, setQuickStats] = useState<QuickStat[]>([]);
+  
+  // Auction state
+  const [auctionState, setAuctionState] = useState<any>(null);
 
   // Current super admin info
   const [currentSuperAdmin, setCurrentSuperAdmin] = useState<{
@@ -250,6 +254,19 @@ export default function SuperAdminDashboard() {
     };
 
     loadBannedPlayers();
+
+    // Load auction state
+    const loadAuctionState = async () => {
+      try {
+        const { AuctionService } = await import('../services/auctionService');
+        const state = await AuctionService.getAuctionState();
+        setAuctionState(state);
+      } catch (error) {
+        console.error('Error loading auction state:', error);
+      }
+    };
+    
+    loadAuctionState();
 
     // Listen for ban changes
     const handleBanChange = () => {
@@ -1035,8 +1052,32 @@ export default function SuperAdminDashboard() {
 
   // Render captain management
   const renderCaptainManagement = () => (
-    <div className="p-8">
+    <div className="p-8 space-y-6">
       <CaptainManagement adminUsername={currentSuperAdmin?.username || 'superadmin'} />
+      
+      {/* Auction Pool Management */}
+      {auctionState?.id ? (
+        <AuctionPoolManagement 
+          auctionId={auctionState.id} 
+          adminUsername={currentSuperAdmin?.username || 'superadmin'} 
+        />
+      ) : (
+        <div className="bg-black/60 backdrop-blur-sm rounded-xl border border-blue-500/40 p-8">
+          <div className="text-center">
+            <Gavel className="w-16 h-16 mx-auto mb-4 text-blue-400 opacity-50" />
+            <h3 className="text-xl font-semibold text-white mb-2">No Active Auction</h3>
+            <p className="text-gray-400 mb-4">
+              Create an auction first to manage the player pool
+            </p>
+            <button
+              onClick={() => setActiveSection('auction')}
+              className="px-6 py-2 bg-gradient-to-r from-blue-600 to-cyan-600 hover:from-blue-500 hover:to-cyan-500 text-white rounded-lg transition-all duration-300"
+            >
+              Go to Auction Control
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 

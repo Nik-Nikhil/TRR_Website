@@ -11,6 +11,7 @@ import AdminsPage from "./pages/Admins";
 import NewPlayerRegistration from "./pages/NewPlayerRegistration";
 import SetDefaultPasswords from "./pages/SetDefaultPasswords";
 import UpdatePlayerData from "./pages/UpdatePlayerData";
+import FixCaptainIds from "./pages/FixCaptainIds";
 
 import SchedulePage from "./pages/Schedule";
 
@@ -72,6 +73,7 @@ function App() {
           <Route path="/player-login" element={<PlayerLogin />} />
           <Route path="/set-default-passwords" element={<SetDefaultPasswords />} />
           <Route path="/update-player-data" element={<UpdatePlayerData />} />
+          <Route path="/fix-captain-ids" element={<FixCaptainIds />} />
           <Route path="/admin-dashboard" element={<AdminDashboard />} />
           <Route path="/super-admin" element={<SuperAdminDashboard />} />
           <Route path="/super-admin-dashboard" element={<SuperAdminDashboard />} />
