@@ -125,7 +125,14 @@ export class PlayerService {
         .eq('id', id)
         .maybeSingle();
       
-      console.log('Query by UUID:', { data, error });
+      console.log('Query by UUID:', { 
+        found: !!data, 
+        nickname: data?.nickname,
+        hasRoles: !!data?.roles,
+        hasHeroes: !!data?.favorite_heroes,
+        hasMedal: !!data?.current_medal_label,
+        error 
+      });
       
       if (error) {
         console.error('❌ Error fetching by UUID:', error);
@@ -148,7 +155,14 @@ export class PlayerService {
       .ilike('nickname', id)
       .maybeSingle();
     
-    console.log('Query by nickname:', { data, error });
+    console.log('Query by nickname:', { 
+      found: !!data, 
+      nickname: data?.nickname,
+      hasRoles: !!data?.roles,
+      hasHeroes: !!data?.favorite_heroes,
+      hasMedal: !!data?.current_medal_label,
+      error 
+    });
     
     if (error) {
       console.error('❌ Error fetching by nickname:', error);

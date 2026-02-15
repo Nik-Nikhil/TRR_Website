@@ -706,35 +706,19 @@ export default function Auction() {
                           </div>
                         )}
 
-                        {/* Best Heroes Section */}
-                        {currentPlayer.favoriteHeroes && currentPlayer.favoriteHeroes.length > 0 && (
-                          <div className="mb-2 bg-gradient-to-br from-red-900/30 to-orange-900/30 rounded-lg p-2 border border-red-500/40">
-                            <div className="flex items-center gap-3">
-                              <p className="text-red-400 text-[0.65rem] font-bold whitespace-nowrap w-32">BEST HEROES</p>
-                              <div className="flex items-center gap-2">
-                                {currentPlayer.favoriteHeroes.slice(0, 3).map((hero: any, idx: number) => (
-                                  <div 
-                                    key={idx}
-                                    className="relative group"
-                                    title={hero.name}
-                                  >
-                                    <video
-                                      src={hero.videoSrc}
-                                      autoPlay
-                                      loop
-                                      muted
-                                      playsInline
-                                      className="w-10 h-10 rounded-lg object-cover border-2 border-red-500/50 hover:border-red-400 transition-all cursor-pointer hover:scale-110"
-                                    />
-                                    <span className="pointer-events-none absolute -bottom-8 left-1/2 -translate-x-1/2 px-2 py-1 rounded-lg bg-black/95 border border-red-500/70 text-[0.65rem] text-red-200 opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap z-20 shadow-lg">
-                                      {hero.name}
-                                    </span>
-                                  </div>
-                                ))}
+                        {/* Ping Section */}
+                        <div className="mb-2 bg-gradient-to-br from-green-900/30 to-emerald-900/30 rounded-lg p-2 border border-green-500/40">
+                          <div className="flex items-center gap-3">
+                            <p className="text-green-400 text-[0.65rem] font-bold whitespace-nowrap w-32">PING</p>
+                            <div className="flex items-center gap-2">
+                              <div className="px-3 py-1 bg-green-500/20 border border-green-400/50 rounded-lg">
+                                <span className="text-green-300 text-sm font-semibold">
+                                  {currentPlayer.pingRange ? `${currentPlayer.pingRange} ms` : 'N/A'}
+                                </span>
                               </div>
                             </div>
                           </div>
-                        )}
+                        </div>
 
                         {/* Seasons Played - Horizontal Layout */}
                         {currentPlayer.seasonBadges && currentPlayer.seasonBadges.length > 0 && (

@@ -4,6 +4,7 @@ import { Search, Lock, Eye, EyeOff, User, LogIn, Users } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import DatabaseService from '../services/database';
 import AuthService from '../services/auth';
+import { mapDatabasePlayerToFrontend } from '../utils/playerMapper';
 
 export default function PlayerLogin() {
   const [selectedPlayer, setSelectedPlayer] = useState<string | null>(null);
@@ -21,7 +22,10 @@ export default function PlayerLogin() {
     const loadPlayers = async () => {
       const result = await DatabaseService.getAllPlayers();
       if (result.success && result.data) {
-        setPlayers(result.data);
+        // Map database players to frontend format
+        const mappedPlayers = result.data.map(mapDatabasePlayerToFrontend);
+        setPlayers(mappedPlayers);
+        console.log(`✅ Loaded ${mappedPlayers.length} players`);
       } else {
         console.error('Failed to load players:', result.error);
         setPlayers([]);
@@ -41,7 +45,9 @@ export default function PlayerLogin() {
 
       const result = await DatabaseService.searchPlayers(searchQuery);
       if (result.success && result.data) {
-        setSearchResults(result.data);
+        // Map database players to frontend format
+        const mappedResults = result.data.map(mapDatabasePlayerToFrontend);
+        setSearchResults(mappedResults);
       } else {
         console.error('Search failed:', result.error);
         setSearchResults([]);

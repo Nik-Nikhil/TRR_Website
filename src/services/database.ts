@@ -24,8 +24,9 @@ export class DatabaseService {
    */
   static async getAllPlayers() {
     try {
-      // Always use local data for now since Supabase is not fully configured
-      return this.getAllPlayersLocal();
+      const { PlayerService } = await import('./supabaseService');
+      const players = await PlayerService.getAllPlayers();
+      return { success: true, data: players };
     } catch (error) {
       console.error('Error fetching players:', error);
       return { success: false, error: (error as Error).message };
@@ -76,13 +77,9 @@ export class DatabaseService {
    */
   static async searchPlayers(query: string) {
     try {
-      // Use direct import instead of dynamic import
-      const filteredPlayers = players.filter(player => 
-        player.nickname.toLowerCase().includes(query.toLowerCase()) ||
-        (player.realName && player.realName.toLowerCase().includes(query.toLowerCase()))
-      ).slice(0, 20);
-      
-      return { success: true, data: filteredPlayers };
+      const { PlayerService } = await import('./supabaseService');
+      const players = await PlayerService.searchPlayers(query);
+      return { success: true, data: players };
     } catch (error) {
       console.error('Error searching players:', error);
       return { success: false, error: (error as Error).message };

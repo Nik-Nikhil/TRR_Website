@@ -41,6 +41,7 @@ export interface Player {
   steamUrl: string;
   dotabuffUrl: string;
   favoriteHeroes: PlayerHero[];
+  pingRange?: string; // Ping range (e.g., "50-100", "100-150")
 
   // Teammate ratings (1-10 scale)
   behaviorScore?: {

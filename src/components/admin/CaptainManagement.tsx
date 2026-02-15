@@ -4,6 +4,8 @@ import { Shield, UserPlus, X, Trash2, DollarSign } from 'lucide-react';
 import captainService from '../../services/captainService';
 import { Avatar } from '../ui/Avatar';
 import { players } from '../../data/players';
+import { PlayerService } from '../../services/supabaseService';
+import { mapDatabasePlayerToFrontend } from '../../utils/playerMapper';
 
 interface CaptainManagementProps {
   adminUsername: string;
@@ -17,6 +19,7 @@ export const CaptainManagement: React.FC<CaptainManagementProps> = ({ adminUsern
   const [budget, setBudget] = useState(1000);
   const [error, setError] = useState('');
   const [availablePlayers, setAvailablePlayers] = useState<any[]>([]);
+  const [captainPlayers, setCaptainPlayers] = useState<Map<string, any>>(new Map());
 
   useEffect(() => {
     loadCaptains();
@@ -46,6 +49,21 @@ export const CaptainManagement: React.FC<CaptainManagementProps> = ({ adminUsern
   const loadCaptains = async () => {
     const captainsList = await captainService.getCaptains();
     setCaptains(captainsList);
+    
+    // Load player data for each captain from database
+    const playerMap = new Map();
+    for (const captain of captainsList) {
+      try {
+        const dbPlayer = await PlayerService.getPlayerById(captain.playerId);
+        if (dbPlayer) {
+          const frontendPlayer = mapDatabasePlayerToFrontend(dbPlayer);
+          playerMap.set(captain.playerId, frontendPlayer);
+        }
+      } catch (error) {
+        console.error(`Error loading player ${captain.playerId}:`, error);
+      }
+    }
+    setCaptainPlayers(playerMap);
   };
 
   const handleAddCaptain = async () => {
@@ -72,8 +90,18 @@ export const CaptainManagement: React.FC<CaptainManagementProps> = ({ adminUsern
       return;
     }
 
+    // Get the player's UUID from the database
+    const { PlayerService } = await import('../../services/supabaseService');
+    const dbPlayer = await PlayerService.getPlayerByNickname(player.nickname);
+    
+    if (!dbPlayer) {
+      setError('Player not found in database');
+      return;
+    }
+
+    // Use the database UUID instead of the local ID
     const success = await captainService.assignCaptain(
-      player.id,
+      dbPlayer.id, // Use UUID from database
       player.nickname,
       teamName.trim(),
       budget,
@@ -133,7 +161,8 @@ export const CaptainManagement: React.FC<CaptainManagementProps> = ({ adminUsern
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
             {captains.map((captain) => {
-              const player = players.find(p => p.id === captain.playerId);
+              // Get player from database map (uses UUID) or fallback to local data
+              const player = captainPlayers.get(captain.playerId) || players.find(p => p.id === captain.playerId);
               return (
                 <motion.div
                   key={captain.playerId}

@@ -1,4 +1,3 @@
-// src/pages/Players/PlayerDetailPage.tsx
 import { useParams, useNavigate } from "react-router-dom";
 import { FaSteam } from "react-icons/fa";
 import { motion } from "framer-motion";
@@ -15,6 +14,7 @@ import FirstLoginPasswordChange from "../../components/FirstLoginPasswordChange"
 import { PlayerService } from "../../services/supabaseService";
 import { supabase } from "../../lib/supabase";
 import type { Player } from "../../data/players";
+import { mapDatabasePlayerToFrontend } from "../../utils/playerMapper";
 
 // Colored season badge styles
 const coloredSeasonBadgeStyles: Record<number, string> = {
@@ -89,10 +89,17 @@ export default function PlayerDetailPage() {
       setLoading(true);
       try {
         // Try to fetch from Supabase first
-        const playerData = await PlayerService.getPlayerById(playerId);
+        const dbPlayer = await PlayerService.getPlayerById(playerId);
         
-        if (playerData) {
-          setPlayer(playerData);
+        if (dbPlayer) {
+          // Map database fields to frontend format
+          const frontendPlayer = mapDatabasePlayerToFrontend(dbPlayer);
+          console.log('✅ Loaded player:', frontendPlayer.nickname, {
+            hasMedal: !!frontendPlayer.currentMedalLabel,
+            hasRoles: frontendPlayer.roles?.length || 0,
+            hasHeroes: frontendPlayer.favoriteHeroes?.length || 0,
+          });
+          setPlayer(frontendPlayer);
         } else {
           // Player not found in Supabase, try local data
           throw new Error('Player not found in Supabase');
@@ -102,9 +109,13 @@ export default function PlayerDetailPage() {
         
         // Fallback to local data
         try {
-          const { getPlayerById: getLocalPlayer } = await import('../../data/players');
-          const localPlayer = getLocalPlayer(playerId);
+          const { players: localPlayers } = await import('../../data/players');
+          const localPlayer = localPlayers.find(p => 
+            p.id === playerId || 
+            p.nickname.toLowerCase() === playerId.toLowerCase()
+          );
           if (localPlayer) {
+            console.log('⚠️ Using local data for:', localPlayer.nickname);
             setPlayer(localPlayer);
           } else {
             error('Player not found', 'Please check the player ID');
