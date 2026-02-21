@@ -199,32 +199,36 @@ export class DatabaseService {
   // ==================== ADMIN OPERATIONS ====================
 
   /**
-   * Get admin by username (you might want to create a separate admins table)
+   * Get admin by username from Supabase
    */
   static async getAdminByUsername(username: string) {
     try {
-      // For now, we'll use hardcoded admin data
-      // In production, create a separate admins table
-      const adminData: Record<string, { username: string; role: string; password: string }> = {
-        'reyuk': { username: 'reyuk', role: 'Founder', password: '12345' },
-        'r3ciprocal': { username: 'r3ciprocal', role: 'Admin', password: 'admin2024' },
-        'frost': { username: 'frost', role: 'Admin', password: 'admin2024' },
-        'machine': { username: 'machine', role: 'Admin', password: 'admin2024' },
-        'godspeed': { username: 'godspeed', role: 'Admin', password: 'admin2024' },
-        'slowfast': { username: 'slowfast', role: 'Admin', password: '12345' },
-        'banner': { username: 'banner', role: 'Mini Admin', password: 'mini2024' },
-        'insanekid': { username: 'insanekid', role: 'Mini Admin', password: 'mini2024' },
-        'fatty': { username: 'fatty', role: 'Mini Admin', password: 'mini2024' },
-        'scripter': { username: 'scripter', role: 'Mini Admin', password: 'mini2024' },
-        'havok4evr': { username: 'havok4evr', role: 'Mini Admin', password: 'mini2024' },
-      };
+      const { data, error } = await supabase
+        .from('admins')
+        .select('*')
+        .eq('username', username.toLowerCase())
+        .eq('is_active', true)
+        .maybeSingle();
 
-      const admin = adminData[username.toLowerCase()];
-      if (!admin) {
+      if (error) {
+        console.error('Error fetching admin:', error);
+        return { success: false, error: error.message };
+      }
+
+      if (!data) {
         return { success: false, error: 'Admin not found' };
       }
 
-      return { success: true, data: admin };
+      return { 
+        success: true, 
+        data: {
+          username: data.username,
+          role: data.role,
+          password: data.password_hash,
+          displayName: data.display_name,
+          realName: data.real_name
+        }
+      };
     } catch (error) {
       console.error('Error fetching admin:', error);
       return { success: false, error: (error as Error).message };

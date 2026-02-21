@@ -37,10 +37,19 @@ export default function Auction() {
   const [chatMessages, setChatMessages] = useState<any[]>([]);
   const [chatInput, setChatInput] = useState('');
   
-  // Hammer countdown state
+  // Hammer countdown state - synced from database
   const [hammerStage, setHammerStage] = useState<0 | 1 | 2 | 3>(0); // 0=none, 1=once, 2=twice, 3=sold
   const [hammerCountdown, setHammerCountdown] = useState(5);
   const [isHammerActive, setIsHammerActive] = useState(false);
+
+  // Sync hammer state from auction state
+  useEffect(() => {
+    if (auctionState) {
+      setIsHammerActive(auctionState.hammer_active);
+      setHammerStage(auctionState.hammer_stage);
+      setHammerCountdown(auctionState.hammer_countdown);
+    }
+  }, [auctionState]);
 
   useEffect(() => {
     // Load initial data
@@ -231,20 +240,31 @@ export default function Auction() {
     if (!isHammerActive || hammerStage === 0) return;
 
     if (hammerCountdown > 0) {
-      const timer = setTimeout(() => {
-        setHammerCountdown(hammerCountdown - 1);
+      const timer = setTimeout(async () => {
+        const newCountdown = hammerCountdown - 1;
+        setHammerCountdown(newCountdown);
+        // Update database
+        await AuctionService.updateHammerState(isHammerActive, hammerStage, newCountdown);
       }, 1000);
       return () => clearTimeout(timer);
     } else {
       // Countdown finished, move to next stage
       if (hammerStage === 1) {
         // Going Once -> Going Twice
-        setHammerStage(2);
-        setHammerCountdown(5);
+        const newStage = 2;
+        const newCountdown = 5;
+        setHammerStage(newStage);
+        setHammerCountdown(newCountdown);
+        // Update database
+        AuctionService.updateHammerState(true, newStage, newCountdown);
       } else if (hammerStage === 2) {
         // Going Twice -> SOLD!
-        setHammerStage(3);
-        setHammerCountdown(2); // Short delay for SOLD animation
+        const newStage = 3;
+        const newCountdown = 2;
+        setHammerStage(newStage);
+        setHammerCountdown(newCountdown); // Short delay for SOLD animation
+        // Update database
+        AuctionService.updateHammerState(true, newStage, newCountdown);
       } else if (hammerStage === 3) {
         // SOLD! -> Execute sale
         executeSale();
@@ -373,7 +393,7 @@ export default function Auction() {
         .from('auction_bids')
         .select('*')
         .eq('auction_id', auctionId)
-        .order('created_at', { ascending: false });
+        .order('created_at', { ascending: true }); // Changed to ascending - earliest first
 
       if (!error && data) {
         // Filter bids to only show those for the current player
@@ -475,7 +495,7 @@ export default function Auction() {
   };
 
   // Start hammer countdown
-  const handleStartHammer = () => {
+  const handleStartHammer = async () => {
     if (!auctionState?.highest_bidder_id && !selectedTeamForManualAssign) {
       alert('No bids placed and no team selected for manual assignment', 'Cannot Start Hammer', 'warning');
       return;
@@ -484,13 +504,17 @@ export default function Auction() {
     setHammerStage(1);
     setHammerCountdown(5);
     setIsHammerActive(true);
+    // Update database
+    await AuctionService.updateHammerState(true, 1, 5);
   };
 
   // Cancel hammer countdown
-  const handleCancelHammer = () => {
+  const handleCancelHammer = async () => {
     setHammerStage(0);
     setHammerCountdown(5);
     setIsHammerActive(false);
+    // Update database
+    await AuctionService.updateHammerState(false, 0, 5);
   };
 
   // Execute the sale after SOLD animation
@@ -498,6 +522,8 @@ export default function Auction() {
     setIsHammerActive(false);
     setHammerStage(0);
     setHammerCountdown(5);
+    // Update database
+    await AuctionService.updateHammerState(false, 0, 5);
     
     // Call the actual sell function
     await confirmFinalize();
@@ -690,7 +716,18 @@ export default function Auction() {
                             No bids yet
                           </div>
                         ) : (
-                          bidHistory.slice(0, 5).map((bid, index) => (
+                          // Sort bids: highest amount first, then earliest time for ties
+                          [...bidHistory]
+                            .sort((a, b) => {
+                              // First sort by amount (descending)
+                              if (b.amount !== a.amount) {
+                                return b.amount - a.amount;
+                              }
+                              // If amounts are equal, sort by time (ascending - earliest first)
+                              return new Date(a.created_at).getTime() - new Date(b.created_at).getTime();
+                            })
+                            .slice(0, 5)
+                            .map((bid, index) => (
                             <motion.div
                               key={bid.id}
                               initial={{ opacity: 0, scale: 0.9 }}

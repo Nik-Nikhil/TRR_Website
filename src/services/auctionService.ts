@@ -20,6 +20,9 @@ export interface AuctionState {
   highest_bidder_id: string | null;
   highest_bidder_name: string | null;
   highest_bidder_team: string | null;
+  hammer_active: boolean;
+  hammer_stage: 0 | 1 | 2 | 3;
+  hammer_countdown: number;
   created_at: string;
   updated_at: string;
 }
@@ -48,6 +51,14 @@ export class AuctionService {
         current_player_data: data.current_player_data,
         highest_bid: data.highest_bid,
         highest_bidder_id: data.highest_bidder_id,
+        highest_bidder_name: data.highest_bidder_name,
+        highest_bidder_team: data.highest_bidder_team,
+        hammer_active: data.hammer_active || false,
+        hammer_stage: data.hammer_stage || 0,
+        hammer_countdown: data.hammer_countdown || 5,
+        created_at: data.created_at,
+        updated_at: data.updated_at
+      } : null;
         highest_bidder_name: data.highest_bidder_name,
         highest_bidder_team: data.highest_bidder_team,
         created_at: data.created_at,
@@ -567,6 +578,33 @@ export class AuctionService {
       return true;
     } catch (error) {
       console.error('Exception deleting auction state:', error);
+      return false;
+    }
+  }
+
+  // Update hammer state
+  static async updateHammerState(hammerActive: boolean, hammerStage: 0 | 1 | 2 | 3, hammerCountdown: number): Promise<boolean> {
+    try {
+      const state = await this.getAuctionState();
+      if (!state) return false;
+
+      const { error } = await supabase
+        .from('auctions')
+        .update({
+          hammer_active: hammerActive,
+          hammer_stage: hammerStage,
+          hammer_countdown: hammerCountdown
+        })
+        .eq('id', state.id);
+
+      if (error) {
+        console.error('Error updating hammer state:', error);
+        return false;
+      }
+
+      return true;
+    } catch (error) {
+      console.error('Error updating hammer state:', error);
       return false;
     }
   }
