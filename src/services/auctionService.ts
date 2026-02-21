@@ -95,8 +95,6 @@ export class AuctionService {
         }])
         .select()
         .single();
-        .select()
-        .single();
 
       if (error) {
         console.error('Error starting auction:', error);
