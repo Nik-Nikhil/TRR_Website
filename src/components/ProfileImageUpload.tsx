@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { motion } from 'framer-motion';
 import { Upload, Link as LinkIcon, X, Loader2, CheckCircle, AlertCircle } from 'lucide-react';
-import profileImageService, { UserType, ImageType } from '../services/profileImageService';
+import profileImageService, { type UserType } from '../services/profileImageService';
 
 interface ProfileImageUploadProps {
   userId: string;

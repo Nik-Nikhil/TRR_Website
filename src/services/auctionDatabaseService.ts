@@ -154,14 +154,14 @@ export class AuctionDatabaseService {
   }
 
   // Approve deletion (superadmin)
-  static async approveDeletion(requestId: string, reviewedBy: string, notes?: string): Promise<boolean> {
+  static async approveDeletion(requestId: string, reviewedBy: string): Promise<boolean> {
     // For now, just mark as deleted - you can add a deletion_requests table later
     window.dispatchEvent(new CustomEvent('deletionApproved', { detail: { requestId, reviewedBy } }));
     return true;
   }
 
   // Reject deletion (superadmin)
-  static async rejectDeletion(requestId: string, reviewedBy: string, _notes?: string): Promise<boolean> {
+  static async rejectDeletion(requestId: string, reviewedBy: string): Promise<boolean> {
     window.dispatchEvent(new CustomEvent('deletionRejected', { detail: { requestId, reviewedBy } }));
     return true;
   }

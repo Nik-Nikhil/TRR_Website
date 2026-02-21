@@ -68,8 +68,7 @@ const teamById = (teams: Team[] | undefined, id?: string | null) =>
 
 /* ===================== POSITION RESOLVER ===================== */
 function getMatchY(
-roundIndex: number, matchIndex: number, rounds: Round[], cache: Map<string, number>, LB_STACK: number,
- 
+roundIndex: number, matchIndex: number, rounds: Round[], cache: Map<string, number>
 )
 : number {
   const match = rounds[roundIndex].matches[matchIndex]
@@ -647,7 +646,7 @@ if (ubWinner && lbWinner) {
   key={m.id}
   style={{
     position: "absolute",
-    top: LOWER_START_Y + getMatchY(ri, mi, data.lower.rounds, cache, LB_STACK),
+    top: LOWER_START_Y + getMatchY(ri, mi, data.lower.rounds, cache),
 
   }}
 >

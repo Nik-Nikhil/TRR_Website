@@ -13,7 +13,7 @@ import { supabase } from "../lib/supabase";
 import { useModal } from "../hooks/useModal";
 
 export default function Auction() {
-  const { confirm, alert, ModalComponent } = useModal();
+  const { alert, ModalComponent } = useModal();
   const [auctionState, setAuctionState] = useState<AuctionState | null>(null);
   const [bidHistory, setBidHistory] = useState<any[]>([]);
   const [bidAmount, setBidAmount] = useState('');
@@ -31,7 +31,7 @@ export default function Auction() {
   const [manualAssignPrice, setManualAssignPrice] = useState<string>('0');
   
   // Auction pool state
-  const [auctionPool, setAuctionPool] = useState<any[]>([]);
+  // const [auctionPool, setAuctionPool] = useState<any[]>([]);
   
   // Captain chat state
   const [chatMessages, setChatMessages] = useState<any[]>([]);

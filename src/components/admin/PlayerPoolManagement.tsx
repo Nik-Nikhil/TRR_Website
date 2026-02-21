@@ -1,7 +1,6 @@
 import { useState, useEffect } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion } from 'framer-motion';
 import { UserPlus, Trash2, Search, CheckCircle } from 'lucide-react';
-import { PlayerService } from '../../services/supabaseService';
 import { supabase } from '../../lib/supabase';
 import { Avatar } from '../ui/Avatar';
 
@@ -58,9 +57,9 @@ export function PlayerPoolManagement() {
 
       if (regError) throw regError;
 
-      const players = registrations
+      const players = (registrations
         ?.map(r => r.players)
-        .filter(Boolean) as Player[];
+        .filter(Boolean) as unknown) as Player[];
       
       setRegisteredPlayers(players || []);
 
@@ -214,7 +213,7 @@ export function PlayerPoolManagement() {
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
             {poolPlayers.map((poolPlayer) => {
-              const player = poolPlayer.players as unknown as Player;
+              const player = poolPlayer.player as unknown as Player;
               if (!player) return null;
 
               return (

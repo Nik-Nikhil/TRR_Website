@@ -35,11 +35,11 @@ type BracketComponentMap = {
 /* ---------------- Maps ---------------- */
 
 const BRACKETS_BY_SEASON: Record<SeasonNumber, SeasonBracketData> = {
-  1: season1 as BracketData,
+  1: season1 as unknown as BracketData,
   2: season2 as Season2Data,
   3: season3 as BracketData3,
-  4: season4 as BracketData,
-  5: season5 as BracketData,
+  4: season4 as unknown as BracketData,
+  5: season5 as unknown as BracketData,
 }
 
 const BRACKET_COMPONENT_BY_SEASON: BracketComponentMap = {

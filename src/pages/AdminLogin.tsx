@@ -56,9 +56,6 @@ export default function AdminLogin() {
             };
           });
 
-        // Sort by role hierarchy, then by creation date (oldest first)
-        const roleOrder: Record<string, number> = { 'Founder': 0, 'Admin': 1, 'Mini Admin': 2 };
-        
         // Fixed order mapping - permanent positions
         const fixedOrder: Record<string, number> = {
           'reyuk': 1,

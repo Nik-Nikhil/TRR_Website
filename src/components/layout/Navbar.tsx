@@ -2,7 +2,7 @@
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { useState, useRef, useEffect, type ReactNode } from "react";
 import * as React from "react";
-import { Menu, Medal, UsersRound, ScrollText, House, LogIn, User, Shield, ChevronDown, UserCircle } from "lucide-react";
+import { Menu, Medal, ScrollText, House, LogIn, User, Shield, ChevronDown, UserCircle } from "lucide-react";
 import { AnimatePresence, LayoutGroup, motion } from "framer-motion";
 import AuthService from "../../services/auth";
 

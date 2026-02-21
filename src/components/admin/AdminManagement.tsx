@@ -3,7 +3,6 @@ import { motion } from 'framer-motion';
 import { UserPlus, Shield, Trash2, X, Eye, EyeOff, Loader2, Ban, CheckCircle } from 'lucide-react';
 import { useModal } from '../../hooks/useModal';
 import adminService from '../../services/adminService';
-import type { Admin } from '../../services/adminService';
 
 // Map database role to display role
 function mapRole(dbRole: string): 'superadmin' | 'admin' | 'mini-admin' {
@@ -29,7 +28,11 @@ interface AdminUI {
   bio?: string;
   avatarUrl?: string;
   createdAt?: Date | string;
+  createdBy?: string;
   isDisabled?: boolean;
+  disableReason?: string;
+  disabledAt?: Date | string;
+  disabledBy?: string;
 }
 
 export const AdminManagement = () => {
@@ -144,7 +147,7 @@ export const AdminManagement = () => {
       resetForm();
       setShowAddForm(false);
     } else {
-      await alert(result.error || 'Failed to add admin', 'Error', 'error');
+      await alert(result.error || 'Failed to add admin', 'Error', 'warning');
     }
     
     setLoading(false);
@@ -157,7 +160,7 @@ export const AdminManagement = () => {
     }
 
     if (!admin.id) {
-      await alert('Invalid admin ID', 'Error', 'error');
+      await alert('Invalid admin ID', 'Error', 'warning');
       return;
     }
 
@@ -176,7 +179,7 @@ export const AdminManagement = () => {
       await alert(`Admin "${admin.username}" deleted`, 'Deleted', 'success');
       await loadAdmins();
     } else {
-      await alert(result.error || 'Failed to delete admin', 'Error', 'error');
+      await alert(result.error || 'Failed to delete admin', 'Error', 'warning');
     }
     
     setLoading(false);
@@ -189,7 +192,7 @@ export const AdminManagement = () => {
     }
 
     if (!admin.id) {
-      await alert('Invalid admin ID', 'Error', 'error');
+      await alert('Invalid admin ID', 'Error', 'warning');
       return;
     }
 
@@ -210,7 +213,7 @@ export const AdminManagement = () => {
       await alert(`Admin "${admin.username}" has been disabled and locked out`, 'Disabled', 'success');
       await loadAdmins();
     } else {
-      await alert(result.error || 'Failed to disable admin', 'Error', 'error');
+      await alert(result.error || 'Failed to disable admin', 'Error', 'warning');
     }
     
     setLoading(false);
@@ -218,7 +221,7 @@ export const AdminManagement = () => {
 
   const handleEnableAdmin = async (admin: AdminUI) => {
     if (!admin.id) {
-      await alert('Invalid admin ID', 'Error', 'error');
+      await alert('Invalid admin ID', 'Error', 'warning');
       return;
     }
 
@@ -239,7 +242,7 @@ export const AdminManagement = () => {
       await alert(`Admin "${admin.username}" has been enabled`, 'Enabled', 'success');
       await loadAdmins();
     } else {
-      await alert(result.error || 'Failed to enable admin', 'Error', 'error');
+      await alert(result.error || 'Failed to enable admin', 'Error', 'warning');
     }
     
     setLoading(false);
@@ -252,7 +255,7 @@ export const AdminManagement = () => {
     }
 
     if (!admin.id) {
-      await alert('Invalid admin ID', 'Error', 'error');
+      await alert('Invalid admin ID', 'Error', 'warning');
       return;
     }
 
@@ -273,7 +276,7 @@ export const AdminManagement = () => {
       await alert(`Role updated for "${admin.username}"`, 'Success', 'success');
       await loadAdmins();
     } else {
-      await alert(result.error || 'Failed to update role', 'Error', 'error');
+      await alert(result.error || 'Failed to update role', 'Error', 'warning');
     }
     
     setLoading(false);
@@ -468,7 +471,7 @@ export const AdminManagement = () => {
                 {admin.email && <p className="text-gray-500 text-sm">{admin.email}</p>}
                 {admin.bio && <p className="text-gray-300 text-sm mt-2">{admin.bio}</p>}
                 <p className="text-gray-500 text-xs mt-2">
-                  Created: {new Date(admin.createdAt).toLocaleDateString()}
+                  Created: {admin.createdAt ? new Date(admin.createdAt).toLocaleDateString() : 'Unknown'}
                   {admin.createdBy && ` by ${admin.createdBy}`}
                 </p>
               </div>

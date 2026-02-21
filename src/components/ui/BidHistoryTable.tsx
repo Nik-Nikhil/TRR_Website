@@ -12,7 +12,7 @@ interface BidHistoryTableProps {
   currentHighestBidderId?: string | null;
 }
 
-export function BidHistoryTable({ bids, currentHighestBidderId }: BidHistoryTableProps) {
+export function BidHistoryTable({ bids }: BidHistoryTableProps) {
   if (bids.length === 0) {
     return (
       <div className="bg-black/40 backdrop-blur-sm rounded-xl p-6 border border-yellow-500/40">

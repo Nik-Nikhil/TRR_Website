@@ -8,7 +8,7 @@ interface RotatingPlayerCardProps {
   index: number;
 }
 
-export default function RotatingPlayerCard({ player, index }: RotatingPlayerCardProps) {
+export default function RotatingPlayerCard({ player }: RotatingPlayerCardProps) {
   return (
     <motion.div
       className="w-full"

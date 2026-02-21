@@ -29,7 +29,7 @@ export default function MessageModal({ isOpen, onClose, adminName, adminDisplayN
     setIsSubmitting(true);
     
     try {
-      const success = messagingService.sendMessage({
+      const success = await messagingService.sendMessage({
         fromPlayer: playerNickname.toLowerCase().replace(/\s+/g, ''),
         fromPlayerNickname: playerNickname.trim(),
         toAdmin: adminName.toLowerCase(),

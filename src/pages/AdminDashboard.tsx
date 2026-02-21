@@ -66,6 +66,7 @@ export default function AdminDashboard() {
   };
 
   useEffect(() => {
+    const loadData = async () => {
     // Check if admin is logged in
     const session = AuthService.getCurrentAdminSession();
     if (!session) {
@@ -145,17 +146,17 @@ export default function AdminDashboard() {
 
     // Load messages for current admin
     if (admin) {
-      const adminMessages = messagingService.getMessagesForAdmin(admin.username);
+      const adminMessages = await messagingService.getMessagesForAdmin(admin.username);
       setMessages(adminMessages);
-      setUnreadCount(messagingService.getUnreadCount(admin.username));
+      setUnreadCount(await messagingService.getUnreadCount(admin.username));
     }
 
     // Listen for new messages
-    const handleNewMessage = (event: any) => {
+    const handleNewMessage = async (event: any) => {
       if (admin && event.detail.message.toAdmin === admin.username) {
-        const updatedMessages = messagingService.getMessagesForAdmin(admin.username);
+        const updatedMessages = await messagingService.getMessagesForAdmin(admin.username);
         setMessages(updatedMessages);
-        setUnreadCount(messagingService.getUnreadCount(admin.username));
+        setUnreadCount(await messagingService.getUnreadCount(admin.username));
       }
     };
 
@@ -164,6 +165,9 @@ export default function AdminDashboard() {
     return () => {
       window.removeEventListener('newAdminMessage', handleNewMessage);
     };
+    };
+    
+    loadData();
   }, [navigate]);
 
   // Add activity log function
@@ -433,11 +437,11 @@ export default function AdminDashboard() {
                     <div className="flex space-x-2">
                       {!message.isRead && (
                         <button
-                          onClick={() => {
+                          onClick={async () => {
                             messagingService.markAsRead(message.id);
-                            const updatedMessages = messagingService.getMessagesForAdmin(currentAdmin.username);
+                            const updatedMessages = await messagingService.getMessagesForAdmin(currentAdmin.username);
                             setMessages(updatedMessages);
-                            setUnreadCount(messagingService.getUnreadCount(currentAdmin.username));
+                            setUnreadCount(await messagingService.getUnreadCount(currentAdmin.username));
                             addActivityLog('Message', `Marked message from ${message.fromPlayerNickname} as read`, 'info');
                           }}
                           className="px-3 py-1 bg-blue-600/20 hover:bg-blue-600/30 border border-blue-500/50 text-blue-300 rounded text-xs transition-colors"
@@ -446,11 +450,11 @@ export default function AdminDashboard() {
                         </button>
                       )}
                       <button
-                        onClick={() => {
+                        onClick={async () => {
                           messagingService.deleteMessage(message.id);
-                          const updatedMessages = messagingService.getMessagesForAdmin(currentAdmin.username);
+                          const updatedMessages = await messagingService.getMessagesForAdmin(currentAdmin.username);
                           setMessages(updatedMessages);
-                          setUnreadCount(messagingService.getUnreadCount(currentAdmin.username));
+                          setUnreadCount(await messagingService.getUnreadCount(currentAdmin.username));
                           addActivityLog('Message', `Deleted message from ${message.fromPlayerNickname}`, 'warning');
                         }}
                         className="px-3 py-1 bg-red-600/20 hover:bg-red-600/30 border border-red-500/50 text-red-300 rounded text-xs transition-colors"

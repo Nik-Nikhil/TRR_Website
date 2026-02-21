@@ -78,13 +78,11 @@ export function AuctionManagement({ userRole, username }: AuctionManagementProps
   };
 
   const handleApproveDeletion = async (requestId: string) => {
-    const notes = prompt('Add review notes (optional):');
-    await AuctionDatabaseService.approveDeletion(requestId, username, notes || undefined);
+    await AuctionDatabaseService.approveDeletion(requestId, username);
   };
 
   const handleRejectDeletion = async (requestId: string) => {
-    const notes = prompt('Add review notes (optional):');
-    await AuctionDatabaseService.rejectDeletion(requestId, username, notes || undefined);
+    await AuctionDatabaseService.rejectDeletion(requestId, username);
   };
 
   const handleSetCurrentAuction = (auctionId: string) => {

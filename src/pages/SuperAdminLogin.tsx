@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { Shield, Lock, Eye, EyeOff, Crown, Zap, AlertCircle } from 'lucide-react';
+import { Shield, Lock, Eye, EyeOff, Zap, AlertCircle } from 'lucide-react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import passwordService from '../services/passwordService';
 

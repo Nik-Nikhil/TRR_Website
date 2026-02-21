@@ -18,7 +18,7 @@ ${updatedPlayers.map(player => {
     nickname: "${player.nickname}",
     realName: "${player.realName || ''}",
     avatarUrl: "${player.avatarUrl}",
-    seasonBadges: [${player.seasonBadges.map(s => `"${s}"`).join(', ')}],
+    seasonBadges: [${player.seasonBadges.map((s: string) => `"${s}"`).join(', ')}],
     hasWonCup: ${player.hasWonCup},
     ${player.cupRank ? `cupRank: "${player.cupRank}",` : ''}
     ${player.cupTooltip ? `cupTooltip: "${player.cupTooltip}",` : ''}
@@ -30,10 +30,10 @@ ${updatedPlayers.map(player => {
     peakMedalId: "${player.peakMedalId}",
     ${player.peakMMR ? `peakMMR: ${player.peakMMR},` : ''}
     bio: "${player.bio}",
-    roles: [${player.roles.map(role => `{ iconSrc: "${role.iconSrc}", label: "${role.label}" }`).join(', ')}],
+    roles: [${player.roles.map((role: any) => `{ iconSrc: "${role.iconSrc}", label: "${role.label}" }`).join(', ')}],
     steamUrl: "${player.steamUrl}",
     dotabuffUrl: "${player.dotabuffUrl}",
-    favoriteHeroes: [${player.favoriteHeroes.map(hero => `{ videoSrc: "${hero.videoSrc}", name: "${hero.name}" }`).join(', ')}],
+    favoriteHeroes: [${player.favoriteHeroes.map((hero: any) => `{ videoSrc: "${hero.videoSrc}", name: "${hero.name}" }`).join(', ')}],
     ${player.behaviorScore ? `behaviorScore: {
       ${player.behaviorScore.mechanicalSkill ? `mechanicalSkill: ${player.behaviorScore.mechanicalSkill},` : ''}
       ${player.behaviorScore.teamwork ? `teamwork: ${player.behaviorScore.teamwork},` : ''}

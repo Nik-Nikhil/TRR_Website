@@ -1,5 +1,5 @@
 import React, { useState, useMemo, useEffect } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion } from 'framer-motion';
 import { Search, Lock, Eye, EyeOff, User, LogIn, Users } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import DatabaseService from '../services/database';

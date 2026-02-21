@@ -7,7 +7,7 @@ import AuthService from '../services/auth';
 import DatabaseService from '../services/database';
 import playerBanService from '../services/playerBanService';
 import captainService from '../services/captainService';
-import { getMedalFromMMR, type MedalInfo } from '../utils/mmrToMedal';
+import { getMedalFromMMR } from '../utils/mmrToMedal';
 
 export const PlayerProfile: React.FC = () => {
   const { playerId } = useParams<{ playerId: string }>();
@@ -37,7 +37,7 @@ export const PlayerProfile: React.FC = () => {
   ];
 
   // Medal Display Component
-  const MedalDisplay = ({ mmr, label, type }: { mmr?: number; label?: string; type: 'current' | 'peak' }) => {
+  const MedalDisplay = ({ mmr, type }: { mmr?: number; label?: string; type: 'current' | 'peak' }) => {
     if (!mmr) {
       return (
         <div className="flex items-center gap-3 p-4 bg-gray-700/30 rounded-xl border border-gray-600/30">

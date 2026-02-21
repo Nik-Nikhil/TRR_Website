@@ -1,4 +1,3 @@
-// App.jsx
 import { Routes, Route } from "react-router-dom";
 import Navbar from "./components/layout/Navbar";
 import Footer from "./components/layout/Footer";
@@ -31,7 +30,6 @@ import SuperAdminLogin from "./pages/SuperAdminLogin";
 import PlayerLogin from "./pages/PlayerLogin";
 import AdminDashboard from "./pages/AdminDashboard";
 import SuperAdminDashboard from "./pages/SuperAdminDashboard";
-import ProtectedRoute from "./components/auth/ProtectedRoute";
 
 import GroupStage from "./pages/GroupStage";
 import Playoff from "./pages/Playoff";

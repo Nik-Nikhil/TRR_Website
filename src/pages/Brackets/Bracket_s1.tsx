@@ -197,7 +197,6 @@ function MatchNode({
           const win = t?.id === winner
           const isSingle = teams.length === 1
           const isDQ = id === "UB_F_M1" && t?.id === "kolly"
-          const isGFWinner = isGrandFinal && win
 
           return (
             <div

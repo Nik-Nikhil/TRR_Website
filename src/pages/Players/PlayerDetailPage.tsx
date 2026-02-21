@@ -62,7 +62,7 @@ export default function PlayerDetailPage() {
   const [editedAvatar, setEditedAvatar] = useState<string>('');
   const [editedHeroes, setEditedHeroes] = useState<string[]>([]);
   const [heroSearchTerm, setHeroSearchTerm] = useState('');
-  const [mmrProof, setMmrProof] = useState<string>('');
+  const [, setMmrProof] = useState<string>('');
   const [mmrValidation, setMmrValidation] = useState({ isValid: true, message: '' });
   const [showPasswordModal, setShowPasswordModal] = useState(false);
   const [passwordChanged, setPasswordChanged] = useState(false);

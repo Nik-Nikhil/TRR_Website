@@ -54,7 +54,15 @@ export interface Player {
   // Special badges
   specialBadge?: "contributor" | "founder" | "mvp";
   
-  
+  // Database fields (snake_case) - for compatibility with database mapper
+  cup_rank?: CupRank;
+  cup_tooltip?: string;
+  cup_season?: number;
+  special_badge?: "contributor" | "founder" | "mvp";
+  mechanical_skill?: number;
+  teamwork?: number;
+  communication?: number;
+  consistency?: number;
 }
 
 export const players: Player[] = [

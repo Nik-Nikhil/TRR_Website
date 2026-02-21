@@ -1,7 +1,6 @@
 // Debug captain session and lookup
 import { supabase } from '../lib/supabase';
 import { AuthService } from '../services/auth';
-// import captainService from '../services/captainService';
 
 export async function debugCaptainSession() {
   console.log('\n🔍 Debugging Captain Session');

@@ -3,15 +3,6 @@ import bcrypt from 'bcryptjs';
 
 export type UserType = 'player' | 'admin' | 'superadmin';
 
-// interface PasswordRecord {
-//   id: string;
-//   user_id: string;
-//   user_type: UserType;
-//   password_hash: string;
-//   created_at: string;
-//   updated_at: string;
-// }
-
 class PasswordService {
   private readonly SALT_ROUNDS = 10;
 

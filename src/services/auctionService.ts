@@ -356,7 +356,7 @@ export class AuctionService {
           schema: 'public',
           table: 'auctions'
         },
-        async (_payload) => {
+        async () => {
           // Fetch the latest state when auction is updated
           const state = await this.getAuctionState();
           if (state) {
@@ -371,7 +371,7 @@ export class AuctionService {
           schema: 'public',
           table: 'auctions'
         },
-        async (_payload) => {
+        async () => {
           // Fetch the latest state when new auction is created
           const state = await this.getAuctionState();
           if (state) {
