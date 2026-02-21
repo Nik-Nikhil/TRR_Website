@@ -42,7 +42,7 @@ export default function AdminLogin() {
             const isAdmin = admin.role === 'Admin';
             
             return {
-              id: admin.username.toLowerCase(),
+              id: admin.username, // Use the actual username from database, not lowercase
               name: admin.displayName,
               realName: admin.realName || '', // Don't fallback to displayName
               role: admin.role,
@@ -56,11 +56,10 @@ export default function AdminLogin() {
             };
           });
 
-        // Fixed order mapping - permanent positions
+        // Fixed order mapping - permanent positions (using actual database usernames)
         const fixedOrder: Record<string, number> = {
           'reyuk': 1,
           'nikhil': 2,
-          'n1khil': 2,
           'r3ciprocal': 3,
           'godspeed': 4,
           'machine': 5,
@@ -70,17 +69,14 @@ export default function AdminLogin() {
           'fatty': 9,
           'scripter': 10,
           'havok4evr': 11,
-          'havok': 11,
-          'raj dadia': 12,
           'rajdadia': 12,
-          'shailesh zambare': 13,
           'shaileshzambare': 13
         };
 
         // Sort admins by fixed order
         activeAdmins.sort((a, b) => {
-          const orderA = fixedOrder[a.id] ?? 9999; // New admins go to end
-          const orderB = fixedOrder[b.id] ?? 9999;
+          const orderA = fixedOrder[a.id.toLowerCase()] ?? 9999; // New admins go to end
+          const orderB = fixedOrder[b.id.toLowerCase()] ?? 9999;
           
           if (orderA !== orderB) return orderA - orderB;
           

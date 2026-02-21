@@ -28,7 +28,7 @@ export default function Auction() {
 
   const [soldPlayers, setSoldPlayers] = useState<any[]>([]);
   const [selectedTeamForManualAssign, setSelectedTeamForManualAssign] = useState<string>('');
-  const [manualAssignPrice, setManualAssignPrice] = useState<string>('0');
+  const [manualAssignPrice, setManualAssignPrice] = useState<string>('');
   
   // Auction pool state
   // const [auctionPool, setAuctionPool] = useState<any[]>([]);
@@ -446,9 +446,9 @@ export default function Auction() {
       return;
     }
     
-    // Minimum bid is 0
-    if (amount < 0) {
-      setBidError('Minimum bid is 0');
+    // Minimum bid is 1
+    if (amount < 1) {
+      setBidError('Minimum bid is 1');
       return;
     }
 
@@ -556,9 +556,15 @@ export default function Auction() {
 
     // Validate manual price if no bids
     if (!auctionState.highest_bidder_id) {
+      // Check if price is empty
+      if (manualAssignPrice.trim() === '') {
+        await alert('Please enter a price (0 or higher)', 'Invalid Price', 'warning');
+        return;
+      }
+      
       const price = parseInt(manualAssignPrice);
       if (isNaN(price) || price < 0) {
-        await alert('Please enter a valid price (minimum 0)', 'Invalid Price', 'warning');
+        await alert('Please enter a valid price (0 or higher)', 'Invalid Price', 'warning');
         return;
       }
 
@@ -646,7 +652,7 @@ export default function Auction() {
     
     // Reset manual assignment selection
     setSelectedTeamForManualAssign('');
-    setManualAssignPrice('0');
+    setManualAssignPrice('');
     
     // Show success modal
     setSuccessMessage(`${playerNickname} assigned to ${finalTeamName}! Budget updated to ${newBudget}.`);
@@ -719,6 +725,66 @@ export default function Auction() {
                     {/* Section 1: Top Bids - Scrollable with Neon Glow */}
                     <div className="bg-black/40 backdrop-blur-sm rounded-xl p-3 border-2 border-yellow-500/60 flex flex-col overflow-hidden shadow-[0_0_20px_rgba(234,179,8,0.3)]">
                       <h3 className="text-white font-bold mb-2 text-sm text-center flex-shrink-0">Top Bids</h3>
+                      
+                      {/* Hammer Animation - Visible to all players */}
+                      {isHammerActive && hammerStage > 0 && (
+                        <motion.div
+                          initial={{ opacity: 0, scale: 0.8 }}
+                          animate={{ opacity: 1, scale: 1 }}
+                          exit={{ opacity: 0, scale: 0.8 }}
+                          className={`mb-3 p-3 rounded-lg text-center font-bold flex-shrink-0 ${
+                            hammerStage === 1 ? 'bg-yellow-600/30 border-2 border-yellow-500' :
+                            hammerStage === 2 ? 'bg-orange-600/30 border-2 border-orange-500' :
+                            'bg-green-600/30 border-2 border-green-500'
+                          }`}
+                        >
+                          <motion.div
+                            animate={{
+                              scale: [1, 1.1, 1],
+                            }}
+                            transition={{
+                              duration: 0.5,
+                              repeat: Infinity,
+                            }}
+                          >
+                            <div className="flex items-center justify-center gap-2 mb-1">
+                              <Gavel className={`w-5 h-5 ${
+                                hammerStage === 1 ? 'text-yellow-300' :
+                                hammerStage === 2 ? 'text-orange-300' :
+                                'text-green-300'
+                              }`} />
+                              <span className={`text-lg ${
+                                hammerStage === 1 ? 'text-yellow-300' :
+                                hammerStage === 2 ? 'text-orange-300' :
+                                'text-green-300'
+                              }`}>
+                                {hammerStage === 1 ? 'GOING ONCE!' :
+                                 hammerStage === 2 ? 'GOING TWICE!' :
+                                 'SOLD!'}
+                              </span>
+                            </div>
+                            <div className={`text-2xl font-extrabold ${
+                              hammerStage === 1 ? 'text-yellow-200' :
+                              hammerStage === 2 ? 'text-orange-200' :
+                              'text-green-200'
+                            }`}>
+                              {hammerCountdown}
+                            </div>
+                          </motion.div>
+                          
+                          {/* Show "Bid Now to Stop!" message for players */}
+                          {hammerStage < 3 && currentCaptainSession && (
+                            <motion.p
+                              initial={{ opacity: 0 }}
+                              animate={{ opacity: 1 }}
+                              className="text-xs text-white/80 mt-2"
+                            >
+                              Bid now to stop the hammer!
+                            </motion.p>
+                          )}
+                        </motion.div>
+                      )}
+                      
                       <div className="flex-1 overflow-y-auto custom-standings-scroll pr-1 space-y-2" style={{ minHeight: '0' }}>
                         {bidHistory.length === 0 ? (
                           <div className="text-gray-400 text-xs text-center py-8">
@@ -1063,11 +1129,21 @@ export default function Auction() {
                                     className="w-full px-2 py-1.5 bg-black/60 border border-purple-500/40 rounded text-white text-xs focus:outline-none focus:ring-2 focus:ring-purple-500"
                                   >
                                     <option value="">-- Select Team --</option>
-                                    {captains.map((captain) => (
-                                      <option key={captain.playerId} value={captain.teamName}>
-                                        {captain.teamName} (Budget: {captain.budget})
-                                      </option>
-                                    ))}
+                                    {captains.map((captain) => {
+                                      // Count players for this team
+                                      const teamPlayers = soldPlayers.filter(p => p.teamName === captain.teamName);
+                                      const isFull = teamPlayers.length >= 5;
+                                      
+                                      return (
+                                        <option 
+                                          key={captain.playerId} 
+                                          value={captain.teamName}
+                                          disabled={isFull}
+                                        >
+                                          {captain.teamName} (Budget: {captain.budget}) {isFull ? '- FULL' : ''}
+                                        </option>
+                                      );
+                                    })}
                                   </select>
                                 </div>
                                 
@@ -1082,9 +1158,9 @@ export default function Auction() {
                                     value={manualAssignPrice}
                                     onChange={(e) => {
                                       const value = e.target.value.replace(/[^0-9]/g, '');
-                                      setManualAssignPrice(value || '0');
+                                      setManualAssignPrice(value);
                                     }}
-                                    placeholder="Enter price"
+                                    placeholder="Enter gold value"
                                     className="w-full px-2 py-1.5 bg-black/60 border border-yellow-500/40 rounded text-white text-xs font-bold focus:outline-none focus:ring-2 focus:ring-yellow-500 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
                                   />
                                 </div>
@@ -1120,7 +1196,7 @@ export default function Auction() {
                             {!auctionState?.highest_bidder_id && (
                               <p className="text-gray-400 text-xs text-center">
                                 {selectedTeamForManualAssign 
-                                  ? `Will assign to ${selectedTeamForManualAssign} for 🪙 ${manualAssignPrice}`
+                                  ? `Will assign to ${selectedTeamForManualAssign} for 🪙 ${manualAssignPrice || '0'}`
                                   : 'No bids - Select team above'}
                               </p>
                             )}
@@ -1338,102 +1414,6 @@ export default function Auction() {
                   </>
                 )}
 
-                {/* Hammer Countdown Overlay - Visible to Everyone */}
-                <AnimatePresence>
-                  {isHammerActive && hammerStage > 0 && (
-                    <motion.div
-                      initial={{ opacity: 0 }}
-                      animate={{ opacity: 1 }}
-                      exit={{ opacity: 0 }}
-                      className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm"
-                    >
-                      <motion.div
-                        initial={{ scale: 0.5, rotate: -10 }}
-                        animate={{ 
-                          scale: hammerStage === 3 ? [1, 1.2, 1] : 1,
-                          rotate: hammerStage === 3 ? [0, 5, -5, 0] : 0
-                        }}
-                        transition={{ duration: 0.5 }}
-                        className="text-center"
-                      >
-                        {/* Hammer Icon */}
-                        <motion.div
-                          animate={{ 
-                            rotate: hammerStage === 3 ? [0, -30, 0] : 0,
-                            scale: hammerStage === 3 ? [1, 1.3, 1] : 1
-                          }}
-                          transition={{ duration: 0.3, repeat: hammerStage === 3 ? 3 : 0 }}
-                          className="text-9xl mb-6"
-                        >
-                          🔨
-                        </motion.div>
-
-                        {/* Stage Text */}
-                        {hammerStage === 1 && (
-                          <motion.div
-                            animate={{ scale: [1, 1.1, 1] }}
-                            transition={{ duration: 1, repeat: Infinity }}
-                          >
-                            <h2 className="text-6xl font-bold text-yellow-400 mb-4">
-                              GOING ONCE!
-                            </h2>
-                            <p className="text-3xl text-yellow-300">
-                              {hammerCountdown}
-                            </p>
-                          </motion.div>
-                        )}
-
-                        {hammerStage === 2 && (
-                          <motion.div
-                            animate={{ scale: [1, 1.1, 1] }}
-                            transition={{ duration: 0.8, repeat: Infinity }}
-                          >
-                            <h2 className="text-6xl font-bold text-orange-400 mb-4">
-                              GOING TWICE!
-                            </h2>
-                            <p className="text-3xl text-orange-300">
-                              {hammerCountdown}
-                            </p>
-                          </motion.div>
-                        )}
-
-                        {hammerStage === 3 && (
-                          <motion.div
-                            initial={{ scale: 0 }}
-                            animate={{ scale: [0, 1.5, 1] }}
-                            transition={{ duration: 0.5 }}
-                          >
-                            <h2 className="text-8xl font-bold bg-gradient-to-r from-yellow-400 via-orange-500 to-red-500 bg-clip-text text-transparent mb-4">
-                              SOLD!
-                            </h2>
-                            <motion.div
-                              animate={{ scale: [1, 1.2, 1], rotate: [0, 360] }}
-                              transition={{ duration: 1 }}
-                              className="text-6xl"
-                            >
-                              🎉
-                            </motion.div>
-                          </motion.div>
-                        )}
-
-                        {/* Player Info */}
-                        {currentPlayer && hammerStage < 3 && (
-                          <div className="mt-8 bg-black/60 backdrop-blur-sm rounded-xl p-6 border-2 border-yellow-500/50">
-                            <p className="text-white text-2xl font-semibold mb-2">
-                              {currentPlayer.nickname}
-                            </p>
-                            {auctionState?.highest_bidder_name && (
-                              <p className="text-yellow-300 text-xl">
-                                Current Bid: 🪙 {auctionState.highest_bid} by {auctionState.highest_bidder_name}
-                              </p>
-                            )}
-                          </div>
-                        )}
-                      </motion.div>
-                    </motion.div>
-                  )}
-                </AnimatePresence>
-
                 {status === 'completed' && (
                   <motion.div
                     initial={{ opacity: 0, scale: 0.9 }}
@@ -1490,7 +1470,7 @@ export default function Auction() {
                   {auctionState.highest_bidder_team || selectedTeamForManualAssign}
                 </span> for{' '}
                 <span className="text-yellow-400 font-bold">
-                  🪙 {auctionState.highest_bid || manualAssignPrice}
+                  🪙 {auctionState.highest_bid || manualAssignPrice || '0'}
                 </span>
                 {!auctionState.highest_bidder_id && (
                   <span className="text-purple-300"> (Manual Assignment)</span>
