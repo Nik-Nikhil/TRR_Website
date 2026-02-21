@@ -59,11 +59,6 @@ export class AuctionService {
         created_at: data.created_at,
         updated_at: data.updated_at
       } : null;
-        highest_bidder_name: data.highest_bidder_name,
-        highest_bidder_team: data.highest_bidder_team,
-        created_at: data.created_at,
-        updated_at: data.updated_at
-      } : null;
     } catch (error) {
       console.error('Error fetching auction state:', error);
       return null;

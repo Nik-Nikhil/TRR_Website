@@ -44,6 +44,7 @@ function App() {
       <div className="flex-1 flex flex-col border-0" style={{ gap: '0', marginBottom: '0', paddingBottom: '0' }}>
         <Routes>
           <Route path="/" element={<Home />} />
+          <Route index element={<Home />} />
 
           <Route path="/schedule" element={<SchedulePage />} />
           <Route path="/admins" element={<AdminsPage />} />
@@ -77,6 +78,9 @@ function App() {
           <Route path="/admin-dashboard" element={<AdminDashboard />} />
           <Route path="/super-admin" element={<SuperAdminDashboard />} />
           <Route path="/super-admin-dashboard" element={<SuperAdminDashboard />} />
+          
+          {/* Catch-all route - redirect to home */}
+          <Route path="*" element={<Home />} />
         </Routes>
       </div>
 
