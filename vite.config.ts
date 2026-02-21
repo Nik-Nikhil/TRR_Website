@@ -13,18 +13,23 @@ export default defineConfig({
         manualChunks(id) {
           // Vendor chunks
           if (id.includes('node_modules')) {
+            // Keep React ecosystem together
             if (id.includes('react') || id.includes('react-dom') || id.includes('react-router')) {
               return 'react-vendor';
             }
+            // Keep framer-motion separate
             if (id.includes('framer-motion')) {
               return 'framer-motion';
             }
+            // Keep lucide-react with vendor to avoid tree-shaking issues
             if (id.includes('lucide-react')) {
-              return 'lucide-icons';
+              return 'vendor';
             }
+            // Supabase
             if (id.includes('@supabase')) {
               return 'supabase';
             }
+            // Bcrypt
             if (id.includes('bcryptjs')) {
               return 'bcrypt';
             }
