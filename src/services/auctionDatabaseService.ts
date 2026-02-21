@@ -161,7 +161,7 @@ export class AuctionDatabaseService {
   }
 
   // Reject deletion (superadmin)
-  static async rejectDeletion(requestId: string, reviewedBy: string, notes?: string): Promise<boolean> {
+  static async rejectDeletion(requestId: string, reviewedBy: string, _notes?: string): Promise<boolean> {
     window.dispatchEvent(new CustomEvent('deletionRejected', { detail: { requestId, reviewedBy } }));
     return true;
   }

@@ -84,7 +84,7 @@ export class AuctionService {
       }
 
       // Create new auction
-      const { data, error } = await supabase
+      const { error } = await supabase
         .from('auctions')
         .insert([{
           name: `Auction ${new Date().toLocaleDateString()}`,
@@ -93,6 +93,8 @@ export class AuctionService {
           created_by: 'admin',
           deletion_status: 'active'
         }])
+        .select()
+        .single();
         .select()
         .single();
 
@@ -356,7 +358,7 @@ export class AuctionService {
           schema: 'public',
           table: 'auctions'
         },
-        async (payload) => {
+        async (_payload) => {
           // Fetch the latest state when auction is updated
           const state = await this.getAuctionState();
           if (state) {
@@ -371,7 +373,7 @@ export class AuctionService {
           schema: 'public',
           table: 'auctions'
         },
-        async (payload) => {
+        async (_payload) => {
           // Fetch the latest state when new auction is created
           const state = await this.getAuctionState();
           if (state) {

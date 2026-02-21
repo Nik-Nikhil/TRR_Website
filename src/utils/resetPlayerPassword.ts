@@ -24,9 +24,10 @@ export async function resetPlayerPassword(nickname: string, newPassword: string)
 
     // Import password service
     const { default: passwordService } = await import('../services/passwordService');
+    const { UserType } = await import('../services/passwordService');
 
     // Set new password
-    const result = await passwordService.setPassword(player.id, newPassword, 'player');
+    const result = await passwordService.setPassword(player.id, newPassword, 'player' as UserType);
 
     if (result.success) {
       console.log(`✅ Password reset successful for ${player.nickname}`);

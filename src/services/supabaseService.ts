@@ -24,6 +24,14 @@ export interface Player {
   favorite_heroes?: any[];
   season_badges?: any[];
   has_won_cup?: boolean;
+  cup_rank?: string;
+  cup_tooltip?: string;
+  cup_season?: number;
+  special_badge?: string;
+  mechanical_skill?: number;
+  teamwork?: number;
+  communication?: number;
+  consistency?: number;
   is_banned?: boolean;
   ban_reason?: string;
   whatsapp_number?: string;
