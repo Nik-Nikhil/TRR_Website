@@ -7,9 +7,61 @@ export default defineConfig({
   build: {
     outDir: 'dist',
     assetsDir: 'assets',
+    chunkSizeWarningLimit: 1000,
     rollupOptions: {
       output: {
-        manualChunks: undefined
+        manualChunks(id) {
+          // Vendor chunks
+          if (id.includes('node_modules')) {
+            if (id.includes('react') || id.includes('react-dom') || id.includes('react-router')) {
+              return 'react-vendor';
+            }
+            if (id.includes('framer-motion')) {
+              return 'framer-motion';
+            }
+            if (id.includes('lucide-react')) {
+              return 'lucide-icons';
+            }
+            if (id.includes('@supabase')) {
+              return 'supabase';
+            }
+            if (id.includes('bcryptjs')) {
+              return 'bcrypt';
+            }
+            // Other node_modules
+            return 'vendor';
+          }
+          
+          // Services
+          if (id.includes('/services/auction')) {
+            return 'auction-services';
+          }
+          if (id.includes('/services/') && (id.includes('auth') || id.includes('password') || id.includes('admin'))) {
+            return 'auth-services';
+          }
+          if (id.includes('/services/')) {
+            return 'services';
+          }
+          
+          // Pages
+          if (id.includes('/pages/Admin') || id.includes('/pages/SuperAdmin')) {
+            return 'admin-pages';
+          }
+          if (id.includes('/pages/Players/') || id.includes('/pages/PlayerProfile') || id.includes('/pages/PlayerLogin')) {
+            return 'player-pages';
+          }
+          if (id.includes('/pages/Auction') || id.includes('/pages/Registration')) {
+            return 'auction-pages';
+          }
+          if (id.includes('/pages/Brackets/') || id.includes('/pages/GroupStage') || id.includes('/pages/Playoff')) {
+            return 'brackets';
+          }
+          
+          // Data
+          if (id.includes('/data/heroes') || id.includes('/data/players') || id.includes('/data/admins')) {
+            return 'game-data';
+          }
+        }
       }
     }
   }
