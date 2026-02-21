@@ -208,7 +208,7 @@ export default function AdminDashboard() {
     { id: 'messages', label: 'Messages', icon: MessageSquare, description: 'Player Messages', badge: unreadCount > 0 ? unreadCount : undefined },
     { id: 'profile-updates', label: 'Profile Updates', icon: UserPlus, description: 'Approve Changes', badge: profileUpdateService.getPendingCount() > 0 ? profileUpdateService.getPendingCount() : undefined },
     { id: 'players', label: 'Player Management', icon: Users, description: 'Manage Players' },
-    { id: 'captains', label: 'Captain Management', icon: Shield, description: 'Assign Captains' },
+    { id: 'captains', label: 'Team Management', icon: Users, description: 'Manage Teams & Captains' },
     { id: 'registration', label: 'Registration', icon: UserPlus, description: 'Control Settings' },
     { id: 'auction', label: 'Auction Control', icon: Gavel, description: 'Manage Auction' },
     { id: 'auction-history', label: 'Auction History', icon: History, description: 'Past Auctions' },

@@ -1,123 +1,22 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { Shield, Lock, Eye, EyeOff, Crown, UserCheck } from 'lucide-react';
 import { useNavigate, Link } from 'react-router-dom';
 import AuthService from '../services/auth';
+import adminService from '../services/adminService';
 
-// Admin data with roles, images, and info (matching the admin page)
-const ADMIN_DATA = [
-  { 
-    id: 'reyuk', 
-    name: 'Reyuk', 
-    realName: 'Keyur Sankhe',
-    role: 'Founder', 
-    password: '12345',
-    color: 'from-purple-600 to-purple-800',
-    icon: Crown,
-    image: '/avatars/admins/reyuk.png',
-    description: 'Tournament Founder',
-    isSuperAdmin: true
-  },
-  { 
-    id: 'r3ciprocal', 
-    name: 'r3ciprocal', 
-    realName: 'Darshil Patel',
-    role: 'Admin', 
-    password: 'admin2024',
-    color: 'from-red-600 to-red-800',
-    icon: Shield,
-    image: '/avatars/admins/r3ciprocal.jpg',
-    description: 'Lead Organizer'
-  },
-  { 
-    id: 'frost', 
-    name: 'Frost', 
-    realName: 'Clint Mendes',
-    role: 'Admin', 
-    password: 'admin2024',
-    color: 'from-red-600 to-red-800',
-    icon: Shield,
-    image: '/avatars/admins/Frost.png',
-    description: 'Tournament Coordinator'
-  },
-  { 
-    id: 'machine', 
-    name: 'Machine', 
-    realName: 'Nisarg Parikh',
-    role: 'Admin', 
-    password: 'admin2024',
-    color: 'from-red-600 to-red-800',
-    icon: Shield,
-    image: '/avatars/admins/Machine.png',
-    description: 'Lead Operator'
-  },
-  { 
-    id: 'godspeed', 
-    name: 'Godspeed', 
-    realName: 'Aby Alexander',
-    role: 'Admin', 
-    password: 'admin2024',
-    color: 'from-red-600 to-red-800',
-    icon: Shield,
-    image: '/avatars/admins/Godspeed.jpg',
-    description: 'Funds Administrator'
-  },
-  { 
-    id: 'banner', 
-    name: 'Banner', 
-    realName: 'Nav Sharma',
-    role: 'Admin', 
-    password: 'banner123',
-    color: 'from-red-600 to-red-800',
-    icon: Shield,
-    image: '/avatars/admins/banner.png',
-    description: 'Lobby Manager & Caster'
-  },
-  { 
-    id: 'insanekid', 
-    name: 'InsaneKid', 
-    realName: 'Siddhesh Naringrikar',
-    role: 'Mini Admin', 
-    password: 'mini2024',
-    color: 'from-blue-600 to-blue-800',
-    icon: UserCheck,
-    image: '/avatars/admins/insane.jpg',
-    description: 'Match Coordinator & Caster'
-  },
-  { 
-    id: 'fatty', 
-    name: 'Fatty', 
-    realName: 'Shreejan Mishra',
-    role: 'Mini Admin', 
-    password: 'mini2024',
-    color: 'from-blue-600 to-blue-800',
-    icon: UserCheck,
-    image: '/avatars/admins/fatty.jpg',
-    description: 'UI/UX Developer'
-  },
-  { 
-    id: 'scripter', 
-    name: 'Scripter', 
-    realName: 'Anubhav Kumar',
-    role: 'Mini Admin', 
-    password: 'mini2024',
-    color: 'from-blue-600 to-blue-800',
-    icon: UserCheck,
-    image: '/avatars/admins/scripter.jpg',
-    description: 'Database-Coordinator'
-  },
-  { 
-    id: 'havok4evr', 
-    name: 'HaVoK4EvR', 
-    realName: 'Gaurav',
-    role: 'Mini Admin', 
-    password: 'mini2024',
-    color: 'from-blue-600 to-blue-800',
-    icon: UserCheck,
-    image: '/avatars/admins/havok.jpg',
-    description: 'Streamer & Caster'
-  },
-];
+// Admin data type
+interface AdminData {
+  id: string;
+  name: string;
+  realName: string;
+  role: string;
+  color: string;
+  icon: any;
+  image: string;
+  description: string;
+  isSuperAdmin?: boolean;
+}
 
 export default function AdminLogin() {
   const [selectedAdmin, setSelectedAdmin] = useState<string | null>(null);
@@ -125,7 +24,86 @@ export default function AdminLogin() {
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  const [adminData, setAdminData] = useState<AdminData[]>([]);
+  const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
+
+  // Load admins from database
+  useEffect(() => {
+    const loadAdmins = async () => {
+      try {
+        const dbAdmins = await adminService.getAdmins();
+        
+        // Filter only active admins and map to AdminData format
+        const activeAdmins = dbAdmins
+          .filter(a => a.isActive)
+          .map(admin => {
+            const isSuperAdmin = admin.role === 'Founder';
+            const isAdmin = admin.role === 'Admin';
+            
+            return {
+              id: admin.username.toLowerCase(),
+              name: admin.displayName,
+              realName: admin.realName || '', // Don't fallback to displayName
+              role: admin.role,
+              color: isSuperAdmin ? 'from-purple-600 to-purple-800' : 
+                     isAdmin ? 'from-red-600 to-red-800' : 
+                     'from-blue-600 to-blue-800',
+              icon: isSuperAdmin ? Crown : isAdmin ? Shield : UserCheck,
+              image: admin.avatarUrl || (admin.username.toLowerCase() === 'reyuk' ? '/avatars/admins/Reyuk.png' : `/avatars/admins/${admin.username}.jpg`),
+              description: admin.description || admin.role,
+              isSuperAdmin
+            };
+          });
+
+        // Sort by role hierarchy, then by creation date (oldest first)
+        const roleOrder: Record<string, number> = { 'Founder': 0, 'Admin': 1, 'Mini Admin': 2 };
+        
+        // Fixed order mapping - permanent positions
+        const fixedOrder: Record<string, number> = {
+          'reyuk': 1,
+          'nikhil': 2,
+          'n1khil': 2,
+          'r3ciprocal': 3,
+          'godspeed': 4,
+          'machine': 5,
+          'frost': 6,
+          'banner': 7,
+          'insanekid': 8,
+          'fatty': 9,
+          'scripter': 10,
+          'havok4evr': 11,
+          'havok': 11,
+          'raj dadia': 12,
+          'rajdadia': 12,
+          'shailesh zambare': 13,
+          'shaileshzambare': 13
+        };
+
+        // Sort admins by fixed order
+        activeAdmins.sort((a, b) => {
+          const orderA = fixedOrder[a.id] ?? 9999; // New admins go to end
+          const orderB = fixedOrder[b.id] ?? 9999;
+          
+          if (orderA !== orderB) return orderA - orderB;
+          
+          // If both are new admins (not in fixed order), sort by creation date
+          const dateA = dbAdmins.find(d => d.username.toLowerCase() === a.id)?.createdAt || '';
+          const dateB = dbAdmins.find(d => d.username.toLowerCase() === b.id)?.createdAt || '';
+          return new Date(dateA).getTime() - new Date(dateB).getTime();
+        });
+
+        setAdminData(activeAdmins);
+      } catch (err) {
+        console.error('Failed to load admins:', err);
+        setError('Failed to load admin accounts');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    loadAdmins();
+  }, []);
 
   const handleAdminSelect = (adminId: string) => {
     setSelectedAdmin(adminId);
@@ -141,28 +119,15 @@ export default function AdminLogin() {
     setError('');
 
     try {
-      const admin = ADMIN_DATA.find(a => a.id === selectedAdmin);
+      const admin = adminData.find(a => a.id === selectedAdmin);
       if (!admin) {
         setError('Admin not found');
         setIsLoading(false);
         return;
       }
 
-      // Check if admin is disabled in localStorage
-      const storedAdmins = localStorage.getItem('admins');
-      if (storedAdmins) {
-        const adminsList = JSON.parse(storedAdmins);
-        const storedAdmin = adminsList.find((a: any) => a.username.toLowerCase() === admin.name.toLowerCase());
-        
-        if (storedAdmin && storedAdmin.isDisabled) {
-          setError('This account has been disabled by SuperAdmin. Please contact administration.');
-          setIsLoading(false);
-          return;
-        }
-      }
-
       // Authenticate with database service
-      const result = await AuthService.loginAdmin(admin.name.toLowerCase(), password);
+      const result = await AuthService.loginAdmin(selectedAdmin, password);
       
       if (!result.success) {
         setError(result.error);
@@ -170,7 +135,7 @@ export default function AdminLogin() {
         return;
       }
 
-      // Special handling for super admins (Reyuk and Nikhil) - redirect to SuperAdmin Dashboard
+      // Special handling for super admins (Founder role) - redirect to SuperAdmin Dashboard
       if (admin.isSuperAdmin) {
         // Set super admin session
         localStorage.setItem('superAdminSession', JSON.stringify({
@@ -178,7 +143,7 @@ export default function AdminLogin() {
           loginTime: new Date().toISOString(),
           type: 'superadmin',
           role: admin.role,
-          username: admin.name.toLowerCase()
+          username: selectedAdmin
         }));
         
         // Navigate to super admin dashboard
@@ -195,7 +160,7 @@ export default function AdminLogin() {
     }
   };
 
-  const selectedAdminData = ADMIN_DATA.find(a => a.id === selectedAdmin);
+  const selectedAdminData = adminData.find(a => a.id === selectedAdmin);
 
   return (
     <>
@@ -227,12 +192,20 @@ export default function AdminLogin() {
               <p className="text-sm text-gray-400">Select your account to continue</p>
             </motion.div>
 
-            {!selectedAdmin ? (
+            {loading ? (
+              /* Loading State */
+              <div className="flex justify-center items-center py-20">
+                <div className="text-center">
+                  <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-purple-500 mx-auto mb-4"></div>
+                  <p className="text-gray-400">Loading admin accounts...</p>
+                </div>
+              </div>
+            ) : !selectedAdmin ? (
               /* Admin Selection Grid */
               <div className="w-full flex justify-center pb-4">
-                <div className="w-full max-w-[1100px] px-3 sm:px-4 md:px-6 relative">
-                  <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3 sm:gap-4 md:gap-6">
-                    {ADMIN_DATA.map((admin, index) => {
+                <div className="w-full max-w-[1600px] px-4 sm:px-6 md:px-8 relative">
+                  <div className="flex flex-wrap justify-center gap-4 md:gap-5 lg:gap-6">
+                    {adminData.map((admin, index) => {
                       const IconComponent = admin.icon;
                       return (
                         <motion.button
@@ -241,14 +214,15 @@ export default function AdminLogin() {
                           animate={{ opacity: 1, y: 0 }}
                           transition={{ delay: index * 0.1 }}
                           onClick={() => handleAdminSelect(admin.id)}
-                          className="bg-gray-800/20 backdrop-blur-xl border border-gray-600/30 rounded-xl p-3 sm:p-4 md:p-6 hover:border-gray-400/50 hover:bg-gray-700/20 transition-all duration-300 group text-center relative cursor-pointer"
+                          className="bg-gray-800/20 backdrop-blur-xl border border-gray-600/30 rounded-xl p-4 sm:p-5 hover:border-gray-400/50 hover:bg-gray-700/20 transition-all duration-300 group text-center relative cursor-pointer w-[120px] sm:w-[130px] md:w-[140px] flex flex-col items-center justify-start"
+                          style={{ minHeight: '170px' }}
                         >
                           {/* Subtle glow effect on hover */}
                           <div className="absolute inset-0 bg-gradient-to-br from-gray-400/5 to-slate-400/5 opacity-0 group-hover:opacity-100 transition-opacity duration-300 rounded-xl" />
                           
-                          <div className="relative z-10">
+                          <div className="relative z-10 flex flex-col items-center w-full pt-2">
                             {/* Admin Image */}
-                            <div className="relative w-14 h-14 sm:w-16 sm:h-16 md:w-20 md:h-20 mx-auto mb-2 sm:mb-3 md:mb-4 group-hover:scale-110 transition-transform duration-300">
+                            <div className="relative w-16 h-16 sm:w-20 sm:h-20 mb-3 group-hover:scale-110 transition-transform duration-300 flex-shrink-0">
                               <div className={`absolute inset-0 bg-gradient-to-br ${admin.color} rounded-full opacity-30 group-hover:opacity-50 transition-opacity duration-300`} />
                               <div className="absolute inset-0 bg-gradient-to-br from-gray-400/20 to-slate-400/20 rounded-full blur-lg opacity-0 group-hover:opacity-40 transition-opacity duration-300" />
                               <img
@@ -265,14 +239,14 @@ export default function AdminLogin() {
                               />
                               {/* Fallback icon (hidden by default) */}
                               <div className={`absolute inset-0 bg-gradient-to-br ${admin.color} rounded-full hidden items-center justify-center z-10`}>
-                                <IconComponent className="w-6 h-6 sm:w-8 sm:h-8 md:w-10 md:h-10 text-white" />
+                                <IconComponent className="w-8 h-8 sm:w-10 sm:h-10 text-white" />
                               </div>
                             </div>
                             
-                            <h3 className="text-sm sm:text-base md:text-lg font-bold text-white mb-1 group-hover:text-gray-200 transition-colors duration-300 leading-tight">{admin.name}</h3>
-                            {admin.realName && (
-                              <p className="text-xs sm:text-sm text-gray-400 group-hover:text-gray-300 transition-colors duration-300 truncate leading-tight">{admin.realName}</p>
-                            )}
+                            {/* Only show display name (gamer tag) - single line */}
+                            <div className="w-full px-1">
+                              <h3 className="text-xs sm:text-sm font-bold text-white group-hover:text-gray-200 transition-colors duration-300 leading-tight truncate">{admin.name}</h3>
+                            </div>
                           </div>
                         </motion.button>
                       );

@@ -140,13 +140,17 @@ export default function Auction() {
           schema: 'public',
           table: 'auction_results'
         },
-        () => {
+        (payload) => {
+          console.log('🔔 Auction results changed:', payload.eventType, payload);
+          if (payload.eventType === 'DELETE') {
+            console.log('🗑️ Auction result deleted, refreshing sold players');
+          }
           loadSoldPlayers();
         }
       )
       .subscribe((status, err) => {
         if (status === 'SUBSCRIBED') {
-          // Subscribed successfully
+          console.log('✅ Subscribed to auction_results changes');
         }
         if (status === 'CHANNEL_ERROR') {
           console.error('❌ Sold players subscription error:', err);
@@ -157,6 +161,7 @@ export default function Auction() {
     const pollInterval = setInterval(async () => {
       await loadAuctionState();
       await loadCaptains(); // Also poll captains for budget updates
+      await loadSoldPlayers(); // Also poll sold players to ensure Teams Overview is accurate
       
       // Poll for bids - get current state
       const currentState = await AuctionService.getAuctionState();
@@ -258,7 +263,13 @@ export default function Auction() {
   const loadSoldPlayers = async () => {
     try {
       const state = await AuctionService.getAuctionState();
-      if (!state) return;
+      if (!state) {
+        console.log('⚠️ No auction state, clearing sold players');
+        setSoldPlayers([]);
+        return;
+      }
+
+      console.log('🔄 Loading sold players for auction:', state.id);
 
       const { data, error } = await supabase
         .from('auction_results')
@@ -267,6 +278,13 @@ export default function Auction() {
         .order('sold_at', { ascending: false });
 
       if (!error && data) {
+        console.log(`📊 Loaded ${data.length} sold players from auction_results`);
+        console.log('📊 Sold players by captain:', data.reduce((acc: any, item: any) => {
+          const captainId = item.sold_to_captain_id;
+          acc[captainId] = (acc[captainId] || 0) + 1;
+          return acc;
+        }, {}));
+        
         setSoldPlayers(data.map((item: any) => ({
           id: item.id,
           playerId: item.player_id,
@@ -279,9 +297,13 @@ export default function Auction() {
           soldAt: item.sold_at,
           auctionId: item.auction_id
         })));
+      } else if (error) {
+        console.error('❌ Error loading sold players:', error);
+        setSoldPlayers([]);
       }
     } catch (error) {
-      console.error('Error loading sold players:', error);
+      console.error('❌ Error loading sold players:', error);
+      setSoldPlayers([]);
     }
   };
 

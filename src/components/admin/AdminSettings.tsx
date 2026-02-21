@@ -56,7 +56,7 @@ export const AdminSettings = () => {
           email: '',
           bio: '',
           role: superAdmin.role || 'Super Admin',
-          avatarUrl: superAdmin.username === 'reyuk' ? '/avatars/admins/reyuk.png' :
+          avatarUrl: superAdmin.username === 'reyuk' ? '/avatars/admins/Reyuk.png' :
                     superAdmin.username === 'nikhil' ? '/avatars/admins/Nikhil.jpg' :
                     ''
         };

@@ -148,19 +148,49 @@ class CaptainService {
   // Remove captain role
   async removeCaptain(playerId: string): Promise<boolean> {
     try {
+      console.log('🗑️ Removing captain:', playerId);
+      
+      // First, get the captain data to find their team name
+      const captainData = await this.getCaptainData(playerId);
+      
+      if (captainData) {
+        console.log('🗑️ Captain data found:', captainData.teamName);
+        
+        // Delete all auction results for this captain's team
+        const { data: deletedResults, error: auctionError } = await supabase
+          .from('auction_results')
+          .delete()
+          .eq('sold_to_captain_id', playerId)
+          .select();
+
+        if (auctionError) {
+          console.error('❌ Error clearing auction results:', auctionError);
+          return false; // Don't continue if we can't clear auction results
+        } else {
+          console.log(`✅ Cleared ${deletedResults?.length || 0} auction results for captain ${playerId}`);
+        }
+        
+        // Wait a moment for the database to propagate the deletion
+        await new Promise(resolve => setTimeout(resolve, 500));
+      } else {
+        console.log('⚠️ No captain data found for:', playerId);
+      }
+
+      // Delete the captain record
       const { error } = await supabase
         .from('captains')
         .delete()
         .eq('player_id', playerId);
 
       if (error) {
-        console.error('Error removing captain:', error);
+        console.error('❌ Error removing captain:', error);
         return false;
       }
 
+      console.log('✅ Captain removed successfully');
       return true;
     } catch (error) {
-      console.error('Error removing captain:', error);
+      console.error('❌ Error removing captain:', error);
       return false;
     }
   }

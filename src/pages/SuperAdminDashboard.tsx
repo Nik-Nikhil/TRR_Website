@@ -225,7 +225,7 @@ export default function SuperAdminDashboard() {
           username: 'reyuk',
           role: 'Founder',
           displayName: 'Reyuk',
-          avatarUrl: '/avatars/admins/reyuk.png'
+          avatarUrl: '/avatars/admins/Reyuk.png'
         });
       } else if (session.username === 'nikhil') {
         setCurrentSuperAdmin({
@@ -417,7 +417,7 @@ export default function SuperAdminDashboard() {
     { id: 'users', label: 'User Management', icon: Users, description: 'Players & Admins' },
     { id: 'admin-management', label: 'Admin Management', icon: Shield, description: 'Add/Manage Admins' },
     { id: 'announcements', label: 'Announcements', icon: Megaphone, description: 'Manage Announcements' },
-    { id: 'captains', label: 'Captain Management', icon: Shield, description: 'Assign Captains' },
+    { id: 'captains', label: 'Team Management', icon: Users, description: 'Manage Teams & Captains' },
     { id: 'registration', label: 'Registration', icon: UserPlus, description: 'Control Settings' },
     { id: 'auction', label: 'Auction Control', icon: Gavel, description: 'Manage Auction' },
     { id: 'auction-history', label: 'Auction History', icon: History, description: 'Past Auctions' },
@@ -1150,7 +1150,8 @@ export default function SuperAdminDashboard() {
     </div>
   );
 
-  // Render settings
+  // Render settings (currently unused but kept for future use)
+  /*
   const renderSettings = () => (
     <div className="p-8">
       <div className="bg-black/60 backdrop-blur-sm rounded-xl p-6 border border-orange-500/40">
@@ -1166,6 +1167,7 @@ export default function SuperAdminDashboard() {
       </div>
     </div>
   );
+  */
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-black via-orange-900/10 to-red-900/20 flex" style={{ paddingTop: '80px' }}>
@@ -1202,7 +1204,7 @@ export default function SuperAdminDashboard() {
               )}
               {activeSection === 'users' && renderUserManagement()}
               {activeSection === 'admin-management' && <AdminManagement />}
-              {activeSection === 'announcements' && <div className="p-8"><AnnouncementManagement /></div>}
+              {activeSection === 'announcements' && <div className="p-8"><AnnouncementManagement username={currentSuperAdmin?.username || 'admin'} /></div>}
               {activeSection === 'captains' && renderCaptainManagement()}
               {activeSection === 'registration' && renderRegistrationControl()}
               {activeSection === 'auction' && renderAuctionControl()}

@@ -1,8 +1,9 @@
 import { useRef, useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
 import { useToast } from "../hooks/useToast";
 import ToastContainer from "../components/ui/ToastContainer";
 import MessageModal from "../components/ui/MessageModal";
+import adminService from "../services/adminService";
+import { Github, Twitch } from "lucide-react";
 
 /* ================= THEME ================= */
 const NEON_RED = "#FF0040";
@@ -35,31 +36,16 @@ type Member = {
 };
 
 /* ================= DATA ================= */
+// Founder is static
 const founder: Member = {
   name: "Reyuk",
   realName: "Keyur Sankhe",
   role: "Founder",
   tag: "Vision & Direction",
   bio: "Founder of TRR. Oversees tournaments, systems, and structure.",
-  image: "/avatars/admins/reyuk.png",
+  image: "/avatars/admins/Reyuk.png",
   nameColor: "#FF4500",
 };
-
-const admins: Member[] = [
-  { name: "r3ciprocal", realName: "Darshil Patel", role: "Admin", tag: "Lead Organizer", bio: "Handles competitive integrity, rules, and match operations.", image: "/avatars/admins/r3ciprocal.jpg", nameColor: "#4169E1" },
-  { name: "Frost", realName: "Clint Mendes", role: "Admin", tag: "Tournament Coordinator", bio: "Oversees tournament flow, manages formats, and ensures smooth competition.", image: "/avatars/admins/Frost.png", nameColor: "#06B6D4" },
-  { name: "Machine", realName: "Nisarg Parikh", role: "Admin", tag: "Lead Operator", bio: "Tournament logistics, coordination, and enforcement.", image: "/avatars/admins/Machine.png", nameColor: "#07E4BE" },
-  { name: "N1KHIL", realName: "Nikhil Kumar Singh", role: "Admin", tag: "Tech Ops Lead", bio: "Handles Discord server management and website maintenance.", image: "/avatars/admins/Nikhil.jpg", isSpecial: true, nameColor: "#A855F7" },
-  { name: "Godspeed", realName: "Aby Alexander", role: "Admin", tag: "Funds Administrator", bio: "Manages tournament funds, prize distribution, and financial accuracy.", image: "/avatars/admins/Godspeed.jpg", nameColor: "#F59E0B" },
-  { name: "Banner", realName: "Nav Sharma", role: "Admin", tag: "Lobby Manager & Caster", bio: "The backbone of match flow, ensuring smooth lobbies and assists with live match casting.", image: "/avatars/admins/banner.png", nameColor: "#F6F556" },
-];
-
-const miniAdmins: Member[] = [
-  { name: "InsaneKid", realName: "Siddhesh Naringrikar", role: "Match Coordinator & Caster", bio: "Keeps matches organized and supports the broadcast behind the scenes.", image: "/avatars/admins/insane.jpg", nameColor: "#A855F7" },
-  { name: "Fatty", realName: "Shreejan Mishra", role: "UI/UX Developer", bio: "Provided consultation and helped in designing the UX and implementing the UI features.", image: "/avatars/admins/fatty.jpg", nameColor: "#d6cbea", githubUrl: "https://github.com/shreejanmishra" },
-  { name: "Scripter", realName: "Anubhav Kumar", role: "Database-Coordinator", bio: "Manages, organizes, and maintains all data systems.", image: "/avatars/admins/scripter.jpg", nameColor: "#EC4899", githubUrl: "https://github.com/anubhav5079" },
-  { name: "HaVoK4EvR", realName: "Gaurav", role: "Streamer & Caster", bio: "Handles live commentary, streams, and audience engagement.", image: "/avatars/admins/havok.jpg", nameColor: "#EAB308", twitch: "https://www.twitch.tv/havok4evr" },
-];
 
 /* ================= CYBERPUNK BACKGROUND ================= */
 function CyberpunkBackground() {
@@ -108,7 +94,7 @@ function CyberpunkBackground() {
 /* ================= CARD COMPONENT ================= */
 function CyberpunkCard({
   m,
-  isSmall = false,
+  // isSmall = false, // Unused parameter
   index = 0,
   onEyeClick,
   onEyeHover,
@@ -125,23 +111,15 @@ function CyberpunkCard({
   currentPhase?: number;
   onMessageClick?: () => void;
 }) {
-  const isFounder = m.role === "Founder";
+  // const isFounder = m.role === "Founder"; // Unused variable
   const nameColor = m.nameColor || "#C0C0C0";
   const [isHovered, setIsHovered] = useState(false);
   const cardRef = useRef<HTMLDivElement>(null);
 
-  const handleCardClick = () => {
-    if (m.githubUrl) {
-      window.open(m.githubUrl, "_blank", "noopener,noreferrer");
-    } else if (m.twitch) {
-      window.open(m.twitch, "_blank", "noopener,noreferrer");
-    }
-  };
-
   return (
     <article
       ref={cardRef}
-      className="relative flex flex-col rounded-[16px] overflow-hidden mx-auto w-full transition-all duration-[400ms] cursor-pointer backdrop-blur-[10px]"
+      className="relative flex flex-col rounded-[16px] overflow-hidden mx-auto w-full transition-all duration-[400ms] backdrop-blur-[10px]"
       style={{
         maxWidth: "240px",
         background: "rgba(15, 10, 30, 0.7)",
@@ -155,7 +133,6 @@ function CyberpunkCard({
       }}
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
-      onClick={handleCardClick}
     >
       {/* Subtle border glow */}
       <div 
@@ -204,7 +181,7 @@ function CyberpunkCard({
         </div>
         
         <h3 
-          className="text-[1.2rem] font-bold mb-[4px] transition-all duration-300 text-center"
+          className="text-[1.2rem] font-bold mb-[4px] transition-all duration-300 text-center flex items-center justify-center gap-2"
           style={{
             fontFamily: "'Orbitron', sans-serif",
             color: nameColor,
@@ -213,7 +190,47 @@ function CyberpunkCard({
               : "none"
           }}
         >
-          {m.name}
+          <span>{m.name}</span>
+          {m.githubUrl && (
+            <a
+              href={m.githubUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              onClick={(e) => e.stopPropagation()}
+              className="inline-flex items-center justify-center w-6 h-6 rounded-full transition-all duration-300 hover:scale-110 cursor-pointer group relative"
+              style={{
+                background: "rgba(255, 255, 255, 0.1)",
+                border: `1px solid ${nameColor}40`
+              }}
+              title="View GitHub Profile"
+            >
+              <Github className="w-3 h-3" style={{ color: nameColor }} />
+              {/* Tooltip */}
+              <span className="absolute bottom-full mb-2 px-2 py-1 text-xs bg-gray-900 text-white rounded opacity-0 group-hover:opacity-100 transition-opacity duration-200 whitespace-nowrap pointer-events-none">
+                GitHub
+              </span>
+            </a>
+          )}
+          {m.twitch && (
+            <a
+              href={m.twitch}
+              target="_blank"
+              rel="noopener noreferrer"
+              onClick={(e) => e.stopPropagation()}
+              className="inline-flex items-center justify-center w-6 h-6 rounded-full transition-all duration-300 hover:scale-110 cursor-pointer group relative"
+              style={{
+                background: "rgba(255, 255, 255, 0.1)",
+                border: `1px solid ${nameColor}40`
+              }}
+              title="Watch on Twitch"
+            >
+              <Twitch className="w-3 h-3" style={{ color: nameColor }} />
+              {/* Tooltip */}
+              <span className="absolute bottom-full mb-2 px-2 py-1 text-xs bg-gray-900 text-white rounded opacity-0 group-hover:opacity-100 transition-opacity duration-200 whitespace-nowrap pointer-events-none">
+                Twitch
+              </span>
+            </a>
+          )}
         </h3>
         
         {m.realName && (
@@ -228,35 +245,18 @@ function CyberpunkCard({
 
         {/* Action Buttons */}
         <div className="flex gap-[5px] mt-auto">
-          {(m.githubUrl || m.twitch) && (
-            <a
-              href={m.githubUrl || m.twitch}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="flex-1 p-[9px] text-center rounded-[6px] font-semibold text-[0.65rem] tracking-[0.05em] uppercase transition-all duration-300 relative overflow-hidden"
-              style={{
-                background: "rgba(255, 255, 255, 0.05)",
-                border: `1px solid ${nameColor}`,
-                color: nameColor,
-                minWidth: "80px"
-              }}
-              onClick={(e) => e.stopPropagation()}
-            >
-              <span className="relative z-10">{m.githubUrl ? "GitHub" : "Twitch"}</span>
-            </a>
-          )}
           <button
             onClick={(e) => {
               e.stopPropagation();
               onMessageClick?.();
             }}
-            className="flex-1 p-[9px] text-center rounded-[6px] font-semibold text-[0.65rem] tracking-[0.05em] uppercase transition-all duration-300 relative overflow-hidden"
+            className="w-full p-[9px] text-center rounded-[6px] font-semibold text-[0.65rem] tracking-[0.05em] uppercase transition-all duration-300 relative overflow-hidden cursor-pointer"
             style={{
               background: "rgba(255, 255, 255, 0.05)",
               border: `1px solid ${nameColor}`,
-              color: nameColor,
-              minWidth: "80px"
+              color: nameColor
             }}
+            title="Send Message"
           >
             <span className="relative z-10">Message</span>
           </button>
@@ -354,38 +354,113 @@ export default function AdminsPage() {
     adminName: '',
     adminDisplayName: ''
   });
-  const [disabledAdmins, setDisabledAdmins] = useState<string[]>([]);
-  const { toasts, info, success, error, removeToast } = useToast();
+  const [admins, setAdmins] = useState<Member[]>([]);
+  const [miniAdmins, setMiniAdmins] = useState<Member[]>([]);
+  const { toasts, /* info, success, */ error, removeToast } = useToast();
   const timeoutRef = useRef<number | null>(null);
   const audioRef = useRef<HTMLAudioElement | null>(null);
-  const navigate = useNavigate();
 
   const currentEye = EYE_PHASES[currentEyePhase];
 
-  // Load disabled admins from localStorage
+  // Load admins from database
   useEffect(() => {
-    const storedAdmins = localStorage.getItem('admins');
-    if (storedAdmins) {
+    const loadAdmins = async () => {
       try {
-        const adminsList = JSON.parse(storedAdmins);
-        const disabled = adminsList
-          .filter((a: any) => a.isDisabled)
-          .map((a: any) => a.username.toLowerCase());
-        setDisabledAdmins(disabled);
-      } catch (e) {
-        console.error('Failed to load disabled admins:', e);
+        const dbAdmins = await adminService.getAdmins();
+        
+        // Filter only active admins
+        const activeAdmins = dbAdmins.filter(a => a.isActive);
+        
+        // Map to Member type and separate by role
+        const adminsList: Member[] = [];
+        const miniAdminsList: Member[] = [];
+        
+        activeAdmins.forEach(admin => {
+          // Skip Reyuk (displayed separately as founder)
+          if (admin.username === 'reyuk') return;
+          
+          const member: Member = {
+            name: admin.displayName,
+            realName: admin.realName || undefined,
+            role: admin.role === 'Founder' ? 'Admin' : admin.role === 'Admin' ? 'Admin' : 'Mini Admin',
+            bio: admin.description || 'TRR Team Member',
+            image: admin.avatarUrl || `/avatars/admins/${admin.username}.jpg`,
+            tag: admin.role === 'Founder' ? 'Admin' : admin.role,
+            nameColor: (admin.role === 'Admin' || admin.role === 'Founder') ? '#4169E1' : '#A855F7',
+            isSpecial: admin.username === 'nikhil' || admin.username === 'n1khil', // Keep eye badge for N1KHIL
+            githubUrl: admin.githubUrl,
+            twitch: admin.twitchUrl
+          };
+          
+          // Treat Founder role (Nikhil) as Admin for display
+          if (admin.role === 'Admin' || admin.role === 'Founder') {
+            adminsList.push(member);
+          } else {
+            miniAdminsList.push(member);
+          }
+        });
+        
+        // Sort admins and mini admins by fixed order
+        const fixedOrder: Record<string, number> = {
+          'r3ciprocal': 1,
+          'godspeed': 2,
+          'nikhil': 3,
+          'n1khil': 3,
+          'machine': 4,
+          'frost': 5,
+          'banner': 6,
+          'insanekid': 7,
+          'fatty': 8,
+          'scripter': 9,
+          'havok4evr': 10,
+          'havok': 10,
+          'raj dadia': 11,
+          'rajdadia': 11,
+          'shailesh zambare': 12,
+          'shaileshzambare': 12
+        };
+        
+        const sortByFixedOrder = (a: Member, b: Member) => {
+          const usernameA = dbAdmins.find(d => d.displayName === a.name)?.username.toLowerCase() || '';
+          const usernameB = dbAdmins.find(d => d.displayName === b.name)?.username.toLowerCase() || '';
+          
+          const orderA = fixedOrder[usernameA] ?? 9999;
+          const orderB = fixedOrder[usernameB] ?? 9999;
+          
+          if (orderA !== orderB) return orderA - orderB;
+          
+          // If both are new (not in fixed order), sort by creation date
+          const dateA = dbAdmins.find(d => d.displayName === a.name)?.createdAt || '';
+          const dateB = dbAdmins.find(d => d.displayName === b.name)?.createdAt || '';
+          return new Date(dateA).getTime() - new Date(dateB).getTime();
+        };
+        
+        adminsList.sort(sortByFixedOrder);
+        miniAdminsList.sort(sortByFixedOrder);
+        
+        setAdmins(adminsList);
+        setMiniAdmins(miniAdminsList);
+      } catch (err) {
+        console.error('Failed to load admins:', err);
+        error('Failed to load admin data');
       }
-    }
+    };
+
+    loadAdmins();
+    
+    // Subscribe to admin changes
+    const subscription = adminService.subscribeToAdmins(() => {
+      loadAdmins();
+    });
+
+    return () => {
+      subscription.unsubscribe();
+    };
   }, []);
 
-  // Filter out disabled admins
-  const activeAdmins = admins.filter(admin => 
-    !disabledAdmins.includes(admin.name.toLowerCase())
-  );
-  
-  const activeMiniAdmins = miniAdmins.filter(miniAdmin => 
-    !disabledAdmins.includes(miniAdmin.name.toLowerCase())
-  );
+  // Filter out disabled admins (kept for backward compatibility)
+  const activeAdmins = admins;
+  const activeMiniAdmins = miniAdmins;
 
   const playSound = (soundPath: string) => {
     if (audioRef.current) {
@@ -412,11 +487,9 @@ export default function AdminsPage() {
     setCurrentEyePhase(prev => {
       const next = prev + 1;
       
+      // Just cycle through phases, no login navigation
       if (next >= EYE_PHASES.length) {
-        setTimeout(() => {
-          navigate('/super-admin-login', { state: { preselectedUser: 'nikhil' } });
-        }, 1000);
-        return prev;
+        return 0; // Reset to first phase
       }
       
       return next;
@@ -548,7 +621,7 @@ export default function AdminsPage() {
             {/* Mini Admins Section */}
             <section className="mb-[50px]">
               <CyberpunkHeader color={NEON_VIOLET}>◢ MINI ADMINS ◣</CyberpunkHeader>
-              <div className="grid grid-cols-2 sm:grid-cols-4 gap-8 max-w-[1050px] mx-auto justify-items-center">
+              <div className="grid grid-cols-3 gap-8 max-w-[800px] mx-auto justify-items-center">
                 {activeMiniAdmins.map((miniAdmin, idx) => (
                   <CyberpunkCard
                     key={miniAdmin.name}

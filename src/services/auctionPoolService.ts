@@ -62,8 +62,23 @@ class AuctionPoolService {
     playerId: string,
     playerData: any,
     addedBy: string
-  ): Promise<boolean> {
+  ): Promise<{ success: boolean; error?: string }> {
     try {
+      // Check if player is already in pool
+      const { data: existing } = await supabase
+        .from('auction_pool')
+        .select('id')
+        .eq('auction_id', auctionId)
+        .eq('player_id', playerId)
+        .maybeSingle();
+
+      if (existing) {
+        return {
+          success: false,
+          error: 'Player is already in the auction pool'
+        };
+      }
+
       const { error } = await supabase
         .from('auction_pool')
         .insert({
@@ -76,13 +91,44 @@ class AuctionPoolService {
 
       if (error) {
         console.error('Error adding player to pool:', error);
-        return false;
+        console.error('Error details:', {
+          code: error.code,
+          message: error.message,
+          details: error.details,
+          hint: error.hint
+        });
+        
+        // Provide more specific error messages
+        if (error.code === '23505') {
+          return {
+            success: false,
+            error: 'Player is already in the auction pool (duplicate)'
+          };
+        } else if (error.code === '23503') {
+          return {
+            success: false,
+            error: 'Invalid auction ID or player ID'
+          };
+        } else if (error.message.includes('uuid')) {
+          return {
+            success: false,
+            error: 'Invalid player ID format (must be UUID)'
+          };
+        }
+        
+        return {
+          success: false,
+          error: `Database error: ${error.message}`
+        };
       }
 
-      return true;
+      return { success: true };
     } catch (error) {
       console.error('Error adding player to pool:', error);
-      return false;
+      return {
+        success: false,
+        error: 'Unexpected error occurred'
+      };
     }
   }
 

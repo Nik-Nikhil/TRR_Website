@@ -2,26 +2,39 @@ import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { UserPlus, Shield, Trash2, X, Eye, EyeOff, Loader2, Ban, CheckCircle } from 'lucide-react';
 import { useModal } from '../../hooks/useModal';
+import adminService from '../../services/adminService';
+import type { Admin } from '../../services/adminService';
 
-interface Admin {
+// Map database role to display role
+function mapRole(dbRole: string): 'superadmin' | 'admin' | 'mini-admin' {
+  if (dbRole === 'Founder') return 'superadmin';
+  if (dbRole === 'Admin') return 'admin';
+  return 'mini-admin';
+}
+
+// Map display role to database role
+function mapToDbRole(role: 'superadmin' | 'admin' | 'mini-admin'): 'Founder' | 'Admin' | 'Mini Admin' {
+  if (role === 'superadmin') return 'Founder';
+  if (role === 'admin') return 'Admin';
+  return 'Mini Admin';
+}
+
+// Local interface for UI state (extends service Admin)
+interface AdminUI {
+  id?: string;
   username: string;
-  password: string;
   displayName: string;
-  email: string;
+  email?: string;
   role: 'superadmin' | 'admin' | 'mini-admin';
   bio?: string;
   avatarUrl?: string;
-  createdAt: Date;
-  createdBy?: string;
-  isDisabled?: boolean; // New field to track disabled admins
-  disabledAt?: Date;
-  disabledBy?: string;
-  disableReason?: string;
+  createdAt?: Date | string;
+  isDisabled?: boolean;
 }
 
 export const AdminManagement = () => {
   const { confirm, alert, ModalComponent } = useModal();
-  const [admins, setAdmins] = useState<Admin[]>([]);
+  const [admins, setAdmins] = useState<AdminUI[]>([]);
   const [showAddForm, setShowAddForm] = useState(false);
   const [loading, setLoading] = useState(false);
 
@@ -38,147 +51,43 @@ export const AdminManagement = () => {
   useEffect(() => {
     loadAdmins();
     
-    // Initialize localStorage with default admins if empty
-    const stored = localStorage.getItem('admins');
-    if (!stored || JSON.parse(stored).length === 0) {
-      const defaultAdmins: Admin[] = [
-        {
-          username: 'reyuk',
-          password: '12345',
-          displayName: 'Reyuk',
-          email: '',
-          role: 'superadmin',
-          bio: 'Founder of TRR',
-          avatarUrl: '/avatars/admins/reyuk.png',
-          createdAt: new Date('2023-01-01'),
-          createdBy: 'system'
-        },
-        {
-          username: 'nikhil',
-          password: 'admin2024',
-          displayName: 'N1KHIL',
-          email: '',
-          role: 'superadmin',
-          bio: 'Tech Ops Lead',
-          avatarUrl: '/avatars/admins/Nikhil.jpg',
-          createdAt: new Date('2023-01-15'),
-          createdBy: 'system'
-        },
-        {
-          username: 'r3ciprocal',
-          password: 'admin2024',
-          displayName: 'r3ciprocal',
-          email: '',
-          role: 'admin',
-          bio: 'Lead Organizer',
-          avatarUrl: '/avatars/admins/r3ciprocal.jpg',
-          createdAt: new Date('2023-02-15'),
-          createdBy: 'system'
-        },
-        {
-          username: 'frost',
-          password: 'admin2024',
-          displayName: 'Frost',
-          email: '',
-          role: 'admin',
-          bio: 'Tournament Coordinator',
-          avatarUrl: '/avatars/admins/Frost.png',
-          createdAt: new Date('2023-03-01'),
-          createdBy: 'system'
-        },
-        {
-          username: 'machine',
-          password: 'admin2024',
-          displayName: 'Machine',
-          email: '',
-          role: 'admin',
-          bio: 'Lead Operator',
-          avatarUrl: '/avatars/admins/Machine.png',
-          createdAt: new Date('2023-04-10'),
-          createdBy: 'system'
-        },
-        {
-          username: 'godspeed',
-          password: 'admin2024',
-          displayName: 'Godspeed',
-          email: '',
-          role: 'admin',
-          bio: 'Funds Administrator',
-          avatarUrl: '/avatars/admins/Godspeed.jpg',
-          createdAt: new Date('2023-05-20'),
-          createdBy: 'system'
-        },
-        {
-          username: 'banner',
-          password: 'banner123',
-          displayName: 'Banner',
-          email: '',
-          role: 'admin',
-          bio: 'Lobby Manager & Caster',
-          avatarUrl: '/avatars/admins/banner.png',
-          createdAt: new Date('2023-06-15'),
-          createdBy: 'system'
-        },
-        {
-          username: 'insanekid',
-          password: 'mini2024',
-          displayName: 'InsaneKid',
-          email: '',
-          role: 'mini-admin',
-          bio: 'Match Coordinator & Caster',
-          avatarUrl: '/avatars/admins/insane.jpg',
-          createdAt: new Date('2023-07-01'),
-          createdBy: 'system'
-        },
-        {
-          username: 'fatty',
-          password: 'mini2024',
-          displayName: 'Fatty',
-          email: '',
-          role: 'mini-admin',
-          bio: 'UI/UX Developer',
-          avatarUrl: '/avatars/admins/fatty.jpg',
-          createdAt: new Date('2023-08-01'),
-          createdBy: 'system'
-        },
-        {
-          username: 'scripter',
-          password: 'mini2024',
-          displayName: 'Scripter',
-          email: '',
-          role: 'mini-admin',
-          bio: 'Database-Coordinator',
-          avatarUrl: '/avatars/admins/scripter.jpg',
-          createdAt: new Date('2023-09-01'),
-          createdBy: 'system'
-        },
-        {
-          username: 'havok4evr',
-          password: 'mini2024',
-          displayName: 'HaVoK4EvR',
-          email: '',
-          role: 'mini-admin',
-          bio: 'Streamer & Caster',
-          avatarUrl: '/avatars/admins/havok.jpg',
-          createdAt: new Date('2023-10-01'),
-          createdBy: 'system'
-        }
-      ];
-      
-      localStorage.setItem('admins', JSON.stringify(defaultAdmins));
+    // Subscribe to admin changes
+    const subscription = adminService.subscribeToAdmins(() => {
       loadAdmins();
-    }
+    });
+
+    return () => {
+      subscription.unsubscribe();
+    };
   }, []);
 
-  const loadAdmins = () => {
-    const stored = localStorage.getItem('admins');
-    if (stored) {
-      const adminList = JSON.parse(stored);
-      setAdmins(adminList.map((a: any) => ({
-        ...a,
-        createdAt: a.createdAt ? new Date(a.createdAt) : new Date()
-      })));
-    }
+  const loadAdmins = async () => {
+    const dbAdmins = await adminService.getAdmins();
+    
+    // Map and sort by role hierarchy: superadmin > admin > mini-admin
+    const mappedAdmins = dbAdmins.map(a => ({
+      id: a.id,
+      username: a.username,
+      displayName: a.displayName,
+      email: a.realName || '',
+      role: mapRole(a.role),
+      bio: a.description,
+      avatarUrl: a.avatarUrl,
+      createdAt: a.createdAt,
+      isDisabled: !a.isActive
+    }));
+
+    // Sort by role hierarchy, then by creation date (oldest first)
+    const roleOrder = { 'superadmin': 0, 'admin': 1, 'mini-admin': 2 };
+    mappedAdmins.sort((a, b) => {
+      const orderA = roleOrder[a.role] ?? 999;
+      const orderB = roleOrder[b.role] ?? 999;
+      if (orderA !== orderB) return orderA - orderB;
+      // If same role, sort by creation date (oldest first - created earlier appears above)
+      return new Date(a.createdAt || 0).getTime() - new Date(b.createdAt || 0).getTime();
+    });
+
+    setAdmins(mappedAdmins);
   };
 
   const resetForm = () => {
@@ -209,12 +118,6 @@ export const AdminManagement = () => {
       return;
     }
 
-    // Check if username already exists
-    if (admins.some(a => a.username.toLowerCase() === username.toLowerCase())) {
-      await alert('Username already exists', 'Duplicate Username', 'warning');
-      return;
-    }
-
     const confirmed = await confirm(
       `Add new ${role} "${username}"?\n\nRole: ${role.toUpperCase()}\nDisplay Name: ${displayName}`,
       'Add Admin'
@@ -224,33 +127,37 @@ export const AdminManagement = () => {
 
     setLoading(true);
 
-    const currentAdmin = JSON.parse(localStorage.getItem('adminSession') || '{}');
-    const newAdmin: Admin = {
+    const result = await adminService.addAdmin({
       username,
       password,
       displayName,
-      email,
-      role,
-      bio,
+      realName: email,
+      role: mapToDbRole(role),
+      description: bio,
       avatarUrl,
-      createdAt: new Date(),
-      createdBy: currentAdmin.username || 'superadmin'
-    };
+      isActive: true
+    });
 
-    const updatedAdmins = [...admins, newAdmin];
-    localStorage.setItem('admins', JSON.stringify(updatedAdmins));
-
-    await alert(`Admin "${username}" added successfully!`, 'Success', 'success');
+    if (result.success) {
+      await alert(`Admin "${username}" added successfully!`, 'Success', 'success');
+      await loadAdmins();
+      resetForm();
+      setShowAddForm(false);
+    } else {
+      await alert(result.error || 'Failed to add admin', 'Error', 'error');
+    }
     
-    loadAdmins();
-    resetForm();
-    setShowAddForm(false);
     setLoading(false);
   };
 
-  const handleDeleteAdmin = async (admin: Admin) => {
+  const handleDeleteAdmin = async (admin: AdminUI) => {
     if (admin.role === 'superadmin') {
       await alert('Cannot delete Super Admin account', 'Protected Account', 'warning');
+      return;
+    }
+
+    if (!admin.id) {
+      await alert('Invalid admin ID', 'Error', 'error');
       return;
     }
 
@@ -263,18 +170,26 @@ export const AdminManagement = () => {
 
     setLoading(true);
 
-    const updatedAdmins = admins.filter(a => a.username !== admin.username);
-    localStorage.setItem('admins', JSON.stringify(updatedAdmins));
+    const result = await adminService.deleteAdmin(admin.id);
 
-    await alert(`Admin "${admin.username}" deleted`, 'Deleted', 'success');
+    if (result.success) {
+      await alert(`Admin "${admin.username}" deleted`, 'Deleted', 'success');
+      await loadAdmins();
+    } else {
+      await alert(result.error || 'Failed to delete admin', 'Error', 'error');
+    }
     
-    loadAdmins();
     setLoading(false);
   };
 
-  const handleDisableAdmin = async (admin: Admin) => {
+  const handleDisableAdmin = async (admin: AdminUI) => {
     if (admin.role === 'superadmin') {
       await alert('Cannot disable Super Admin account', 'Protected Account', 'warning');
+      return;
+    }
+
+    if (!admin.id) {
+      await alert('Invalid admin ID', 'Error', 'error');
       return;
     }
 
@@ -287,27 +202,26 @@ export const AdminManagement = () => {
 
     setLoading(true);
 
-    const currentAdmin = JSON.parse(localStorage.getItem('adminSession') || '{}');
-    const updatedAdmins = admins.map(a => 
-      a.username === admin.username 
-        ? { 
-            ...a, 
-            isDisabled: true, 
-            disabledAt: new Date(),
-            disabledBy: currentAdmin.username || 'superadmin',
-            disableReason: 'Demoted by SuperAdmin'
-          } 
-        : a
-    );
-    localStorage.setItem('admins', JSON.stringify(updatedAdmins));
+    const result = await adminService.updateAdmin(admin.id, {
+      isActive: false
+    });
 
-    await alert(`Admin "${admin.username}" has been disabled and locked out`, 'Disabled', 'success');
+    if (result.success) {
+      await alert(`Admin "${admin.username}" has been disabled and locked out`, 'Disabled', 'success');
+      await loadAdmins();
+    } else {
+      await alert(result.error || 'Failed to disable admin', 'Error', 'error');
+    }
     
-    loadAdmins();
     setLoading(false);
   };
 
-  const handleEnableAdmin = async (admin: Admin) => {
+  const handleEnableAdmin = async (admin: AdminUI) => {
+    if (!admin.id) {
+      await alert('Invalid admin ID', 'Error', 'error');
+      return;
+    }
+
     const confirmed = await confirm(
       `Enable admin "${admin.username}"?\n\nThis will restore their access.`,
       'Enable Admin'
@@ -317,28 +231,28 @@ export const AdminManagement = () => {
 
     setLoading(true);
 
-    const updatedAdmins = admins.map(a => 
-      a.username === admin.username 
-        ? { 
-            ...a, 
-            isDisabled: false, 
-            disabledAt: undefined,
-            disabledBy: undefined,
-            disableReason: undefined
-          } 
-        : a
-    );
-    localStorage.setItem('admins', JSON.stringify(updatedAdmins));
+    const result = await adminService.updateAdmin(admin.id, {
+      isActive: true
+    });
 
-    await alert(`Admin "${admin.username}" has been enabled`, 'Enabled', 'success');
+    if (result.success) {
+      await alert(`Admin "${admin.username}" has been enabled`, 'Enabled', 'success');
+      await loadAdmins();
+    } else {
+      await alert(result.error || 'Failed to enable admin', 'Error', 'error');
+    }
     
-    loadAdmins();
     setLoading(false);
   };
 
-  const handleUpdateRole = async (admin: Admin, newRole: 'admin' | 'mini-admin') => {
+  const handleUpdateRole = async (admin: AdminUI, newRole: 'admin' | 'mini-admin') => {
     if (admin.role === 'superadmin') {
       await alert('Cannot change Super Admin role', 'Protected Account', 'warning');
+      return;
+    }
+
+    if (!admin.id) {
+      await alert('Invalid admin ID', 'Error', 'error');
       return;
     }
 
@@ -351,14 +265,17 @@ export const AdminManagement = () => {
 
     setLoading(true);
 
-    const updatedAdmins = admins.map(a => 
-      a.username === admin.username ? { ...a, role: newRole } : a
-    );
-    localStorage.setItem('admins', JSON.stringify(updatedAdmins));
+    const result = await adminService.updateAdmin(admin.id, {
+      role: mapToDbRole(newRole)
+    });
 
-    await alert(`Role updated for "${admin.username}"`, 'Success', 'success');
+    if (result.success) {
+      await alert(`Role updated for "${admin.username}"`, 'Success', 'success');
+      await loadAdmins();
+    } else {
+      await alert(result.error || 'Failed to update role', 'Error', 'error');
+    }
     
-    loadAdmins();
     setLoading(false);
   };
 
