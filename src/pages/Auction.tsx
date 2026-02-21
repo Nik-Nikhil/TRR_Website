@@ -28,7 +28,7 @@ export default function Auction() {
 
   const [soldPlayers, setSoldPlayers] = useState<any[]>([]);
   const [selectedTeamForManualAssign, setSelectedTeamForManualAssign] = useState<string>('');
-  const [manualAssignPrice, setManualAssignPrice] = useState<string>('1');
+  const [manualAssignPrice, setManualAssignPrice] = useState<string>('0');
   
   // Auction pool state
   const [auctionPool, setAuctionPool] = useState<any[]>([]);
@@ -41,6 +41,7 @@ export default function Auction() {
   const [hammerStage, setHammerStage] = useState<0 | 1 | 2 | 3>(0); // 0=none, 1=once, 2=twice, 3=sold
   const [hammerCountdown, setHammerCountdown] = useState(5);
   const [isHammerActive, setIsHammerActive] = useState(false);
+  const [newBidDuringHammer, setNewBidDuringHammer] = useState(false);
 
   // Sync hammer state from auction state
   useEffect(() => {
@@ -119,6 +120,12 @@ export default function Auction() {
             if (prev.some(b => b.id === bid.id)) {
               return prev;
             }
+            
+            // If hammer is active, mark that a new bid came in
+            if (isHammerActive) {
+              setNewBidDuringHammer(true);
+            }
+            
             return [bid, ...prev];
           });
           // Reload auction state to get updated highest bid
@@ -434,14 +441,14 @@ export default function Auction() {
     setBidError('');
     const amount = parseInt(bidAmount);
     
-    if (isNaN(amount) || amount <= 0) {
+    if (isNaN(amount) || amount < 0) {
       setBidError('Please enter a valid bid amount');
       return;
     }
     
-    // Minimum bid is 1 (no base price)
-    if (amount < 1) {
-      setBidError('Minimum bid is 1');
+    // Minimum bid is 0
+    if (amount < 0) {
+      setBidError('Minimum bid is 0');
       return;
     }
 
@@ -504,6 +511,7 @@ export default function Auction() {
     setHammerStage(1);
     setHammerCountdown(5);
     setIsHammerActive(true);
+    setNewBidDuringHammer(false); // Reset flag
     // Update database
     await AuctionService.updateHammerState(true, 1, 5);
   };
@@ -513,6 +521,7 @@ export default function Auction() {
     setHammerStage(0);
     setHammerCountdown(5);
     setIsHammerActive(false);
+    setNewBidDuringHammer(false); // Reset flag
     // Update database
     await AuctionService.updateHammerState(false, 0, 5);
   };
@@ -548,8 +557,8 @@ export default function Auction() {
     // Validate manual price if no bids
     if (!auctionState.highest_bidder_id) {
       const price = parseInt(manualAssignPrice);
-      if (isNaN(price) || price < 1) {
-        await alert('Please enter a valid price (minimum 1)', 'Invalid Price', 'warning');
+      if (isNaN(price) || price < 0) {
+        await alert('Please enter a valid price (minimum 0)', 'Invalid Price', 'warning');
         return;
       }
 
@@ -587,7 +596,7 @@ export default function Auction() {
       finalCaptainId = selectedCaptain.playerId;
       finalCaptainName = selectedCaptain.playerNickname;
       finalTeamName = selectedCaptain.teamName;
-      finalPrice = parseInt(manualAssignPrice) || 1; // Use admin-specified price
+      finalPrice = parseInt(manualAssignPrice) || 0; // Use admin-specified price
     }
 
     // ✅ CHECK 5-PLAYER LIMIT PER TEAM
@@ -637,7 +646,7 @@ export default function Auction() {
     
     // Reset manual assignment selection
     setSelectedTeamForManualAssign('');
-    setManualAssignPrice('1');
+    setManualAssignPrice('0');
     
     // Show success modal
     setSuccessMessage(`${playerNickname} assigned to ${finalTeamName}! Budget updated to ${newBudget}.`);
@@ -1073,7 +1082,7 @@ export default function Auction() {
                                     value={manualAssignPrice}
                                     onChange={(e) => {
                                       const value = e.target.value.replace(/[^0-9]/g, '');
-                                      setManualAssignPrice(value || '1');
+                                      setManualAssignPrice(value || '0');
                                     }}
                                     placeholder="Enter price"
                                     className="w-full px-2 py-1.5 bg-black/60 border border-yellow-500/40 rounded text-white text-xs font-bold focus:outline-none focus:ring-2 focus:ring-yellow-500 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
@@ -1094,6 +1103,20 @@ export default function Auction() {
                               <span className="text-base">{isHammerActive ? '❌' : '🔨'}</span>
                               <span>{isHammerActive ? 'Cancel Hammer' : 'Start Hammer'}</span>
                             </button>
+                            
+                            {/* Stop Hammer button - shows when new bid during hammer */}
+                            {isHammerActive && newBidDuringHammer && (
+                              <motion.button
+                                initial={{ scale: 0.8, opacity: 0 }}
+                                animate={{ scale: 1, opacity: 1 }}
+                                onClick={handleCancelHammer}
+                                className="w-full px-3 py-2 bg-gradient-to-r from-yellow-600 to-amber-600 hover:from-yellow-500 hover:to-amber-500 text-white text-sm font-bold rounded-lg transition-all duration-300 shadow-lg flex items-center justify-center gap-2 animate-pulse"
+                              >
+                                <span className="text-base">⚠️</span>
+                                <span>Stop Hammer - New Bid!</span>
+                              </motion.button>
+                            )}
+                            
                             {!auctionState?.highest_bidder_id && (
                               <p className="text-gray-400 text-xs text-center">
                                 {selectedTeamForManualAssign 
