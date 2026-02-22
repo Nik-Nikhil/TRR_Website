@@ -3,11 +3,14 @@ import { supabase } from '../lib/supabase';
 
 export interface AuctionPoolPlayer {
   id: string;
-  auction_id: string;
+  auction_id: string | null;
   player_id: string;
   player_data: any;
-  status: 'available' | 'sold' | 'removed';
-  added_by: string;
+  base_price: number;
+  player_type?: 'core' | 'support';
+  is_sold: boolean;
+  sold_for?: number;
+  sold_to_captain_id?: string;
   added_at: string;
   sold_at?: string;
 }
@@ -41,7 +44,7 @@ class AuctionPoolService {
         .from('auction_pool')
         .select('*')
         .eq('auction_id', auctionId)
-        .eq('status', 'available')
+        .eq('is_sold', false)
         .order('added_at', { ascending: true });
 
       if (error) {
@@ -60,8 +63,7 @@ class AuctionPoolService {
   async addPlayerToPool(
     auctionId: string,
     playerId: string,
-    playerData: any,
-    addedBy: string
+    playerData: any
   ): Promise<{ success: boolean; error?: string }> {
     try {
       // Check if player is already in pool
@@ -85,8 +87,7 @@ class AuctionPoolService {
           auction_id: auctionId,
           player_id: playerId,
           player_data: playerData,
-          status: 'available',
-          added_by: addedBy
+          is_sold: false
         });
 
       if (error) {
@@ -158,7 +159,7 @@ class AuctionPoolService {
       const { error } = await supabase
         .from('auction_pool')
         .update({
-          status: 'sold',
+          is_sold: true,
           sold_at: new Date().toISOString()
         })
         .eq('auction_id', auctionId)

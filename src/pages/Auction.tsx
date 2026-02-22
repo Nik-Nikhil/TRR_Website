@@ -33,6 +33,7 @@ export default function Auction() {
   // Player Pool modal state
   const [showPlayerPoolModal, setShowPlayerPoolModal] = useState(false);
   const [allPlayers, setAllPlayers] = useState<any[]>([]);
+  const [playerPoolType, setPlayerPoolType] = useState<'core' | 'support'>('core');
   
   // Auction pool state
   // const [auctionPool, setAuctionPool] = useState<any[]>([]);
@@ -76,10 +77,15 @@ export default function Auction() {
 
     // Subscribe to auction state changes
     const stateSubscription = AuctionService.subscribeToAuctionState(async (state) => {
+      // Check if player changed by comparing player data IDs
+      const oldPlayerId = auctionState?.current_player_data?.id;
+      const newPlayerId = state.current_player_data?.id;
+      
       setAuctionState(state);
       
-      // When player changes, clear bid history (will be reloaded by the other useEffect)
-      if (state.current_player_id !== auctionState?.current_player_id) {
+      // When player changes, clear bid history
+      if (oldPlayerId !== newPlayerId) {
+        console.log('🔄 Player changed, clearing bid history');
         setBidHistory([]);
       }
       
@@ -275,26 +281,29 @@ export default function Auction() {
         // Update database
         AuctionService.updateHammerState(true, newStage, newCountdown);
       } else if (hammerStage === 2) {
-        // Going Twice -> SOLD! (instant)
+        // Going Twice -> SOLD! (instant execution, no delay)
         const newStage = 3;
-        const newCountdown = 0;
         setHammerStage(newStage);
-        setHammerCountdown(newCountdown);
+        setHammerCountdown(0);
         // Update database and execute sale immediately
-        AuctionService.updateHammerState(true, newStage, newCountdown).then(() => {
+        AuctionService.updateHammerState(true, newStage, 0);
+        // Execute sale after a brief moment to show SOLD animation
+        setTimeout(() => {
           executeSale();
-        });
+        }, 800); // Just 0.8 seconds to show SOLD
       }
     }
   }, [isHammerActive, hammerStage, hammerCountdown]);
 
   // Reset bid history when current player changes
   useEffect(() => {
-    if (auctionState?.current_player_id) {
+    const currentPlayerId = auctionState?.current_player_data?.id;
+    if (currentPlayerId) {
       // Clear bid history for new player - bids start fresh for each player
+      console.log('🔄 Player changed in useEffect, clearing bid history');
       setBidHistory([]);
     }
-  }, [auctionState?.current_player_id]);
+  }, [auctionState?.current_player_data?.id]);
 
   const loadSoldPlayers = async () => {
     try {
@@ -343,7 +352,7 @@ export default function Auction() {
     }
   };
 
-  const loadAllPlayers = async () => {
+  const loadAllPlayers = async (type: 'core' | 'support') => {
     try {
       const state = await AuctionService.getAuctionState();
       if (!state) return;
@@ -352,6 +361,7 @@ export default function Auction() {
         .from('auction_pool')
         .select('*')
         .eq('auction_id', state.id)
+        .eq('player_type', type) // Filter by player type
         .order('player_data->currentMMR', { ascending: false });
 
       if (!error && data) {
@@ -461,9 +471,20 @@ export default function Auction() {
       return;
     }
     
-    // Minimum bid is 1
-    if (amount < 1) {
-      setBidError('Minimum bid is 1');
+    // Get minimum bid based on current state
+    const currentBid = auctionState.highest_bid || 0;
+    const hasExistingBids = auctionState.highest_bidder_id !== null;
+    
+    // If no bids yet, minimum is the base price (or 1 if base price is 0)
+    // If there are bids, minimum is current bid + 1
+    const minimumBid = hasExistingBids ? currentBid + 1 : (currentBid > 0 ? currentBid : 1);
+    
+    if (amount < minimumBid) {
+      if (hasExistingBids) {
+        setBidError(`Your bid must be higher than the current bid of ${currentBid}`);
+      } else {
+        setBidError(`Minimum bid is ${minimumBid}`);
+      }
       return;
     }
 
@@ -713,19 +734,35 @@ export default function Auction() {
                     </span>
                   </div>
                   
-                  {/* Player Pool Button */}
-                  <button
-                    onClick={() => {
-                      loadAllPlayers();
-                      setShowPlayerPoolModal(true);
-                    }}
-                    className="ml-auto px-4 py-2 bg-gradient-to-r from-cyan-600 to-blue-600 hover:from-cyan-500 hover:to-blue-500 text-white text-sm font-semibold rounded-lg transition-all duration-300 flex items-center gap-2 shadow-lg"
-                  >
-                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
-                    </svg>
-                    Player Pool
-                  </button>
+                  {/* Player Pool Buttons */}
+                  <div className="ml-auto flex gap-2">
+                    <button
+                      onClick={() => {
+                        setPlayerPoolType('core');
+                        loadAllPlayers('core');
+                        setShowPlayerPoolModal(true);
+                      }}
+                      className="px-4 py-2 bg-gradient-to-r from-red-600 to-orange-600 hover:from-red-500 hover:to-orange-500 text-white text-sm font-semibold rounded-lg transition-all duration-300 flex items-center gap-2 shadow-lg"
+                    >
+                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
+                      </svg>
+                      Core Pool
+                    </button>
+                    <button
+                      onClick={() => {
+                        setPlayerPoolType('support');
+                        loadAllPlayers('support');
+                        setShowPlayerPoolModal(true);
+                      }}
+                      className="px-4 py-2 bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-500 hover:to-emerald-500 text-white text-sm font-semibold rounded-lg transition-all duration-300 flex items-center gap-2 shadow-lg"
+                    >
+                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
+                      </svg>
+                      Support Pool
+                    </button>
+                  </div>
                 </div>
               </div>
 
@@ -751,44 +788,60 @@ export default function Auction() {
                   {/* New 4-Section Layout - Full Height with Fixed Heights */}
                   <div className="grid grid-cols-1 lg:grid-cols-[280px_1.2fr_380px_280px] gap-3 overflow-hidden" style={{ height: 'calc(100vh - 240px)' }}>
                     
-                    {/* Section 1: Top Bids - Scrollable with Neon Glow - Blinks during hammer */}
-                    <motion.div 
-                      className="bg-black/40 backdrop-blur-sm rounded-xl p-3 border-2 border-yellow-500/60 flex flex-col overflow-hidden shadow-[0_0_20px_rgba(234,179,8,0.3)]"
-                      animate={isHammerActive && hammerStage > 0 ? {
-                        opacity: [1, 0.6, 1],
-                        borderColor: [
-                          hammerStage === 1 ? 'rgba(234, 179, 8, 0.6)' : hammerStage === 2 ? 'rgba(249, 115, 22, 0.6)' : 'rgba(34, 197, 94, 0.6)',
-                          hammerStage === 1 ? 'rgba(234, 179, 8, 1)' : hammerStage === 2 ? 'rgba(249, 115, 22, 1)' : 'rgba(34, 197, 94, 1)',
-                          hammerStage === 1 ? 'rgba(234, 179, 8, 0.6)' : hammerStage === 2 ? 'rgba(249, 115, 22, 0.6)' : 'rgba(34, 197, 94, 0.6)',
-                        ]
-                      } : {}}
-                      transition={{
-                        duration: 1,
-                        repeat: Infinity,
-                        ease: "easeInOut"
-                      }}
-                    >
+                    {/* Section 1: Top Bids - Scrollable with Neon Glow */}
+                    <div className="bg-black/40 backdrop-blur-sm rounded-xl p-3 border-2 border-yellow-500/60 flex flex-col overflow-hidden shadow-[0_0_20px_rgba(234,179,8,0.3)]">
                       <h3 className="text-white font-bold mb-2 text-sm text-center flex-shrink-0">Top Bids</h3>
                       
-                      {/* Hammer Animation - Visible to all players */}
+                      {/* Hammer Animation - Only this blinks */}
                       {isHammerActive && hammerStage > 0 && (
                         <motion.div
                           initial={{ opacity: 0, scale: 0.8 }}
-                          animate={{ opacity: 1, scale: 1 }}
+                          animate={{ 
+                            opacity: 1, 
+                            scale: 1,
+                          }}
                           exit={{ opacity: 0, scale: 0.8 }}
-                          className={`mb-3 p-3 rounded-lg text-center font-bold flex-shrink-0 ${
-                            hammerStage === 1 ? 'bg-yellow-600/30 border-2 border-yellow-500' :
-                            hammerStage === 2 ? 'bg-orange-600/30 border-2 border-orange-500' :
-                            'bg-green-600/30 border-2 border-green-500'
+                          className={`mb-3 p-3 rounded-lg text-center font-bold flex-shrink-0 relative overflow-hidden ${
+                            hammerStage === 1 ? 'bg-yellow-600/30' :
+                            hammerStage === 2 ? 'bg-orange-600/30' :
+                            'bg-green-600/30'
                           }`}
                         >
-                          <div className="flex items-center justify-center gap-2 mb-1">
-                            <Gavel className={`w-5 h-5 ${
-                              hammerStage === 1 ? 'text-yellow-300' :
-                              hammerStage === 2 ? 'text-orange-300' :
-                              'text-green-300'
-                            }`} />
-                            <span className={`text-lg ${
+                          {/* Animated pulsing border */}
+                          <motion.div
+                            className="absolute inset-0 rounded-lg"
+                            style={{
+                              border: '2px solid',
+                              borderColor: hammerStage === 1 ? '#eab308' : hammerStage === 2 ? '#f97316' : '#22c55e'
+                            }}
+                            animate={{
+                              opacity: [0.5, 1, 0.5],
+                              scale: [1, 1.02, 1],
+                            }}
+                            transition={{
+                              duration: 0.8,
+                              repeat: Infinity,
+                              ease: "easeInOut"
+                            }}
+                          />
+                          
+                          <div className="relative z-10 flex items-center justify-center gap-2">
+                            <motion.div
+                              animate={{
+                                rotate: hammerStage === 3 ? [0, -20, 20, -20, 20, 0] : 0,
+                              }}
+                              transition={{
+                                duration: 0.5,
+                                ease: "easeInOut"
+                              }}
+                            >
+                              <Gavel className={`w-5 h-5 ${
+                                hammerStage === 1 ? 'text-yellow-300' :
+                                hammerStage === 2 ? 'text-orange-300' :
+                                'text-green-300'
+                              }`} />
+                            </motion.div>
+                            <span className={`text-lg font-extrabold ${
                               hammerStage === 1 ? 'text-yellow-300' :
                               hammerStage === 2 ? 'text-orange-300' :
                               'text-green-300'
@@ -797,15 +850,6 @@ export default function Auction() {
                                hammerStage === 2 ? 'GOING TWICE!' :
                                'SOLD!'}
                             </span>
-                          </div>
-                          
-                          {/* Show countdown timer for everyone */}
-                          <div className={`text-2xl font-extrabold ${
-                            hammerStage === 1 ? 'text-yellow-200' :
-                            hammerStage === 2 ? 'text-orange-200' :
-                            'text-green-200'
-                          }`}>
-                            {hammerCountdown}s
                           </div>
                           
                           {/* Show "Bid Now to Stop!" message for players */}
@@ -880,7 +924,7 @@ export default function Auction() {
                           ))
                         )}
                       </div>
-                    </motion.div>
+                    </div>
 
                     {/* Center: Current Player - Scrollable with Neon Glow */}
                     <div className="bg-gradient-to-br from-yellow-900/40 to-orange-900/40 backdrop-blur-sm rounded-xl p-3 border-2 border-yellow-500/70 shadow-[0_0_30px_rgba(234,179,8,0.4)] flex flex-col relative overflow-hidden">
@@ -1589,7 +1633,7 @@ export default function Auction() {
                   <svg className="w-6 h-6 text-cyan-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
                   </svg>
-                  Player Pool ({allPlayers.length} Players)
+                  {playerPoolType === 'core' ? 'Core' : 'Support'} Player Pool ({allPlayers.length} Players)
                 </h3>
                 <button
                   onClick={() => setShowPlayerPoolModal(false)}

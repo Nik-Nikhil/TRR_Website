@@ -27,7 +27,8 @@ export function PlayerPoolManagement() {
   const [poolPlayers, setPoolPlayers] = useState<AuctionPoolPlayer[]>([]);
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedPlayers, setSelectedPlayers] = useState<Set<string>>(new Set());
-  const [basePrice, setBasePrice] = useState('50');
+  const [basePrice, setBasePrice] = useState('0');
+  const [playerType, setPlayerType] = useState<'core' | 'support'>('core');
   const [loading, setLoading] = useState(true);
   const [message, setMessage] = useState('');
 
@@ -107,19 +108,28 @@ export function PlayerPoolManagement() {
     }
 
     const price = parseInt(basePrice);
-    if (isNaN(price) || price < 1) {
-      setMessage('Please enter a valid base price');
+    if (isNaN(price) || price < 0) {
+      setMessage('Please enter a valid base price (0 or higher)');
       return;
     }
 
     try {
       setMessage('Adding players to pool...');
 
-      const playersToAdd = Array.from(selectedPlayers).map(playerId => ({
-        player_id: playerId,
-        base_price: price,
-        auction_id: null // Will be set when auction starts
-      }));
+      // Get full player data for each selected player
+      const playersToAdd = await Promise.all(
+        Array.from(selectedPlayers).map(async (playerId) => {
+          const player = registeredPlayers.find(p => p.id === playerId);
+          
+          return {
+            player_id: playerId,
+            base_price: price,
+            player_type: playerType,
+            player_data: player, // Store full player data as JSONB
+            auction_id: null // Will be set when auction starts
+          };
+        })
+      );
 
       const { error } = await supabase
         .from('auction_pool')
@@ -127,9 +137,9 @@ export function PlayerPoolManagement() {
 
       if (error) throw error;
 
-      setMessage(`Successfully added ${selectedPlayers.size} player(s) to pool!`);
+      setMessage(`Successfully added ${selectedPlayers.size} ${playerType} player(s) to pool!`);
       setSelectedPlayers(new Set());
-      setBasePrice('50');
+      setBasePrice('0');
       await loadData();
 
       setTimeout(() => setMessage(''), 3000);
@@ -258,7 +268,7 @@ export function PlayerPoolManagement() {
         </h3>
 
         {/* Search and Base Price */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-4">
           <div className="md:col-span-2">
             <label className="text-white text-sm font-semibold mb-2 block">
               Search Players
@@ -277,14 +287,28 @@ export function PlayerPoolManagement() {
 
           <div>
             <label className="text-white text-sm font-semibold mb-2 block">
+              Player Type
+            </label>
+            <select
+              value={playerType}
+              onChange={(e) => setPlayerType(e.target.value as 'core' | 'support')}
+              className="w-full px-4 py-2 bg-black/60 border border-purple-500/40 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-purple-500"
+            >
+              <option value="core">Core</option>
+              <option value="support">Support</option>
+            </select>
+          </div>
+
+          <div>
+            <label className="text-white text-sm font-semibold mb-2 block">
               Base Price
             </label>
             <input
               type="number"
               value={basePrice}
               onChange={(e) => setBasePrice(e.target.value)}
-              placeholder="50"
-              min="1"
+              placeholder="0"
+              min="0"
               className="w-full px-4 py-2 bg-black/60 border border-purple-500/40 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-500"
             />
           </div>

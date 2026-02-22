@@ -4,7 +4,7 @@ import { Gavel, Play, Pause, Square, Loader2, Users, ArrowRight, RotateCcw, Arch
 import { AuctionService } from '../../services/auctionService';
 import { AuctionHistoryService } from '../../services/auctionHistoryService';
 import { Avatar } from '../ui/Avatar';
-import { players } from '../../data/players';
+import { supabase } from '../../lib/supabase';
 import { useModal } from '../../hooks/useModal';
 
 export const AuctionControl = () => {
@@ -16,9 +16,11 @@ export const AuctionControl = () => {
   const [currentPlayer, setCurrentPlayer] = useState<any>(null);
   const [showNameInput, setShowNameInput] = useState(false);
   const [auctionName, setAuctionName] = useState('');
+  const [poolPlayers, setPoolPlayers] = useState<any[]>([]);
 
   useEffect(() => {
     loadAuctionState();
+    loadPoolPlayers();
     
     // Subscribe to auction state changes
     const subscription = AuctionService.subscribeToAuctionState((state) => {
@@ -36,6 +38,21 @@ export const AuctionControl = () => {
     if (state) {
       setAuctionStatus(state.status);
       setCurrentPlayer(state.current_player_data);
+    }
+  };
+
+  const loadPoolPlayers = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('auction_pool')
+        .select('*, player_data')
+        .order('added_at', { ascending: false });
+
+      if (!error && data) {
+        setPoolPlayers(data);
+      }
+    } catch (error) {
+      console.error('Error loading pool players:', error);
     }
   };
 
@@ -142,20 +159,20 @@ export const AuctionControl = () => {
     setLoading(true);
     setError(null);
 
-    const player = players.find(p => p.id === selectedPlayerId);
-    if (!player) {
-      setError('Player not found');
+    const poolPlayer = poolPlayers.find(p => p.id === selectedPlayerId);
+    if (!poolPlayer) {
+      setError('Player not found in pool');
       setLoading(false);
       return;
     }
 
-    // Add base price to player data
+    // Use player data from pool with base_price
     const playerData = {
-      ...player,
-      basePrice: 50 // Default base price
+      ...poolPlayer.player_data,
+      basePrice: poolPlayer.base_price || 0 // Use base_price from auction_pool
     };
 
-    const success = await AuctionService.setCurrentPlayer(player.id, playerData);
+    const success = await AuctionService.setCurrentPlayer(poolPlayer.player_id, playerData);
     if (success) {
       setCurrentPlayer(playerData);
       setSelectedPlayerId('');
@@ -471,11 +488,14 @@ export const AuctionControl = () => {
               className="w-full p-3 bg-black/60 border border-blue-500/40 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
             >
               <option value="">Select a player...</option>
-              {players.map((player) => (
-                <option key={player.id} value={player.id}>
-                  {player.nickname} - {player.currentMMR || 'Unranked'} MMR - {player.roles?.map(r => r.label).join(', ')}
-                </option>
-              ))}
+              {poolPlayers.map((poolPlayer) => {
+                const player = poolPlayer.player_data;
+                return (
+                  <option key={poolPlayer.id} value={poolPlayer.id}>
+                    {player?.nickname || 'Unknown'} - {player?.currentMMR || 'Unranked'} MMR - Base: {poolPlayer.base_price} gold
+                  </option>
+                );
+              })}
             </select>
 
             <button

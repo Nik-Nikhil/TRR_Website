@@ -7,7 +7,7 @@ CREATE TABLE IF NOT EXISTS auction_pool (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     player_id UUID REFERENCES players(id) ON DELETE CASCADE,
     auction_id UUID REFERENCES auctions(id) ON DELETE SET NULL,
-    base_price INTEGER NOT NULL DEFAULT 50,
+    base_price INTEGER NOT NULL DEFAULT 0,
     
     -- Status
     is_sold BOOLEAN DEFAULT false,

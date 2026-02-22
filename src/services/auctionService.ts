@@ -241,6 +241,9 @@ export class AuctionService {
       const state = await this.getAuctionState();
       if (!state) return false;
 
+      // Get base price from player data, default to 0 if not set
+      const basePrice = playerData?.basePrice || 0;
+
       // Don't set current_player_id as foreign key since players might not be in DB yet
       // Just store the player data in JSONB
       const { error } = await supabase
@@ -251,7 +254,7 @@ export class AuctionService {
             id: playerId,
             ...playerData
           },
-          highest_bid: playerData?.basePrice || 0,
+          highest_bid: basePrice, // Start bidding from base price
           highest_bidder_id: null,
           highest_bidder_name: null,
           highest_bidder_team: null
@@ -278,10 +281,22 @@ export class AuctionService {
         return false;
       }
 
-      // Check if bid is higher than current (must be strictly greater)
+      // Check if bid is valid
       const currentBid = state.highest_bid || 0;
-      if (amount <= currentBid) {
-        return false;
+      
+      // If there's no bidder yet (first bid), bid must be >= base price
+      // If there are existing bids, new bid must be > current bid
+      if (!state.highest_bidder_id) {
+        // First bid - must be at least the base price (or 1 if base price is 0)
+        const minimumBid = currentBid > 0 ? currentBid : 1;
+        if (amount < minimumBid) {
+          return false;
+        }
+      } else {
+        // Subsequent bids - must be higher than current bid
+        if (amount <= currentBid) {
+          return false;
+        }
       }
 
       // Update auction state

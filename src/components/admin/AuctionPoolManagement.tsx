@@ -74,8 +74,7 @@ export const AuctionPoolManagement: React.FC<AuctionPoolManagementProps> = ({
       const result = await auctionPoolService.addPlayerToPool(
         auctionId,
         player.id,
-        player,
-        adminUsername
+        player
       );
 
       if (result.success) {
