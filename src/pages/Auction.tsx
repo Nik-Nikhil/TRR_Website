@@ -30,6 +30,10 @@ export default function Auction() {
   const [selectedTeamForManualAssign, setSelectedTeamForManualAssign] = useState<string>('');
   const [manualAssignPrice, setManualAssignPrice] = useState<string>('');
   
+  // Player Pool modal state
+  const [showPlayerPoolModal, setShowPlayerPoolModal] = useState(false);
+  const [allPlayers, setAllPlayers] = useState<any[]>([]);
+  
   // Auction pool state
   // const [auctionPool, setAuctionPool] = useState<any[]>([]);
   
@@ -121,9 +125,15 @@ export default function Auction() {
               return prev;
             }
             
-            // If hammer is active, mark that a new bid came in
+            // If hammer is active, stop it automatically when new bid comes in
             if (isHammerActive) {
               setNewBidDuringHammer(true);
+              // Automatically stop the hammer
+              setIsHammerActive(false);
+              setHammerStage(0);
+              setHammerCountdown(6);
+              // Update database
+              AuctionService.updateHammerState(false, 0, 6);
             }
             
             return [bid, ...prev];
@@ -242,7 +252,7 @@ export default function Auction() {
     };
   }, [auctionState?.id]);
 
-  // Hammer countdown effect
+  // Hammer countdown effect - 6 seconds per stage
   useEffect(() => {
     if (!isHammerActive || hammerStage === 0) return;
 
@@ -257,24 +267,23 @@ export default function Auction() {
     } else {
       // Countdown finished, move to next stage
       if (hammerStage === 1) {
-        // Going Once -> Going Twice
+        // Going Once -> Going Twice (6 seconds)
         const newStage = 2;
-        const newCountdown = 5;
+        const newCountdown = 6;
         setHammerStage(newStage);
         setHammerCountdown(newCountdown);
         // Update database
         AuctionService.updateHammerState(true, newStage, newCountdown);
       } else if (hammerStage === 2) {
-        // Going Twice -> SOLD!
+        // Going Twice -> SOLD! (instant)
         const newStage = 3;
-        const newCountdown = 2;
+        const newCountdown = 0;
         setHammerStage(newStage);
-        setHammerCountdown(newCountdown); // Short delay for SOLD animation
-        // Update database
-        AuctionService.updateHammerState(true, newStage, newCountdown);
-      } else if (hammerStage === 3) {
-        // SOLD! -> Execute sale
-        executeSale();
+        setHammerCountdown(newCountdown);
+        // Update database and execute sale immediately
+        AuctionService.updateHammerState(true, newStage, newCountdown).then(() => {
+          executeSale();
+        });
       }
     }
   }, [isHammerActive, hammerStage, hammerCountdown]);
@@ -334,28 +343,35 @@ export default function Auction() {
     }
   };
 
+  const loadAllPlayers = async () => {
+    try {
+      const state = await AuctionService.getAuctionState();
+      if (!state) return;
+
+      const { data, error } = await supabase
+        .from('auction_pool')
+        .select('*')
+        .eq('auction_id', state.id)
+        .order('player_data->currentMMR', { ascending: false });
+
+      if (!error && data) {
+        setAllPlayers(data.map((item: any) => item.player_data));
+      }
+    } catch (error) {
+      console.error('❌ Error loading all players:', error);
+    }
+  };
+
   const handleSendMessage = async () => {
     if (!chatInput.trim() || !currentCaptainSession || !auctionState?.id) return;
 
     const captainId = currentCaptainSession.playerId || currentCaptainSession.id;
     const captain = captains.find(c => c.playerId === captainId);
 
-    // Optimistic update - add message immediately to UI
-    const tempMessage = {
-      id: `temp-${Date.now()}`,
-      auction_id: auctionState.id,
-      sender_id: captainId,
-      sender_name: currentCaptainSession.nickname,
-      sender_team: captain?.teamName,
-      message: chatInput,
-      created_at: new Date().toISOString()
-    };
-
-    setChatMessages(prev => [...prev, tempMessage]);
     const messageToSend = chatInput;
     setChatInput(''); // Clear input immediately
 
-    // Send to database
+    // Send to database - no optimistic update, let subscription handle it
     const success = await auctionChatService.sendMessage(
       auctionState.id,
       captainId,
@@ -365,9 +381,8 @@ export default function Auction() {
     );
 
     if (!success) {
-      // Remove optimistic message if send failed
-      setChatMessages(prev => prev.filter(m => m.id !== tempMessage.id));
-      setChatInput(messageToSend); // Restore input
+      // Restore input if send failed
+      setChatInput(messageToSend);
     }
   };
 
@@ -501,7 +516,7 @@ export default function Auction() {
     setIsBidding(false); // Unlock bidding
   };
 
-  // Start hammer countdown
+  // Start hammer countdown - 6 seconds for "GOING ONCE!"
   const handleStartHammer = async () => {
     if (!auctionState?.highest_bidder_id && !selectedTeamForManualAssign) {
       alert('No bids placed and no team selected for manual assignment', 'Cannot Start Hammer', 'warning');
@@ -509,30 +524,30 @@ export default function Auction() {
     }
 
     setHammerStage(1);
-    setHammerCountdown(5);
+    setHammerCountdown(6); // 6 seconds for GOING ONCE
     setIsHammerActive(true);
     setNewBidDuringHammer(false); // Reset flag
     // Update database
-    await AuctionService.updateHammerState(true, 1, 5);
+    await AuctionService.updateHammerState(true, 1, 6);
   };
 
   // Cancel hammer countdown
   const handleCancelHammer = async () => {
     setHammerStage(0);
-    setHammerCountdown(5);
+    setHammerCountdown(6);
     setIsHammerActive(false);
     setNewBidDuringHammer(false); // Reset flag
     // Update database
-    await AuctionService.updateHammerState(false, 0, 5);
+    await AuctionService.updateHammerState(false, 0, 6);
   };
 
   // Execute the sale after SOLD animation
   const executeSale = async () => {
     setIsHammerActive(false);
     setHammerStage(0);
-    setHammerCountdown(5);
+    setHammerCountdown(6);
     // Update database
-    await AuctionService.updateHammerState(false, 0, 5);
+    await AuctionService.updateHammerState(false, 0, 6);
     
     // Call the actual sell function
     await confirmFinalize();
@@ -697,6 +712,20 @@ export default function Auction() {
                        'Not Started'}
                     </span>
                   </div>
+                  
+                  {/* Player Pool Button */}
+                  <button
+                    onClick={() => {
+                      loadAllPlayers();
+                      setShowPlayerPoolModal(true);
+                    }}
+                    className="ml-auto px-4 py-2 bg-gradient-to-r from-cyan-600 to-blue-600 hover:from-cyan-500 hover:to-blue-500 text-white text-sm font-semibold rounded-lg transition-all duration-300 flex items-center gap-2 shadow-lg"
+                  >
+                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
+                    </svg>
+                    Player Pool
+                  </button>
                 </div>
               </div>
 
@@ -722,8 +751,23 @@ export default function Auction() {
                   {/* New 4-Section Layout - Full Height with Fixed Heights */}
                   <div className="grid grid-cols-1 lg:grid-cols-[280px_1.2fr_380px_280px] gap-3 overflow-hidden" style={{ height: 'calc(100vh - 240px)' }}>
                     
-                    {/* Section 1: Top Bids - Scrollable with Neon Glow */}
-                    <div className="bg-black/40 backdrop-blur-sm rounded-xl p-3 border-2 border-yellow-500/60 flex flex-col overflow-hidden shadow-[0_0_20px_rgba(234,179,8,0.3)]">
+                    {/* Section 1: Top Bids - Scrollable with Neon Glow - Blinks during hammer */}
+                    <motion.div 
+                      className="bg-black/40 backdrop-blur-sm rounded-xl p-3 border-2 border-yellow-500/60 flex flex-col overflow-hidden shadow-[0_0_20px_rgba(234,179,8,0.3)]"
+                      animate={isHammerActive && hammerStage > 0 ? {
+                        opacity: [1, 0.6, 1],
+                        borderColor: [
+                          hammerStage === 1 ? 'rgba(234, 179, 8, 0.6)' : hammerStage === 2 ? 'rgba(249, 115, 22, 0.6)' : 'rgba(34, 197, 94, 0.6)',
+                          hammerStage === 1 ? 'rgba(234, 179, 8, 1)' : hammerStage === 2 ? 'rgba(249, 115, 22, 1)' : 'rgba(34, 197, 94, 1)',
+                          hammerStage === 1 ? 'rgba(234, 179, 8, 0.6)' : hammerStage === 2 ? 'rgba(249, 115, 22, 0.6)' : 'rgba(34, 197, 94, 0.6)',
+                        ]
+                      } : {}}
+                      transition={{
+                        duration: 1,
+                        repeat: Infinity,
+                        ease: "easeInOut"
+                      }}
+                    >
                       <h3 className="text-white font-bold mb-2 text-sm text-center flex-shrink-0">Top Bids</h3>
                       
                       {/* Hammer Animation - Visible to all players */}
@@ -738,46 +782,38 @@ export default function Auction() {
                             'bg-green-600/30 border-2 border-green-500'
                           }`}
                         >
-                          <motion.div
-                            animate={{
-                              scale: [1, 1.1, 1],
-                            }}
-                            transition={{
-                              duration: 0.5,
-                              repeat: Infinity,
-                            }}
-                          >
-                            <div className="flex items-center justify-center gap-2 mb-1">
-                              <Gavel className={`w-5 h-5 ${
-                                hammerStage === 1 ? 'text-yellow-300' :
-                                hammerStage === 2 ? 'text-orange-300' :
-                                'text-green-300'
-                              }`} />
-                              <span className={`text-lg ${
-                                hammerStage === 1 ? 'text-yellow-300' :
-                                hammerStage === 2 ? 'text-orange-300' :
-                                'text-green-300'
-                              }`}>
-                                {hammerStage === 1 ? 'GOING ONCE!' :
-                                 hammerStage === 2 ? 'GOING TWICE!' :
-                                 'SOLD!'}
-                              </span>
-                            </div>
-                            <div className={`text-2xl font-extrabold ${
-                              hammerStage === 1 ? 'text-yellow-200' :
-                              hammerStage === 2 ? 'text-orange-200' :
-                              'text-green-200'
+                          <div className="flex items-center justify-center gap-2 mb-1">
+                            <Gavel className={`w-5 h-5 ${
+                              hammerStage === 1 ? 'text-yellow-300' :
+                              hammerStage === 2 ? 'text-orange-300' :
+                              'text-green-300'
+                            }`} />
+                            <span className={`text-lg ${
+                              hammerStage === 1 ? 'text-yellow-300' :
+                              hammerStage === 2 ? 'text-orange-300' :
+                              'text-green-300'
                             }`}>
-                              {hammerCountdown}
-                            </div>
-                          </motion.div>
+                              {hammerStage === 1 ? 'GOING ONCE!' :
+                               hammerStage === 2 ? 'GOING TWICE!' :
+                               'SOLD!'}
+                            </span>
+                          </div>
+                          
+                          {/* Show countdown timer for everyone */}
+                          <div className={`text-2xl font-extrabold ${
+                            hammerStage === 1 ? 'text-yellow-200' :
+                            hammerStage === 2 ? 'text-orange-200' :
+                            'text-green-200'
+                          }`}>
+                            {hammerCountdown}s
+                          </div>
                           
                           {/* Show "Bid Now to Stop!" message for players */}
                           {hammerStage < 3 && currentCaptainSession && (
                             <motion.p
                               initial={{ opacity: 0 }}
                               animate={{ opacity: 1 }}
-                              className="text-xs text-white/80 mt-2"
+                              className="text-xs text-white/80 mt-1"
                             >
                               Bid now to stop the hammer!
                             </motion.p>
@@ -844,7 +880,7 @@ export default function Auction() {
                           ))
                         )}
                       </div>
-                    </div>
+                    </motion.div>
 
                     {/* Center: Current Player - Scrollable with Neon Glow */}
                     <div className="bg-gradient-to-br from-yellow-900/40 to-orange-900/40 backdrop-blur-sm rounded-xl p-3 border-2 border-yellow-500/70 shadow-[0_0_30px_rgba(234,179,8,0.4)] flex flex-col relative overflow-hidden">
@@ -1525,6 +1561,108 @@ export default function Auction() {
                 >
                   Continue
                 </button>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* Player Pool Modal */}
+      <AnimatePresence>
+        {showPlayerPoolModal && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4"
+            onClick={() => setShowPlayerPoolModal(false)}
+          >
+            <motion.div
+              initial={{ scale: 0.9, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.9, opacity: 0 }}
+              className="bg-gradient-to-br from-gray-900/95 to-gray-800/95 rounded-xl p-6 max-w-6xl w-full max-h-[90vh] border border-cyan-500/40 overflow-hidden flex flex-col"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <div className="flex items-center justify-between mb-4">
+                <h3 className="text-2xl font-bold text-white flex items-center gap-2">
+                  <svg className="w-6 h-6 text-cyan-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
+                  </svg>
+                  Player Pool ({allPlayers.length} Players)
+                </h3>
+                <button
+                  onClick={() => setShowPlayerPoolModal(false)}
+                  className="text-gray-400 hover:text-white transition-colors"
+                >
+                  <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                  </svg>
+                </button>
+              </div>
+              
+              <div className="overflow-auto flex-1">
+                <table className="w-full text-sm">
+                  <thead className="sticky top-0 bg-gradient-to-r from-cyan-900/80 to-blue-900/80 backdrop-blur-sm z-10">
+                    <tr className="border-b-2 border-cyan-500/30">
+                      <th className="text-left py-3 px-3 text-cyan-300 font-bold">#</th>
+                      <th className="text-left py-3 px-3 text-cyan-300 font-bold">Player Name</th>
+                      <th className="text-center py-3 px-3 text-purple-300 font-bold">Peak MMR</th>
+                      <th className="text-center py-3 px-3 text-cyan-300 font-bold">Current MMR</th>
+                      <th className="text-center py-3 px-3 text-yellow-300 font-bold">Roles</th>
+                      <th className="text-center py-3 px-3 text-green-300 font-bold">Ping</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {allPlayers.map((player, index) => (
+                      <tr 
+                        key={player.id || index}
+                        className="border-b border-gray-700/50 hover:bg-cyan-500/10 transition-colors"
+                      >
+                        <td className="py-3 px-3 text-gray-400 font-semibold">{index + 1}</td>
+                        <td className="py-3 px-3">
+                          <div className="flex items-center gap-2">
+                            <img 
+                              src={player.avatarUrl || '/avatars/default.png'} 
+                              alt={player.nickname}
+                              className="w-8 h-8 rounded-full border border-cyan-500/50"
+                              onError={(e) => {
+                                e.currentTarget.src = '/avatars/default.png';
+                              }}
+                            />
+                            <span className="text-white font-semibold">{player.nickname}</span>
+                          </div>
+                        </td>
+                        <td className="py-3 px-3 text-center">
+                          <span className="text-purple-300 font-bold">{player.peakMMR || 'N/A'}</span>
+                        </td>
+                        <td className="py-3 px-3 text-center">
+                          <span className="text-cyan-300 font-bold">{player.currentMMR || 'N/A'}</span>
+                        </td>
+                        <td className="py-3 px-3">
+                          <div className="flex items-center justify-center gap-1">
+                            {player.roles && player.roles.length > 0 ? (
+                              player.roles.map((role: any, idx: number) => (
+                                <img
+                                  key={idx}
+                                  src={role.iconSrc}
+                                  alt={role.label}
+                                  title={role.label}
+                                  className="w-5 h-5 object-contain"
+                                />
+                              ))
+                            ) : (
+                              <span className="text-gray-500 text-xs">N/A</span>
+                            )}
+                          </div>
+                        </td>
+                        <td className="py-3 px-3 text-center">
+                          <span className="text-green-300 font-semibold">{player.pingRange || 'N/A'}</span>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
               </div>
             </motion.div>
           </motion.div>

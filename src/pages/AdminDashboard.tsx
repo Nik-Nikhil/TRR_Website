@@ -17,6 +17,7 @@ import { AuctionHistory } from '../components/admin/AuctionHistory';
 import { CaptainManagement } from '../components/admin/CaptainManagement';
 import { AdminSettings } from '../components/admin/AdminSettings';
 import { ProfileUpdateRequests } from '../components/admin/ProfileUpdateRequests';
+import { PlayerPoolManagement } from '../components/admin/PlayerPoolManagement';
 import { AuctionService } from '../services/auctionService';
 import messagingService from '../services/messagingService';
 import profileUpdateService from '../services/profileUpdateService';
@@ -214,6 +215,7 @@ export default function AdminDashboard() {
     { id: 'players', label: 'Player Management', icon: Users, description: 'Manage Players' },
     { id: 'captains', label: 'Team Management', icon: Users, description: 'Manage Teams & Captains' },
     { id: 'registration', label: 'Registration', icon: UserPlus, description: 'Control Settings' },
+    { id: 'player-pool', label: 'Player Pool', icon: Users, description: 'Manage Auction Pool' },
     { id: 'auction', label: 'Auction Control', icon: Gavel, description: 'Manage Auction' },
     { id: 'auction-history', label: 'Auction History', icon: History, description: 'Past Auctions' },
     { id: 'database', label: 'Database', icon: Database, description: 'Backup & Restore' },
@@ -315,6 +317,7 @@ export default function AdminDashboard() {
              activeSection === 'players' ? 'Player Management' :
              activeSection === 'captains' ? 'Captain Management' :
              activeSection === 'registration' ? 'Registration Control' :
+             activeSection === 'player-pool' ? 'Player Pool Management' :
              activeSection === 'auction' ? 'Auction Control' :
              activeSection === 'auction-history' ? 'Auction History' :
              activeSection === 'database' ? 'Database Management' :
@@ -326,6 +329,7 @@ export default function AdminDashboard() {
              activeSection === 'players' ? 'Manage registered players' :
              activeSection === 'captains' ? 'Assign and manage team captains' :
              activeSection === 'registration' ? 'Control player registration settings' :
+             activeSection === 'player-pool' ? 'Add players to the auction pool' :
              activeSection === 'auction' ? 'Start and manage player auctions' :
              activeSection === 'auction-history' ? 'View past auction results and data' :
              activeSection === 'database' ? 'Database operations and maintenance' :
@@ -871,6 +875,7 @@ export default function AdminDashboard() {
               {activeSection === 'players' && <div className="p-8"><div className="bg-black/60 backdrop-blur-sm rounded-xl p-6 border border-blue-500/40 text-center"><p className="text-white">Player Management - Coming Soon</p></div></div>}
               {activeSection === 'captains' && renderCaptainManagement()}
               {activeSection === 'registration' && renderRegistrationControl()}
+              {activeSection === 'player-pool' && <div className="p-8"><PlayerPoolManagement /></div>}
               {activeSection === 'auction' && renderAuctionControl()}
               {activeSection === 'auction-history' && renderAuctionHistory()}
               {activeSection === 'database' && <div className="p-8"><div className="bg-black/60 backdrop-blur-sm rounded-xl p-6 border border-blue-500/40 text-center"><p className="text-white">Database Management - Coming Soon</p></div></div>}
