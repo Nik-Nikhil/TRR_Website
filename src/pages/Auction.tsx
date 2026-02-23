@@ -425,26 +425,8 @@ export default function Auction() {
         return;
       }
 
-      const { data, error } = await supabase
-        .from('auction_bids')
-        .select('*')
-        .eq('auction_id', auctionId)
-        .order('created_at', { ascending: true });
-
-      if (!error && data) {
-        const currentPlayerId = currentState.current_player_id;
-        const currentPlayerDataId = currentState.current_player_data?.id;
-        
-        // Filter bids for current player (not used for display, just for validation)
-        const filteredBids = data.filter(bid => {
-          return bid.player_id === currentPlayerId || 
-                 bid.player_id === currentPlayerDataId ||
-                 (currentState.current_player_data && 
-                  bid.player_id === currentState.current_player_data.id);
-        });
-        
-        // Bids are now handled by TopBidsStandalone component
-      }
+      // Bids are now handled by TopBidsStandalone component
+      // This function is kept for compatibility but doesn't need to do anything
     } catch (error) {
       // Silent error
     }
@@ -660,7 +642,7 @@ export default function Auction() {
 
     if (error) {
       console.error('❌ Failed to insert into auction_results:', error);
-      await alert(`Failed to assign player: ${error.message}`, 'Database Error', 'error');
+      await alert(`Failed to assign player: ${error.message}`, 'Database Error', 'warning');
       return;
     }
 
