@@ -255,8 +255,6 @@ export default function Auction() {
           return [...newMessages, ...prev];
         }
         return prev;
-        }
-        return prev;
       });
     }, 3000);
 
@@ -382,7 +380,21 @@ export default function Auction() {
         .order('player_data->currentMMR', { ascending: false });
 
       if (!error && data) {
-        setAllPlayers(data.map((item: any) => item.player_data));
+        // Filter out current player being auctioned and sold players
+        const currentPlayerId = state.current_player_id;
+        const soldPlayerIds = soldPlayers.map(sp => sp.playerId);
+        
+        const filteredPlayers = data
+          .map((item: any) => item.player_data)
+          .filter((player: any) => {
+            // Remove current player being auctioned
+            if (player.id === currentPlayerId) return false;
+            // Remove sold players
+            if (soldPlayerIds.includes(player.id)) return false;
+            return true;
+          });
+        
+        setAllPlayers(filteredPlayers);
       }
     } catch (error) {
       // Silent error
@@ -589,6 +601,19 @@ export default function Auction() {
   const executeSale = async () => {
     console.log('💰 executeSale called');
     console.log('💰 saleTimeoutRef.current:', saleTimeoutRef.current);
+    
+    // Double-check that we have a valid bidder or manual assignment before executing
+    if (!auctionState?.highest_bidder_id && !selectedTeamForManualAssign) {
+      console.log('⚠️ No valid bidder or manual assignment, canceling sale');
+      await alert('Sale canceled: No bids placed and no team selected', 'Cannot Complete Sale', 'warning');
+      isLocalHammerRunning.current = false;
+      await AuctionService.updateHammerState(false, 0, 6);
+      setIsHammerActive(false);
+      setHammerStage(0);
+      setHammerCountdown(6);
+      return;
+    }
+    
     isLocalHammerRunning.current = false; // Mark that countdown is complete
     await AuctionService.updateHammerState(false, 0, 6);
     setIsHammerActive(false);
@@ -1486,6 +1511,11 @@ export default function Auction() {
                                     setBidAmount(value);
                                     setBidError('');
                                   }}
+                                  onKeyPress={(e) => {
+                                    if (e.key === 'Enter' && bidAmount && status !== 'paused' && !isBidding && !hasNoBudget) {
+                                      handlePlaceBid();
+                                    }
+                                  }}
                                   placeholder="Enter bid amount"
                                   className="flex-1 px-4 py-2.5 bg-black/60 border border-yellow-500/40 rounded-lg text-white text-sm font-bold placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-yellow-500 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
                                 />
@@ -1627,87 +1657,61 @@ export default function Auction() {
                     </tr>
                   </thead>
                   <tbody>
-                    {allPlayers.map((player, index) => {
-                      // Check if this player has been sold
-                      const isSold = soldPlayers.some(sp => sp.playerId === player.id);
-                      
-                      return (
-                        <tr 
-                          key={player.id || index}
-                          className={`border-b border-gray-700/50 transition-colors ${
-                            isSold 
-                              ? 'opacity-40 bg-gray-800/50 cursor-not-allowed' 
-                              : 'hover:bg-cyan-500/10'
-                          }`}
-                        >
-                          <td className="py-3 px-3 text-gray-400 font-semibold">{index + 1}</td>
-                          <td className="py-3 px-3">
-                            <div className="flex items-center gap-2">
-                              <img 
-                                src={player.avatarUrl || '/avatars/default.png'} 
-                                alt={player.nickname}
-                                className={`w-8 h-8 rounded-full border ${
-                                  isSold ? 'border-gray-600 grayscale' : 'border-cyan-500/50'
-                                }`}
-                                onError={(e) => {
-                                  e.currentTarget.src = '/avatars/default.png';
-                                }}
-                              />
-                              <div className="flex flex-col">
-                                <span className={`font-semibold ${
-                                  isSold ? 'text-gray-500 line-through' : 'text-white'
-                                }`}>
-                                  {player.nickname}
-                                </span>
-                                {isSold && (
-                                  <span className="text-xs text-red-400">SOLD</span>
-                                )}
-                              </div>
-                            </div>
-                          </td>
-                          <td className="py-3 px-3 text-center">
-                            <span className={`font-bold ${
-                              isSold ? 'text-gray-600' : 'text-purple-300'
-                            }`}>
-                              {player.peakMMR || 'N/A'}
+                    {allPlayers.map((player, index) => (
+                      <tr 
+                        key={player.id || index}
+                        className="border-b border-gray-700/50 hover:bg-cyan-500/10 transition-colors"
+                      >
+                        <td className="py-3 px-3 text-gray-400 font-semibold">{index + 1}</td>
+                        <td className="py-3 px-3">
+                          <div className="flex items-center gap-2">
+                            <img 
+                              src={player.avatarUrl || '/avatars/default.png'} 
+                              alt={player.nickname}
+                              className="w-8 h-8 rounded-full border border-cyan-500/50"
+                              onError={(e) => {
+                                e.currentTarget.src = '/avatars/default.png';
+                              }}
+                            />
+                            <span className="text-white font-semibold">
+                              {player.nickname}
                             </span>
-                          </td>
-                          <td className="py-3 px-3 text-center">
-                            <span className={`font-bold ${
-                              isSold ? 'text-gray-600' : 'text-cyan-300'
-                            }`}>
-                              {player.currentMMR || 'N/A'}
-                            </span>
-                          </td>
-                          <td className="py-3 px-3">
-                            <div className="flex items-center justify-center gap-1">
-                              {player.roles && player.roles.length > 0 ? (
-                                player.roles.map((role: any, idx: number) => (
-                                  <img
-                                    key={idx}
-                                    src={role.iconSrc}
-                                    alt={role.label}
-                                    title={role.label}
-                                    className={`w-5 h-5 object-contain ${
-                                      isSold ? 'grayscale opacity-50' : ''
-                                    }`}
-                                  />
-                                ))
-                              ) : (
-                                <span className="text-gray-500 text-xs">N/A</span>
-                              )}
-                            </div>
-                          </td>
-                          <td className="py-3 px-3 text-center">
-                            <span className={`font-semibold ${
-                              isSold ? 'text-gray-600' : 'text-green-300'
-                            }`}>
-                              {player.pingRange || 'N/A'}
-                            </span>
-                          </td>
-                        </tr>
-                      );
-                    })}
+                          </div>
+                        </td>
+                        <td className="py-3 px-3 text-center">
+                          <span className="text-purple-300 font-bold">
+                            {player.peakMMR || 'N/A'}
+                          </span>
+                        </td>
+                        <td className="py-3 px-3 text-center">
+                          <span className="text-cyan-300 font-bold">
+                            {player.currentMMR || 'N/A'}
+                          </span>
+                        </td>
+                        <td className="py-3 px-3">
+                          <div className="flex items-center justify-center gap-1">
+                            {player.roles && player.roles.length > 0 ? (
+                              player.roles.map((role: any, idx: number) => (
+                                <img
+                                  key={idx}
+                                  src={role.iconSrc}
+                                  alt={role.label}
+                                  title={role.label}
+                                  className="w-5 h-5 object-contain"
+                                />
+                              ))
+                            ) : (
+                              <span className="text-gray-500 text-xs">N/A</span>
+                            )}
+                          </div>
+                        </td>
+                        <td className="py-3 px-3 text-center">
+                          <span className="text-green-300 font-semibold">
+                            {player.pingRange || 'N/A'}
+                          </span>
+                        </td>
+                      </tr>
+                    ))}
                   </tbody>
                 </table>
               </div>
