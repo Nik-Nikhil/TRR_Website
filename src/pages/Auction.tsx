@@ -11,6 +11,7 @@ import type { AuctionState } from "../services/auctionService";
 import { AuthService } from "../services/auth";
 import { supabase } from "../lib/supabase";
 import { useModal } from "../hooks/useModal";
+import { TopBidsStandalone } from "../components/auction/TopBidsStandalone";
 
 export default function Auction() {
   const { alert, ModalComponent } = useModal();
@@ -21,10 +22,9 @@ export default function Auction() {
   const [captains, setCaptains] = useState<any[]>([]);
   const [bidError, setBidError] = useState<string>('');
   const [adminSession, setAdminSession] = useState<any>(null);
-  const [showConfirmModal, setShowConfirmModal] = useState(false);
   const [showSuccessModal, setShowSuccessModal] = useState(false);
   const [successMessage, setSuccessMessage] = useState('');
-  const [isBidding, setIsBidding] = useState(false); // Prevent simultaneous bids
+  const [isBidding, setIsBidding] = useState(false);
 
   const [soldPlayers, setSoldPlayers] = useState<any[]>([]);
   const [selectedTeamForManualAssign, setSelectedTeamForManualAssign] = useState<string>('');
@@ -86,7 +86,7 @@ export default function Auction() {
             setAdminSession(superAdmin);
           }
         } catch (e) {
-          console.error('Error parsing superadmin session:', e);
+          // Silent error
         }
       }
     }
@@ -101,13 +101,11 @@ export default function Auction() {
       
       // When player changes, clear bid history
       if (oldPlayerId !== newPlayerId) {
-        console.log('🔄 Player changed, clearing bid history');
         setBidHistory([]);
-      }
-      
-      // Also reload bid history when auction state changes to ensure sync
-      if (state.id) {
-        await pollBidsForCurrentAuction(state.id);
+        // Only poll bids when player actually changes
+        if (state.id && newPlayerId) {
+          await pollBidsForCurrentAuction(state.id);
+        }
       }
     });
 
@@ -169,14 +167,7 @@ export default function Auction() {
           loadAuctionState();
         }
       )
-      .subscribe((status, err) => {
-        if (status === 'CHANNEL_ERROR') {
-          console.error('❌ Bid subscription error:', err);
-        }
-        if (status === 'TIMED_OUT') {
-          console.error('⏱️ Bid subscription timed out');
-        }
-      });
+      .subscribe();
 
     // Subscribe to captain changes
     const captainSubscription = captainService.subscribeToCaptains(() => {
@@ -193,35 +184,24 @@ export default function Auction() {
           schema: 'public',
           table: 'auction_results'
         },
-        (payload) => {
-          console.log('🔔 Auction results changed:', payload.eventType, payload);
-          if (payload.eventType === 'DELETE') {
-            console.log('🗑️ Auction result deleted, refreshing sold players');
-          }
+        () => {
           loadSoldPlayers();
         }
       )
-      .subscribe((status, err) => {
-        if (status === 'SUBSCRIBED') {
-          console.log('✅ Subscribed to auction_results changes');
-        }
-        if (status === 'CHANNEL_ERROR') {
-          console.error('❌ Sold players subscription error:', err);
-        }
-      });
+      .subscribe();
 
-    // Fallback: Poll for updates every 2 seconds as backup
+    // Fallback: Poll for updates every 5 seconds as backup
     const pollInterval = setInterval(async () => {
       await loadAuctionState();
-      await loadCaptains(); // Also poll captains for budget updates
-      await loadSoldPlayers(); // Also poll sold players to ensure Teams Overview is accurate
+      await loadCaptains();
+      await loadSoldPlayers();
       
       // Poll for bids - get current state
       const currentState = await AuctionService.getAuctionState();
       if (currentState?.id) {
         await pollBidsForCurrentAuction(currentState.id);
       }
-    }, 2000);
+    }, 5000);
 
     return () => {
       stateSubscription.unsubscribe();
@@ -236,23 +216,18 @@ export default function Auction() {
   useEffect(() => {
     if (!auctionState?.id) return;
 
-    console.log('🔔 Setting up chat subscription for auction:', auctionState.id);
-
     // Load initial messages
     const loadMessages = async () => {
       const messages = await auctionChatService.getMessages(auctionState.id);
       setChatMessages(messages);
-      console.log('📨 Loaded', messages.length, 'chat messages');
     };
     loadMessages();
 
     // Subscribe to new messages
     const chatSubscription = auctionChatService.subscribeToMessages(auctionState.id, (newMessage) => {
-      console.log('📨 New chat message received via subscription:', newMessage);
       setChatMessages(prev => {
         // Avoid duplicates
         if (prev.some(m => m.id === newMessage.id)) {
-          console.log('⚠️ Duplicate message detected, skipping:', newMessage.id);
           return prev;
         }
         return [...prev, newMessage];
@@ -265,7 +240,6 @@ export default function Auction() {
       setChatMessages(prev => {
         // Only update if there are new messages
         if (messages.length > prev.length) {
-          console.log('📨 Polling found new messages:', messages.length - prev.length);
           return messages;
         }
         return prev;
@@ -273,7 +247,6 @@ export default function Auction() {
     }, 3000);
 
     return () => {
-      console.log('🔕 Cleaning up chat subscription and polling');
       chatSubscription.unsubscribe();
       clearInterval(pollInterval);
     };
@@ -332,7 +305,6 @@ export default function Auction() {
     const currentPlayerId = auctionState?.current_player_data?.id;
     if (currentPlayerId) {
       // Clear bid history for new player - bids start fresh for each player
-      console.log('🔄 Player changed in useEffect, clearing bid history');
       setBidHistory([]);
     }
   }, [auctionState?.current_player_data?.id]);
@@ -341,12 +313,9 @@ export default function Auction() {
     try {
       const state = await AuctionService.getAuctionState();
       if (!state) {
-        console.log('⚠️ No auction state, clearing sold players');
         setSoldPlayers([]);
         return;
       }
-
-      console.log('🔄 Loading sold players for auction:', state.id);
 
       const { data, error } = await supabase
         .from('auction_results')
@@ -355,13 +324,6 @@ export default function Auction() {
         .order('sold_at', { ascending: false });
 
       if (!error && data) {
-        console.log(`📊 Loaded ${data.length} sold players from auction_results`);
-        console.log('📊 Sold players by captain:', data.reduce((acc: any, item: any) => {
-          const captainId = item.sold_to_captain_id;
-          acc[captainId] = (acc[captainId] || 0) + 1;
-          return acc;
-        }, {}));
-        
         setSoldPlayers(data.map((item: any) => ({
           id: item.id,
           playerId: item.player_id,
@@ -375,11 +337,9 @@ export default function Auction() {
           auctionId: item.auction_id
         })));
       } else if (error) {
-        console.error('❌ Error loading sold players:', error);
         setSoldPlayers([]);
       }
     } catch (error) {
-      console.error('❌ Error loading sold players:', error);
       setSoldPlayers([]);
     }
   };
@@ -393,14 +353,14 @@ export default function Auction() {
         .from('auction_pool')
         .select('*')
         .eq('auction_id', state.id)
-        .eq('player_type', type) // Filter by player type
+        .eq('player_type', type)
         .order('player_data->currentMMR', { ascending: false });
 
       if (!error && data) {
         setAllPlayers(data.map((item: any) => item.player_data));
       }
     } catch (error) {
-      console.error('❌ Error loading all players:', error);
+      // Silent error
     }
   };
 
@@ -424,7 +384,6 @@ export default function Auction() {
       
       // Verify this player is actually a captain
       if (!captain) {
-        console.log('User is not a captain, cannot send message');
         return;
       }
       
@@ -467,14 +426,11 @@ export default function Auction() {
 
   const pollBidsForCurrentAuction = async (auctionId: string) => {
     try {
-      // Get current auction state to know which player we're showing
       const currentState = await AuctionService.getAuctionState();
       
-      // Check if there's a current player (either via current_player_id or current_player_data)
       const hasCurrentPlayer = currentState?.current_player_id || currentState?.current_player_data?.id;
       
       if (!hasCurrentPlayer) {
-        // No current player, clear bids
         setBidHistory([]);
         return;
       }
@@ -483,23 +439,19 @@ export default function Auction() {
         .from('auction_bids')
         .select('*')
         .eq('auction_id', auctionId)
-        .order('created_at', { ascending: true }); // Changed to ascending - earliest first
+        .order('created_at', { ascending: true });
 
       if (!error && data) {
-        // Filter bids to only show those for the current player
-        // The player_id in bids might be stored in different formats, so we need to check
         const currentPlayerId = currentState.current_player_id;
         const currentPlayerDataId = currentState.current_player_data?.id;
         
         const filteredBids = data.filter(bid => {
-          // Check if bid's player_id matches current player
           return bid.player_id === currentPlayerId || 
                  bid.player_id === currentPlayerDataId ||
                  (currentState.current_player_data && 
                   bid.player_id === currentState.current_player_data.id);
         });
 
-        // Only update if the data is different to avoid unnecessary re-renders
         setBidHistory(prev => {
           if (JSON.stringify(prev) !== JSON.stringify(filteredBids)) {
             return filteredBids;
@@ -508,7 +460,7 @@ export default function Auction() {
         });
       }
     } catch (error) {
-      console.error('Error polling bids:', error);
+      // Silent error
     }
   };
 
@@ -628,35 +580,27 @@ export default function Auction() {
 
   // Execute the sale after SOLD animation
   const executeSale = async () => {
+    await AuctionService.updateHammerState(false, 0, 6);
     setIsHammerActive(false);
     setHammerStage(0);
     setHammerCountdown(6);
-    // Update database
-    await AuctionService.updateHammerState(false, 0, 6);
-    
-    // Call the actual sell function
-    await confirmFinalize();
+    await finalizeSale();
   };
 
   const handleSellPlayer = async () => {
     if (!auctionState) return;
-
-    // Start hammer countdown instead of immediate sale
     handleStartHammer();
   };
 
-  const confirmFinalize = async () => {
+  const finalizeSale = async () => {
     if (!auctionState) return;
 
-    // Validation checks
     if (!auctionState.highest_bidder_id && !selectedTeamForManualAssign) {
       await alert('Please select a team to assign this player to', 'Selection Required', 'warning');
       return;
     }
 
-    // Validate manual price if no bids
     if (!auctionState.highest_bidder_id) {
-      // Check if price is empty
       if (manualAssignPrice.trim() === '') {
         await alert('Please enter a price (0 or higher)', 'Invalid Price', 'warning');
         return;
@@ -668,15 +612,12 @@ export default function Auction() {
         return;
       }
 
-      // Check if selected team has enough budget
       const selectedCaptain = captains.find(c => c.teamName === selectedTeamForManualAssign);
       if (selectedCaptain && selectedCaptain.budget < price) {
         await alert(`${selectedTeamForManualAssign} doesn't have enough budget. Available: ${selectedCaptain.budget}`, 'Insufficient Budget', 'warning');
         return;
       }
     }
-
-    setShowConfirmModal(false);
 
     const playerNickname = auctionState.current_player_data?.nickname || 'Unknown Player';
 
@@ -685,15 +626,12 @@ export default function Auction() {
     let finalTeamName: string;
     let finalPrice: number;
 
-    // Check if there's a highest bidder or manual assignment
     if (auctionState.highest_bidder_id) {
-      // Normal auction flow with bids
       finalCaptainId = auctionState.highest_bidder_id;
       finalCaptainName = auctionState.highest_bidder_name || '';
       finalTeamName = auctionState.highest_bidder_team || '';
       finalPrice = auctionState.highest_bid || 0;
     } else {
-      // Manual assignment by admin (no bids)
       const selectedCaptain = captains.find(c => c.teamName === selectedTeamForManualAssign);
       if (!selectedCaptain) {
         await alert('Selected team not found', 'Error', 'warning');
@@ -702,10 +640,9 @@ export default function Auction() {
       finalCaptainId = selectedCaptain.playerId;
       finalCaptainName = selectedCaptain.playerNickname;
       finalTeamName = selectedCaptain.teamName;
-      finalPrice = parseInt(manualAssignPrice) || 0; // Use admin-specified price
+      finalPrice = parseInt(manualAssignPrice) || 0;
     }
 
-    // ✅ CHECK 5-PLAYER LIMIT PER TEAM
     const teamPlayerCount = soldPlayers.filter(p => p.teamName === finalTeamName).length;
     if (teamPlayerCount >= 5) {
       await alert(
@@ -716,7 +653,6 @@ export default function Auction() {
       return;
     }
 
-    // Deduct budget from winning captain
     const winningCaptain = captains.find(c => c.playerId === finalCaptainId);
     const newBudget = winningCaptain ? winningCaptain.budget - finalPrice : 0;
     
@@ -724,7 +660,6 @@ export default function Auction() {
       await captainService.updateBudget(finalCaptainId, newBudget);
     }
 
-    // Save to auction results in Supabase
     const { error } = await supabase
       .from('auction_results')
       .insert([{
@@ -737,12 +672,7 @@ export default function Auction() {
         final_price: finalPrice
       }]);
 
-    if (error) {
-      console.error('Error saving auction result:', error);
-    }
-
-    // Send announcement to chat
-    if (auctionState?.id) {
+    if (!error) {
       await auctionChatService.sendMessage(
         auctionState.id,
         'system',
@@ -752,20 +682,16 @@ export default function Auction() {
       );
     }
 
-    // Clear current player from auction
     await AuctionService.setCurrentPlayer('', null);
     
-    // Force immediate reload of all data to ensure UI updates
     await Promise.all([
       loadCaptains(),
       loadSoldPlayers()
     ]);
     
-    // Reset manual assignment selection
     setSelectedTeamForManualAssign('');
     setManualAssignPrice('');
     
-    // Show success modal
     setSuccessMessage(`${playerNickname} assigned to ${finalTeamName}! Budget updated to ${newBudget}.`);
     setShowSuccessModal(true);
   };
@@ -863,102 +789,12 @@ export default function Auction() {
                   {/* New 4-Section Layout - Full Height with Fixed Heights */}
                   <div className="grid grid-cols-1 lg:grid-cols-[280px_1.2fr_380px_280px] gap-3 overflow-hidden" style={{ height: 'calc(100vh - 240px)' }}>
                     
-                    {/* Section 1: Top Bids - Scrollable with Neon Glow */}
-                    <div className="bg-black/40 backdrop-blur-sm rounded-xl p-3 border-2 border-yellow-500/60 flex flex-col overflow-hidden shadow-[0_0_20px_rgba(234,179,8,0.3)]">
-                      <h3 className="text-white font-bold mb-2 text-sm text-center flex-shrink-0">Top Bids</h3>
-                      
-                      {/* Hammer Status - No animation */}
-                      {isHammerActive && hammerStage > 0 && (
-                        <div
-                          className={`mb-3 p-3 rounded-lg text-center font-bold flex-shrink-0 border-2 ${
-                            hammerStage === 1 ? 'bg-yellow-600/30 border-yellow-500' :
-                            hammerStage === 2 ? 'bg-orange-600/30 border-orange-500' :
-                            'bg-green-600/30 border-green-500'
-                          }`}
-                        >
-                          <div className="flex items-center justify-center gap-2">
-                            <Gavel className={`w-5 h-5 ${
-                              hammerStage === 1 ? 'text-yellow-300' :
-                              hammerStage === 2 ? 'text-orange-300' :
-                              'text-green-300'
-                            }`} />
-                            <span className={`text-lg font-extrabold ${
-                              hammerStage === 1 ? 'text-yellow-300' :
-                              hammerStage === 2 ? 'text-orange-300' :
-                              'text-green-300'
-                            }`}>
-                              {hammerStage === 1 ? 'GOING ONCE!' :
-                               hammerStage === 2 ? 'GOING TWICE!' :
-                               'SOLD!'}
-                            </span>
-                          </div>
-                          
-                          {/* Show "Bid Now to Stop!" message for players */}
-                          {hammerStage < 3 && currentCaptainSession && (
-                            <p className="text-xs text-white/80 mt-1">
-                              Bid now to stop the hammer!
-                            </p>
-                          )}
-                        </div>
-                      )}
-                      
-                      <div className="flex-1 overflow-y-auto custom-standings-scroll pr-1 space-y-2" style={{ minHeight: '0' }}>
-                        {bidHistory.length === 0 ? (
-                          <div className="text-gray-400 text-xs text-center py-8">
-                            No bids yet
-                          </div>
-                        ) : (
-                          // Sort bids: highest amount first, then earliest time for ties
-                          [...bidHistory]
-                            .sort((a, b) => {
-                              // First sort by amount (descending)
-                              if (b.amount !== a.amount) {
-                                return b.amount - a.amount;
-                              }
-                              // If amounts are equal, sort by time (ascending - earliest first)
-                              return new Date(a.created_at).getTime() - new Date(b.created_at).getTime();
-                            })
-                            .slice(0, 5)
-                            .map((bid, index) => (
-                            <div
-                              key={bid.id}
-                              className={`relative rounded-lg p-2 border ${
-                                index === 0 
-                                  ? 'bg-gradient-to-br from-yellow-900/50 to-orange-900/50 border-yellow-500/70' 
-                                  : 'bg-gradient-to-br from-gray-900/50 to-gray-800/50 border-gray-600/50'
-                              }`}
-                            >
-                              <div className="relative z-10">
-                                <div className="flex items-center justify-center mb-1">
-                                  {index === 0 && <span className="text-sm mr-1">👑</span>}
-                                  <span className={`text-lg font-bold ${
-                                    index === 0 ? 'text-yellow-300' : 'text-gray-300'
-                                  }`}>
-                                    🪙 {bid.amount}
-                                  </span>
-                                </div>
-                                <div className="text-center">
-                                  <p className={`text-xs font-bold truncate ${
-                                    index === 0 ? 'text-yellow-400' : 'text-gray-400'
-                                  }`}>
-                                    {bid.captain_name}
-                                  </p>
-                                  <p className={`text-xs truncate ${
-                                    index === 0 ? 'text-orange-400' : 'text-gray-500'
-                                  }`}>
-                                    {bid.team_name}
-                                  </p>
-                                  {/* Timestamp */}
-                                  <p className="text-gray-500 text-[0.65rem] mt-1">
-                                    {new Date(bid.created_at).toLocaleTimeString()}
-                                  </p>
-                                </div>
-                              </div>
-                            </div>
-                          ))
-                        )}
-                      </div>
-                    </div>
+                    {/* Section 1: Top Bids - Standalone with own subscription */}
+                    <TopBidsStandalone 
+                      auctionId={auctionState?.id || null}
+                      currentPlayerId={auctionState?.current_player_data?.id || null}
+                      hammerStage={hammerStage}
+                    />
 
                     {/* Center: Current Player - Scrollable with Neon Glow */}
                     <div className="bg-gradient-to-br from-yellow-900/40 to-orange-900/40 backdrop-blur-sm rounded-xl p-3 border-2 border-yellow-500/70 shadow-[0_0_30px_rgba(234,179,8,0.4)] flex flex-col relative overflow-hidden">
@@ -1642,56 +1478,6 @@ export default function Auction() {
           </div>
         </div>
       </div>
-
-      {/* Confirmation Modal */}
-      <AnimatePresence>
-        {showConfirmModal && auctionState && (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            className="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4"
-            onClick={() => setShowConfirmModal(false)}
-          >
-            <motion.div
-              initial={{ scale: 0.9, opacity: 0 }}
-              animate={{ scale: 1, opacity: 1 }}
-              exit={{ scale: 0.9, opacity: 0 }}
-              className="bg-gradient-to-br from-purple-900/90 to-indigo-900/90 rounded-xl p-6 max-w-md w-full border border-purple-500/40"
-              onClick={(e) => e.stopPropagation()}
-            >
-              <h3 className="text-2xl font-bold text-white mb-4">Finalize Assignment?</h3>
-              <p className="text-gray-300 text-sm mb-4">
-                Assign <span className="text-yellow-400 font-bold">{auctionState.current_player_data?.nickname}</span> to{' '}
-                <span className="text-green-400 font-bold">
-                  {auctionState.highest_bidder_team || selectedTeamForManualAssign}
-                </span> for{' '}
-                <span className="text-yellow-400 font-bold">
-                  🪙 {auctionState.highest_bid || manualAssignPrice || '0'}
-                </span>
-                {!auctionState.highest_bidder_id && (
-                  <span className="text-purple-300"> (Manual Assignment)</span>
-                )}
-                ?
-              </p>
-              <div className="flex gap-3 mt-6">
-                <button
-                  onClick={confirmFinalize}
-                  className="flex-1 px-4 py-2 bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-500 hover:to-emerald-500 text-white font-semibold rounded-lg transition-all duration-300"
-                >
-                  Finalize
-                </button>
-                <button
-                  onClick={() => setShowConfirmModal(false)}
-                  className="flex-1 px-4 py-2 bg-gray-600 hover:bg-gray-500 text-white font-semibold rounded-lg transition-all duration-300"
-                >
-                  Cancel
-                </button>
-              </div>
-            </motion.div>
-          </motion.div>
-        )}
-      </AnimatePresence>
 
       {/* Success Modal */}
       <AnimatePresence>

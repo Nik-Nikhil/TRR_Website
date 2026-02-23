@@ -12,7 +12,6 @@ export interface ChatMessage {
 }
 
 class AuctionChatService {
-  // Get all messages for an auction
   async getMessages(auctionId: string): Promise<ChatMessage[]> {
     try {
       const { data, error } = await supabase
@@ -22,18 +21,15 @@ class AuctionChatService {
         .order('created_at', { ascending: true });
 
       if (error) {
-        console.error('Error fetching messages:', error);
         return [];
       }
 
       return data || [];
     } catch (error) {
-      console.error('Error fetching messages:', error);
       return [];
     }
   }
 
-  // Send a message
   async sendMessage(
     auctionId: string,
     senderId: string,
@@ -53,13 +49,11 @@ class AuctionChatService {
         });
 
       if (error) {
-        console.error('Error sending message:', error);
         return false;
       }
 
       return true;
     } catch (error) {
-      console.error('Error sending message:', error);
       return false;
     }
   }
@@ -67,7 +61,6 @@ class AuctionChatService {
   // Subscribe to new messages
   subscribeToMessages(auctionId: string, callback: (message: ChatMessage) => void) {
     const channelName = `auction-chat-${auctionId}-${Date.now()}`;
-    console.log('🔔 Creating chat subscription channel:', channelName);
     
     const channel = supabase
       .channel(channelName)
@@ -80,20 +73,13 @@ class AuctionChatService {
           filter: `auction_id=eq.${auctionId}`
         },
         (payload) => {
-          console.log('📨 Real-time message received via subscription:', payload.new);
           callback(payload.new as ChatMessage);
         }
       )
-      .subscribe((status, err) => {
-        console.log('📡 Chat subscription status:', status);
-        if (err) {
-          console.error('❌ Chat subscription error:', err);
-        }
-      });
+      .subscribe();
 
     return {
       unsubscribe: () => {
-        console.log('🔕 Unsubscribing from chat channel:', channelName);
         supabase.removeChannel(channel);
       }
     };
