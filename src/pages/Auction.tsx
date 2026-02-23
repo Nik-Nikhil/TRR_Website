@@ -53,23 +53,32 @@ export default function Auction() {
   // Ref to track sale execution timeout
   const saleTimeoutRef = useRef<number | null>(null);
 
-  // Sync hammer state from auction state
   // Sync hammer state from database only when not actively running locally
   useEffect(() => {
-    if (auctionState && !isLocalHammerRunning.current) {
-      console.log('🔄 Syncing hammer state from database:', {
-        active: auctionState.hammer_active,
-        stage: auctionState.hammer_stage,
-        countdown: auctionState.hammer_countdown,
-        localRunning: isLocalHammerRunning.current
-      });
+    if (!auctionState) return;
+    
+    // CRITICAL: Never sync stage 3 (SOLD) from database on initial load
+    // Stage 3 should only be reached through local countdown progression
+    if (auctionState.hammer_stage === 3 && !isLocalHammerRunning.current) {
+      // Clear any pending sale timeout
+      if (saleTimeoutRef.current) {
+        window.clearTimeout(saleTimeoutRef.current);
+        saleTimeoutRef.current = null;
+      }
+      // Reset to idle state instead
+      setIsHammerActive(false);
+      setHammerStage(0);
+      setHammerCountdown(6);
+      // Also update database to clear the stale state
+      AuctionService.updateHammerState(false, 0, 6);
+      return;
+    }
+    
+    if (!isLocalHammerRunning.current) {
       // Only sync from database if we're not in the middle of a local countdown
-      // This prevents the subscription from overwriting our local countdown state
       setIsHammerActive(auctionState.hammer_active);
       setHammerStage(auctionState.hammer_stage);
       setHammerCountdown(auctionState.hammer_countdown);
-    } else if (isLocalHammerRunning.current) {
-      console.log('⏸️ Skipping database sync - local hammer is running');
     }
   }, [auctionState]);
 
@@ -222,21 +231,17 @@ export default function Auction() {
     // Load initial messages
     const loadMessages = async () => {
       const messages = await auctionChatService.getMessages(auctionState.id);
-      console.log('💬 Loaded chat messages:', messages.length);
       setChatMessages(messages);
     };
     loadMessages();
 
     // Subscribe to new messages
     const chatSubscription = auctionChatService.subscribeToMessages(auctionState.id, (newMessage) => {
-      console.log('📨 New chat message received:', newMessage);
       setChatMessages(prev => {
         // Avoid duplicates
         if (prev.some(m => m.id === newMessage.id)) {
-          console.log('⚠️ Duplicate message, skipping');
           return prev;
         }
-        console.log('✅ Adding new message to chat (at top)');
         return [newMessage, ...prev]; // Add new message at the beginning (top)
       });
     });
@@ -250,7 +255,6 @@ export default function Auction() {
         const newMessages = messages.filter(m => !prevIds.has(m.id));
         
         if (newMessages.length > 0) {
-          console.log('📥 Polling found', newMessages.length, 'new messages');
           // Add new messages at the top (they're already sorted newest first from DB)
           return [...newMessages, ...prev];
         }
@@ -266,8 +270,29 @@ export default function Auction() {
 
   // Hammer countdown effect - 6 seconds per stage
   useEffect(() => {
+    // CRITICAL: Only run on auction page
+    const currentPath = window.location.pathname;
+    if (!currentPath.includes('/auction')) {
+      // Clear any stale hammer state when not on auction page
+      if (isHammerActive || hammerStage !== 0) {
+        setIsHammerActive(false);
+        setHammerStage(0);
+        setHammerCountdown(6);
+        isLocalHammerRunning.current = false;
+        if (saleTimeoutRef.current) {
+          window.clearTimeout(saleTimeoutRef.current);
+          saleTimeoutRef.current = null;
+        }
+      }
+      return;
+    }
+    
+    // Safety check: don't run hammer logic if no auction state
+    if (!auctionState) {
+      return;
+    }
+    
     if (!isHammerActive || hammerStage === 0) {
-      console.log('🔨 Hammer countdown stopped. Active:', isHammerActive, 'Stage:', hammerStage);
       if (hammerStage === 0) {
         isLocalHammerRunning.current = false;
       }
@@ -276,18 +301,15 @@ export default function Auction() {
 
     // If we're at stage 3 (SOLD), don't do anything - the timeout is already set
     if (hammerStage === 3) {
-      console.log('🔨 At SOLD stage, waiting for sale execution');
       return; // Don't clear the sale timeout
     }
 
     // Mark that we're running a local countdown
     isLocalHammerRunning.current = true;
-    console.log('🔨 Hammer countdown running. Stage:', hammerStage, 'Countdown:', hammerCountdown);
 
     if (hammerCountdown > 0) {
       const timer = setTimeout(() => {
         const newCountdown = hammerCountdown - 1;
-        console.log('⏱️ Countdown tick:', newCountdown, 'Stage:', hammerStage);
         setHammerCountdown(newCountdown);
         // Don't update database on every tick - only on stage changes
       }, 1000);
@@ -296,7 +318,6 @@ export default function Auction() {
       // Countdown finished, move to next stage
       if (hammerStage === 1) {
         // Going Once -> Going Twice (6 seconds)
-        console.log('🔨 Moving from GOING ONCE to GOING TWICE');
         const newStage = 2;
         const newCountdown = 6;
         setHammerStage(newStage);
@@ -305,7 +326,6 @@ export default function Auction() {
         AuctionService.updateHammerState(true, newStage, newCountdown);
       } else if (hammerStage === 2) {
         // Going Twice -> SOLD! (instant execution, no delay)
-        console.log('🔨 Moving from GOING TWICE to SOLD!');
         const newStage = 3;
         setHammerStage(newStage);
         setHammerCountdown(0);
@@ -313,9 +333,7 @@ export default function Auction() {
         AuctionService.updateHammerState(true, newStage, 0);
         // Execute sale after a brief moment to show SOLD animation
         // Store timeout ref so it can be cancelled if a bid comes in
-        console.log('⏰ Setting timeout to execute sale in 0.8s');
         saleTimeoutRef.current = window.setTimeout(() => {
-          console.log('💰 Executing sale now!');
           // Execute sale - timeout will be cleared if a bid comes in
           executeSale();
           saleTimeoutRef.current = null;
@@ -323,18 +341,15 @@ export default function Auction() {
         }, 800); // Just 0.8 seconds to show SOLD
       }
     }
-  }, [isHammerActive, hammerStage, hammerCountdown]);
+  }, [isHammerActive, hammerStage, hammerCountdown, auctionState]);
 
   const loadSoldPlayers = async () => {
     try {
       const state = await AuctionService.getAuctionState();
       if (!state) {
-        console.log('⚠️ No auction state, clearing sold players');
         setSoldPlayers([]);
         return;
       }
-
-      console.log('🔍 Loading sold players for auction:', state.id);
 
       const { data, error } = await supabase
         .from('auction_results')
@@ -343,8 +358,6 @@ export default function Auction() {
         .order('sold_at', { ascending: false });
 
       if (!error && data) {
-        console.log('✅ Loaded sold players:', data.length, 'players');
-        console.log('📊 Sold players data:', data);
         setSoldPlayers(data.map((item: any) => ({
           id: item.id,
           playerId: item.player_id,
@@ -358,11 +371,9 @@ export default function Auction() {
           auctionId: item.auction_id
         })));
       } else if (error) {
-        console.error('❌ Error loading sold players:', error);
         setSoldPlayers([]);
       }
     } catch (error) {
-      console.error('❌ Exception loading sold players:', error);
       setSoldPlayers([]);
     }
   };
@@ -380,26 +391,44 @@ export default function Auction() {
         .order('player_data->currentMMR', { ascending: false });
 
       if (!error && data) {
-        // Filter out current player being auctioned and sold players
+        // Get fresh sold players list
+        const { data: soldData } = await supabase
+          .from('auction_results')
+          .select('player_id')
+          .eq('auction_id', state.id);
+        
+        const soldPlayerIds = soldData?.map(sp => sp.player_id) || [];
         const currentPlayerId = state.current_player_id;
-        const soldPlayerIds = soldPlayers.map(sp => sp.playerId);
         
         const filteredPlayers = data
-          .map((item: any) => item.player_data)
-          .filter((player: any) => {
+          .filter((poolItem: any) => {
+            const playerId = poolItem.player_id;
+            
             // Remove current player being auctioned
-            if (player.id === currentPlayerId) return false;
+            if (playerId === currentPlayerId) {
+              return false;
+            }
             // Remove sold players
-            if (soldPlayerIds.includes(player.id)) return false;
+            if (soldPlayerIds.includes(playerId)) {
+              return false;
+            }
             return true;
-          });
+          })
+          .map((item: any) => item.player_data);
         
         setAllPlayers(filteredPlayers);
       }
     } catch (error) {
-      // Silent error
+      console.error('Error loading players:', error);
     }
   };
+
+  // Reload player pool when a player is sold (if modal is open)
+  useEffect(() => {
+    if (showPlayerPoolModal && playerPoolType) {
+      loadAllPlayers(playerPoolType);
+    }
+  }, [soldPlayers, showPlayerPoolModal, playerPoolType]);
 
   const handleSendMessage = async () => {
     if (!chatInput.trim() || !auctionState?.id) return;
@@ -563,13 +592,11 @@ export default function Auction() {
 
   // Start hammer countdown - 6 seconds for "GOING ONCE!"
   const handleStartHammer = async () => {
-    console.log('🔨 START HAMMER clicked');
     if (!auctionState?.highest_bidder_id && !selectedTeamForManualAssign) {
       alert('No bids placed and no team selected for manual assignment', 'Cannot Start Hammer', 'warning');
       return;
     }
 
-    console.log('🔨 Starting hammer countdown...');
     isLocalHammerRunning.current = true; // Mark that we're starting a local countdown
     setHammerStage(1);
     setHammerCountdown(6); // 6 seconds for GOING ONCE
@@ -577,7 +604,6 @@ export default function Auction() {
     setNewBidDuringHammer(false); // Reset flag
     // Update database
     await AuctionService.updateHammerState(true, 1, 6);
-    console.log('🔨 Hammer started: Stage 1, Countdown 6');
   };
 
   // Cancel hammer countdown
@@ -599,12 +625,21 @@ export default function Auction() {
 
   // Execute the sale after SOLD animation
   const executeSale = async () => {
-    console.log('💰 executeSale called');
-    console.log('💰 saleTimeoutRef.current:', saleTimeoutRef.current);
+    // CRITICAL: Only execute on auction page
+    const currentPath = window.location.pathname;
+    if (!currentPath.includes('/auction')) {
+      isLocalHammerRunning.current = false;
+      return;
+    }
+    
+    // Safety check: ensure we have an auction state
+    if (!auctionState) {
+      isLocalHammerRunning.current = false;
+      return;
+    }
     
     // Double-check that we have a valid bidder or manual assignment before executing
     if (!auctionState?.highest_bidder_id && !selectedTeamForManualAssign) {
-      console.log('⚠️ No valid bidder or manual assignment, canceling sale');
       await alert('Sale canceled: No bids placed and no team selected', 'Cannot Complete Sale', 'warning');
       isLocalHammerRunning.current = false;
       await AuctionService.updateHammerState(false, 0, 6);
@@ -619,9 +654,7 @@ export default function Auction() {
     setIsHammerActive(false);
     setHammerStage(0);
     setHammerCountdown(6);
-    console.log('💰 Calling finalizeSale...');
     await finalizeSale();
-    console.log('💰 finalizeSale completed');
   };
 
   const handleSellPlayer = async () => {
@@ -630,15 +663,9 @@ export default function Auction() {
   };
 
   const finalizeSale = async () => {
-    console.log('🎯 finalizeSale START');
     if (!auctionState) {
-      console.log('❌ No auction state, aborting');
       return;
     }
-
-    console.log('🎯 Auction state:', auctionState);
-    console.log('🎯 Highest bidder:', auctionState.highest_bidder_id);
-    console.log('🎯 Selected team for manual assign:', selectedTeamForManualAssign);
 
     if (!auctionState.highest_bidder_id && !selectedTeamForManualAssign) {
       await alert('Please select a team to assign this player to', 'Selection Required', 'warning');
@@ -665,7 +692,6 @@ export default function Auction() {
     }
 
     const playerNickname = auctionState.current_player_data?.nickname || 'Unknown Player';
-    console.log('🎯 Player nickname:', playerNickname);
 
     let finalCaptainId: string;
     let finalCaptainName: string;
@@ -689,15 +715,7 @@ export default function Auction() {
       finalPrice = parseInt(manualAssignPrice) || 0;
     }
 
-    console.log('🎯 Final assignment:', {
-      captainId: finalCaptainId,
-      captainName: finalCaptainName,
-      teamName: finalTeamName,
-      price: finalPrice
-    });
-
     const teamPlayerCount = soldPlayers.filter(p => p.teamName === finalTeamName).length;
-    console.log('🎯 Current team player count:', teamPlayerCount);
     
     if (teamPlayerCount >= 5) {
       await alert(
@@ -711,12 +729,10 @@ export default function Auction() {
     const winningCaptain = captains.find(c => c.playerId === finalCaptainId);
     const newBudget = winningCaptain ? winningCaptain.budget - finalPrice : 0;
     
-    console.log('🎯 Updating captain budget to:', newBudget);
     if (winningCaptain) {
       await captainService.updateBudget(finalCaptainId, newBudget);
     }
 
-    console.log('🎯 Inserting into auction_results...');
     const { error } = await supabase
       .from('auction_results')
       .insert([{
@@ -730,27 +746,14 @@ export default function Auction() {
       }]);
 
     if (error) {
-      console.error('❌ Failed to insert into auction_results:', error);
       await alert(`Failed to assign player: ${error.message}`, 'Database Error', 'warning');
       return;
     }
 
-    console.log('✅ Player inserted into auction_results successfully');
-    console.log('📊 Inserted data:', {
-      auction_id: auctionState.id,
-      player_id: auctionState.current_player_id,
-      player_nickname: playerNickname,
-      sold_to_captain_id: finalCaptainId,
-      sold_to_captain_name: finalCaptainName,
-      sold_to_team_name: finalTeamName,
-      final_price: finalPrice
-    });
-
     // Send chat message about the sale
     const chatMessage = `✅ ${playerNickname} has been assigned to ${finalTeamName} (Captain: ${finalCaptainName}) for 🪙 ${finalPrice} gold!`;
-    console.log('📨 Sending chat message:', chatMessage);
     
-    const chatResult = await auctionChatService.sendMessage(
+    await auctionChatService.sendMessage(
       auctionState.id,
       'system',
       'Auction System',
@@ -758,18 +761,8 @@ export default function Auction() {
       chatMessage
     );
 
-    console.log('📨 Chat message sent:', chatResult ? 'SUCCESS' : 'FAILED');
-    
-    if (!chatResult) {
-      console.error('❌ Chat message failed to send!');
-    }
-
     // Clear current player
-    console.log('🗑️ Clearing current player...');
     await AuctionService.setCurrentPlayer('', null);
-    console.log('✅ Current player cleared');
-    
-    console.log('🔄 Reloading captains and sold players...');
     
     // Reload captains and sold players to update UI
     await Promise.all([
@@ -777,14 +770,11 @@ export default function Auction() {
       loadSoldPlayers()
     ]);
     
-    console.log('✅ Reload complete');
-    
     setSelectedTeamForManualAssign('');
     setManualAssignPrice('');
     
     setSuccessMessage(`${playerNickname} assigned to ${finalTeamName}! Budget updated to ${newBudget}.`);
     setShowSuccessModal(true);
-    console.log('🎯 finalizeSale END');
   };
 
   const status = auctionState?.status || 'not-started';
@@ -829,9 +819,10 @@ export default function Auction() {
                   {/* Player Pool Buttons */}
                   <div className="ml-auto flex gap-2">
                     <button
-                      onClick={() => {
+                      onClick={async () => {
                         setPlayerPoolType('core');
-                        loadAllPlayers('core');
+                        await loadSoldPlayers();
+                        await loadAllPlayers('core');
                         setShowPlayerPoolModal(true);
                       }}
                       className="px-4 py-2 bg-gradient-to-r from-red-600 to-orange-600 hover:from-red-500 hover:to-orange-500 text-white text-sm font-semibold rounded-lg transition-all duration-300 flex items-center gap-2 shadow-lg"
@@ -842,9 +833,10 @@ export default function Auction() {
                       Core Pool
                     </button>
                     <button
-                      onClick={() => {
+                      onClick={async () => {
                         setPlayerPoolType('support');
-                        loadAllPlayers('support');
+                        await loadSoldPlayers();
+                        await loadAllPlayers('support');
                         setShowPlayerPoolModal(true);
                       }}
                       className="px-4 py-2 bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-500 hover:to-emerald-500 text-white text-sm font-semibold rounded-lg transition-all duration-300 flex items-center gap-2 shadow-lg"
@@ -1273,6 +1265,8 @@ export default function Auction() {
                                 ).length;
                                 const playerCount = teamPlayersCount; // Don't add captain to count
                                 
+                                console.log(`👥 Team ${captain.teamName}: ${playerCount} players`, soldPlayers.filter(p => p.soldToCaptainId === captain.playerId));
+                                
                                 // Standard starting budget
                                 const startingBudget = 1000;
 
@@ -1665,13 +1659,12 @@ export default function Auction() {
                         <td className="py-3 px-3 text-gray-400 font-semibold">{index + 1}</td>
                         <td className="py-3 px-3">
                           <div className="flex items-center gap-2">
-                            <img 
-                              src={player.avatarUrl || '/avatars/default.png'} 
+                            <Avatar
+                              src={player.avatarUrl}
                               alt={player.nickname}
-                              className="w-8 h-8 rounded-full border border-cyan-500/50"
-                              onError={(e) => {
-                                e.currentTarget.src = '/avatars/default.png';
-                              }}
+                              name={player.nickname}
+                              size="sm"
+                              className="border border-cyan-500/50"
                             />
                             <span className="text-white font-semibold">
                               {player.nickname}

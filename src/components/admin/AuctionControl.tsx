@@ -83,6 +83,9 @@ export const AuctionControl = () => {
 
   const loadPoolPlayers = async () => {
     try {
+      // Reload sold players first to get fresh data
+      await loadSoldPlayers();
+      
       const { data, error } = await supabase
         .from('auction_pool')
         .select('*, player_data')
@@ -528,20 +531,23 @@ export const AuctionControl = () => {
               className="w-full p-3 bg-black/60 border border-blue-500/40 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
             >
               <option value="">Select a player...</option>
-              {poolPlayers.map((poolPlayer) => {
-                const player = poolPlayer.player_data;
-                const isSold = soldPlayers.some(sp => sp.player_id === poolPlayer.player_id);
-                return (
-                  <option 
-                    key={poolPlayer.id} 
-                    value={poolPlayer.id}
-                    disabled={isSold}
-                    className={isSold ? 'text-gray-500 line-through' : ''}
-                  >
-                    {isSold ? '✓ SOLD - ' : ''}{player?.nickname || 'Unknown'} - {player?.currentMMR || 'Unranked'} MMR - Base: {poolPlayer.base_price} gold
-                  </option>
-                );
-              })}
+              {poolPlayers
+                .filter((poolPlayer) => {
+                  // Remove sold players completely
+                  const isSold = soldPlayers.some(sp => sp.player_id === poolPlayer.player_id);
+                  return !isSold;
+                })
+                .map((poolPlayer) => {
+                  const player = poolPlayer.player_data;
+                  return (
+                    <option 
+                      key={poolPlayer.id} 
+                      value={poolPlayer.id}
+                    >
+                      {player?.nickname || 'Unknown'} - {player?.currentMMR || 'Unranked'} MMR - Base: {poolPlayer.base_price} gold
+                    </option>
+                  );
+                })}
             </select>
 
             <button
