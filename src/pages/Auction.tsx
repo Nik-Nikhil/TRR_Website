@@ -741,6 +741,17 @@ export default function Auction() {
       console.error('Error saving auction result:', error);
     }
 
+    // Send announcement to chat
+    if (auctionState?.id) {
+      await auctionChatService.sendMessage(
+        auctionState.id,
+        'system',
+        'Auction System',
+        undefined,
+        `✅ ${playerNickname} has been assigned to ${finalTeamName} (Captain: ${finalCaptainName}) for 🪙 ${finalPrice} gold!`
+      );
+    }
+
     // Clear current player from auction
     await AuctionService.setCurrentPlayer('', null);
     
@@ -856,55 +867,21 @@ export default function Auction() {
                     <div className="bg-black/40 backdrop-blur-sm rounded-xl p-3 border-2 border-yellow-500/60 flex flex-col overflow-hidden shadow-[0_0_20px_rgba(234,179,8,0.3)]">
                       <h3 className="text-white font-bold mb-2 text-sm text-center flex-shrink-0">Top Bids</h3>
                       
-                      {/* Hammer Animation - Only this blinks */}
+                      {/* Hammer Status - No animation */}
                       {isHammerActive && hammerStage > 0 && (
-                        <motion.div
-                          initial={{ opacity: 0, scale: 0.8 }}
-                          animate={{ 
-                            opacity: 1, 
-                            scale: 1,
-                          }}
-                          exit={{ opacity: 0, scale: 0.8 }}
-                          className={`mb-3 p-3 rounded-lg text-center font-bold flex-shrink-0 relative overflow-hidden ${
-                            hammerStage === 1 ? 'bg-yellow-600/30' :
-                            hammerStage === 2 ? 'bg-orange-600/30' :
-                            'bg-green-600/30'
+                        <div
+                          className={`mb-3 p-3 rounded-lg text-center font-bold flex-shrink-0 border-2 ${
+                            hammerStage === 1 ? 'bg-yellow-600/30 border-yellow-500' :
+                            hammerStage === 2 ? 'bg-orange-600/30 border-orange-500' :
+                            'bg-green-600/30 border-green-500'
                           }`}
                         >
-                          {/* Animated pulsing border */}
-                          <motion.div
-                            className="absolute inset-0 rounded-lg"
-                            style={{
-                              border: '2px solid',
-                              borderColor: hammerStage === 1 ? '#eab308' : hammerStage === 2 ? '#f97316' : '#22c55e'
-                            }}
-                            animate={{
-                              opacity: [0.5, 1, 0.5],
-                              scale: [1, 1.02, 1],
-                            }}
-                            transition={{
-                              duration: 0.8,
-                              repeat: Infinity,
-                              ease: "easeInOut"
-                            }}
-                          />
-                          
-                          <div className="relative z-10 flex items-center justify-center gap-2">
-                            <motion.div
-                              animate={{
-                                rotate: hammerStage === 3 ? [0, -20, 20, -20, 20, 0] : 0,
-                              }}
-                              transition={{
-                                duration: 0.5,
-                                ease: "easeInOut"
-                              }}
-                            >
-                              <Gavel className={`w-5 h-5 ${
-                                hammerStage === 1 ? 'text-yellow-300' :
-                                hammerStage === 2 ? 'text-orange-300' :
-                                'text-green-300'
-                              }`} />
-                            </motion.div>
+                          <div className="flex items-center justify-center gap-2">
+                            <Gavel className={`w-5 h-5 ${
+                              hammerStage === 1 ? 'text-yellow-300' :
+                              hammerStage === 2 ? 'text-orange-300' :
+                              'text-green-300'
+                            }`} />
                             <span className={`text-lg font-extrabold ${
                               hammerStage === 1 ? 'text-yellow-300' :
                               hammerStage === 2 ? 'text-orange-300' :
@@ -918,15 +895,11 @@ export default function Auction() {
                           
                           {/* Show "Bid Now to Stop!" message for players */}
                           {hammerStage < 3 && currentCaptainSession && (
-                            <motion.p
-                              initial={{ opacity: 0 }}
-                              animate={{ opacity: 1 }}
-                              className="text-xs text-white/80 mt-1"
-                            >
+                            <p className="text-xs text-white/80 mt-1">
                               Bid now to stop the hammer!
-                            </motion.p>
+                            </p>
                           )}
-                        </motion.div>
+                        </div>
                       )}
                       
                       <div className="flex-1 overflow-y-auto custom-standings-scroll pr-1 space-y-2" style={{ minHeight: '0' }}>
@@ -1448,35 +1421,46 @@ export default function Auction() {
                             No messages yet
                           </div>
                         ) : (
-                          chatMessages.map((msg, index) => (
-                            <motion.div
-                              key={msg.id || index}
-                              initial={{ opacity: 0, x: -10 }}
-                              animate={{ opacity: 1, x: 0 }}
-                              className="bg-purple-900/20 border border-purple-500/30 rounded-lg p-2"
-                            >
-                              <div className="flex items-start gap-2">
-                                <div className="flex-1 min-w-0">
-                                  <div className="flex items-center gap-2">
-                                    <p className="text-purple-300 font-semibold text-xs truncate">
-                                      {msg.sender_name}
+                          chatMessages.map((msg, index) => {
+                            const isSystemMessage = msg.sender_id === 'system';
+                            return (
+                              <motion.div
+                                key={msg.id || index}
+                                initial={{ opacity: 0, x: -10 }}
+                                animate={{ opacity: 1, x: 0 }}
+                                className={`rounded-lg p-2 border ${
+                                  isSystemMessage 
+                                    ? 'bg-green-900/20 border-green-500/30' 
+                                    : 'bg-purple-900/20 border-purple-500/30'
+                                }`}
+                              >
+                                <div className="flex items-start gap-2">
+                                  <div className="flex-1 min-w-0">
+                                    <div className="flex items-center gap-2">
+                                      <p className={`font-semibold text-xs truncate ${
+                                        isSystemMessage ? 'text-green-300' : 'text-purple-300'
+                                      }`}>
+                                        {msg.sender_name}
+                                      </p>
+                                      {msg.sender_team && (
+                                        <span className="text-purple-400 text-[0.6rem] bg-purple-900/40 px-1.5 py-0.5 rounded">
+                                          {msg.sender_team}
+                                        </span>
+                                      )}
+                                    </div>
+                                    <p className={`text-xs mt-0.5 break-words ${
+                                      isSystemMessage ? 'text-green-200 font-medium' : 'text-white'
+                                    }`}>
+                                      {msg.message}
                                     </p>
-                                    {msg.sender_team && (
-                                      <span className="text-purple-400 text-[0.6rem] bg-purple-900/40 px-1.5 py-0.5 rounded">
-                                        {msg.sender_team}
-                                      </span>
-                                    )}
+                                    <p className="text-gray-500 text-[0.6rem] mt-1">
+                                      {new Date(msg.created_at).toLocaleTimeString()}
+                                    </p>
                                   </div>
-                                  <p className="text-white text-xs mt-0.5 break-words">
-                                    {msg.message}
-                                  </p>
-                                  <p className="text-gray-500 text-[0.6rem] mt-1">
-                                    {new Date(msg.created_at).toLocaleTimeString()}
-                                  </p>
                                 </div>
-                              </div>
-                            </motion.div>
-                          ))
+                              </motion.div>
+                            );
+                          })
                         )}
                       </div>
                       
