@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Link } from "react-router-dom";
 import { Gavel } from "lucide-react";
@@ -47,6 +47,9 @@ export default function Auction() {
   const [hammerCountdown, setHammerCountdown] = useState(5);
   const [isHammerActive, setIsHammerActive] = useState(false);
   const [newBidDuringHammer, setNewBidDuringHammer] = useState(false);
+  
+  // Ref to track sale execution timeout
+  const saleTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   // Sync hammer state from auction state
   useEffect(() => {
@@ -147,6 +150,11 @@ export default function Auction() {
             // If hammer is active, stop it automatically when new bid comes in
             if (isHammerActive) {
               setNewBidDuringHammer(true);
+              // Clear any pending sale execution
+              if (saleTimeoutRef.current) {
+                clearTimeout(saleTimeoutRef.current);
+                saleTimeoutRef.current = null;
+              }
               // Automatically stop the hammer
               setIsHammerActive(false);
               setHammerStage(0);
@@ -301,11 +309,24 @@ export default function Auction() {
         // Update database and execute sale immediately
         AuctionService.updateHammerState(true, newStage, 0);
         // Execute sale after a brief moment to show SOLD animation
-        setTimeout(() => {
-          executeSale();
+        // Store timeout ref so it can be cancelled if a bid comes in
+        saleTimeoutRef.current = setTimeout(() => {
+          // Double-check hammer is still active before executing sale
+          if (isHammerActive && hammerStage === 3) {
+            executeSale();
+          }
+          saleTimeoutRef.current = null;
         }, 800); // Just 0.8 seconds to show SOLD
       }
     }
+    
+    // Cleanup function to clear timeout if component unmounts or dependencies change
+    return () => {
+      if (saleTimeoutRef.current) {
+        clearTimeout(saleTimeoutRef.current);
+        saleTimeoutRef.current = null;
+      }
+    };
   }, [isHammerActive, hammerStage, hammerCountdown]);
 
   // Reset bid history when current player changes
@@ -593,6 +614,12 @@ export default function Auction() {
 
   // Cancel hammer countdown
   const handleCancelHammer = async () => {
+    // Clear any pending sale execution
+    if (saleTimeoutRef.current) {
+      clearTimeout(saleTimeoutRef.current);
+      saleTimeoutRef.current = null;
+    }
+    
     setHammerStage(0);
     setHammerCountdown(6);
     setIsHammerActive(false);
@@ -922,11 +949,8 @@ export default function Auction() {
                             })
                             .slice(0, 5)
                             .map((bid, index) => (
-                            <motion.div
+                            <div
                               key={bid.id}
-                              initial={{ opacity: 0, scale: 0.9 }}
-                              animate={{ opacity: 1, scale: 1 }}
-                              transition={{ delay: index * 0.1 }}
                               className={`relative rounded-lg p-2 border ${
                                 index === 0 
                                   ? 'bg-gradient-to-br from-yellow-900/50 to-orange-900/50 border-yellow-500/70' 
@@ -959,7 +983,7 @@ export default function Auction() {
                                   </p>
                                 </div>
                               </div>
-                            </motion.div>
+                            </div>
                           ))
                         )}
                       </div>
@@ -1345,11 +1369,11 @@ export default function Auction() {
                             </thead>
                             <tbody>
                               {captains.map((captain, index) => {
-                                // Get team players count from auction results
+                                // Get team players count from auction results (only bought players, not captain)
                                 const teamPlayersCount = soldPlayers.filter(
                                   p => p.soldToCaptainId === captain.playerId
                                 ).length;
-                                const playerCount = teamPlayersCount + 1; // +1 for captain
+                                const playerCount = teamPlayersCount; // Don't add captain to count
                                 
                                 // Standard starting budget
                                 const startingBudget = 1000;
