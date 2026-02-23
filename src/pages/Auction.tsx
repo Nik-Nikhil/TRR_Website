@@ -388,27 +388,32 @@ export default function Auction() {
   const handleSendMessage = async () => {
     if (!chatInput.trim() || !auctionState?.id) return;
     
-    // Check if user is captain or admin
-    if (!currentCaptainSession && !adminSession) return;
-
     let senderId: string;
     let senderName: string;
     let senderTeam: string | undefined;
 
-    if (currentCaptainSession) {
-      // Captain sending message
-      const captainId = currentCaptainSession.playerId || currentCaptainSession.id;
-      const captain = captains.find(c => c.playerId === captainId);
-      
-      senderId = captainId;
-      senderName = currentCaptainSession.nickname;
-      senderTeam = captain?.teamName;
-    } else if (adminSession) {
-      // Admin sending message
+    // Check if user is admin
+    if (adminSession) {
       senderId = adminSession.id || adminSession.username;
       senderName = `Admin: ${adminSession.username}`;
       senderTeam = undefined; // Admins don't have teams
+    } 
+    // Check if user is a captain (not just any player)
+    else if (currentCaptainSession) {
+      const captainId = currentCaptainSession.playerId || currentCaptainSession.id;
+      const captain = captains.find(c => c.playerId === captainId);
+      
+      // Verify this player is actually a captain
+      if (!captain) {
+        console.log('User is not a captain, cannot send message');
+        return;
+      }
+      
+      senderId = captainId;
+      senderName = currentCaptainSession.nickname;
+      senderTeam = captain.teamName;
     } else {
+      // Not authorized
       return;
     }
 
@@ -1454,35 +1459,75 @@ export default function Auction() {
                       </div>
                       
                       {/* Chat Input - Only for captains and admins */}
-                      {(currentCaptainSession || adminSession) ? (
-                        <div className="flex gap-2 flex-shrink-0">
-                          <input
-                            type="text"
-                            value={chatInput}
-                            onChange={(e) => setChatInput(e.target.value)}
-                            onKeyPress={(e) => {
-                              if (e.key === 'Enter' && chatInput.trim()) {
-                                handleSendMessage();
-                              }
-                            }}
-                            placeholder="Type a message..."
-                            className="flex-1 px-2 py-1.5 bg-black/60 border border-purple-500/40 rounded text-white text-xs placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-500"
-                          />
-                          <button
-                            onClick={handleSendMessage}
-                            disabled={!chatInput.trim()}
-                            className="px-3 py-1.5 bg-purple-600 hover:bg-purple-500 disabled:bg-gray-600 disabled:cursor-not-allowed text-white text-xs font-semibold rounded transition-colors"
-                          >
-                            Send
-                          </button>
-                        </div>
-                      ) : (
-                        <div className="bg-gray-800/50 border border-gray-600/50 rounded-lg p-2 text-center flex-shrink-0">
-                          <p className="text-gray-400 text-xs">
-                            🔒 Chat is only available for captains and admins
-                          </p>
-                        </div>
-                      )}
+                      {(() => {
+                        // Check if user is admin
+                        if (adminSession) {
+                          return (
+                            <div className="flex gap-2 flex-shrink-0">
+                              <input
+                                type="text"
+                                value={chatInput}
+                                onChange={(e) => setChatInput(e.target.value)}
+                                onKeyPress={(e) => {
+                                  if (e.key === 'Enter' && chatInput.trim()) {
+                                    handleSendMessage();
+                                  }
+                                }}
+                                placeholder="Type a message..."
+                                className="flex-1 px-2 py-1.5 bg-black/60 border border-purple-500/40 rounded text-white text-xs placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-500"
+                              />
+                              <button
+                                onClick={handleSendMessage}
+                                disabled={!chatInput.trim()}
+                                className="px-3 py-1.5 bg-purple-600 hover:bg-purple-500 disabled:bg-gray-600 disabled:cursor-not-allowed text-white text-xs font-semibold rounded transition-colors"
+                              >
+                                Send
+                              </button>
+                            </div>
+                          );
+                        }
+                        
+                        // Check if user is a captain (not just any player)
+                        if (currentCaptainSession) {
+                          const captainId = currentCaptainSession.playerId || currentCaptainSession.id;
+                          const isCaptain = captains.some(c => c.playerId === captainId);
+                          
+                          if (isCaptain) {
+                            return (
+                              <div className="flex gap-2 flex-shrink-0">
+                                <input
+                                  type="text"
+                                  value={chatInput}
+                                  onChange={(e) => setChatInput(e.target.value)}
+                                  onKeyPress={(e) => {
+                                    if (e.key === 'Enter' && chatInput.trim()) {
+                                      handleSendMessage();
+                                    }
+                                  }}
+                                  placeholder="Type a message..."
+                                  className="flex-1 px-2 py-1.5 bg-black/60 border border-purple-500/40 rounded text-white text-xs placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-500"
+                                />
+                                <button
+                                  onClick={handleSendMessage}
+                                  disabled={!chatInput.trim()}
+                                  className="px-3 py-1.5 bg-purple-600 hover:bg-purple-500 disabled:bg-gray-600 disabled:cursor-not-allowed text-white text-xs font-semibold rounded transition-colors"
+                                >
+                                  Send
+                                </button>
+                              </div>
+                            );
+                          }
+                        }
+                        
+                        // Not a captain or admin - show locked message
+                        return (
+                          <div className="bg-gray-800/50 border border-gray-600/50 rounded-lg p-2 text-center flex-shrink-0">
+                            <p className="text-gray-400 text-xs">
+                              🔒 Chat is only available for captains and admins
+                            </p>
+                          </div>
+                        );
+                      })()}
                     </div>
                   </div>
 
