@@ -245,9 +245,16 @@ export default function Auction() {
     const pollInterval = setInterval(async () => {
       const messages = await auctionChatService.getMessages(auctionState.id);
       setChatMessages(prev => {
-        // Only update if there are new messages
-        if (messages.length > prev.length) {
-          return messages;
+        // Check if there are any new messages by comparing IDs
+        const prevIds = new Set(prev.map(m => m.id));
+        const newMessages = messages.filter(m => !prevIds.has(m.id));
+        
+        if (newMessages.length > 0) {
+          console.log('📥 Polling found', newMessages.length, 'new messages');
+          // Add new messages at the top (they're already sorted newest first from DB)
+          return [...newMessages, ...prev];
+        }
+        return prev;
         }
         return prev;
       });
