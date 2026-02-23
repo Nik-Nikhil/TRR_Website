@@ -49,7 +49,7 @@ export default function Auction() {
   const [newBidDuringHammer, setNewBidDuringHammer] = useState(false);
   
   // Ref to track sale execution timeout
-  const saleTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const saleTimeoutRef = useRef<number | null>(null);
 
   // Sync hammer state from auction state
   useEffect(() => {
@@ -152,7 +152,7 @@ export default function Auction() {
               setNewBidDuringHammer(true);
               // Clear any pending sale execution
               if (saleTimeoutRef.current) {
-                clearTimeout(saleTimeoutRef.current);
+                window.clearTimeout(saleTimeoutRef.current);
                 saleTimeoutRef.current = null;
               }
               // Automatically stop the hammer
@@ -310,11 +310,9 @@ export default function Auction() {
         AuctionService.updateHammerState(true, newStage, 0);
         // Execute sale after a brief moment to show SOLD animation
         // Store timeout ref so it can be cancelled if a bid comes in
-        saleTimeoutRef.current = setTimeout(() => {
-          // Double-check hammer is still active before executing sale
-          if (isHammerActive && hammerStage === 3) {
-            executeSale();
-          }
+        saleTimeoutRef.current = window.setTimeout(() => {
+          // Execute sale - timeout will be cleared if a bid comes in
+          executeSale();
           saleTimeoutRef.current = null;
         }, 800); // Just 0.8 seconds to show SOLD
       }
@@ -323,7 +321,7 @@ export default function Auction() {
     // Cleanup function to clear timeout if component unmounts or dependencies change
     return () => {
       if (saleTimeoutRef.current) {
-        clearTimeout(saleTimeoutRef.current);
+        window.clearTimeout(saleTimeoutRef.current);
         saleTimeoutRef.current = null;
       }
     };
@@ -616,7 +614,7 @@ export default function Auction() {
   const handleCancelHammer = async () => {
     // Clear any pending sale execution
     if (saleTimeoutRef.current) {
-      clearTimeout(saleTimeoutRef.current);
+      window.clearTimeout(saleTimeoutRef.current);
       saleTimeoutRef.current = null;
     }
     
