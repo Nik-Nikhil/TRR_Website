@@ -18,7 +18,7 @@ class AuctionChatService {
         .from('auction_chat')
         .select('*')
         .eq('auction_id', auctionId)
-        .order('created_at', { ascending: true });
+        .order('created_at', { ascending: false }); // Newest first
 
       if (error) {
         return [];

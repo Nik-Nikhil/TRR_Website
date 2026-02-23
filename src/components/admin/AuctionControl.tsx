@@ -17,10 +17,12 @@ export const AuctionControl = () => {
   const [showNameInput, setShowNameInput] = useState(false);
   const [auctionName, setAuctionName] = useState('');
   const [poolPlayers, setPoolPlayers] = useState<any[]>([]);
+  const [soldPlayers, setSoldPlayers] = useState<any[]>([]); // Track sold players
 
   useEffect(() => {
     loadAuctionState();
     loadPoolPlayers();
+    loadSoldPlayers(); // Load sold players
     
     // Subscribe to auction state changes
     const subscription = AuctionService.subscribeToAuctionState((state) => {
@@ -28,8 +30,25 @@ export const AuctionControl = () => {
       setCurrentPlayer(state.current_player_data);
     });
 
+    // Subscribe to sold players changes
+    const soldPlayersChannel = supabase
+      .channel('auction-results-admin')
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'auction_results'
+        },
+        () => {
+          loadSoldPlayers();
+        }
+      )
+      .subscribe();
+
     return () => {
       subscription.unsubscribe();
+      supabase.removeChannel(soldPlayersChannel);
     };
   }, []);
 
@@ -38,6 +57,27 @@ export const AuctionControl = () => {
     if (state) {
       setAuctionStatus(state.status);
       setCurrentPlayer(state.current_player_data);
+    }
+  };
+
+  const loadSoldPlayers = async () => {
+    try {
+      const state = await AuctionService.getAuctionState();
+      if (!state) {
+        setSoldPlayers([]);
+        return;
+      }
+
+      const { data, error } = await supabase
+        .from('auction_results')
+        .select('player_id')
+        .eq('auction_id', state.id);
+
+      if (!error && data) {
+        setSoldPlayers(data);
+      }
+    } catch (error) {
+      console.error('Error loading sold players:', error);
     }
   };
 
@@ -490,9 +530,15 @@ export const AuctionControl = () => {
               <option value="">Select a player...</option>
               {poolPlayers.map((poolPlayer) => {
                 const player = poolPlayer.player_data;
+                const isSold = soldPlayers.some(sp => sp.player_id === poolPlayer.player_id);
                 return (
-                  <option key={poolPlayer.id} value={poolPlayer.id}>
-                    {player?.nickname || 'Unknown'} - {player?.currentMMR || 'Unranked'} MMR - Base: {poolPlayer.base_price} gold
+                  <option 
+                    key={poolPlayer.id} 
+                    value={poolPlayer.id}
+                    disabled={isSold}
+                    className={isSold ? 'text-gray-500 line-through' : ''}
+                  >
+                    {isSold ? '✓ SOLD - ' : ''}{player?.nickname || 'Unknown'} - {player?.currentMMR || 'Unranked'} MMR - Base: {poolPlayer.base_price} gold
                   </option>
                 );
               })}

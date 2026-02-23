@@ -47,15 +47,29 @@ export default function Auction() {
   const [isHammerActive, setIsHammerActive] = useState(false);
   const [newBidDuringHammer, setNewBidDuringHammer] = useState(false);
   
+  // Ref to track if we're in the middle of a local hammer countdown
+  const isLocalHammerRunning = useRef(false);
+  
   // Ref to track sale execution timeout
   const saleTimeoutRef = useRef<number | null>(null);
 
   // Sync hammer state from auction state
+  // Sync hammer state from database only when not actively running locally
   useEffect(() => {
-    if (auctionState) {
+    if (auctionState && !isLocalHammerRunning.current) {
+      console.log('🔄 Syncing hammer state from database:', {
+        active: auctionState.hammer_active,
+        stage: auctionState.hammer_stage,
+        countdown: auctionState.hammer_countdown,
+        localRunning: isLocalHammerRunning.current
+      });
+      // Only sync from database if we're not in the middle of a local countdown
+      // This prevents the subscription from overwriting our local countdown state
       setIsHammerActive(auctionState.hammer_active);
       setHammerStage(auctionState.hammer_stage);
       setHammerCountdown(auctionState.hammer_countdown);
+    } else if (isLocalHammerRunning.current) {
+      console.log('⏸️ Skipping database sync - local hammer is running');
     }
   }, [auctionState]);
 
@@ -222,8 +236,8 @@ export default function Auction() {
           console.log('⚠️ Duplicate message, skipping');
           return prev;
         }
-        console.log('✅ Adding new message to chat');
-        return [...prev, newMessage];
+        console.log('✅ Adding new message to chat (at top)');
+        return [newMessage, ...prev]; // Add new message at the beginning (top)
       });
     });
 
@@ -247,50 +261,63 @@ export default function Auction() {
 
   // Hammer countdown effect - 6 seconds per stage
   useEffect(() => {
-    if (!isHammerActive || hammerStage === 0 || hammerStage === 3) return; // Stop countdown at SOLD stage
+    if (!isHammerActive || hammerStage === 0) {
+      console.log('🔨 Hammer countdown stopped. Active:', isHammerActive, 'Stage:', hammerStage);
+      if (hammerStage === 0) {
+        isLocalHammerRunning.current = false;
+      }
+      return; // Stop countdown
+    }
+
+    // If we're at stage 3 (SOLD), don't do anything - the timeout is already set
+    if (hammerStage === 3) {
+      console.log('🔨 At SOLD stage, waiting for sale execution');
+      return; // Don't clear the sale timeout
+    }
+
+    // Mark that we're running a local countdown
+    isLocalHammerRunning.current = true;
+    console.log('🔨 Hammer countdown running. Stage:', hammerStage, 'Countdown:', hammerCountdown);
 
     if (hammerCountdown > 0) {
-      const timer = setTimeout(async () => {
+      const timer = setTimeout(() => {
         const newCountdown = hammerCountdown - 1;
+        console.log('⏱️ Countdown tick:', newCountdown, 'Stage:', hammerStage);
         setHammerCountdown(newCountdown);
-        // Update database
-        await AuctionService.updateHammerState(isHammerActive, hammerStage, newCountdown);
+        // Don't update database on every tick - only on stage changes
       }, 1000);
       return () => clearTimeout(timer);
     } else {
       // Countdown finished, move to next stage
       if (hammerStage === 1) {
         // Going Once -> Going Twice (6 seconds)
+        console.log('🔨 Moving from GOING ONCE to GOING TWICE');
         const newStage = 2;
         const newCountdown = 6;
         setHammerStage(newStage);
         setHammerCountdown(newCountdown);
-        // Update database
+        // Update database only on stage change
         AuctionService.updateHammerState(true, newStage, newCountdown);
       } else if (hammerStage === 2) {
         // Going Twice -> SOLD! (instant execution, no delay)
+        console.log('🔨 Moving from GOING TWICE to SOLD!');
         const newStage = 3;
         setHammerStage(newStage);
         setHammerCountdown(0);
-        // Update database and execute sale immediately
+        // Update database
         AuctionService.updateHammerState(true, newStage, 0);
         // Execute sale after a brief moment to show SOLD animation
         // Store timeout ref so it can be cancelled if a bid comes in
+        console.log('⏰ Setting timeout to execute sale in 0.8s');
         saleTimeoutRef.current = window.setTimeout(() => {
+          console.log('💰 Executing sale now!');
           // Execute sale - timeout will be cleared if a bid comes in
           executeSale();
           saleTimeoutRef.current = null;
+          isLocalHammerRunning.current = false;
         }, 800); // Just 0.8 seconds to show SOLD
       }
     }
-    
-    // Cleanup function to clear timeout if component unmounts or dependencies change
-    return () => {
-      if (saleTimeoutRef.current) {
-        window.clearTimeout(saleTimeoutRef.current);
-        saleTimeoutRef.current = null;
-      }
-    };
   }, [isHammerActive, hammerStage, hammerCountdown]);
 
   const loadSoldPlayers = async () => {
@@ -517,17 +544,21 @@ export default function Auction() {
 
   // Start hammer countdown - 6 seconds for "GOING ONCE!"
   const handleStartHammer = async () => {
+    console.log('🔨 START HAMMER clicked');
     if (!auctionState?.highest_bidder_id && !selectedTeamForManualAssign) {
       alert('No bids placed and no team selected for manual assignment', 'Cannot Start Hammer', 'warning');
       return;
     }
 
+    console.log('🔨 Starting hammer countdown...');
+    isLocalHammerRunning.current = true; // Mark that we're starting a local countdown
     setHammerStage(1);
     setHammerCountdown(6); // 6 seconds for GOING ONCE
     setIsHammerActive(true);
     setNewBidDuringHammer(false); // Reset flag
     // Update database
     await AuctionService.updateHammerState(true, 1, 6);
+    console.log('🔨 Hammer started: Stage 1, Countdown 6');
   };
 
   // Cancel hammer countdown
@@ -538,6 +569,7 @@ export default function Auction() {
       saleTimeoutRef.current = null;
     }
     
+    isLocalHammerRunning.current = false; // Mark that we're stopping the countdown
     setHammerStage(0);
     setHammerCountdown(6);
     setIsHammerActive(false);
@@ -548,11 +580,16 @@ export default function Auction() {
 
   // Execute the sale after SOLD animation
   const executeSale = async () => {
+    console.log('💰 executeSale called');
+    console.log('💰 saleTimeoutRef.current:', saleTimeoutRef.current);
+    isLocalHammerRunning.current = false; // Mark that countdown is complete
     await AuctionService.updateHammerState(false, 0, 6);
     setIsHammerActive(false);
     setHammerStage(0);
     setHammerCountdown(6);
+    console.log('💰 Calling finalizeSale...');
     await finalizeSale();
+    console.log('💰 finalizeSale completed');
   };
 
   const handleSellPlayer = async () => {
@@ -561,7 +598,15 @@ export default function Auction() {
   };
 
   const finalizeSale = async () => {
-    if (!auctionState) return;
+    console.log('🎯 finalizeSale START');
+    if (!auctionState) {
+      console.log('❌ No auction state, aborting');
+      return;
+    }
+
+    console.log('🎯 Auction state:', auctionState);
+    console.log('🎯 Highest bidder:', auctionState.highest_bidder_id);
+    console.log('🎯 Selected team for manual assign:', selectedTeamForManualAssign);
 
     if (!auctionState.highest_bidder_id && !selectedTeamForManualAssign) {
       await alert('Please select a team to assign this player to', 'Selection Required', 'warning');
@@ -588,6 +633,7 @@ export default function Auction() {
     }
 
     const playerNickname = auctionState.current_player_data?.nickname || 'Unknown Player';
+    console.log('🎯 Player nickname:', playerNickname);
 
     let finalCaptainId: string;
     let finalCaptainName: string;
@@ -611,7 +657,16 @@ export default function Auction() {
       finalPrice = parseInt(manualAssignPrice) || 0;
     }
 
+    console.log('🎯 Final assignment:', {
+      captainId: finalCaptainId,
+      captainName: finalCaptainName,
+      teamName: finalTeamName,
+      price: finalPrice
+    });
+
     const teamPlayerCount = soldPlayers.filter(p => p.teamName === finalTeamName).length;
+    console.log('🎯 Current team player count:', teamPlayerCount);
+    
     if (teamPlayerCount >= 5) {
       await alert(
         `${finalTeamName} already has 5 players!\n\nTeams cannot have more than 5 players.\n\nCurrent roster: ${teamPlayerCount}/5`,
@@ -624,10 +679,12 @@ export default function Auction() {
     const winningCaptain = captains.find(c => c.playerId === finalCaptainId);
     const newBudget = winningCaptain ? winningCaptain.budget - finalPrice : 0;
     
+    console.log('🎯 Updating captain budget to:', newBudget);
     if (winningCaptain) {
       await captainService.updateBudget(finalCaptainId, newBudget);
     }
 
+    console.log('🎯 Inserting into auction_results...');
     const { error } = await supabase
       .from('auction_results')
       .insert([{
@@ -647,20 +704,38 @@ export default function Auction() {
     }
 
     console.log('✅ Player inserted into auction_results successfully');
+    console.log('📊 Inserted data:', {
+      auction_id: auctionState.id,
+      player_id: auctionState.current_player_id,
+      player_nickname: playerNickname,
+      sold_to_captain_id: finalCaptainId,
+      sold_to_captain_name: finalCaptainName,
+      sold_to_team_name: finalTeamName,
+      final_price: finalPrice
+    });
 
     // Send chat message about the sale
+    const chatMessage = `✅ ${playerNickname} has been assigned to ${finalTeamName} (Captain: ${finalCaptainName}) for 🪙 ${finalPrice} gold!`;
+    console.log('📨 Sending chat message:', chatMessage);
+    
     const chatResult = await auctionChatService.sendMessage(
       auctionState.id,
       'system',
       'Auction System',
       undefined,
-      `✅ ${playerNickname} has been assigned to ${finalTeamName} (Captain: ${finalCaptainName}) for 🪙 ${finalPrice} gold!`
+      chatMessage
     );
 
     console.log('📨 Chat message sent:', chatResult ? 'SUCCESS' : 'FAILED');
+    
+    if (!chatResult) {
+      console.error('❌ Chat message failed to send!');
+    }
 
     // Clear current player
+    console.log('🗑️ Clearing current player...');
     await AuctionService.setCurrentPlayer('', null);
+    console.log('✅ Current player cleared');
     
     console.log('🔄 Reloading captains and sold players...');
     
@@ -677,6 +752,7 @@ export default function Auction() {
     
     setSuccessMessage(`${playerNickname} assigned to ${finalTeamName}! Budget updated to ${newBudget}.`);
     setShowSuccessModal(true);
+    console.log('🎯 finalizeSale END');
   };
 
   const status = auctionState?.status || 'not-started';
@@ -1544,53 +1620,87 @@ export default function Auction() {
                     </tr>
                   </thead>
                   <tbody>
-                    {allPlayers.map((player, index) => (
-                      <tr 
-                        key={player.id || index}
-                        className="border-b border-gray-700/50 hover:bg-cyan-500/10 transition-colors"
-                      >
-                        <td className="py-3 px-3 text-gray-400 font-semibold">{index + 1}</td>
-                        <td className="py-3 px-3">
-                          <div className="flex items-center gap-2">
-                            <img 
-                              src={player.avatarUrl || '/avatars/default.png'} 
-                              alt={player.nickname}
-                              className="w-8 h-8 rounded-full border border-cyan-500/50"
-                              onError={(e) => {
-                                e.currentTarget.src = '/avatars/default.png';
-                              }}
-                            />
-                            <span className="text-white font-semibold">{player.nickname}</span>
-                          </div>
-                        </td>
-                        <td className="py-3 px-3 text-center">
-                          <span className="text-purple-300 font-bold">{player.peakMMR || 'N/A'}</span>
-                        </td>
-                        <td className="py-3 px-3 text-center">
-                          <span className="text-cyan-300 font-bold">{player.currentMMR || 'N/A'}</span>
-                        </td>
-                        <td className="py-3 px-3">
-                          <div className="flex items-center justify-center gap-1">
-                            {player.roles && player.roles.length > 0 ? (
-                              player.roles.map((role: any, idx: number) => (
-                                <img
-                                  key={idx}
-                                  src={role.iconSrc}
-                                  alt={role.label}
-                                  title={role.label}
-                                  className="w-5 h-5 object-contain"
-                                />
-                              ))
-                            ) : (
-                              <span className="text-gray-500 text-xs">N/A</span>
-                            )}
-                          </div>
-                        </td>
-                        <td className="py-3 px-3 text-center">
-                          <span className="text-green-300 font-semibold">{player.pingRange || 'N/A'}</span>
-                        </td>
-                      </tr>
-                    ))}
+                    {allPlayers.map((player, index) => {
+                      // Check if this player has been sold
+                      const isSold = soldPlayers.some(sp => sp.playerId === player.id);
+                      
+                      return (
+                        <tr 
+                          key={player.id || index}
+                          className={`border-b border-gray-700/50 transition-colors ${
+                            isSold 
+                              ? 'opacity-40 bg-gray-800/50 cursor-not-allowed' 
+                              : 'hover:bg-cyan-500/10'
+                          }`}
+                        >
+                          <td className="py-3 px-3 text-gray-400 font-semibold">{index + 1}</td>
+                          <td className="py-3 px-3">
+                            <div className="flex items-center gap-2">
+                              <img 
+                                src={player.avatarUrl || '/avatars/default.png'} 
+                                alt={player.nickname}
+                                className={`w-8 h-8 rounded-full border ${
+                                  isSold ? 'border-gray-600 grayscale' : 'border-cyan-500/50'
+                                }`}
+                                onError={(e) => {
+                                  e.currentTarget.src = '/avatars/default.png';
+                                }}
+                              />
+                              <div className="flex flex-col">
+                                <span className={`font-semibold ${
+                                  isSold ? 'text-gray-500 line-through' : 'text-white'
+                                }`}>
+                                  {player.nickname}
+                                </span>
+                                {isSold && (
+                                  <span className="text-xs text-red-400">SOLD</span>
+                                )}
+                              </div>
+                            </div>
+                          </td>
+                          <td className="py-3 px-3 text-center">
+                            <span className={`font-bold ${
+                              isSold ? 'text-gray-600' : 'text-purple-300'
+                            }`}>
+                              {player.peakMMR || 'N/A'}
+                            </span>
+                          </td>
+                          <td className="py-3 px-3 text-center">
+                            <span className={`font-bold ${
+                              isSold ? 'text-gray-600' : 'text-cyan-300'
+                            }`}>
+                              {player.currentMMR || 'N/A'}
+                            </span>
+                          </td>
+                          <td className="py-3 px-3">
+                            <div className="flex items-center justify-center gap-1">
+                              {player.roles && player.roles.length > 0 ? (
+                                player.roles.map((role: any, idx: number) => (
+                                  <img
+                                    key={idx}
+                                    src={role.iconSrc}
+                                    alt={role.label}
+                                    title={role.label}
+                                    className={`w-5 h-5 object-contain ${
+                                      isSold ? 'grayscale opacity-50' : ''
+                                    }`}
+                                  />
+                                ))
+                              ) : (
+                                <span className="text-gray-500 text-xs">N/A</span>
+                              )}
+                            </div>
+                          </td>
+                          <td className="py-3 px-3 text-center">
+                            <span className={`font-semibold ${
+                              isSold ? 'text-gray-600' : 'text-green-300'
+                            }`}>
+                              {player.pingRange || 'N/A'}
+                            </span>
+                          </td>
+                        </tr>
+                      );
+                    })}
                   </tbody>
                 </table>
               </div>
