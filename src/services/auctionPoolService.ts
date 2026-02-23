@@ -87,6 +87,7 @@ class AuctionPoolService {
           auction_id: auctionId,
           player_id: playerId,
           player_data: playerData,
+          player_type: playerData.player_type || 'core',
           is_sold: false
         });
 

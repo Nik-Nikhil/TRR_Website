@@ -8,18 +8,17 @@ import { Avatar } from '../ui/Avatar';
 
 interface AuctionPoolManagementProps {
   auctionId: string;
-  adminUsername: string;
 }
 
 export const AuctionPoolManagement: React.FC<AuctionPoolManagementProps> = ({ 
-  auctionId, 
-  adminUsername 
+  auctionId
 }) => {
   const [poolPlayers, setPoolPlayers] = useState<any[]>([]);
   const [allPlayers, setAllPlayers] = useState<any[]>([]);
   const [showAddModal, setShowAddModal] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedPlayers, setSelectedPlayers] = useState<Set<string>>(new Set());
+  const [playerType, setPlayerType] = useState<'core' | 'support'>('core');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
 
@@ -74,7 +73,7 @@ export const AuctionPoolManagement: React.FC<AuctionPoolManagementProps> = ({
       const result = await auctionPoolService.addPlayerToPool(
         auctionId,
         player.id,
-        player
+        { ...player, player_type: playerType }
       );
 
       if (result.success) {
@@ -302,8 +301,8 @@ export const AuctionPoolManagement: React.FC<AuctionPoolManagementProps> = ({
 
               {/* Modal Body */}
               <div className="flex-1 overflow-hidden flex flex-col p-6">
-                {/* Search */}
-                <div className="mb-4">
+                {/* Search and Player Type */}
+                <div className="mb-4 space-y-3">
                   <div className="relative">
                     <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
                     <input
@@ -314,7 +313,35 @@ export const AuctionPoolManagement: React.FC<AuctionPoolManagementProps> = ({
                       className="w-full pl-12 pr-4 py-3.5 bg-gray-700/50 border border-gray-600/50 rounded-xl text-white text-base placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
                     />
                   </div>
-                  <p className="text-sm text-blue-400 font-medium mt-2.5">
+                  
+                  {/* Player Type Selector */}
+                  <div className="flex items-center gap-3">
+                    <label className="text-white text-sm font-semibold">Add as:</label>
+                    <div className="flex gap-2">
+                      <button
+                        onClick={() => setPlayerType('core')}
+                        className={`px-4 py-2 rounded-lg font-semibold text-sm transition-all ${
+                          playerType === 'core'
+                            ? 'bg-gradient-to-r from-red-600 to-orange-600 text-white shadow-lg'
+                            : 'bg-gray-700/50 text-gray-400 hover:bg-gray-700'
+                        }`}
+                      >
+                        🔥 Core
+                      </button>
+                      <button
+                        onClick={() => setPlayerType('support')}
+                        className={`px-4 py-2 rounded-lg font-semibold text-sm transition-all ${
+                          playerType === 'support'
+                            ? 'bg-gradient-to-r from-green-600 to-emerald-600 text-white shadow-lg'
+                            : 'bg-gray-700/50 text-gray-400 hover:bg-gray-700'
+                        }`}
+                      >
+                        🛡️ Support
+                      </button>
+                    </div>
+                  </div>
+                  
+                  <p className="text-sm text-blue-400 font-medium">
                     {selectedPlayers.size} player(s) selected
                   </p>
                 </div>

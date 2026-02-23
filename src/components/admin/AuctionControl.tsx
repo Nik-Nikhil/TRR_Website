@@ -539,7 +539,7 @@ export const AuctionControl = () => {
           <button
             onClick={async () => {
               const confirmed = await confirm(
-                '⚠️ DELETE ALL DATA?\n\nThis will permanently delete:\n• All captains\n• All bids\n• All results\n• Auction state\n\nThis action CANNOT be undone!\n\nAre you absolutely sure?',
+                '⚠️ DELETE ALL DATA?\n\nThis will permanently delete:\n• All captains\n• All bids\n• All results\n• Auction pool (all players)\n• Auction state\n\nThis action CANNOT be undone!\n\nAre you absolutely sure?',
                 'Delete All Data'
               );
               

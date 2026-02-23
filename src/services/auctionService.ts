@@ -442,7 +442,7 @@ export class AuctionService {
   // Delete all auction-related data
   static async deleteAllAuctionData(): Promise<boolean> {
     try {
-      // Delete in order: bids, results, captains, auctions
+      // Delete in order: bids, results, pool, captains, auctions
       const { error: bidsError } = await supabase
         .from('auction_bids')
         .delete()
@@ -460,6 +460,17 @@ export class AuctionService {
 
       if (resultsError) {
         console.error('Error deleting results:', resultsError);
+        return false;
+      }
+
+      // Delete auction pool
+      const { error: poolError } = await supabase
+        .from('auction_pool')
+        .delete()
+        .neq('id', '00000000-0000-0000-0000-000000000000');
+
+      if (poolError) {
+        console.error('Error deleting auction pool:', poolError);
         return false;
       }
 

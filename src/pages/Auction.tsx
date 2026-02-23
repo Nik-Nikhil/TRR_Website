@@ -1459,35 +1459,61 @@ export default function Auction() {
                       
                       {/* Bid Input */}
                       <div className="max-w-md mx-auto">
-                        <div className="flex gap-2">
-                          <input
-                            type="text"
-                            inputMode="numeric"
-                            pattern="[0-9]*"
-                            value={bidAmount}
-                            onChange={(e) => {
-                              const value = e.target.value.replace(/[^0-9]/g, '');
-                              setBidAmount(value);
-                              setBidError('');
-                            }}
-                            placeholder="Enter bid amount"
-                            className="flex-1 px-4 py-2.5 bg-black/60 border border-yellow-500/40 rounded-lg text-white text-sm font-bold placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-yellow-500 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
-                          />
-                          <button
-                            onClick={handlePlaceBid}
-                            disabled={!bidAmount || status === 'paused' || isBidding || (currentCaptainSession && captains.find(c => c.playerId === (currentCaptainSession.playerId || currentCaptainSession.id))?.budget <= 0)}
-                            className="px-6 py-2.5 bg-gradient-to-r from-yellow-600 to-orange-600 hover:from-yellow-500 hover:to-orange-500 disabled:from-gray-600 disabled:to-gray-700 disabled:cursor-not-allowed text-white font-bold rounded-lg transition-all duration-300 flex items-center justify-center gap-2 shadow-lg flex-shrink-0"
-                          >
-                            <span className="text-base">🪙</span>
-                            <span className="text-sm">{isBidding ? 'BIDDING...' : 'PLACE BID'}</span>
-                          </button>
-                        </div>
-                        {bidError && (
-                          <p className="text-red-400 text-xs mt-2 font-semibold text-center">⚠️ {bidError}</p>
-                        )}
-                        {status === 'paused' && (
-                          <p className="text-yellow-400 text-xs mt-2 text-center">⏸️ Bidding paused</p>
-                        )}
+                        {(() => {
+                          const captainId = currentCaptainSession.playerId || currentCaptainSession.id;
+                          const isHighestBidder = auctionState?.highest_bidder_id === captainId;
+                          const captain = captains.find(c => c.playerId === captainId);
+                          const hasNoBudget = captain && captain.budget <= 0;
+                          
+                          // Show message if captain is highest bidder
+                          if (isHighestBidder) {
+                            return (
+                              <div className="bg-green-900/30 border border-green-500/50 rounded-lg p-4 text-center">
+                                <p className="text-green-300 font-bold text-sm mb-1">✅ You have the highest bid!</p>
+                                <p className="text-green-400/80 text-xs">
+                                  Your bid: <span className="font-bold">🪙 {auctionState?.highest_bid}</span>
+                                </p>
+                                <p className="text-gray-400 text-xs mt-2">
+                                  Wait for another captain to bid before you can bid again
+                                </p>
+                              </div>
+                            );
+                          }
+                          
+                          return (
+                            <>
+                              <div className="flex gap-2">
+                                <input
+                                  type="text"
+                                  inputMode="numeric"
+                                  pattern="[0-9]*"
+                                  value={bidAmount}
+                                  onChange={(e) => {
+                                    const value = e.target.value.replace(/[^0-9]/g, '');
+                                    setBidAmount(value);
+                                    setBidError('');
+                                  }}
+                                  placeholder="Enter bid amount"
+                                  className="flex-1 px-4 py-2.5 bg-black/60 border border-yellow-500/40 rounded-lg text-white text-sm font-bold placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-yellow-500 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                                />
+                                <button
+                                  onClick={handlePlaceBid}
+                                  disabled={!bidAmount || status === 'paused' || isBidding || hasNoBudget}
+                                  className="px-6 py-2.5 bg-gradient-to-r from-yellow-600 to-orange-600 hover:from-yellow-500 hover:to-orange-500 disabled:from-gray-600 disabled:to-gray-700 disabled:cursor-not-allowed text-white font-bold rounded-lg transition-all duration-300 flex items-center justify-center gap-2 shadow-lg flex-shrink-0"
+                                >
+                                  <span className="text-base">🪙</span>
+                                  <span className="text-sm">{isBidding ? 'BIDDING...' : 'PLACE BID'}</span>
+                                </button>
+                              </div>
+                              {bidError && (
+                                <p className="text-red-400 text-xs mt-2 font-semibold text-center">⚠️ {bidError}</p>
+                              )}
+                              {status === 'paused' && (
+                                <p className="text-yellow-400 text-xs mt-2 text-center">⏸️ Bidding paused</p>
+                              )}
+                            </>
+                          );
+                        })()}
                       </div>
                     </motion.div>
                   )}
