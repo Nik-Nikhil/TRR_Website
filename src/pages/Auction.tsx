@@ -69,10 +69,23 @@ export default function Auction() {
       setCurrentCaptainSession(playerSession);
     }
 
-    // Check for admin session
+    // Check for admin session (regular admin or superadmin)
     const admin = AuthService.getCurrentAdminSession();
     if (admin) {
       setAdminSession(admin);
+    } else {
+      // Check for superadmin session
+      const superAdminSessionStr = localStorage.getItem('superAdminSession');
+      if (superAdminSessionStr) {
+        try {
+          const superAdmin = JSON.parse(superAdminSessionStr);
+          if (superAdmin.authenticated) {
+            setAdminSession(superAdmin);
+          }
+        } catch (e) {
+          console.error('Error parsing superadmin session:', e);
+        }
+      }
     }
 
     // Subscribe to auction state changes
@@ -260,7 +273,7 @@ export default function Auction() {
 
   // Hammer countdown effect - 6 seconds per stage
   useEffect(() => {
-    if (!isHammerActive || hammerStage === 0) return;
+    if (!isHammerActive || hammerStage === 0 || hammerStage === 3) return; // Stop countdown at SOLD stage
 
     if (hammerCountdown > 0) {
       const timer = setTimeout(async () => {
@@ -373,10 +386,31 @@ export default function Auction() {
   };
 
   const handleSendMessage = async () => {
-    if (!chatInput.trim() || !currentCaptainSession || !auctionState?.id) return;
+    if (!chatInput.trim() || !auctionState?.id) return;
+    
+    // Check if user is captain or admin
+    if (!currentCaptainSession && !adminSession) return;
 
-    const captainId = currentCaptainSession.playerId || currentCaptainSession.id;
-    const captain = captains.find(c => c.playerId === captainId);
+    let senderId: string;
+    let senderName: string;
+    let senderTeam: string | undefined;
+
+    if (currentCaptainSession) {
+      // Captain sending message
+      const captainId = currentCaptainSession.playerId || currentCaptainSession.id;
+      const captain = captains.find(c => c.playerId === captainId);
+      
+      senderId = captainId;
+      senderName = currentCaptainSession.nickname;
+      senderTeam = captain?.teamName;
+    } else if (adminSession) {
+      // Admin sending message
+      senderId = adminSession.id || adminSession.username;
+      senderName = `Admin: ${adminSession.username}`;
+      senderTeam = undefined; // Admins don't have teams
+    } else {
+      return;
+    }
 
     const messageToSend = chatInput;
     setChatInput(''); // Clear input immediately
@@ -384,9 +418,9 @@ export default function Auction() {
     // Send to database - no optimistic update, let subscription handle it
     const success = await auctionChatService.sendMessage(
       auctionState.id,
-      captainId,
-      currentCaptainSession.nickname,
-      captain?.teamName,
+      senderId,
+      senderName,
+      senderTeam,
       messageToSend
     );
 
@@ -1376,9 +1410,9 @@ export default function Auction() {
                       )}
                     </div>
 
-                    {/* Section 4: Captain Chat - Scrollable with Neon Glow */}
+                    {/* Section 4: Chat - Scrollable with Neon Glow */}
                     <div className="bg-black/40 backdrop-blur-sm rounded-xl p-3 border-2 border-purple-500/60 flex flex-col overflow-hidden shadow-[0_0_20px_rgba(168,85,247,0.3)]">
-                      <h3 className="text-white font-bold mb-2 text-sm text-center flex-shrink-0">Captain Chat</h3>
+                      <h3 className="text-white font-bold mb-2 text-sm text-center flex-shrink-0">Chat</h3>
                       
                       {/* Chat Messages */}
                       <div className="flex-1 overflow-y-auto custom-standings-scroll pr-1 space-y-2 mb-2" style={{ minHeight: '0' }}>
@@ -1419,8 +1453,8 @@ export default function Auction() {
                         )}
                       </div>
                       
-                      {/* Chat Input - Only for captains */}
-                      {currentCaptainSession && (
+                      {/* Chat Input - Only for captains and admins */}
+                      {(currentCaptainSession || adminSession) ? (
                         <div className="flex gap-2 flex-shrink-0">
                           <input
                             type="text"
@@ -1441,6 +1475,12 @@ export default function Auction() {
                           >
                             Send
                           </button>
+                        </div>
+                      ) : (
+                        <div className="bg-gray-800/50 border border-gray-600/50 rounded-lg p-2 text-center flex-shrink-0">
+                          <p className="text-gray-400 text-xs">
+                            🔒 Chat is only available for captains and admins
+                          </p>
                         </div>
                       )}
                     </div>

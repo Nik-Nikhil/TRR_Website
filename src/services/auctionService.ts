@@ -83,6 +83,17 @@ export class AuctionService {
         return true;
       }
 
+      // Clear any existing auction pool before creating new auction
+      const { error: poolError } = await supabase
+        .from('auction_pool')
+        .delete()
+        .neq('id', '00000000-0000-0000-0000-000000000000'); // Delete all
+
+      if (poolError) {
+        console.error('Error clearing auction pool:', poolError);
+        // Continue anyway - don't fail the whole operation
+      }
+
       // Create new auction
       const { error } = await supabase
         .from('auctions')
@@ -114,6 +125,17 @@ export class AuctionService {
     try {
       const state = await this.getAuctionState();
       if (!state) return false;
+
+      // Clear auction pool when completing auction
+      const { error: poolError } = await supabase
+        .from('auction_pool')
+        .delete()
+        .eq('auction_id', state.id);
+
+      if (poolError) {
+        console.error('Error clearing auction pool:', poolError);
+        // Continue anyway - don't fail the whole operation
+      }
 
       const { error } = await supabase
         .from('auctions')
@@ -163,6 +185,17 @@ export class AuctionService {
           return false;
         }
       } else {
+        // Clear auction pool when resetting
+        const { error: poolError } = await supabase
+          .from('auction_pool')
+          .delete()
+          .eq('auction_id', state.id);
+
+        if (poolError) {
+          console.error('Error clearing auction pool:', poolError);
+          // Continue anyway - don't fail the whole operation
+        }
+
         const { error } = await supabase
           .from('auctions')
           .update({

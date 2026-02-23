@@ -1058,8 +1058,7 @@ export default function SuperAdminDashboard() {
       {/* Auction Pool Management */}
       {auctionState?.id ? (
         <AuctionPoolManagement 
-          auctionId={auctionState.id} 
-          adminUsername={currentSuperAdmin?.username || 'superadmin'} 
+          auctionId={auctionState.id}
         />
       ) : (
         <div className="bg-black/60 backdrop-blur-sm rounded-xl border border-blue-500/40 p-8">
