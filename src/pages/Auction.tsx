@@ -16,7 +16,6 @@ import { TopBidsStandalone } from "../components/auction/TopBidsStandalone";
 export default function Auction() {
   const { alert, ModalComponent } = useModal();
   const [auctionState, setAuctionState] = useState<AuctionState | null>(null);
-  const [bidHistory, setBidHistory] = useState<any[]>([]);
   const [bidAmount, setBidAmount] = useState('');
   const [currentCaptainSession, setCurrentCaptainSession] = useState<any>(null);
   const [captains, setCaptains] = useState<any[]>([]);
@@ -219,17 +218,21 @@ export default function Auction() {
     // Load initial messages
     const loadMessages = async () => {
       const messages = await auctionChatService.getMessages(auctionState.id);
+      console.log('💬 Loaded chat messages:', messages.length);
       setChatMessages(messages);
     };
     loadMessages();
 
     // Subscribe to new messages
     const chatSubscription = auctionChatService.subscribeToMessages(auctionState.id, (newMessage) => {
+      console.log('📨 New chat message received:', newMessage);
       setChatMessages(prev => {
         // Avoid duplicates
         if (prev.some(m => m.id === newMessage.id)) {
+          console.log('⚠️ Duplicate message, skipping');
           return prev;
         }
+        console.log('✅ Adding new message to chat');
         return [...prev, newMessage];
       });
     });
@@ -313,9 +316,12 @@ export default function Auction() {
     try {
       const state = await AuctionService.getAuctionState();
       if (!state) {
+        console.log('⚠️ No auction state, clearing sold players');
         setSoldPlayers([]);
         return;
       }
+
+      console.log('🔍 Loading sold players for auction:', state.id);
 
       const { data, error } = await supabase
         .from('auction_results')
@@ -324,6 +330,8 @@ export default function Auction() {
         .order('sold_at', { ascending: false });
 
       if (!error && data) {
+        console.log('✅ Loaded sold players:', data.length, 'players');
+        console.log('📊 Sold players data:', data);
         setSoldPlayers(data.map((item: any) => ({
           id: item.id,
           playerId: item.player_id,
@@ -337,9 +345,11 @@ export default function Auction() {
           auctionId: item.auction_id
         })));
       } else if (error) {
+        console.error('❌ Error loading sold players:', error);
         setSoldPlayers([]);
       }
     } catch (error) {
+      console.error('❌ Exception loading sold players:', error);
       setSoldPlayers([]);
     }
   };
@@ -672,22 +682,37 @@ export default function Auction() {
         final_price: finalPrice
       }]);
 
-    if (!error) {
-      await auctionChatService.sendMessage(
-        auctionState.id,
-        'system',
-        'Auction System',
-        undefined,
-        `✅ ${playerNickname} has been assigned to ${finalTeamName} (Captain: ${finalCaptainName}) for 🪙 ${finalPrice} gold!`
-      );
+    if (error) {
+      console.error('❌ Failed to insert into auction_results:', error);
+      await alert(`Failed to assign player: ${error.message}`, 'Database Error', 'error');
+      return;
     }
 
+    console.log('✅ Player inserted into auction_results successfully');
+
+    // Send chat message about the sale
+    const chatResult = await auctionChatService.sendMessage(
+      auctionState.id,
+      'system',
+      'Auction System',
+      undefined,
+      `✅ ${playerNickname} has been assigned to ${finalTeamName} (Captain: ${finalCaptainName}) for 🪙 ${finalPrice} gold!`
+    );
+
+    console.log('📨 Chat message sent:', chatResult ? 'SUCCESS' : 'FAILED');
+
+    // Clear current player
     await AuctionService.setCurrentPlayer('', null);
     
+    console.log('🔄 Reloading captains and sold players...');
+    
+    // Reload captains and sold players to update UI
     await Promise.all([
       loadCaptains(),
       loadSoldPlayers()
     ]);
+    
+    console.log('✅ Reload complete');
     
     setSelectedTeamForManualAssign('');
     setManualAssignPrice('');
