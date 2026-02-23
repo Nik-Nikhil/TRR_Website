@@ -98,9 +98,8 @@ export default function Auction() {
       
       setAuctionState(state);
       
-      // When player changes, clear bid history
+      // When player changes, poll bids for the new player
       if (oldPlayerId !== newPlayerId) {
-        setBidHistory([]);
         // Only poll bids when player actually changes
         if (state.id && newPlayerId) {
           await pollBidsForCurrentAuction(state.id);
@@ -137,31 +136,22 @@ export default function Auction() {
             return;
           }
           
-          // Add bid to history
-          setBidHistory(prev => {
-            // Check if bid already exists to avoid duplicates
-            if (prev.some(b => b.id === bid.id)) {
-              return prev;
+          // If hammer is active, stop it automatically when new bid comes in
+          if (isHammerActive) {
+            setNewBidDuringHammer(true);
+            // Clear any pending sale execution
+            if (saleTimeoutRef.current) {
+              window.clearTimeout(saleTimeoutRef.current);
+              saleTimeoutRef.current = null;
             }
-            
-            // If hammer is active, stop it automatically when new bid comes in
-            if (isHammerActive) {
-              setNewBidDuringHammer(true);
-              // Clear any pending sale execution
-              if (saleTimeoutRef.current) {
-                window.clearTimeout(saleTimeoutRef.current);
-                saleTimeoutRef.current = null;
-              }
-              // Automatically stop the hammer
-              setIsHammerActive(false);
-              setHammerStage(0);
-              setHammerCountdown(6);
-              // Update database
-              AuctionService.updateHammerState(false, 0, 6);
-            }
-            
-            return [bid, ...prev];
-          });
+            // Automatically stop the hammer
+            setIsHammerActive(false);
+            setHammerStage(0);
+            setHammerCountdown(6);
+            // Update database
+            AuctionService.updateHammerState(false, 0, 6);
+          }
+          
           // Reload auction state to get updated highest bid
           loadAuctionState();
         }
@@ -303,15 +293,6 @@ export default function Auction() {
     };
   }, [isHammerActive, hammerStage, hammerCountdown]);
 
-  // Reset bid history when current player changes
-  useEffect(() => {
-    const currentPlayerId = auctionState?.current_player_data?.id;
-    if (currentPlayerId) {
-      // Clear bid history for new player - bids start fresh for each player
-      setBidHistory([]);
-    }
-  }, [auctionState?.current_player_data?.id]);
-
   const loadSoldPlayers = async () => {
     try {
       const state = await AuctionService.getAuctionState();
@@ -441,7 +422,6 @@ export default function Auction() {
       const hasCurrentPlayer = currentState?.current_player_id || currentState?.current_player_data?.id;
       
       if (!hasCurrentPlayer) {
-        setBidHistory([]);
         return;
       }
 
@@ -455,19 +435,15 @@ export default function Auction() {
         const currentPlayerId = currentState.current_player_id;
         const currentPlayerDataId = currentState.current_player_data?.id;
         
+        // Filter bids for current player (not used for display, just for validation)
         const filteredBids = data.filter(bid => {
           return bid.player_id === currentPlayerId || 
                  bid.player_id === currentPlayerDataId ||
                  (currentState.current_player_data && 
                   bid.player_id === currentState.current_player_data.id);
         });
-
-        setBidHistory(prev => {
-          if (JSON.stringify(prev) !== JSON.stringify(filteredBids)) {
-            return filteredBids;
-          }
-          return prev;
-        });
+        
+        // Bids are now handled by TopBidsStandalone component
       }
     } catch (error) {
       // Silent error
