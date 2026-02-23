@@ -415,7 +415,7 @@ export default function Auction() {
     // Bids will be populated by the real-time subscription
   };
 
-  const pollBidsForCurrentAuction = async (auctionId: string) => {
+  const pollBidsForCurrentAuction = async (_auctionId: string) => {
     try {
       const currentState = await AuctionService.getAuctionState();
       
