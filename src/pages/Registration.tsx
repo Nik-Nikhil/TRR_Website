@@ -41,8 +41,68 @@ export default function Registration() {
   const [inGameName, setInGameName] = useState('');
   const [showMMRUpload, setShowMMRUpload] = useState(false);
   const [selectedRoles, setSelectedRoles] = useState<string[]>([]);
+  const [playerType, setPlayerType] = useState<'core' | 'support' | ''>('');
   const [currentStep, setCurrentStep] = useState(1);
-  const totalSteps = 8;
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [showSuccessModal, setShowSuccessModal] = useState(false);
+  const totalSteps = 9;
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    if (!selectedPlayer || !playerType) {
+      alert('Please complete all required fields');
+      return;
+    }
+
+    setIsSubmitting(true);
+
+    try {
+      // Get current season from registration settings
+      const { default: registrationService } = await import('../services/registrationService');
+      const currentSeason = await registrationService.getCurrentSeason();
+
+      // Import the registration request service
+      const { default: registrationRequestService } = await import('../services/registrationRequestService');
+
+      // Prepare form data
+      const formData = {
+        player_id: selectedPlayer.id,
+        player_nickname: selectedPlayer.nickname,
+        player_data: selectedPlayer,
+        in_game_name: inGameName,
+        discord_username: '', // Get from form
+        whatsapp_number: '', // Get from form
+        current_mmr: parseInt(currentMMR) || 0,
+        player_type: playerType as 'core' | 'support',
+        selected_roles: selectedRoles,
+        ping_range: '', // Get from form
+        is_captain_available: false, // Get from form
+        season_number: currentSeason,
+        mmr_proof_url: '', // Upload to storage if needed
+        mmr_changed: showMMRUpload
+      };
+
+      // Submit registration request
+      const result = await registrationRequestService.submitRegistration(formData);
+
+      if (result.success) {
+        setShowSuccessModal(true);
+      } else {
+        alert(`❌ Registration failed: ${result.error}`);
+      }
+    } catch (error) {
+      console.error('Registration error:', error);
+      alert('❌ An error occurred during registration. Please try again.');
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  const handleCloseSuccessModal = () => {
+    setShowSuccessModal(false);
+    handleBackToSelection();
+  };
 
   const handlePlayerSelect = (player: Player) => {
     setSelectedPlayer(player);
@@ -59,6 +119,7 @@ export default function Registration() {
     setInGameName('');
     setShowMMRUpload(false);
     setSelectedRoles([]);
+    setPlayerType('');
     setCurrentStep(1);
   };
 
@@ -76,7 +137,9 @@ export default function Registration() {
 
   const canProceedToNext = () => {
     switch (currentStep) {
-      case 3: // Roles step
+      case 3: // Player Type step
+        return playerType !== '';
+      case 4: // Roles step
         return selectedRoles.length === 3;
       default:
         return true;
@@ -231,7 +294,7 @@ export default function Registration() {
                       </div>
 
                       {/* Registration Form */}
-                      <form className="space-y-2">
+                      <form className="space-y-2" onSubmit={handleSubmit}>
                         {/* Step 1: Player Information */}
                         {currentStep === 1 && (
                           <div className="bg-slate-800/50 border border-slate-600/50 rounded-lg p-2">
@@ -378,8 +441,117 @@ export default function Registration() {
                           </div>
                         )}
 
-                        {/* Step 3: Preferred Roles */}
+                        {/* Step 3: Player Type Selection */}
                         {currentStep === 3 && (
+                          <div className="bg-slate-800/50 border border-slate-600/50 rounded-lg p-6">
+                            <div className="text-center mb-6">
+                              <div className="inline-flex items-center gap-3 px-4 py-2 bg-gradient-to-r from-purple-600/20 to-pink-600/20 border border-purple-500/30 rounded-full">
+                                <div className="w-2 h-2 bg-purple-400 rounded-full"></div>
+                                <h3 className="text-lg font-bold bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent">
+                                  Player Type <span className="text-red-400">*</span>
+                                </h3>
+                                <div className="w-2 h-2 bg-pink-400 rounded-full"></div>
+                              </div>
+                            </div>
+                            
+                            <p className="text-slate-300 text-sm text-center mb-6">
+                              Choose your player type. This determines which auction pool you'll be placed in.
+                            </p>
+
+                            <div className="grid md:grid-cols-2 gap-4 max-w-3xl mx-auto">
+                              {/* Core Player Option */}
+                              <label className="relative block cursor-pointer">
+                                <input
+                                  type="radio"
+                                  name="playerType"
+                                  value="core"
+                                  checked={playerType === 'core'}
+                                  onChange={(e) => setPlayerType(e.target.value as 'core' | 'support')}
+                                  className="sr-only peer"
+                                />
+                                <div className={`relative flex flex-col items-center gap-4 p-6 border-2 rounded-xl transition-all ${
+                                  playerType === 'core'
+                                    ? 'bg-orange-600/20 border-orange-500/50 shadow-lg shadow-orange-500/20'
+                                    : 'bg-slate-800/50 border-slate-600/50 hover:bg-slate-700/50 hover:border-slate-500/50'
+                                }`}>
+                                  <div className="text-6xl">⚔️</div>
+                                  <div className="text-center">
+                                    <h4 className="text-xl font-bold text-orange-400 mb-2">Core Player</h4>
+                                    <p className="text-slate-300 text-sm mb-3">
+                                      Positions 1, 2, 3 (Carry, Mid, Offlane)
+                                    </p>
+                                    <ul className="text-slate-400 text-xs space-y-1 text-left">
+                                      <li>• Primary damage dealers</li>
+                                      <li>• Farm-dependent heroes</li>
+                                      <li>• Late game impact</li>
+                                      <li>• Requires high mechanical skill</li>
+                                    </ul>
+                                  </div>
+                                  {playerType === 'core' && (
+                                    <div className="absolute -top-2 -right-2 w-8 h-8 bg-orange-500 text-white rounded-full flex items-center justify-center">
+                                      ✓
+                                    </div>
+                                  )}
+                                </div>
+                              </label>
+
+                              {/* Support Player Option */}
+                              <label className="relative block cursor-pointer">
+                                <input
+                                  type="radio"
+                                  name="playerType"
+                                  value="support"
+                                  checked={playerType === 'support'}
+                                  onChange={(e) => setPlayerType(e.target.value as 'core' | 'support')}
+                                  className="sr-only peer"
+                                />
+                                <div className={`relative flex flex-col items-center gap-4 p-6 border-2 rounded-xl transition-all ${
+                                  playerType === 'support'
+                                    ? 'bg-cyan-600/20 border-cyan-500/50 shadow-lg shadow-cyan-500/20'
+                                    : 'bg-slate-800/50 border-slate-600/50 hover:bg-slate-700/50 hover:border-slate-500/50'
+                                }`}>
+                                  <div className="text-6xl">🛡️</div>
+                                  <div className="text-center">
+                                    <h4 className="text-xl font-bold text-cyan-400 mb-2">Support Player</h4>
+                                    <p className="text-slate-300 text-sm mb-3">
+                                      Positions 4, 5 (Soft Support, Hard Support)
+                                    </p>
+                                    <ul className="text-slate-400 text-xs space-y-1 text-left">
+                                      <li>• Enable team success</li>
+                                      <li>• Vision and map control</li>
+                                      <li>• Early game impact</li>
+                                      <li>• Strategic decision making</li>
+                                    </ul>
+                                  </div>
+                                  {playerType === 'support' && (
+                                    <div className="absolute -top-2 -right-2 w-8 h-8 bg-cyan-500 text-white rounded-full flex items-center justify-center">
+                                      ✓
+                                    </div>
+                                  )}
+                                </div>
+                              </label>
+                            </div>
+
+                            {!playerType && (
+                              <div className="text-center mt-4 p-3 bg-blue-900/20 border border-blue-500/30 rounded-lg">
+                                <p className="text-blue-300 text-sm font-medium">
+                                  ℹ️ Please select your player type to continue
+                                </p>
+                              </div>
+                            )}
+
+                            {playerType && (
+                              <div className="text-center mt-4 p-3 bg-green-900/20 border border-green-500/30 rounded-lg">
+                                <p className="text-green-300 text-sm font-medium">
+                                  ✅ You selected: {playerType === 'core' ? 'Core Player' : 'Support Player'}
+                                </p>
+                              </div>
+                            )}
+                          </div>
+                        )}
+
+                        {/* Step 4: Preferred Roles */}
+                        {currentStep === 4 && (
                           <div className="bg-slate-800/50 border border-slate-600/50 rounded-lg p-6">
                             <div className="text-center mb-6">
                               <div className="inline-flex items-center gap-3 px-4 py-2 bg-gradient-to-r from-orange-600/20 to-yellow-600/20 border border-orange-500/30 rounded-full">
@@ -503,8 +675,8 @@ export default function Registration() {
                           </div>
                         )}
 
-                        {/* Step 4: Captain Availability */}
-                        {currentStep === 4 && (
+                        {/* Step 5: Captain Availability */}
+                        {currentStep === 5 && (
                           <div className="bg-slate-800/50 border border-slate-600/50 rounded-lg p-6">
                             <div className="text-center mb-6">
                               <div className="inline-flex items-center gap-3 px-4 py-2 bg-gradient-to-r from-green-600/20 to-emerald-600/20 border border-green-500/30 rounded-full">
@@ -565,8 +737,8 @@ export default function Registration() {
                           </div>
                         )}
 
-                        {/* Step 5: Notes for Captain */}
-                        {currentStep === 5 && (
+                        {/* Step 6: Notes for Captain */}
+                        {currentStep === 6 && (
                           <div className="bg-slate-800/50 border border-slate-600/50 rounded-lg p-6">
                             <div className="text-center mb-6">
                               <div className="inline-flex items-center gap-3 px-4 py-2 bg-gradient-to-r from-indigo-600/20 to-purple-600/20 border border-indigo-500/30 rounded-full">
@@ -588,8 +760,8 @@ export default function Registration() {
                           </div>
                         )}
 
-                        {/* Step 6: Connection Info */}
-                        {currentStep === 6 && (
+                        {/* Step 7: Connection Info */}
+                        {currentStep === 7 && (
                           <div className="bg-slate-800/50 border border-slate-600/50 rounded-lg p-6">
                             <div className="text-center mb-6">
                               <div className="inline-flex items-center gap-3 px-4 py-2 bg-gradient-to-r from-red-600/20 to-orange-600/20 border border-red-500/30 rounded-full">
@@ -662,8 +834,8 @@ export default function Registration() {
                           </div>
                         )}
 
-                        {/* Step 7: Payment */}
-                        {currentStep === 7 && (
+                        {/* Step 8: Payment */}
+                        {currentStep === 8 && (
                           <div className="bg-slate-800/50 border border-slate-600/50 rounded-lg p-6">
                             <div className="text-center mb-6">
                               <div className="inline-flex items-center gap-3 px-4 py-2 bg-gradient-to-r from-yellow-600/20 to-orange-600/20 border border-yellow-500/30 rounded-full">
@@ -789,8 +961,8 @@ export default function Registration() {
                           </div>
                         )}
 
-                        {/* Step 8: Terms & Conditions and Feedback */}
-                        {currentStep === 8 && (
+                        {/* Step 9: Terms & Conditions and Feedback */}
+                        {currentStep === 9 && (
                           <>
                             {/* Terms and Conditions Section */}
                             <div className="bg-slate-800/50 border border-slate-600/50 rounded-lg p-6">
@@ -926,9 +1098,10 @@ export default function Registration() {
                           ) : (
                             <button
                               type="submit"
-                              className="flex items-center gap-1 bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-600 hover:to-emerald-600 text-white font-bold py-2 px-4 rounded-lg transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-xl text-sm cursor-pointer"
+                              disabled={isSubmitting}
+                              className="flex items-center gap-1 bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-600 hover:to-emerald-600 disabled:opacity-50 disabled:cursor-not-allowed text-white font-bold py-2 px-4 rounded-lg transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-xl text-sm cursor-pointer"
                             >
-                              Complete Registration
+                              {isSubmitting ? 'Submitting...' : 'Complete Registration'}
                               <CheckCircle className="w-3 h-3" />
                             </button>
                           )}
@@ -1111,6 +1284,51 @@ export default function Registration() {
       
       </div>
       </main>
+
+      {/* Success Modal */}
+      {showSuccessModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm">
+          <div className="bg-gradient-to-br from-slate-900 to-slate-800 rounded-2xl p-8 max-w-md w-full border border-green-500/30 shadow-2xl shadow-green-500/20 animate-in fade-in zoom-in duration-300">
+            {/* Success Icon */}
+            <div className="text-center mb-6">
+              <div className="w-20 h-20 bg-gradient-to-br from-green-500 to-emerald-500 rounded-full flex items-center justify-center mx-auto mb-4 animate-bounce">
+                <CheckCircle className="w-12 h-12 text-white" />
+              </div>
+              <h2 className="text-2xl font-bold text-white mb-2">Registration Submitted!</h2>
+              <div className="w-16 h-1 bg-gradient-to-r from-green-500 to-emerald-500 mx-auto rounded-full"></div>
+            </div>
+
+            {/* Message */}
+            <div className="bg-slate-800/50 rounded-lg p-4 mb-6 border border-green-500/20">
+              <p className="text-green-300 text-center mb-3">
+                ✅ Your registration has been submitted successfully!
+              </p>
+              <p className="text-slate-300 text-sm text-center">
+                Your registration is pending admin approval. You will be notified once it has been reviewed.
+              </p>
+            </div>
+
+            {/* Info Box */}
+            <div className="bg-blue-900/20 border border-blue-500/30 rounded-lg p-4 mb-6">
+              <h3 className="text-blue-300 font-semibold text-sm mb-2">What happens next?</h3>
+              <ul className="text-slate-300 text-xs space-y-1">
+                <li>• Admin will review your registration</li>
+                <li>• You'll be notified of approval/denial</li>
+                <li>• If approved, you'll be added to the auction pool</li>
+                <li>• Check your profile for updates</li>
+              </ul>
+            </div>
+
+            {/* Close Button */}
+            <button
+              onClick={handleCloseSuccessModal}
+              className="w-full bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-600 hover:to-emerald-600 text-white font-bold py-3 px-6 rounded-lg transition-all duration-300 transform hover:scale-105 shadow-lg"
+            >
+              OK
+            </button>
+          </div>
+        </div>
+      )}
     </>
   );
 }

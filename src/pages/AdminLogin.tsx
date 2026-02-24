@@ -81,11 +81,12 @@ export default function AdminLogin() {
           if (orderA !== orderB) return orderA - orderB;
           
           // If both are new admins (not in fixed order), sort by creation date
-          const dateA = dbAdmins.find(d => d.username.toLowerCase() === a.id)?.createdAt || '';
-          const dateB = dbAdmins.find(d => d.username.toLowerCase() === b.id)?.createdAt || '';
+          const dateA = dbAdmins.find(d => d.username === a.id)?.createdAt || '';
+          const dateB = dbAdmins.find(d => d.username === b.id)?.createdAt || '';
           return new Date(dateA).getTime() - new Date(dateB).getTime();
         });
 
+        console.log('Loaded admins:', activeAdmins.map(a => ({ id: a.id, name: a.name })));
         setAdminData(activeAdmins);
       } catch (err) {
         console.error('Failed to load admins:', err);
@@ -112,30 +113,49 @@ export default function AdminLogin() {
     setError('');
 
     try {
+      console.log('Attempting login for:', selectedAdmin);
+      console.log('Available admins:', adminData.map(a => ({ id: a.id, name: a.name })));
+      
+      // Find admin in loaded data
       const admin = adminData.find(a => a.id === selectedAdmin);
       if (!admin) {
-        setError('Admin not found');
+        console.error('Admin not found in adminData. Selected:', selectedAdmin);
+        setError('Admin not found in loaded data. Please refresh the page.');
         setIsLoading(false);
         return;
       }
+
+      console.log('Found admin:', { id: admin.id, name: admin.name, role: admin.role });
 
       // Authenticate with database service
       const result = await AuthService.loginAdmin(selectedAdmin, password);
       
       if (!result.success) {
-        setError(result.error);
+        setError(result.error || 'Invalid password');
         setIsLoading(false);
         return;
       }
 
-      // Special handling for super admins (Founder role) - redirect to SuperAdmin Dashboard
-      if (admin.isSuperAdmin) {
+      // Fetch fresh admin data from database to check role
+      const dbAdmins = await adminService.getAdmins();
+      const dbAdmin = dbAdmins.find(a => a.username === selectedAdmin);
+      
+      if (!dbAdmin) {
+        setError('Admin not found in database');
+        setIsLoading(false);
+        return;
+      }
+
+      // Check if super admin (Founder role)
+      const isSuperAdmin = dbAdmin.role === 'Founder';
+
+      if (isSuperAdmin) {
         // Set super admin session
         localStorage.setItem('superAdminSession', JSON.stringify({
           authenticated: true,
           loginTime: new Date().toISOString(),
           type: 'superadmin',
-          role: admin.role,
+          role: dbAdmin.role,
           username: selectedAdmin
         }));
         

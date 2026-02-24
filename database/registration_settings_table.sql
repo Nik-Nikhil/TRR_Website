@@ -3,6 +3,7 @@ CREATE TABLE IF NOT EXISTS registration_settings (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   is_enabled BOOLEAN NOT NULL DEFAULT false,
   super_admin_override BOOLEAN NOT NULL DEFAULT false,
+  current_season INTEGER NOT NULL DEFAULT 1,
   last_modified_by TEXT NOT NULL,
   last_modified_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
   message TEXT DEFAULT 'Registration starting soon. Stay tuned for updates.',
@@ -10,8 +11,8 @@ CREATE TABLE IF NOT EXISTS registration_settings (
 );
 
 -- Insert default settings (only one row should exist)
-INSERT INTO registration_settings (is_enabled, super_admin_override, last_modified_by, message)
-VALUES (false, false, 'system', 'Registration starting soon. Stay tuned for updates.')
+INSERT INTO registration_settings (is_enabled, super_admin_override, current_season, last_modified_by, message)
+VALUES (false, false, 1, 'system', 'Registration starting soon. Stay tuned for updates.')
 ON CONFLICT DO NOTHING;
 
 -- Enable Row Level Security

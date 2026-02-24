@@ -7,19 +7,15 @@ export async function testRealtimeConnection(): Promise<{
   details?: any;
 }> {
   try {
-    console.log('🧪 Testing Supabase real-time connection...');
 
     // Create a test channel
     const testChannel = supabase
       .channel('realtime-test-channel')
       .on('presence', { event: 'sync' }, () => {
-        console.log('✅ Presence sync received');
+        // Presence sync callback
       })
-      .subscribe((status, err) => {
-        console.log('📡 Test channel status:', status);
-        if (err) {
-          console.error('❌ Test channel error:', err);
-        }
+      .subscribe(() => {
+        // Subscription callback
       });
 
     // Wait for subscription
@@ -27,7 +23,6 @@ export async function testRealtimeConnection(): Promise<{
 
     // Check channel status
     const channelState = testChannel.state;
-    console.log('📊 Channel state:', channelState);
 
     // Clean up
     supabase.removeChannel(testChannel);
@@ -61,7 +56,6 @@ export async function testAuctionChatRealtime(auctionId: string): Promise<{
   message: string;
 }> {
   try {
-    console.log('🧪 Testing auction_chat real-time for auction:', auctionId);
 
     let messageReceived = false;
 
@@ -76,16 +70,12 @@ export async function testAuctionChatRealtime(auctionId: string): Promise<{
           table: 'auction_chat',
           filter: `auction_id=eq.${auctionId}`
         },
-        (payload) => {
-          console.log('✅ Real-time message received:', payload);
+        () => {
           messageReceived = true;
         }
       )
-      .subscribe((status, err) => {
-        console.log('📡 Auction chat test subscription status:', status);
-        if (err) {
-          console.error('❌ Subscription error:', err);
-        }
+      .subscribe(() => {
+        // Subscription callback
       });
 
     // Wait for subscription to be ready

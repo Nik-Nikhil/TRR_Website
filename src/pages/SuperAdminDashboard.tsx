@@ -21,10 +21,12 @@ import { AdminSettings } from '../components/admin/AdminSettings';
 import { AdminManagement } from '../components/admin/AdminManagement';
 import { ProfileUpdateRequests } from '../components/admin/ProfileUpdateRequests';
 import { ProfileImageRequests } from '../components/admin/ProfileImageRequests';
+import { RegistrationRequests } from '../components/admin/RegistrationRequests';
 import AnnouncementManagement from '../components/admin/AnnouncementManagement';
 import playerBanService from '../services/playerBanService';
 import messagingService from '../services/messagingService';
 import profileUpdateService from '../services/profileUpdateService';
+import registrationRequestService from '../services/registrationRequestService';
 
 interface Admin {
   id: string;
@@ -74,6 +76,9 @@ export default function SuperAdminDashboard() {
   // Messages states
   const [myMessages, setMyMessages] = useState<any[]>([]);
   const [myUnreadCount, setMyUnreadCount] = useState(0);
+
+  // Registration requests state
+  const [registrationRequestsCount, setRegistrationRequestsCount] = useState(0);
 
   // Quick stats
   const [quickStats, setQuickStats] = useState<QuickStat[]>([]);
@@ -293,6 +298,13 @@ export default function SuperAdminDashboard() {
 
     loadMyMessages();
 
+    // Load registration requests count
+    const loadRegCount = async () => {
+      const count = await registrationRequestService.getPendingCount();
+      setRegistrationRequestsCount(count);
+    };
+    loadRegCount();
+
     // Subscribe to real-time messages
     const messageChannel = messagingService.subscribeToMessages(currentSuperAdmin.username, (newMessage) => {
       setMyMessages(prev => [newMessage, ...prev]);
@@ -413,6 +425,7 @@ export default function SuperAdminDashboard() {
   const navigationItems = [
     { id: 'dashboard', label: 'Dashboard', icon: BarChart3, description: 'Overview & Analytics' },
     { id: 'messages', label: 'My Messages', icon: MessageSquare, description: 'My Messages', badge: myUnreadCount > 0 ? myUnreadCount : undefined },
+    { id: 'registration-requests', label: 'Registration Requests', icon: UserPlus, description: 'Approve Registrations', badge: registrationRequestsCount > 0 ? registrationRequestsCount : undefined },
     { id: 'profile-requests', label: 'Profile Requests', icon: UserCheck, description: 'Approve Changes', badge: profileUpdateService.getPendingCount() > 0 ? profileUpdateService.getPendingCount() : undefined },
     { id: 'users', label: 'User Management', icon: Users, description: 'Players & Admins' },
     { id: 'admin-management', label: 'Admin Management', icon: Shield, description: 'Add/Manage Admins' },
@@ -517,6 +530,7 @@ export default function SuperAdminDashboard() {
         <div>
           <h2 className="text-2xl font-bold text-white capitalize">
             {activeSection === 'dashboard' ? 'Dashboard Overview' : 
+             activeSection === 'registration-requests' ? 'Registration Requests' :
              activeSection === 'users' ? 'User Management' :
              activeSection === 'profile-requests' ? 'Profile Requests' :
              activeSection === 'announcements' ? 'Announcement Management' :
@@ -530,6 +544,7 @@ export default function SuperAdminDashboard() {
           </h2>
           <p className="text-orange-300/70 mt-1">
             {activeSection === 'dashboard' ? 'System overview and quick actions' :
+             activeSection === 'registration-requests' ? 'Review and approve player registrations' :
              activeSection === 'users' ? 'Manage players and administrators' :
              activeSection === 'profile-requests' ? 'Review and approve profile updates and images' :
              activeSection === 'announcements' ? 'Create and manage announcements' :
@@ -1195,6 +1210,7 @@ export default function SuperAdminDashboard() {
             >
               {activeSection === 'dashboard' && renderDashboard()}
               {activeSection === 'messages' && renderMyMessages()}
+              {activeSection === 'registration-requests' && <div className="p-8"><RegistrationRequests adminUsername={currentSuperAdmin?.username || 'superadmin'} /></div>}
               {activeSection === 'profile-requests' && (
                 <div className="p-8 space-y-8">
                   <ProfileUpdateRequests />

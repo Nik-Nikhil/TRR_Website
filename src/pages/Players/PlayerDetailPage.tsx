@@ -94,18 +94,13 @@ export default function PlayerDetailPage() {
         if (dbPlayer) {
           // Map database fields to frontend format
           const frontendPlayer = mapDatabasePlayerToFrontend(dbPlayer);
-          console.log('✅ Loaded player:', frontendPlayer.nickname, {
-            hasMedal: !!frontendPlayer.currentMedalLabel,
-            hasRoles: frontendPlayer.roles?.length || 0,
-            hasHeroes: frontendPlayer.favoriteHeroes?.length || 0,
-          });
           setPlayer(frontendPlayer);
         } else {
           // Player not found in Supabase, try local data
           throw new Error('Player not found in Supabase');
         }
       } catch (err) {
-        console.error('Error loading player from Supabase:', err);
+        // Silent error
         
         // Fallback to local data
         try {
@@ -115,7 +110,6 @@ export default function PlayerDetailPage() {
             p.nickname.toLowerCase() === playerId.toLowerCase()
           );
           if (localPlayer) {
-            console.log('⚠️ Using local data for:', localPlayer.nickname);
             setPlayer(localPlayer);
           } else {
             error('Player not found', 'Please check the player ID');

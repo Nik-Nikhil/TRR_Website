@@ -77,7 +77,7 @@ export const AuctionControl = () => {
         setSoldPlayers(data);
       }
     } catch (error) {
-      console.error('Error loading sold players:', error);
+      // Silent error
     }
   };
 
@@ -86,16 +86,14 @@ export const AuctionControl = () => {
       // Reload sold players first to get fresh data
       await loadSoldPlayers();
       
-      const { data, error } = await supabase
-        .from('auction_pool')
-        .select('*, player_data')
-        .order('added_at', { ascending: false });
-
-      if (!error && data) {
-        setPoolPlayers(data);
+      // Get current auction state to filter by auction ID
+      const auctionState = await AuctionService.getAuctionState();
+      if (!auctionState) {
+        setPoolPlayers([]);
+        return;
       }
     } catch (error) {
-      console.error('Error loading pool players:', error);
+      // Silent error
     }
   };
 
@@ -772,6 +770,34 @@ export const AuctionControl = () => {
             {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : '⚙️'}
             Delete Auction State
           </button>
+
+          {/* Delete Auction Pool */}
+          <button
+            onClick={async () => {
+              const confirmed = await confirm(
+                'Delete auction pool?\n\nThis will remove all players from the auction pool.\n\nContinue?',
+                'Delete Auction Pool'
+              );
+              
+              if (!confirmed) return;
+              
+              setLoading(true);
+              setError(null);
+              const success = await AuctionService.deleteAuctionPool();
+              if (success) {
+                await alert('Auction pool deleted successfully', 'Success', 'success');
+                await loadPoolPlayers();
+              } else {
+                setError('Failed to delete auction pool');
+              }
+              setLoading(false);
+            }}
+            disabled={loading}
+            className="flex items-center justify-center gap-2 px-4 py-2 bg-blue-600/80 hover:bg-blue-600 disabled:bg-gray-600 text-white font-semibold rounded-lg transition-all duration-300"
+          >
+            {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : '🎯'}
+            Delete Auction Pool
+          </button>
         </div>
 
         <div className="mt-4 bg-red-500/10 border border-red-500/30 rounded-lg p-3">
@@ -783,3 +809,4 @@ export const AuctionControl = () => {
     </div>
   );
 };
+

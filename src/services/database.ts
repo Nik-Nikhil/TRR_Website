@@ -429,7 +429,6 @@ export class DatabaseService {
         }
       };
 
-      console.log('Role change request submitted:', approvalRequest);
       
       // In production, you would insert this into the database:
       // const { data, error } = await supabase
@@ -513,7 +512,6 @@ export class DatabaseService {
 
       // In a real implementation, this would insert into the database
       // For now, we'll simulate success and log the new player data
-      console.log('New player account created:', newPlayer);
       
       // In production, you would insert this into the database:
       // const { data, error } = await supabase

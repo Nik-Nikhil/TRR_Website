@@ -25,9 +25,8 @@ export default function PlayerLogin() {
         // Map database players to frontend format
         const mappedPlayers = result.data.map(mapDatabasePlayerToFrontend);
         setPlayers(mappedPlayers);
-        console.log(`✅ Loaded ${mappedPlayers.length} players`);
       } else {
-        console.error('Failed to load players:', result.error);
+        // Silent error
         setPlayers([]);
       }
     };

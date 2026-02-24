@@ -120,7 +120,6 @@ export class PlayerService {
   }
 
   static async getPlayerById(id: string): Promise<Player | null> {
-    console.log('🔍 Fetching player by id:', id);
     
     // Check if id looks like a UUID (contains hyphens and is 36 chars)
     const isUUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(id);
@@ -133,54 +132,27 @@ export class PlayerService {
         .eq('id', id)
         .maybeSingle();
       
-      console.log('Query by UUID:', { 
-        found: !!data, 
-        nickname: data?.nickname,
-        hasRoles: !!data?.roles,
-        hasHeroes: !!data?.favorite_heroes,
-        hasMedal: !!data?.current_medal_label,
-        error 
-      });
-      
       if (error) {
-        console.error('❌ Error fetching by UUID:', error);
+        // Silent error
         return null;
       }
       
       if (data) {
-        console.log('✅ Found player by UUID:', data.nickname);
         return data;
       }
     }
     
     // Try by nickname (either because it's not a UUID or UUID lookup failed)
     // Use case-insensitive search
-    console.log('🔄 Trying by nickname (case-insensitive):', id);
-    
     const { data, error } = await supabase
       .from('players')
       .select('*')
       .ilike('nickname', id)
       .maybeSingle();
     
-    console.log('Query by nickname:', { 
-      found: !!data, 
-      nickname: data?.nickname,
-      hasRoles: !!data?.roles,
-      hasHeroes: !!data?.favorite_heroes,
-      hasMedal: !!data?.current_medal_label,
-      error 
-    });
-    
     if (error) {
-      console.error('❌ Error fetching by nickname:', error);
+      // Silent error
       return null;
-    }
-    
-    if (data) {
-      console.log('✅ Found player by nickname:', data.nickname);
-    } else {
-      console.log('❌ Player not found in database');
     }
     
     return data;

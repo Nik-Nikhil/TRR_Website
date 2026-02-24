@@ -47,7 +47,7 @@ export const AuctionPoolManagement: React.FC<AuctionPoolManagementProps> = ({
       const mappedPlayers = dbPlayers.map(mapDatabasePlayerToFrontend);
       setAllPlayers(mappedPlayers);
     } catch (error) {
-      console.error('Error loading players:', error);
+      // Silent error
     }
   };
 
@@ -128,9 +128,9 @@ export const AuctionPoolManagement: React.FC<AuctionPoolManagementProps> = ({
     (p.realName && p.realName.toLowerCase().includes(searchQuery.toLowerCase()))
   );
 
-  // Separate by status
-  const availablePlayers = poolPlayers.filter(p => p.status === 'available');
-  const soldPlayers = poolPlayers.filter(p => p.status === 'sold');
+  // Separate by sold status
+  const availablePlayers = poolPlayers.filter(p => !p.is_sold);
+  const soldPlayers = poolPlayers.filter(p => p.is_sold);
 
   return (
     <div className="space-y-6">

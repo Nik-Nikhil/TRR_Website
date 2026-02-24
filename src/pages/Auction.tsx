@@ -53,34 +53,42 @@ export default function Auction() {
   // Ref to track sale execution timeout
   const saleTimeoutRef = useRef<number | null>(null);
 
-  // Sync hammer state from database only when not actively running locally
+  // Sync hammer state from database
   useEffect(() => {
     if (!auctionState) return;
     
-    // CRITICAL: Never sync stage 3 (SOLD) from database on initial load
-    // Stage 3 should only be reached through local countdown progression
-    if (auctionState.hammer_stage === 3 && !isLocalHammerRunning.current) {
-      // Clear any pending sale timeout
-      if (saleTimeoutRef.current) {
-        window.clearTimeout(saleTimeoutRef.current);
-        saleTimeoutRef.current = null;
+    // CRITICAL: Check if we're on the auction page
+    const currentPath = window.location.pathname;
+    if (!currentPath.includes('/auction')) {
+      // Not on auction page - clear any hammer state locally only
+      if (isHammerActive || hammerStage !== 0) {
+        setIsHammerActive(false);
+        setHammerStage(0);
+        setHammerCountdown(6);
+        isLocalHammerRunning.current = false;
+        if (saleTimeoutRef.current) {
+          window.clearTimeout(saleTimeoutRef.current);
+          saleTimeoutRef.current = null;
+        }
       }
-      // Reset to idle state instead
-      setIsHammerActive(false);
-      setHammerStage(0);
-      setHammerCountdown(6);
-      // Also update database to clear the stale state
-      AuctionService.updateHammerState(false, 0, 6);
       return;
     }
     
-    if (!isLocalHammerRunning.current) {
-      // Only sync from database if we're not in the middle of a local countdown
-      setIsHammerActive(auctionState.hammer_active);
-      setHammerStage(auctionState.hammer_stage);
-      setHammerCountdown(auctionState.hammer_countdown);
+    // Always sync from database - this is the source of truth
+    setIsHammerActive(auctionState.hammer_active);
+    setHammerStage(auctionState.hammer_stage);
+    setHammerCountdown(auctionState.hammer_countdown);
+    
+    // If we're at stage 3 (SOLD) and hammer is active, execute the sale
+    if (auctionState.hammer_active && auctionState.hammer_stage === 3 && !isLocalHammerRunning.current) {
+      isLocalHammerRunning.current = true; // Prevent multiple executions
+      // Execute sale after brief delay
+      saleTimeoutRef.current = window.setTimeout(() => {
+        executeSale();
+        saleTimeoutRef.current = null;
+      }, 800);
     }
-  }, [auctionState]);
+  }, [auctionState, isHammerActive, hammerStage]);
 
   useEffect(() => {
     // Load initial data
@@ -304,14 +312,12 @@ export default function Auction() {
       return; // Don't clear the sale timeout
     }
 
-    // Mark that we're running a local countdown
-    isLocalHammerRunning.current = true;
-
     if (hammerCountdown > 0) {
       const timer = setTimeout(() => {
         const newCountdown = hammerCountdown - 1;
         setHammerCountdown(newCountdown);
-        // Don't update database on every tick - only on stage changes
+        // Update database on every tick for real-time sync
+        AuctionService.updateHammerState(isHammerActive, hammerStage, newCountdown);
       }, 1000);
       return () => clearTimeout(timer);
     } else {
@@ -322,7 +328,7 @@ export default function Auction() {
         const newCountdown = 6;
         setHammerStage(newStage);
         setHammerCountdown(newCountdown);
-        // Update database only on stage change
+        // Update database
         AuctionService.updateHammerState(true, newStage, newCountdown);
       } else if (hammerStage === 2) {
         // Going Twice -> SOLD! (instant execution, no delay)
@@ -333,11 +339,11 @@ export default function Auction() {
         AuctionService.updateHammerState(true, newStage, 0);
         // Execute sale after a brief moment to show SOLD animation
         // Store timeout ref so it can be cancelled if a bid comes in
+        isLocalHammerRunning.current = true;
         saleTimeoutRef.current = window.setTimeout(() => {
           // Execute sale - timeout will be cleared if a bid comes in
           executeSale();
           saleTimeoutRef.current = null;
-          isLocalHammerRunning.current = false;
         }, 800); // Just 0.8 seconds to show SOLD
       }
     }
@@ -419,16 +425,9 @@ export default function Auction() {
         setAllPlayers(filteredPlayers);
       }
     } catch (error) {
-      console.error('Error loading players:', error);
+      // Silent error
     }
   };
-
-  // Reload player pool when a player is sold (if modal is open)
-  useEffect(() => {
-    if (showPlayerPoolModal && playerPoolType) {
-      loadAllPlayers(playerPoolType);
-    }
-  }, [soldPlayers, showPlayerPoolModal, playerPoolType]);
 
   const handleSendMessage = async () => {
     if (!chatInput.trim() || !auctionState?.id) return;
@@ -562,10 +561,10 @@ export default function Auction() {
       return;
     }
 
-    // ✅ CHECK IF TEAM IS ALREADY FULL (5 PLAYERS)
+    // ✅ CHECK IF TEAM IS ALREADY FULL (5 PLAYERS including captain)
     const teamPlayerCount = soldPlayers.filter(p => p.teamName === captain.teamName).length;
-    if (teamPlayerCount >= 5) {
-      setBidError(`Your team is full (5/5 players). Cannot bid on more players.`);
+    if (teamPlayerCount >= 4) {
+      setBidError(`Your team is full (5/5 players including captain). Cannot bid on more players.`);
       return;
     }
 
@@ -629,12 +628,27 @@ export default function Auction() {
     const currentPath = window.location.pathname;
     if (!currentPath.includes('/auction')) {
       isLocalHammerRunning.current = false;
+      // Clear hammer state
+      setIsHammerActive(false);
+      setHammerStage(0);
+      setHammerCountdown(6);
       return;
     }
     
     // Safety check: ensure we have an auction state
     if (!auctionState) {
       isLocalHammerRunning.current = false;
+      return;
+    }
+    
+    // CRITICAL: Don't show alert if this is a stale state being cleared
+    // Check if we're in a local hammer countdown - if not, this is stale
+    if (!isLocalHammerRunning.current) {
+      // This is a stale SOLD state from database, silently abort
+      await AuctionService.updateHammerState(false, 0, 6);
+      setIsHammerActive(false);
+      setHammerStage(0);
+      setHammerCountdown(6);
       return;
     }
     
@@ -684,10 +698,15 @@ export default function Auction() {
         return;
       }
 
+      // Check if team has enough budget - if not, cap the price at available budget
       const selectedCaptain = captains.find(c => c.teamName === selectedTeamForManualAssign);
       if (selectedCaptain && selectedCaptain.budget < price) {
-        await alert(`${selectedTeamForManualAssign} doesn't have enough budget. Available: ${selectedCaptain.budget}`, 'Insufficient Budget', 'warning');
-        return;
+        await alert(
+          `${selectedTeamForManualAssign} only has ${selectedCaptain.budget} gold left.\n\nThe player will be assigned for ${selectedCaptain.budget} gold instead of ${price}.`,
+          'Budget Adjusted',
+          'info'
+        );
+        // Price will be capped when calculating finalPrice below
       }
     }
 
@@ -712,14 +731,17 @@ export default function Auction() {
       finalCaptainId = selectedCaptain.playerId;
       finalCaptainName = selectedCaptain.playerNickname;
       finalTeamName = selectedCaptain.teamName;
-      finalPrice = parseInt(manualAssignPrice) || 0;
+      
+      // Cap the price at the team's available budget (can't go negative)
+      const requestedPrice = parseInt(manualAssignPrice) || 0;
+      finalPrice = Math.min(requestedPrice, selectedCaptain.budget);
     }
 
     const teamPlayerCount = soldPlayers.filter(p => p.teamName === finalTeamName).length;
     
-    if (teamPlayerCount >= 5) {
+    if (teamPlayerCount >= 4) {
       await alert(
-        `${finalTeamName} already has 5 players!\n\nTeams cannot have more than 5 players.\n\nCurrent roster: ${teamPlayerCount}/5`,
+        `${finalTeamName} already has 5 players (including captain)!\n\nTeams cannot have more than 5 players.\n\nCurrent roster: ${teamPlayerCount + 1}/5`,
         'Team Full',
         'warning'
       );
@@ -750,8 +772,18 @@ export default function Auction() {
       return;
     }
 
+    // Mark player as sold in auction pool
+    await supabase
+      .from('auction_pool')
+      .update({ 
+        is_sold: true,
+        sold_at: new Date().toISOString()
+      })
+      .eq('auction_id', auctionState.id)
+      .eq('player_id', auctionState.current_player_id);
+
     // Send chat message about the sale
-    const chatMessage = `✅ ${playerNickname} has been assigned to ${finalTeamName} (Captain: ${finalCaptainName}) for 🪙 ${finalPrice} gold!`;
+    const chatMessage = `${playerNickname} will be playing in Team ${finalTeamName} (Captain: ${finalCaptainName}) for 🪙 ${finalPrice} gold`;
     
     await auctionChatService.sendMessage(
       auctionState.id,
@@ -1163,9 +1195,9 @@ export default function Auction() {
                                   >
                                     <option value="">-- Select Team --</option>
                                     {captains.map((captain) => {
-                                      // Count players for this team
+                                      // Count players for this team (captain + bought players)
                                       const teamPlayers = soldPlayers.filter(p => p.teamName === captain.teamName);
-                                      const isFull = teamPlayers.length >= 5;
+                                      const isFull = teamPlayers.length >= 4; // 4 bought + 1 captain = 5 total
                                       
                                       return (
                                         <option 
@@ -1173,7 +1205,7 @@ export default function Auction() {
                                           value={captain.teamName}
                                           disabled={isFull}
                                         >
-                                          {captain.teamName} (Budget: {captain.budget}) {isFull ? '- FULL' : ''}
+                                          {captain.teamName} (Budget: {captain.budget}) {isFull ? '- FULL (5/5)' : ''}
                                         </option>
                                       );
                                     })}
@@ -1263,9 +1295,7 @@ export default function Auction() {
                                 const teamPlayersCount = soldPlayers.filter(
                                   p => p.soldToCaptainId === captain.playerId
                                 ).length;
-                                const playerCount = teamPlayersCount; // Don't add captain to count
-                                
-                                console.log(`👥 Team ${captain.teamName}: ${playerCount} players`, soldPlayers.filter(p => p.soldToCaptainId === captain.playerId));
+                                const playerCount = teamPlayersCount + 1; // Add 1 for captain
                                 
                                 // Standard starting budget
                                 const startingBudget = 1000;

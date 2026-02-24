@@ -4,6 +4,7 @@ import { motion } from 'framer-motion';
 import { ArrowLeft, Trophy, Users } from 'lucide-react';
 import { Avatar } from '../components/ui/Avatar';
 import captainService from '../services/captainService';
+import { AuctionService } from '../services/auctionService';
 import { supabase } from '../lib/supabase';
 import { players } from '../data/players';
 
@@ -23,6 +24,9 @@ export default function TeamDetail() {
 
     setLoading(true);
 
+    // Get current auction state to filter by auction ID
+    const auctionState = await AuctionService.getAuctionState();
+    
     // Get captain info
     const captains = await captainService.getCaptains();
     const teamCaptain = captains.find(c => c.teamName === decodeURIComponent(teamName));
@@ -30,20 +34,28 @@ export default function TeamDetail() {
     if (teamCaptain) {
       setCaptain(teamCaptain);
 
-      // Get sold players for this team
-      const { data: soldPlayers } = await supabase
-        .from('auction_results')
-        .select('*')
-        .eq('sold_to_team_name', teamCaptain.teamName)
-        .order('sold_at', { ascending: false });
+      // Get sold players for this team in the CURRENT auction only
+      if (auctionState?.id) {
+        const { data: soldPlayers } = await supabase
+          .from('auction_results')
+          .select('*')
+          .eq('sold_to_team_name', teamCaptain.teamName)
+          .eq('auction_id', auctionState.id) // Filter by current auction
+          .order('sold_at', { ascending: false });
 
-      if (soldPlayers) {
-        const playersWithData = soldPlayers.map((sp: any) => ({
-          ...sp.player_data,
-          soldFor: sp.final_price,
-          soldAt: sp.sold_at
-        }));
-        setTeamPlayers(playersWithData);
+        if (soldPlayers) {
+          const playersWithData = soldPlayers.map((sp: any) => ({
+            ...sp.player_data,
+            soldFor: sp.final_price,
+            soldAt: sp.sold_at
+          }));
+          setTeamPlayers(playersWithData);
+        } else {
+          setTeamPlayers([]);
+        }
+      } else {
+        // No active auction, clear team players
+        setTeamPlayers([]);
       }
     }
 

@@ -636,6 +636,26 @@ export class AuctionService {
     }
   }
 
+  // Delete only auction pool
+  static async deleteAuctionPool(): Promise<boolean> {
+    try {
+      const { error } = await supabase
+        .from('auction_pool')
+        .delete()
+        .neq('id', '00000000-0000-0000-0000-000000000000');
+
+      if (error) {
+        console.error('Error deleting auction pool:', error);
+        return false;
+      }
+
+      return true;
+    } catch (error) {
+      console.error('Exception deleting auction pool:', error);
+      return false;
+    }
+  }
+
   // Update hammer state
   static async updateHammerState(hammerActive: boolean, hammerStage: 0 | 1 | 2 | 3, hammerCountdown: number): Promise<boolean> {
     try {

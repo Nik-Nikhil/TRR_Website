@@ -5,6 +5,7 @@ interface RegistrationSettings {
   id?: string;
   isEnabled: boolean;
   superAdminOverride: boolean;
+  currentSeason: number;
   lastModifiedBy: string;
   lastModifiedAt: string;
   message?: string;
@@ -15,6 +16,7 @@ class RegistrationService {
   private defaultSettings: RegistrationSettings = {
     isEnabled: false,
     superAdminOverride: false,
+    currentSeason: 1,
     lastModifiedBy: 'system',
     lastModifiedAt: new Date().toISOString(),
     message: 'Registration starting soon. Stay tuned for updates.'
@@ -38,6 +40,7 @@ class RegistrationService {
           id: data.id,
           isEnabled: data.is_enabled,
           superAdminOverride: data.super_admin_override,
+          currentSeason: data.current_season || 1,
           lastModifiedBy: data.last_modified_by,
           lastModifiedAt: data.last_modified_at,
           message: data.message
@@ -167,6 +170,54 @@ class RegistrationService {
     return settings.message || this.defaultSettings.message!;
   }
 
+  // Get current season number
+  async getCurrentSeason(): Promise<number> {
+    const settings = await this.getSettings();
+    return settings.currentSeason || 1;
+  }
+
+  // Update season number
+  async updateSeasonNumber(
+    seasonNumber: number,
+    modifiedBy: string
+  ): Promise<{ success: boolean; error?: string }> {
+    try {
+      const currentSettings = await this.getSettings();
+
+      const updateData = {
+        current_season: seasonNumber,
+        last_modified_by: modifiedBy,
+        last_modified_at: new Date().toISOString()
+      };
+
+      const { error } = await supabase
+        .from('registration_settings')
+        .update(updateData)
+        .eq('id', currentSettings.id || '');
+
+      if (error) {
+        console.error('Error updating season number:', error);
+        return {
+          success: false,
+          error: 'Failed to update season number'
+        };
+      }
+
+      // Dispatch custom event to notify components
+      window.dispatchEvent(new CustomEvent('registrationSettingsChanged', {
+        detail: { ...currentSettings, ...updateData }
+      }));
+
+      return { success: true };
+    } catch (error) {
+      console.error('Error updating season number:', error);
+      return {
+        success: false,
+        error: 'Failed to update season number'
+      };
+    }
+  }
+
   // Subscribe to real-time changes
   subscribeToChanges(callback: (settings: RegistrationSettings) => void) {
     const channel = supabase
@@ -185,6 +236,7 @@ class RegistrationService {
               id: data.id,
               isEnabled: data.is_enabled,
               superAdminOverride: data.super_admin_override,
+              currentSeason: data.current_season || 1,
               lastModifiedBy: data.last_modified_by,
               lastModifiedAt: data.last_modified_at,
               message: data.message

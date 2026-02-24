@@ -12,7 +12,6 @@ import { DEFAULT_PASSWORDS } from '../config/defaultPasswords';
  * Set default password for all players
  */
 export async function setDefaultPasswordsForAllPlayers() {
-  console.log('🔐 Starting to set default passwords for all players...');
   
   const defaultPassword = DEFAULT_PASSWORDS.PLAYER_DEFAULT;
   let successCount = 0;
@@ -31,11 +30,8 @@ export async function setDefaultPasswordsForAllPlayers() {
     }
 
     if (!players || players.length === 0) {
-      console.log('⚠️ No players found in database');
       return { success: true, message: 'No players to update' };
     }
-
-    console.log(`📊 Found ${players.length} players`);
 
     // Import password service
     const { default: passwordService } = await import('../services/passwordService');
@@ -47,7 +43,6 @@ export async function setDefaultPasswordsForAllPlayers() {
         const result = await passwordService.setPassword(player.id, 'player', defaultPassword);
 
         if (result.success) {
-          console.log(`✅ Set password for: ${player.nickname}`);
           successCount++;
         } else {
           console.error(`❌ Failed for ${player.nickname}:`, result.error);
@@ -60,17 +55,9 @@ export async function setDefaultPasswordsForAllPlayers() {
         errors.push({ player: player.nickname, error: err });
       }
     }
-
-    console.log('\n=== Password Update Complete ===');
-    console.log(`✅ Success: ${successCount} players`);
-    console.log(`❌ Errors: ${errorCount} players`);
-    console.log(`🔑 Default Password: ${defaultPassword}`);
     
     if (errors.length > 0) {
-      console.log('\n❌ Errors:');
-      errors.forEach(e => {
-        console.log(`- ${e.player}:`, e.error);
-      });
+      // Silent error logging
     }
 
     return {
@@ -97,10 +84,9 @@ export async function setDefaultPasswordForPlayer(playerId: string) {
     const result = await passwordService.setPassword(playerId, 'player', defaultPassword);
     
     if (result.success) {
-      console.log(`✅ Password set for player ${playerId}`);
-      console.log(`🔑 Default Password: ${defaultPassword}`);
+      // Silent success
     } else {
-      console.error(`❌ Failed to set password:`, result.error);
+      // Silent error
     }
     
     return result;

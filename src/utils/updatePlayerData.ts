@@ -8,8 +8,6 @@ interface UpdateResult {
 }
 
 export async function updateAllPlayerData(): Promise<UpdateResult> {
-  console.log('🔄 Starting complete player data update...');
-  console.log(`📊 Total players to update: ${players.length}`);
   
   const result: UpdateResult = {
     success: [],
@@ -18,7 +16,6 @@ export async function updateAllPlayerData(): Promise<UpdateResult> {
 
   for (const player of players) {
     try {
-      console.log(`\n🔍 Processing: ${player.nickname}`);
       
       // First, find the player by nickname (case-insensitive)
       const { data: existingPlayer, error: fetchError } = await supabase
@@ -34,7 +31,6 @@ export async function updateAllPlayerData(): Promise<UpdateResult> {
       }
 
       if (!existingPlayer) {
-        console.log(`⚠️ Player not found in database: ${player.nickname}`);
         result.errors.push({ nickname: player.nickname, error: 'Player not found in database' });
         continue;
       }
@@ -99,7 +95,6 @@ export async function updateAllPlayerData(): Promise<UpdateResult> {
         continue;
       }
 
-      console.log(`✅ Updated: ${player.nickname}`);
       result.success.push(player.nickname);
 
     } catch (error) {
@@ -111,25 +106,11 @@ export async function updateAllPlayerData(): Promise<UpdateResult> {
     }
   }
 
-  console.log('\n' + '='.repeat(50));
-  console.log('=== Player Data Update Complete ===');
-  console.log(`✅ Success: ${result.success.length} players`);
-  console.log(`❌ Errors: ${result.errors.length} players`);
-  
-  if (result.errors.length > 0) {
-    console.log('\n❌ Failed players:');
-    result.errors.forEach(({ nickname, error }) => {
-      console.log(`   • ${nickname}: ${error}`);
-    });
-  }
-
   return result;
 }
 
 // Debug function to check a specific player's data
 export async function debugPlayerData(nickname: string) {
-  console.log(`\n🔍 Debugging player data for: ${nickname}`);
-  console.log('='.repeat(50));
   
   // Get from database
   const { data: dbPlayer, error } = await supabase
@@ -144,39 +125,7 @@ export async function debugPlayerData(nickname: string) {
   }
 
   if (!dbPlayer) {
-    console.log('❌ Player not found in database');
     return;
   }
 
-  console.log('\n📊 Database Data:');
-  console.log('   ID:', dbPlayer.id);
-  console.log('   Nickname:', dbPlayer.nickname);
-  console.log('   Avatar:', dbPlayer.avatar_url);
-  console.log('   Current Medal:', dbPlayer.current_medal_label, `(${dbPlayer.current_medal_id})`);
-  console.log('   Peak Medal:', dbPlayer.peak_medal_label, `(${dbPlayer.peak_medal_id})`);
-  console.log('   Current MMR:', dbPlayer.current_mmr);
-  console.log('   Peak MMR:', dbPlayer.peak_mmr);
-  console.log('   Roles:', JSON.stringify(dbPlayer.roles, null, 2));
-  console.log('   Favorite Heroes:', JSON.stringify(dbPlayer.favorite_heroes, null, 2));
-  console.log('   Season Badges:', JSON.stringify(dbPlayer.season_badges, null, 2));
-  console.log('   Has Won Cup:', dbPlayer.has_won_cup);
-  console.log('   Bio:', dbPlayer.bio);
-  console.log('   Steam URL:', dbPlayer.steam_url);
-  console.log('   Dotabuff URL:', dbPlayer.dotabuff_url);
-
-  // Get from local data
-  const localPlayer = players.find(p => p.nickname.toLowerCase() === nickname.toLowerCase());
-  
-  if (localPlayer) {
-    console.log('\n📋 Local Data:');
-    console.log('   Current Medal:', localPlayer.currentMedalLabel, `(${localPlayer.currentMedalId})`);
-    console.log('   Peak Medal:', localPlayer.peakMedalLabel, `(${localPlayer.peakMedalId})`);
-    console.log('   Current MMR:', localPlayer.currentMMR);
-    console.log('   Peak MMR:', localPlayer.peakMMR);
-    console.log('   Roles:', localPlayer.roles.length, 'roles');
-    console.log('   Favorite Heroes:', localPlayer.favoriteHeroes.length, 'heroes');
-    console.log('   Season Badges:', localPlayer.seasonBadges.length, 'badges');
-  }
-
-  console.log('='.repeat(50));
 }

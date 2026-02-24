@@ -6,7 +6,6 @@ import { supabase } from '../lib/supabase';
 
 export async function resetPlayerPassword(nickname: string, newPassword: string) {
   try {
-    console.log(`🔐 Resetting password for player: ${nickname}`);
 
     // Get player by nickname
     const { data: player, error: playerError } = await supabase
@@ -20,8 +19,6 @@ export async function resetPlayerPassword(nickname: string, newPassword: string)
       return { success: false, error: 'Player not found' };
     }
 
-    console.log(`✅ Found player: ${player.nickname} (ID: ${player.id})`);
-
     // Import password service
     const passwordService = await import('../services/passwordService');
 
@@ -29,8 +26,6 @@ export async function resetPlayerPassword(nickname: string, newPassword: string)
     const result = await passwordService.default.setPassword(player.id, 'player', newPassword);
 
     if (result.success) {
-      console.log(`✅ Password reset successful for ${player.nickname}`);
-      console.log(`🔑 New Password: ${newPassword}`);
       return { 
         success: true, 
         message: `Password reset for ${player.nickname}`,

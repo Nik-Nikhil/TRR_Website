@@ -99,8 +99,6 @@ export class ImageOptimizationService {
       .from(bucket)
       .getPublicUrl(path);
     
-    console.log(`Image compressed: ${originalSize} bytes → ${compressedSize} bytes (${Math.round((1 - compressedSize/originalSize) * 100)}% reduction)`);
-    
     return {
       url: publicUrl,
       size: compressedSize,
@@ -187,7 +185,6 @@ export class ImageOptimizationService {
         })
         .eq('id', imageId);
       
-      console.log(`Image ${imageId} optimized successfully`);
       return true;
     } catch (error) {
       console.error('Failed to optimize image:', error);

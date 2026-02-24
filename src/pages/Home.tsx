@@ -222,7 +222,7 @@ export default function Home() {
                     {registrationEnabled ? (
                       <div className="w-full flex justify-center">
                         <Link 
-                          to="/new-player-registration"
+                          to="/register"
                           className="inline-flex items-center justify-center rounded-full px-6 py-1.5 text-xs font-bold uppercase tracking-wider bg-white text-gray-900 shadow-lg hover:brightness-95 transition cursor-pointer"
                         >
                           REGISTER NOW

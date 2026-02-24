@@ -11,6 +11,7 @@ import { supabase } from '../../lib/supabase';
 interface RegistrationSettings {
   isEnabled: boolean;
   superAdminOverride: boolean;
+  currentSeason: number;
   lastModifiedBy: string;
   lastModifiedAt: string;
   message?: string;
@@ -25,6 +26,7 @@ export default function RegistrationControl({ userRole, username }: Registration
   const [settings, setSettings] = useState<RegistrationSettings>({
     isEnabled: false,
     superAdminOverride: false,
+    currentSeason: 1,
     lastModifiedBy: 'system',
     lastModifiedAt: new Date().toISOString(),
     message: 'Registration starting soon. Stay tuned for updates.'
@@ -32,6 +34,8 @@ export default function RegistrationControl({ userRole, username }: Registration
   const [isLoading, setIsLoading] = useState(false);
   const [message, setMessage] = useState('');
   const [showMessageEditor, setShowMessageEditor] = useState(false);
+  const [showSeasonEditor, setShowSeasonEditor] = useState(false);
+  const [seasonNumber, setSeasonNumber] = useState(1);
 
   useEffect(() => {
     // Load initial settings
@@ -39,6 +43,7 @@ export default function RegistrationControl({ userRole, username }: Registration
       const currentSettings = await registrationService.getSettings();
       setSettings(currentSettings);
       setMessage(currentSettings.message || '');
+      setSeasonNumber(currentSettings.currentSeason || 1);
     };
     
     loadSettings();
@@ -53,6 +58,7 @@ export default function RegistrationControl({ userRole, username }: Registration
     const handleSettingsChange = (event: CustomEvent) => {
       setSettings(event.detail);
       setMessage(event.detail.message || '');
+      setSeasonNumber(event.detail.currentSeason || 1);
     };
 
     window.addEventListener('registrationSettingsChanged', handleSettingsChange as EventListener);
@@ -112,6 +118,16 @@ export default function RegistrationControl({ userRole, username }: Registration
 
     if (result.success) {
       setShowMessageEditor(false);
+    } else {
+      alert(result.error);
+    }
+  };
+
+  const handleUpdateSeason = async () => {
+    const result = await registrationService.updateSeasonNumber(seasonNumber, username);
+
+    if (result.success) {
+      setShowSeasonEditor(false);
     } else {
       alert(result.error);
     }
@@ -237,6 +253,54 @@ export default function RegistrationControl({ userRole, username }: Registration
               </button>
             </div>
           )}
+
+          {/* Message Editor */}
+          <div className="p-4 bg-gray-700/30 rounded-lg">
+            <div className="flex items-center justify-between mb-3">
+              <h4 className="text-white font-medium">Current Season</h4>
+              <button
+                onClick={() => setShowSeasonEditor(!showSeasonEditor)}
+                className="text-blue-400 hover:text-blue-300 text-sm flex items-center space-x-1"
+              >
+                <Settings className="w-4 h-4" />
+                <span>Edit</span>
+              </button>
+            </div>
+            
+            {showSeasonEditor ? (
+              <div className="space-y-3">
+                <input
+                  type="number"
+                  min="1"
+                  value={seasonNumber}
+                  onChange={(e) => setSeasonNumber(parseInt(e.target.value) || 1)}
+                  className="w-full px-3 py-2 bg-gray-800 border border-gray-600 rounded text-white text-sm"
+                  placeholder="Enter season number..."
+                />
+                <div className="flex space-x-2">
+                  <button
+                    onClick={handleUpdateSeason}
+                    className="px-3 py-1 bg-blue-600 hover:bg-blue-700 text-white rounded text-sm"
+                  >
+                    Save
+                  </button>
+                  <button
+                    onClick={() => {
+                      setShowSeasonEditor(false);
+                      setSeasonNumber(settings.currentSeason || 1);
+                    }}
+                    className="px-3 py-1 bg-gray-600 hover:bg-gray-700 text-white rounded text-sm"
+                  >
+                    Cancel
+                  </button>
+                </div>
+              </div>
+            ) : (
+              <p className="text-gray-300 text-sm bg-gray-800/50 p-3 rounded">
+                Season {settings.currentSeason}
+              </p>
+            )}
+          </div>
 
           {/* Message Editor */}
           <div className="p-4 bg-gray-700/30 rounded-lg">
