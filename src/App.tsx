@@ -22,7 +22,6 @@ import AdminProfile from "./pages/AdminProfile";
 import RulesPage from "./pages/Rules";
 import Announcements from "./pages/Announcements";
 import HallOfFame from "./pages/HallOfFame";
-import SeasonShowCase from "./pages/SeasonShowCase";
 import Registration from "./pages/Registration";
 import Auction from "./pages/Auction";
 import AdminLogin from "./pages/AdminLogin";

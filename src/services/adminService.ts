@@ -148,7 +148,7 @@ class AdminService {
 
       // Also store password in user_passwords table for authentication
       const { default: passwordService } = await import('./passwordService');
-      const passwordResult = await passwordService.setUserPassword(admin.username, admin.password);
+      const passwordResult = await passwordService.setPassword(admin.username, 'admin', admin.password);
       
       if (!passwordResult.success) {
         console.error('Error storing admin password:', passwordResult.error);
@@ -225,7 +225,7 @@ class AdminService {
       // If password was updated, also update in user_passwords table
       if (updates.password) {
         const { default: passwordService } = await import('./passwordService');
-        const passwordResult = await passwordService.setUserPassword(adminData.username, updates.password);
+        const passwordResult = await passwordService.setPassword(adminData.username, 'admin', updates.password);
         
         if (!passwordResult.success) {
           console.error('Error updating admin password:', passwordResult.error);
