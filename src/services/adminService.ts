@@ -123,7 +123,7 @@ class AdminService {
       const passwordHash = await hashPassword(admin.password);
 
       // Insert admin
-      const { error } = await supabase
+      const { error: adminError } = await supabase
         .from('admins')
         .insert({
           username: admin.username,
@@ -138,11 +138,25 @@ class AdminService {
           is_active: admin.isActive
         });
 
-      if (error) {
-        console.error('Error adding admin:', error);
+      if (adminError) {
+        console.error('Error adding admin:', adminError);
         return {
           success: false,
-          error: error.message
+          error: adminError.message
+        };
+      }
+
+      // Also store password in user_passwords table for authentication
+      const { default: passwordService } = await import('./passwordService');
+      const passwordResult = await passwordService.setUserPassword(admin.username, admin.password);
+      
+      if (!passwordResult.success) {
+        console.error('Error storing admin password:', passwordResult.error);
+        // Admin was created but password storage failed - try to clean up
+        await supabase.from('admins').delete().eq('username', admin.username);
+        return {
+          success: false,
+          error: 'Failed to store password: ' + passwordResult.error
         };
       }
 
@@ -180,6 +194,21 @@ class AdminService {
 
       updateData.updated_at = new Date().toISOString();
 
+      // Get the admin's username first
+      const { data: adminData, error: fetchError } = await supabase
+        .from('admins')
+        .select('username')
+        .eq('id', id)
+        .single();
+
+      if (fetchError || !adminData) {
+        console.error('Error fetching admin:', fetchError);
+        return {
+          success: false,
+          error: 'Admin not found'
+        };
+      }
+
       const { error } = await supabase
         .from('admins')
         .update(updateData)
@@ -191,6 +220,20 @@ class AdminService {
           success: false,
           error: error.message
         };
+      }
+
+      // If password was updated, also update in user_passwords table
+      if (updates.password) {
+        const { default: passwordService } = await import('./passwordService');
+        const passwordResult = await passwordService.setUserPassword(adminData.username, updates.password);
+        
+        if (!passwordResult.success) {
+          console.error('Error updating admin password:', passwordResult.error);
+          return {
+            success: false,
+            error: 'Admin updated but password update failed: ' + passwordResult.error
+          };
+        }
       }
 
       return { success: true };

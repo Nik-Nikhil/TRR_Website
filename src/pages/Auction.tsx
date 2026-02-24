@@ -33,6 +33,8 @@ export default function Auction() {
   const [showPlayerPoolModal, setShowPlayerPoolModal] = useState(false);
   const [allPlayers, setAllPlayers] = useState<any[]>([]);
   const [playerPoolType, setPlayerPoolType] = useState<'core' | 'support'>('core');
+  const [playerPoolTab, setPlayerPoolTab] = useState<'available' | 'sold'>('available');
+  const [soldPlayersInPool, setSoldPlayersInPool] = useState<any[]>([]);
   
   // Auction pool state
   // const [auctionPool, setAuctionPool] = useState<any[]>([]);
@@ -423,6 +425,40 @@ export default function Auction() {
           .map((item: any) => item.player_data);
         
         setAllPlayers(filteredPlayers);
+      }
+    } catch (error) {
+      // Silent error
+    }
+  };
+
+  const loadSoldPlayersInPool = async (type: 'core' | 'support') => {
+    try {
+      const state = await AuctionService.getAuctionState();
+      if (!state) return;
+
+      // Get sold players from auction_results
+      const { data: soldData, error } = await supabase
+        .from('auction_results')
+        .select('*')
+        .eq('auction_id', state.id)
+        .order('sold_at', { ascending: false });
+
+      if (!error && soldData) {
+        // Filter by player type from player_data
+        const filteredSoldPlayers = soldData
+          .filter((result: any) => {
+            // Check if player_data has the matching type
+            const playerType = result.player_data?.playerType || result.player_data?.player_type;
+            return playerType === type;
+          })
+          .map((result: any) => ({
+            ...result.player_data,
+            soldTo: result.sold_to_team_name,
+            soldFor: result.final_price,
+            soldAt: result.sold_at
+          }));
+        
+        setSoldPlayersInPool(filteredSoldPlayers);
       }
     } catch (error) {
       // Silent error
@@ -853,8 +889,10 @@ export default function Auction() {
                     <button
                       onClick={async () => {
                         setPlayerPoolType('core');
+                        setPlayerPoolTab('available');
                         await loadSoldPlayers();
                         await loadAllPlayers('core');
+                        await loadSoldPlayersInPool('core');
                         setShowPlayerPoolModal(true);
                       }}
                       className="px-4 py-2 bg-gradient-to-r from-red-600 to-orange-600 hover:from-red-500 hover:to-orange-500 text-white text-sm font-semibold rounded-lg transition-all duration-300 flex items-center gap-2 shadow-lg"
@@ -867,8 +905,10 @@ export default function Auction() {
                     <button
                       onClick={async () => {
                         setPlayerPoolType('support');
+                        setPlayerPoolTab('available');
                         await loadSoldPlayers();
                         await loadAllPlayers('support');
+                        await loadSoldPlayersInPool('support');
                         setShowPlayerPoolModal(true);
                       }}
                       className="px-4 py-2 bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-500 hover:to-emerald-500 text-white text-sm font-semibold rounded-lg transition-all duration-300 flex items-center gap-2 shadow-lg"
@@ -1652,12 +1692,38 @@ export default function Auction() {
               onClick={(e) => e.stopPropagation()}
             >
               <div className="flex items-center justify-between mb-4">
-                <h3 className="text-2xl font-bold text-white flex items-center gap-2">
-                  <svg className="w-6 h-6 text-cyan-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
-                  </svg>
-                  {playerPoolType === 'core' ? 'Core' : 'Support'} Player Pool ({allPlayers.length} Players)
-                </h3>
+                <div className="flex items-center gap-4">
+                  <h3 className="text-2xl font-bold text-white flex items-center gap-2">
+                    <svg className="w-6 h-6 text-cyan-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
+                    </svg>
+                    {playerPoolType === 'core' ? 'Core' : 'Support'} Player Pool
+                  </h3>
+                  
+                  {/* Tabs */}
+                  <div className="flex gap-2">
+                    <button
+                      onClick={() => setPlayerPoolTab('available')}
+                      className={`px-4 py-2 rounded-lg text-sm font-semibold transition-all ${
+                        playerPoolTab === 'available'
+                          ? 'bg-cyan-600 text-white'
+                          : 'bg-gray-700 text-gray-300 hover:bg-gray-600'
+                      }`}
+                    >
+                      Available ({allPlayers.length})
+                    </button>
+                    <button
+                      onClick={() => setPlayerPoolTab('sold')}
+                      className={`px-4 py-2 rounded-lg text-sm font-semibold transition-all ${
+                        playerPoolTab === 'sold'
+                          ? 'bg-green-600 text-white'
+                          : 'bg-gray-700 text-gray-300 hover:bg-gray-600'
+                      }`}
+                    >
+                      Sold ({soldPlayersInPool.length})
+                    </button>
+                  </div>
+                </div>
                 <button
                   onClick={() => setShowPlayerPoolModal(false)}
                   className="text-gray-400 hover:text-white transition-colors"
@@ -1669,7 +1735,9 @@ export default function Auction() {
               </div>
               
               <div className="overflow-auto flex-1">
-                <table className="w-full text-sm">
+                {playerPoolTab === 'available' ? (
+                  /* Available Players Table */
+                  <table className="w-full text-sm">
                   <thead className="sticky top-0 bg-gradient-to-r from-cyan-900/80 to-blue-900/80 backdrop-blur-sm z-10">
                     <tr className="border-b-2 border-cyan-500/30">
                       <th className="text-left py-3 px-3 text-cyan-300 font-bold">#</th>
@@ -1678,6 +1746,7 @@ export default function Auction() {
                       <th className="text-center py-3 px-3 text-cyan-300 font-bold">Current MMR</th>
                       <th className="text-center py-3 px-3 text-yellow-300 font-bold">Roles</th>
                       <th className="text-center py-3 px-3 text-green-300 font-bold">Ping</th>
+                      <th className="text-center py-3 px-3 text-red-300 font-bold">Dotabuff</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -1733,10 +1802,110 @@ export default function Auction() {
                             {player.pingRange || 'N/A'}
                           </span>
                         </td>
+                        <td className="py-3 px-3 text-center">
+                          {player.dotabuffUrl ? (
+                            <a
+                              href={player.dotabuffUrl}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="inline-flex items-center justify-center w-8 h-8 bg-red-600/90 hover:bg-red-600 border border-red-500 rounded-md transition-all duration-300 hover:scale-110"
+                              title="View Dotabuff Profile"
+                              onClick={(e) => e.stopPropagation()}
+                            >
+                              <img 
+                                src="/icons/dotabuff.png" 
+                                alt="Dotabuff" 
+                                className="w-5 h-5"
+                              />
+                            </a>
+                          ) : (
+                            <span className="text-gray-500 text-xs">N/A</span>
+                          )}
+                        </td>
                       </tr>
                     ))}
                   </tbody>
                 </table>
+                ) : (
+                  /* Sold Players Table */
+                  <table className="w-full text-sm">
+                  <thead className="sticky top-0 bg-gradient-to-r from-green-900/80 to-emerald-900/80 backdrop-blur-sm z-10">
+                    <tr className="border-b-2 border-green-500/30">
+                      <th className="text-left py-3 px-3 text-green-300 font-bold">#</th>
+                      <th className="text-left py-3 px-3 text-green-300 font-bold">Player Name</th>
+                      <th className="text-center py-3 px-3 text-purple-300 font-bold">Peak MMR</th>
+                      <th className="text-center py-3 px-3 text-cyan-300 font-bold">Current MMR</th>
+                      <th className="text-center py-3 px-3 text-yellow-300 font-bold">Sold To</th>
+                      <th className="text-center py-3 px-3 text-amber-300 font-bold">Price</th>
+                      <th className="text-center py-3 px-3 text-red-300 font-bold">Dotabuff</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {soldPlayersInPool.map((player, index) => (
+                      <tr 
+                        key={player.id || index}
+                        className="border-b border-gray-700/50 hover:bg-green-500/10 transition-colors"
+                      >
+                        <td className="py-3 px-3 text-gray-400 font-semibold">{index + 1}</td>
+                        <td className="py-3 px-3">
+                          <div className="flex items-center gap-2">
+                            <Avatar
+                              src={player.avatarUrl}
+                              alt={player.nickname}
+                              name={player.nickname}
+                              size="sm"
+                              className="border border-green-500/50"
+                            />
+                            <span className="text-white font-semibold">
+                              {player.nickname}
+                            </span>
+                          </div>
+                        </td>
+                        <td className="py-3 px-3 text-center">
+                          <span className="text-purple-300 font-bold">
+                            {player.peakMMR || 'N/A'}
+                          </span>
+                        </td>
+                        <td className="py-3 px-3 text-center">
+                          <span className="text-cyan-300 font-bold">
+                            {player.currentMMR || 'N/A'}
+                          </span>
+                        </td>
+                        <td className="py-3 px-3 text-center">
+                          <span className="text-yellow-300 font-semibold">
+                            {player.soldTo || 'N/A'}
+                          </span>
+                        </td>
+                        <td className="py-3 px-3 text-center">
+                          <span className="text-amber-300 font-bold">
+                            🪙 {player.soldFor || 0}
+                          </span>
+                        </td>
+                        <td className="py-3 px-3 text-center">
+                          {player.dotabuffUrl ? (
+                            <a
+                              href={player.dotabuffUrl}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="inline-flex items-center justify-center w-8 h-8 bg-red-600/90 hover:bg-red-600 border border-red-500 rounded-md transition-all duration-300 hover:scale-110"
+                              title="View Dotabuff Profile"
+                              onClick={(e) => e.stopPropagation()}
+                            >
+                              <img 
+                                src="/icons/dotabuff.png" 
+                                alt="Dotabuff" 
+                                className="w-5 h-5"
+                              />
+                            </a>
+                          ) : (
+                            <span className="text-gray-500 text-xs">N/A</span>
+                          )}
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+                )}
               </div>
             </motion.div>
           </motion.div>

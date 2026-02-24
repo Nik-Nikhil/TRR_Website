@@ -203,6 +203,9 @@ export class DatabaseService {
    */
   static async getAdminByUsername(username: string) {
     try {
+      console.log('[DatabaseService] Looking for admin with username:', username);
+      console.log('[DatabaseService] Searching with lowercase:', username.toLowerCase());
+      
       const { data, error } = await supabase
         .from('admins')
         .select('*')
@@ -211,13 +214,22 @@ export class DatabaseService {
         .maybeSingle();
 
       if (error) {
-        console.error('Error fetching admin:', error);
+        console.error('[DatabaseService] Error fetching admin:', error);
         return { success: false, error: error.message };
       }
 
       if (!data) {
+        console.error('[DatabaseService] Admin not found in database');
+        // Let's also check without lowercase to see if there's a case mismatch
+        const { data: allData } = await supabase
+          .from('admins')
+          .select('username, display_name, is_active')
+          .eq('is_active', true);
+        console.log('[DatabaseService] All active admins in database:', allData);
         return { success: false, error: 'Admin not found' };
       }
+
+      console.log('[DatabaseService] Found admin:', { username: data.username, role: data.role, displayName: data.display_name });
 
       return { 
         success: true, 
@@ -242,25 +254,33 @@ export class DatabaseService {
    */
   static async authenticateAdmin(username: string, password: string) {
     try {
+      console.log('[DatabaseService] Authenticating admin:', username);
+      
       const admin = await this.getAdminByUsername(username);
       
       if (!admin.success || !admin.data) {
+        console.error('[DatabaseService] Admin lookup failed:', admin.error);
         return { success: false, error: 'Admin not found' };
       }
+
+      console.log('[DatabaseService] Admin found, verifying password...');
 
       // Use encrypted password service for authentication
       const { default: passwordService } = await import('./passwordService');
       const verification = await passwordService.verifyUserPassword(username, password);
       
       if (!verification.success) {
+        console.error('[DatabaseService] Password verification failed:', verification.error);
         return { success: false, error: 'Invalid password' };
       }
+
+      console.log('[DatabaseService] Authentication successful!');
 
       // Don't return password in response
       const { password: _, ...adminData } = admin.data;
       return { success: true, data: adminData };
     } catch (error) {
-      console.error('Error authenticating admin:', error);
+      console.error('[DatabaseService] Error authenticating admin:', error);
       return { success: false, error: (error as Error).message };
     }
   }

@@ -55,7 +55,8 @@ function App() {
           <Route path="/teams/:teamId" element={<TeamDetail />} />
           <Route path="/team/:teamName" element={<TeamDetailAuction />} />
 
-          <Route path="/seasons" element={<SeasonShowCase />} />
+          {/* Seasons/Standings - Disabled (Under Construction) */}
+          {/* <Route path="/seasons" element={<SeasonShowCase />} /> */}
           <Route path="/auction" element={<Auction />} />
 
           <Route path="/players" element={<AllPlayersPage />} />

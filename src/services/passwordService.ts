@@ -95,6 +95,8 @@ class PasswordService {
     password: string
   ): Promise<{ success: boolean; error?: string }> {
     try {
+      console.log('[PasswordService] Verifying password for user:', userId);
+      
       const { data, error } = await supabase
         .from('user_passwords')
         .select('password_hash')
@@ -102,15 +104,29 @@ class PasswordService {
         .single();
 
       if (error || !data) {
+        console.error('[PasswordService] Password not found in user_passwords table for:', userId);
+        console.error('[PasswordService] Error:', error);
+        
+        // Check if there are any passwords in the table
+        const { data: allPasswords } = await supabase
+          .from('user_passwords')
+          .select('user_id')
+          .limit(10);
+        console.log('[PasswordService] Sample user_ids in user_passwords table:', allPasswords?.map(p => p.user_id));
+        
         return { success: false, error: 'Password not found' };
       }
+
+      console.log('[PasswordService] Password hash found, verifying...');
 
       const isValid = await this.verifyPassword(password, data.password_hash);
 
       if (!isValid) {
+        console.error('[PasswordService] Password verification failed - incorrect password');
         return { success: false, error: 'Invalid password' };
       }
 
+      console.log('[PasswordService] Password verified successfully!');
       return { success: true };
     } catch (error: any) {
       console.error('Error in verifyUserPassword:', error);
