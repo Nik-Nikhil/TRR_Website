@@ -407,38 +407,38 @@ export default function Auction() {
         .select('*')
         .eq('auction_id', state.id)
         .eq('player_type', type)
+        .eq('is_sold', false) // Only get unsold players
         .order('player_data->currentMMR', { ascending: false });
 
       if (!error && data) {
-        // Get fresh sold players list
+        // Get fresh sold players list from auction_results as backup check
         const { data: soldData } = await supabase
           .from('auction_results')
           .select('player_id')
           .eq('auction_id', state.id);
         
-        const soldPlayerIds = soldData?.map(sp => sp.player_id) || [];
+        const soldPlayerIds = new Set(soldData?.map(sp => sp.player_id) || []);
         const currentPlayerId = state.current_player_id;
         
-        const filteredPlayers = data
-          .filter((poolItem: any) => {
-            const playerId = poolItem.player_id;
-            
-            // Remove current player being auctioned
-            if (playerId === currentPlayerId) {
-              return false;
-            }
-            // Remove sold players
-            if (soldPlayerIds.includes(playerId)) {
-              return false;
-            }
-            return true;
-          })
-          .map((item: any) => item.player_data);
+        // Use a Map to deduplicate by player_id
+        const uniquePlayers = new Map();
         
-        setAllPlayers(filteredPlayers);
+        data.forEach((poolItem: any) => {
+          const playerId = poolItem.player_id;
+          
+          // Skip if current player, sold, or already in map
+          if (playerId === currentPlayerId || soldPlayerIds.has(playerId) || uniquePlayers.has(playerId)) {
+            return;
+          }
+          
+          uniquePlayers.set(playerId, poolItem.player_data);
+        });
+        
+        setAllPlayers(Array.from(uniquePlayers.values()));
       }
     } catch (error) {
-      // Silent error
+      console.error('Error loading available players:', error);
+      setAllPlayers([]);
     }
   };
 
@@ -455,24 +455,31 @@ export default function Auction() {
         .order('sold_at', { ascending: false });
 
       if (!error && soldData) {
-        // Filter by player type from player_data
-        const filteredSoldPlayers = soldData
-          .filter((result: any) => {
-            // Check if player_data has the matching type
-            const playerType = result.player_data?.playerType || result.player_data?.player_type;
-            return playerType === type;
-          })
-          .map((result: any) => ({
-            ...result.player_data,
-            soldTo: result.sold_to_team_name,
-            soldFor: result.final_price,
-            soldAt: result.sold_at
-          }));
+        // Use a Map to deduplicate by player_id (keep only the first/latest entry)
+        const uniquePlayers = new Map();
         
-        setSoldPlayersInPool(filteredSoldPlayers);
+        soldData.forEach((result: any) => {
+          const playerId = result.player_id;
+          const playerType = result.player_data?.playerType || result.player_data?.player_type;
+          
+          // Only include if matches the type and not already in map
+          if (playerType === type && !uniquePlayers.has(playerId)) {
+            uniquePlayers.set(playerId, {
+              ...result.player_data,
+              id: playerId, // Ensure we have the player ID
+              soldTo: result.sold_to_team_name,
+              soldFor: result.final_price,
+              soldAt: result.sold_at
+            });
+          }
+        });
+        
+        // Convert Map values to array
+        setSoldPlayersInPool(Array.from(uniquePlayers.values()));
       }
     } catch (error) {
-      // Silent error
+      console.error('Error loading sold players:', error);
+      setSoldPlayersInPool([]);
     }
   };
 
