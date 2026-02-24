@@ -54,6 +54,9 @@ export default function Auction() {
   
   // Ref to track sale execution timeout
   const saleTimeoutRef = useRef<number | null>(null);
+  
+  // Ref to track if a sale is currently being processed
+  const isSaleInProgress = useRef(false);
 
   // Sync hammer state from database
   useEffect(() => {
@@ -721,24 +724,57 @@ export default function Auction() {
   };
 
   const finalizeSale = async () => {
+    // Guard against multiple simultaneous executions
+    if (isSaleInProgress.current) {
+      console.log('Sale already in progress, skipping duplicate call');
+      return;
+    }
+    
     if (!auctionState) {
       return;
     }
+    
+    // Check if player is already sold before starting
+    const { data: existingSale } = await supabase
+      .from('auction_results')
+      .select('id')
+      .eq('auction_id', auctionState.id)
+      .eq('player_id', auctionState.current_player_id)
+      .maybeSingle();
+    
+    if (existingSale) {
+      console.log('Player already sold, clearing UI');
+      // Player already sold, just clear the UI and return
+      await AuctionService.setCurrentPlayer('', null);
+      await Promise.all([
+        loadCaptains(),
+        loadSoldPlayers()
+      ]);
+      setSelectedTeamForManualAssign('');
+      setManualAssignPrice('');
+      return;
+    }
+    
+    // Mark that we're processing a sale
+    isSaleInProgress.current = true;
 
     if (!auctionState.highest_bidder_id && !selectedTeamForManualAssign) {
       await alert('Please select a team to assign this player to', 'Selection Required', 'warning');
+      isSaleInProgress.current = false;
       return;
     }
 
     if (!auctionState.highest_bidder_id) {
       if (manualAssignPrice.trim() === '') {
         await alert('Please enter a price (0 or higher)', 'Invalid Price', 'warning');
+        isSaleInProgress.current = false;
         return;
       }
       
       const price = parseInt(manualAssignPrice);
       if (isNaN(price) || price < 0) {
         await alert('Please enter a valid price (0 or higher)', 'Invalid Price', 'warning');
+        isSaleInProgress.current = false;
         return;
       }
 
@@ -795,26 +831,6 @@ export default function Auction() {
     const winningCaptain = captains.find(c => c.playerId === finalCaptainId);
     const newBudget = winningCaptain ? winningCaptain.budget - finalPrice : 0;
     
-    // Check if this player is already sold to prevent duplicates
-    const { data: existingSale } = await supabase
-      .from('auction_results')
-      .select('id')
-      .eq('auction_id', auctionState.id)
-      .eq('player_id', auctionState.current_player_id)
-      .maybeSingle();
-    
-    if (existingSale) {
-      // Player already sold, just clear the UI and return
-      await AuctionService.setCurrentPlayer('', null);
-      await Promise.all([
-        loadCaptains(),
-        loadSoldPlayers()
-      ]);
-      setSelectedTeamForManualAssign('');
-      setManualAssignPrice('');
-      return;
-    }
-    
     if (winningCaptain) {
       await captainService.updateBudget(finalCaptainId, newBudget);
     }
@@ -833,6 +849,7 @@ export default function Auction() {
 
     if (error) {
       await alert(`Failed to assign player: ${error.message}`, 'Database Error', 'warning');
+      isSaleInProgress.current = false; // Reset flag on error
       return;
     }
 
@@ -871,6 +888,9 @@ export default function Auction() {
     
     setSuccessMessage(`${playerNickname} assigned to ${finalTeamName}! Budget updated to ${newBudget}.`);
     setShowSuccessModal(true);
+    
+    // Reset the sale in progress flag
+    isSaleInProgress.current = false;
   };
 
   const status = auctionState?.status || 'not-started';
