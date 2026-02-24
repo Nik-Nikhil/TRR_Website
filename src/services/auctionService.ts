@@ -94,6 +94,17 @@ export class AuctionService {
         // Continue anyway - don't fail the whole operation
       }
 
+      // Clear any existing chat messages before creating new auction
+      const { error: chatError } = await supabase
+        .from('auction_chat')
+        .delete()
+        .neq('id', '00000000-0000-0000-0000-000000000000'); // Delete all
+
+      if (chatError) {
+        console.error('Error clearing auction chat:', chatError);
+        // Continue anyway - don't fail the whole operation
+      }
+
       // Create new auction
       const { error } = await supabase
         .from('auctions')
