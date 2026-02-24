@@ -116,6 +116,24 @@ export const AdminManagement = () => {
       return;
     }
 
+    // Check for spaces in username
+    if (username.includes(' ')) {
+      await alert('Username cannot contain spaces. Use lowercase letters, numbers, and underscores only.\n\nExample: "shaileshzambare" not "Shailesh Zambare"', 'Invalid Username', 'warning');
+      return;
+    }
+
+    // Check for uppercase letters
+    if (username !== username.toLowerCase()) {
+      await alert('Username must be lowercase only.\n\nExample: "rajdodia" not "RajDodia"', 'Invalid Username', 'warning');
+      return;
+    }
+
+    // Check for special characters (allow only letters, numbers, underscore)
+    if (!/^[a-z0-9_]+$/.test(username)) {
+      await alert('Username can only contain lowercase letters, numbers, and underscores.\n\nExample: "admin_user" or "admin123"', 'Invalid Username', 'warning');
+      return;
+    }
+
     if (password.length < 6) {
       await alert('Password must be at least 6 characters', 'Invalid Password', 'warning');
       return;
@@ -333,10 +351,13 @@ export const AdminManagement = () => {
               <input
                 type="text"
                 value={username}
-                onChange={(e) => setUsername(e.target.value)}
-                placeholder="admin_username"
+                onChange={(e) => setUsername(e.target.value.toLowerCase())}
+                placeholder="lowercase_only (e.g., johndoe)"
                 className="w-full px-4 py-3 bg-black/60 border border-green-500/40 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-green-500"
               />
+              <p className="text-xs text-gray-500 mt-1">
+                Lowercase letters, numbers, and underscores only. No spaces!
+              </p>
             </div>
 
             {/* Password */}
