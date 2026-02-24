@@ -76,21 +76,24 @@ export default function Auction() {
       return;
     }
     
-    // Always sync from database - this is the source of truth
-    setIsHammerActive(auctionState.hammer_active);
-    setHammerStage(auctionState.hammer_stage);
-    setHammerCountdown(auctionState.hammer_countdown);
-    
-    // If we're at stage 3 (SOLD) and hammer is active, execute the sale
-    if (auctionState.hammer_active && auctionState.hammer_stage === 3 && !isLocalHammerRunning.current) {
-      isLocalHammerRunning.current = true; // Prevent multiple executions
-      // Execute sale after brief delay
-      saleTimeoutRef.current = window.setTimeout(() => {
-        executeSale();
-        saleTimeoutRef.current = null;
-      }, 800);
+    // Only sync from database if we're NOT running a local countdown
+    // This prevents the database sync from interfering with the local countdown
+    if (!isLocalHammerRunning.current) {
+      setIsHammerActive(auctionState.hammer_active);
+      setHammerStage(auctionState.hammer_stage);
+      setHammerCountdown(auctionState.hammer_countdown);
+      
+      // If we're at stage 3 (SOLD) and hammer is active, execute the sale
+      if (auctionState.hammer_active && auctionState.hammer_stage === 3) {
+        isLocalHammerRunning.current = true; // Prevent multiple executions
+        // Execute sale after brief delay
+        saleTimeoutRef.current = window.setTimeout(() => {
+          executeSale();
+          saleTimeoutRef.current = null;
+        }, 800);
+      }
     }
-  }, [auctionState, isHammerActive, hammerStage]);
+  }, [auctionState?.highest_bid, auctionState?.hammer_active, auctionState?.hammer_stage]);
 
   useEffect(() => {
     // Load initial data
@@ -318,8 +321,10 @@ export default function Auction() {
       const timer = setTimeout(() => {
         const newCountdown = hammerCountdown - 1;
         setHammerCountdown(newCountdown);
-        // Update database on every tick for real-time sync
-        AuctionService.updateHammerState(isHammerActive, hammerStage, newCountdown);
+        // Only update database every second, not on every render
+        if (isLocalHammerRunning.current) {
+          AuctionService.updateHammerState(isHammerActive, hammerStage, newCountdown);
+        }
       }, 1000);
       return () => clearTimeout(timer);
     } else {
@@ -331,17 +336,20 @@ export default function Auction() {
         setHammerStage(newStage);
         setHammerCountdown(newCountdown);
         // Update database
-        AuctionService.updateHammerState(true, newStage, newCountdown);
+        if (isLocalHammerRunning.current) {
+          AuctionService.updateHammerState(true, newStage, newCountdown);
+        }
       } else if (hammerStage === 2) {
         // Going Twice -> SOLD! (instant execution, no delay)
         const newStage = 3;
         setHammerStage(newStage);
         setHammerCountdown(0);
         // Update database
-        AuctionService.updateHammerState(true, newStage, 0);
+        if (isLocalHammerRunning.current) {
+          AuctionService.updateHammerState(true, newStage, 0);
+        }
         // Execute sale after a brief moment to show SOLD animation
         // Store timeout ref so it can be cancelled if a bid comes in
-        isLocalHammerRunning.current = true;
         saleTimeoutRef.current = window.setTimeout(() => {
           // Execute sale - timeout will be cleared if a bid comes in
           executeSale();
@@ -786,6 +794,26 @@ export default function Auction() {
 
     const winningCaptain = captains.find(c => c.playerId === finalCaptainId);
     const newBudget = winningCaptain ? winningCaptain.budget - finalPrice : 0;
+    
+    // Check if this player is already sold to prevent duplicates
+    const { data: existingSale } = await supabase
+      .from('auction_results')
+      .select('id')
+      .eq('auction_id', auctionState.id)
+      .eq('player_id', auctionState.current_player_id)
+      .maybeSingle();
+    
+    if (existingSale) {
+      // Player already sold, just clear the UI and return
+      await AuctionService.setCurrentPlayer('', null);
+      await Promise.all([
+        loadCaptains(),
+        loadSoldPlayers()
+      ]);
+      setSelectedTeamForManualAssign('');
+      setManualAssignPrice('');
+      return;
+    }
     
     if (winningCaptain) {
       await captainService.updateBudget(finalCaptainId, newBudget);

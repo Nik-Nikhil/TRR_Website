@@ -92,8 +92,14 @@ export const AuctionControl = () => {
         setPoolPlayers([]);
         return;
       }
+
+      // Import and use auction pool service
+      const { default: auctionPoolService } = await import('../../services/auctionPoolService');
+      const players = await auctionPoolService.getAuctionPool(auctionState.id);
+      setPoolPlayers(players);
     } catch (error) {
-      // Silent error
+      console.error('Error loading pool players:', error);
+      setPoolPlayers([]);
     }
   };
 
