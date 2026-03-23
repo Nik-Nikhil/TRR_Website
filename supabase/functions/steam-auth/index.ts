@@ -1,42 +1,23 @@
-// supabase/functions/steam-auth/index.ts
-// Handles Steam OpenID 2.0 login flow
-// Deploy with: supabase functions deploy steam-auth
-
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
 
 const STEAM_OPENID_URL = 'https://steamcommunity.com/openid/login'
 const STEAM_API_BASE = 'https://api.steampowered.com'
 
-// These come from Supabase secrets (set via CLI):
-//   supabase secrets set STEAM_API_KEY=your_key
-//   supabase secrets set SITE_URL=https://yoursite.com
-//   supabase secrets set SUPABASE_URL=...
-//   supabase secrets set SUPABASE_SERVICE_ROLE_KEY=...
 const STEAM_API_KEY = Deno.env.get('STEAM_API_KEY') ?? ''
-const SITE_URL = Deno.env.get('SITE_URL') ?? 'http://localhost:5173'
-
-// Supabase injects these automatically at runtime
+const SITE_URL = Deno.env.get('SITE_URL') ?? 'https://www.trresports.in'
 const PROJECT_URL = Deno.env.get('SUPABASE_URL') ?? 'https://qcsdshznxhhwtxdecako.supabase.co'
-const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? Deno.env.get('SERVICE_ROLE_KEY') ?? ''
+const SERVICE_KEY = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? Deno.env.get('SERVICE_ROLE_KEY') ?? ''
 
 const CALLBACK_URL = `${PROJECT_URL}/functions/v1/steam-auth/callback`
 
-const corsHeaders = {
-  'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
-  'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
-}
-
 Deno.serve(async (req: Request) => {
-  // Handle CORS preflight
-  if (req.method === 'OPTIONS') {
-    return new Response(null, { headers: corsHeaders })
-  }
-
   const url = new URL(req.url)
   const path = url.pathname
 
-  // ── /steam-auth/init ──────────────────────────────────────────────
+  console.log(`[steam-auth] ${req.method} ${path}`)
+  console.log(`[steam-auth] SITE_URL=${SITE_URL}, PROJECT_URL=${PROJECT_URL}, HAS_KEY=${!!SERVICE_KEY}, HAS_STEAM_KEY=${!!STEAM_API_KEY}`)
+
+  // ── INIT: redirect to Steam ───────────────────────────────────────
   if (path.endsWith('/init')) {
     const params = new URLSearchParams({
       'openid.ns': 'http://specs.openid.net/auth/2.0',
@@ -46,178 +27,135 @@ Deno.serve(async (req: Request) => {
       'openid.identity': 'http://specs.openid.net/auth/2.0/identifier_select',
       'openid.claimed_id': 'http://specs.openid.net/auth/2.0/identifier_select',
     })
-
-    return Response.redirect(`${STEAM_OPENID_URL}?${params.toString()}`, 302)
+    const redirectTo = `${STEAM_OPENID_URL}?${params.toString()}`
+    console.log(`[steam-auth] Redirecting to Steam: ${redirectTo.slice(0, 100)}...`)
+    return Response.redirect(redirectTo, 302)
   }
 
-  // ── /steam-auth/callback ──────────────────────────────────────────
-  // Steam redirects here after login; we verify + upsert player
+  // ── CALLBACK: Steam returns here ──────────────────────────────────
   if (path.endsWith('/callback')) {
+    const params = url.searchParams
+    console.log(`[steam-auth] Callback params: mode=${params.get('openid.mode')}, claimed_id=${params.get('openid.claimed_id')}`)
+
     try {
-      const params = url.searchParams
-
-      // 1. Verify the OpenID response with Steam
+      // 1. Verify with Steam
       const verified = await verifySteamOpenID(params)
-      if (!verified) {
-        return redirectWithError('Steam verification failed')
-      }
+      console.log(`[steam-auth] Verification result: ${verified}`)
+      if (!verified) return redirectError('Steam verification failed')
 
-      // 2. Extract SteamID64 from claimed_id
-      // Format: https://steamcommunity.com/openid/id/76561198XXXXXXXXX
+      // 2. Extract SteamID64
       const claimedId = params.get('openid.claimed_id') ?? ''
       const steamId = claimedId.split('/').pop() ?? ''
-      if (!steamId || !/^\d{17}$/.test(steamId)) {
-        return redirectWithError('Invalid Steam ID')
-      }
+      console.log(`[steam-auth] SteamID: ${steamId}`)
+      if (!steamId || !/^\d{17}$/.test(steamId)) return redirectError('Invalid Steam ID: ' + steamId)
 
       // 3. Fetch Steam profile
       const profile = await fetchSteamProfile(steamId)
-      if (!profile) {
-        return redirectWithError('Could not fetch Steam profile')
+      console.log(`[steam-auth] Profile: ${JSON.stringify(profile)}`)
+      if (!profile) return redirectError('Could not fetch Steam profile')
+
+      // 4. Upsert player
+      if (!SERVICE_KEY) {
+        console.error('[steam-auth] No service key available!')
+        return redirectError('Server configuration error: missing service key')
       }
 
-      // 4. Upsert player in Supabase
-      const supabase = createClient(PROJECT_URL, SUPABASE_SERVICE_ROLE_KEY)
+      const supabase = createClient(PROJECT_URL, SERVICE_KEY)
       const player = await upsertPlayer(supabase, steamId, profile)
-      if (!player) {
-        return redirectWithError('Database error')
-      }
+      console.log(`[steam-auth] Player upsert result: ${JSON.stringify(player)}`)
+      if (!player) return redirectError('Database error: could not create/find player')
 
-      // 5. Redirect back to frontend with player data encoded in URL
-      const sessionData = encodeURIComponent(JSON.stringify({
+      // 5. Redirect to frontend with session
+      const session = encodeURIComponent(JSON.stringify({
         playerId: player.id,
         nickname: player.nickname,
         steamId,
-        avatarUrl: player.avatar_url,
+        avatarUrl: player.avatar_url ?? '',
         isNewAccount: player.is_new,
       }))
 
-      return Response.redirect(`${SITE_URL}/steam-callback?session=${sessionData}`, 302)
+      const dest = `${SITE_URL}/steam-callback?session=${session}`
+      console.log(`[steam-auth] Success! Redirecting to: ${SITE_URL}/steam-callback`)
+      return Response.redirect(dest, 302)
+
     } catch (err) {
-      console.error('Steam callback error:', err)
-      const msg = err instanceof Error ? err.message : String(err)
-      return redirectWithError(`Internal error: ${msg}`)
+      const msg = err instanceof Error ? `${err.message}\n${err.stack}` : String(err)
+      console.error('[steam-auth] Unhandled error:', msg)
+      return redirectError('Internal error: ' + (err instanceof Error ? err.message : String(err)))
     }
   }
 
-  return new Response(JSON.stringify({ error: 'Not found' }), {
-    status: 404,
-    headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+  return new Response(JSON.stringify({ ok: true, path, SITE_URL, PROJECT_URL, HAS_KEY: !!SERVICE_KEY }), {
+    headers: { 'Content-Type': 'application/json' },
   })
 })
 
-// ── Helpers ───────────────────────────────────────────────────────────────────
-
-/**
- * Verify the OpenID response by sending it back to Steam for confirmation.
- * This is the critical security step — never skip it.
- */
 async function verifySteamOpenID(params: URLSearchParams): Promise<boolean> {
-  const verifyParams = new URLSearchParams(params)
-  verifyParams.set('openid.mode', 'check_authentication')
-
+  const body = new URLSearchParams(params)
+  body.set('openid.mode', 'check_authentication')
   const res = await fetch(STEAM_OPENID_URL, {
     method: 'POST',
     headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-    body: verifyParams.toString(),
+    body: body.toString(),
   })
-
   const text = await res.text()
+  console.log('[steam-auth] Steam verify response:', text.slice(0, 200))
   return text.includes('is_valid:true')
 }
 
-/**
- * Fetch public Steam profile via Web API.
- * Requires STEAM_API_KEY secret.
- */
 async function fetchSteamProfile(steamId: string) {
   if (!STEAM_API_KEY) {
-    // No API key — return minimal profile using community URL
-    return {
-      nickname: `Steam_${steamId.slice(-6)}`,
-      avatar_url: '',
-      steam_url: `https://steamcommunity.com/profiles/${steamId}`,
-    }
+    console.warn('[steam-auth] No STEAM_API_KEY — using fallback profile')
+    return { nickname: `Player_${steamId.slice(-6)}`, avatar_url: '', steam_url: `https://steamcommunity.com/profiles/${steamId}` }
   }
-
-  const res = await fetch(
-    `${STEAM_API_BASE}/ISteamUser/GetPlayerSummaries/v0002/?key=${STEAM_API_KEY}&steamids=${steamId}`
-  )
+  const res = await fetch(`${STEAM_API_BASE}/ISteamUser/GetPlayerSummaries/v0002/?key=${STEAM_API_KEY}&steamids=${steamId}`)
   const data = await res.json()
-  const player = data?.response?.players?.[0]
-  if (!player) return null
-
+  const p = data?.response?.players?.[0]
+  if (!p) return null
   return {
-    nickname: player.personaname as string,
-    avatar_url: (player.avatarfull ?? player.avatarmedium ?? player.avatar) as string,
+    nickname: p.personaname as string,
+    avatar_url: (p.avatarfull ?? p.avatarmedium ?? p.avatar ?? '') as string,
     steam_url: `https://steamcommunity.com/profiles/${steamId}`,
   }
 }
 
-/**
- * Upsert player — find by steam_id, update profile, or create new record.
- */
-async function upsertPlayer(
-  supabase: ReturnType<typeof createClient>,
-  steamId: string,
-  profile: { nickname: string; avatar_url: string; steam_url: string }
-) {
-  // Check if player already exists by steam_id
-  const { data: existing } = await supabase
+async function upsertPlayer(supabase: ReturnType<typeof createClient>, steamId: string, profile: { nickname: string; avatar_url: string; steam_url: string }) {
+  // Try find existing by steam_id
+  const { data: existing, error: findErr } = await supabase
     .from('players')
     .select('id, nickname, avatar_url')
     .eq('steam_id', steamId)
     .maybeSingle()
 
-  if (existing) {
-    // Update avatar/steam data on each login (keeps it fresh)
-    await supabase
-      .from('players')
-      .update({
-        avatar_url: profile.avatar_url || existing.avatar_url,
-        steam_url: profile.steam_url,
-        updated_at: new Date().toISOString(),
-      })
-      .eq('id', existing.id)
+  if (findErr) console.error('[steam-auth] Find error:', findErr)
 
+  if (existing) {
+    await supabase.from('players').update({
+      avatar_url: profile.avatar_url || existing.avatar_url,
+      steam_url: profile.steam_url,
+    }).eq('id', existing.id)
     return { ...existing, is_new: false }
   }
 
-  // New player — create record
-  // Handle nickname collisions by appending steamId suffix
+  // Deduplicate nickname
   let nickname = profile.nickname
-  const { data: nickConflict } = await supabase
-    .from('players')
-    .select('id')
-    .eq('nickname', nickname)
-    .maybeSingle()
+  const { data: conflict } = await supabase.from('players').select('id').eq('nickname', nickname).maybeSingle()
+  if (conflict) nickname = `${nickname}_${steamId.slice(-4)}`
 
-  if (nickConflict) {
-    nickname = `${nickname}_${steamId.slice(-4)}`
-  }
-
-  const { data: newPlayer, error } = await supabase
+  const { data: created, error: insertErr } = await supabase
     .from('players')
-    .insert({
-      nickname,
-      steam_id: steamId,
-      steam_url: profile.steam_url,
-      avatar_url: profile.avatar_url,
-    })
+    .insert({ nickname, steam_id: steamId, steam_url: profile.steam_url, avatar_url: profile.avatar_url })
     .select('id, nickname, avatar_url')
     .single()
 
-  if (error) {
-    console.error('Insert error:', error)
+  if (insertErr) {
+    console.error('[steam-auth] Insert error:', JSON.stringify(insertErr))
     return null
   }
-
-  return { ...newPlayer, is_new: true }
+  return { ...created, is_new: true }
 }
 
-function redirectWithError(msg: string) {
-  return Response.redirect(
-    `${SITE_URL}/steam-callback?error=${encodeURIComponent(msg)}`,
-    302
-  )
+function redirectError(msg: string) {
+  console.error('[steam-auth] Redirecting with error:', msg)
+  return Response.redirect(`${SITE_URL}/steam-callback?error=${encodeURIComponent(msg)}`, 302)
 }

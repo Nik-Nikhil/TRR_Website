@@ -2,6 +2,7 @@
 // Frontend helpers for Steam OpenID login flow
 
 const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL as string
+const SUPABASE_ANON_KEY = import.meta.env.VITE_SUPABASE_ANON_KEY as string
 
 export interface SteamSession {
   playerId: string
@@ -19,9 +20,10 @@ export const SteamAuthService = {
    * The edge function handles the OpenID redirect to Steam.
    */
   initiateLogin() {
-    const initUrl = `${SUPABASE_URL}/functions/v1/steam-auth/init`
-    console.log('🔵 Steam login init URL:', initUrl)
-    window.location.href = initUrl
+    // Pass anon key so the edge function accepts the request without JWT
+    const initUrl = `${SUPABASE_URL}/functions/v1/steam-auth/init?apikey=${SUPABASE_ANON_KEY}`
+    console.log('🔵 Navigating to Steam init...')
+    window.location.assign(initUrl)
   },
 
   /**
