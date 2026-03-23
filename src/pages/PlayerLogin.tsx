@@ -1,13 +1,50 @@
-import React, { useState, useMemo, useEffect } from 'react';
-import { motion } from 'framer-motion';
-import { Search, Lock, Eye, EyeOff, User, LogIn, Users } from 'lucide-react';
+import { useState, useEffect, useMemo } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { Search, Lock, Eye, EyeOff, LogIn, ChevronRight } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import DatabaseService from '../services/database';
 import AuthService from '../services/auth';
+import SteamAuthService from '../services/steamAuth';
 import { mapDatabasePlayerToFrontend } from '../utils/playerMapper';
 
+function SteamIcon({ className = 'w-5 h-5' }: { className?: string }) {
+  return (
+    <svg className={className} viewBox="0 0 24 24" fill="currentColor">
+      <path d="M11.979 0C5.678 0 .511 4.86.022 11.037l6.432 2.658c.545-.371 1.203-.59 1.912-.59.063 0 .125.004.188.006l2.861-4.142V8.91c0-2.495 2.028-4.524 4.524-4.524 2.494 0 4.524 2.031 4.524 4.527s-2.03 4.525-4.524 4.525h-.105l-4.076 2.911c0 .052.004.105.004.159 0 1.875-1.515 3.396-3.39 3.396-1.635 0-3.016-1.173-3.331-2.727L.436 15.27C1.862 20.307 6.486 24 11.979 24c6.627 0 11.999-5.373 11.999-12S18.606 0 11.979 0zM7.54 18.21l-1.473-.61c.262.543.714.999 1.314 1.25 1.297.539 2.793-.076 3.332-1.375.263-.63.264-1.319.005-1.949s-.75-1.121-1.377-1.383c-.624-.26-1.29-.249-1.878-.03l1.523.63c.956.4 1.409 1.5 1.009 2.455-.397.957-1.497 1.41-2.455 1.012H7.54zm11.415-9.303c0-1.662-1.353-3.015-3.015-3.015-1.665 0-3.015 1.353-3.015 3.015 0 1.665 1.35 3.015 3.015 3.015 1.663 0 3.015-1.35 3.015-3.015zm-5.273-.005c0-1.252 1.013-2.266 2.265-2.266 1.249 0 2.266 1.014 2.266 2.266 0 1.251-1.017 2.265-2.266 2.265-1.252 0-2.265-1.014-2.265-2.265z" />
+    </svg>
+  );
+}
+
+function getInitials(name: string) {
+  const w = name.trim().split(' ');
+  return w.length >= 2 ? (w[0][0] + w[1][0]).toUpperCase() : name.slice(0, 2).toUpperCase();
+}
+
+function getColor(name: string) {
+  const colors = ['from-blue-500 to-indigo-600', 'from-purple-500 to-pink-600', 'from-orange-500 to-red-600', 'from-teal-500 to-cyan-600', 'from-green-500 to-emerald-600'];
+  let h = 0;
+  for (let i = 0; i < name.length; i++) h = name.charCodeAt(i) + ((h << 5) - h);
+  return colors[Math.abs(h) % colors.length];
+}
+
+function PlayerAvatar({ url, name, size }: { url: string; name: string; size: number }) {
+  const [err, setErr] = useState(false);
+  const cls = `w-${size} h-${size}`;
+  if (!url || err) {
+    return (
+      <div className={`${cls} rounded-full bg-gradient-to-br ${getColor(name)} flex items-center justify-center flex-shrink-0`}>
+        <span className="text-white font-bold text-xs">{getInitials(name)}</span>
+      </div>
+    );
+  }
+  return <img src={url} alt={name} className={`${cls} rounded-full object-cover flex-shrink-0`} onError={() => setErr(true)} />;
+}
+
 export default function PlayerLogin() {
-  const [selectedPlayer, setSelectedPlayer] = useState<string | null>(null);
+  const navigate = useNavigate();
+  const [clickCount, setClickCount] = useState(0);
+  const [showLegacy, setShowLegacy] = useState(false);
+  const [selectedPlayer, setSelectedPlayer] = useState<any>(null);
   const [searchQuery, setSearchQuery] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
@@ -15,363 +52,182 @@ export default function PlayerLogin() {
   const [isLoading, setIsLoading] = useState(false);
   const [players, setPlayers] = useState<any[]>([]);
   const [searchResults, setSearchResults] = useState<any[]>([]);
-  const navigate = useNavigate();
 
-  // Load players from database
   useEffect(() => {
-    const loadPlayers = async () => {
-      const result = await DatabaseService.getAllPlayers();
-      if (result.success && result.data) {
-        // Map database players to frontend format
-        const mappedPlayers = result.data.map(mapDatabasePlayerToFrontend);
-        setPlayers(mappedPlayers);
-      } else {
-        // Silent error
-        setPlayers([]);
-      }
-    };
-    
-    loadPlayers();
-  }, []);
+    if (SteamAuthService.isLoggedIn()) {
+      const s = SteamAuthService.getSession();
+      if (s) navigate(`/players/${s.playerId}`, { replace: true });
+    }
+  }, [navigate]);
 
-  // Search players when query changes
   useEffect(() => {
-    const searchPlayers = async () => {
-      if (!searchQuery.trim()) {
-        setSearchResults([]);
-        return;
-      }
+    if (!showLegacy) return;
+    DatabaseService.getAllPlayers().then(r => {
+      if (r.success && r.data) setPlayers(r.data.map(mapDatabasePlayerToFrontend));
+    });
+  }, [showLegacy]);
 
-      const result = await DatabaseService.searchPlayers(searchQuery);
-      if (result.success && result.data) {
-        // Map database players to frontend format
-        const mappedResults = result.data.map(mapDatabasePlayerToFrontend);
-        setSearchResults(mappedResults);
-      } else {
-        console.error('Search failed:', result.error);
-        setSearchResults([]);
-      }
-    };
-
-    const debounceTimer = setTimeout(searchPlayers, 300);
-    return () => clearTimeout(debounceTimer);
+  useEffect(() => {
+    if (!searchQuery.trim()) { setSearchResults([]); return; }
+    const t = setTimeout(async () => {
+      const r = await DatabaseService.searchPlayers(searchQuery);
+      if (r.success && r.data) setSearchResults(r.data.map(mapDatabasePlayerToFrontend));
+      else setSearchResults([]);
+    }, 300);
+    return () => clearTimeout(t);
   }, [searchQuery]);
 
-  // Filter players based on search query (fallback for offline mode)
   const filteredPlayers = useMemo(() => {
-    if (searchResults.length > 0) {
-      return searchResults;
-    }
-    
+    if (searchResults.length) return searchResults;
     if (!searchQuery.trim()) return players;
-    
-    const query = searchQuery.toLowerCase();
-    return players.filter(player => 
-      player.nickname.toLowerCase().includes(query) ||
-      (player.realName && player.realName.toLowerCase().includes(query))
-    );
+    const q = searchQuery.toLowerCase();
+    return players.filter(p => p.nickname.toLowerCase().includes(q));
   }, [searchQuery, players, searchResults]);
-
-  const handlePlayerSelect = (playerId: string) => {
-    setSelectedPlayer(playerId);
-    setPassword('');
-    setError('');
-    setSearchQuery('');
-  };
 
   const handlePasswordSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!selectedPlayer) return;
-
-    setIsLoading(true);
-    setError('');
-
+    setIsLoading(true); setError('');
     try {
-      // Find the selected player
-      const player = players.find(p => p.id === selectedPlayer);
-      if (!player) {
-        setError('Player not found');
-        setIsLoading(false);
-        return;
-      }
-
-      // Authenticate with database
-      const result = await AuthService.loginPlayer(player.nickname, password);
-      
-      if (!result.success) {
-        setError(result.error || 'Login failed');
-        setIsLoading(false);
-        return;
-      }
-
-      // Navigate to player detail page (which will show as editable for own profile)
-      navigate(`/players/${player.id}`);
-    } catch (error) {
-      console.error('Login error:', error);
-      setError('Login failed. Please try again.');
-    } finally {
-      setIsLoading(false);
-    }
+      const result = await AuthService.loginPlayer(selectedPlayer.nickname, password);
+      if (!result.success) { setError(result.error || 'Login failed'); return; }
+      navigate(`/players/${selectedPlayer.id}`);
+    } catch { setError('Login failed. Please try again.'); }
+    finally { setIsLoading(false); }
   };
 
-  const selectedPlayerData = players.find(p => p.id === selectedPlayer);
+  const handleFooterClick = () => {
+    const next = clickCount + 1;
+    setClickCount(next);
+    if (next >= 5) { setShowLegacy(v => !v); setClickCount(0); }
+  };
 
   return (
-    <>
-      {/* Fixed Background matching AdminLogin */}
-      <div className="fixed inset-0 z-0">
-        <div className="absolute inset-0 bg-[url('https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/blog/play/dota_heroes.jpg')] bg-cover bg-center" />
-        {/* Navbar-inspired gradient overlay */}
-        <div 
-          className="absolute inset-0"
-          style={{
-            background: "radial-gradient(circle at 0% 0%, rgba(192,192,192,0.15), transparent 60%), radial-gradient(circle at 100% 100%, rgba(136,144,150,0.12), transparent 60%), rgba(5,7,10,0.94)"
-          }}
-        />
-        <div className="absolute inset-0 bg-gradient-to-br from-gray-800/30 via-slate-900/40 to-gray-900/50" />
-        {/* Subtle animated orbs matching navbar theme */}
-        <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-gradient-to-r from-gray-400/10 to-slate-400/10 rounded-full blur-3xl animate-pulse" />
-        <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-gradient-to-r from-slate-500/10 to-gray-500/10 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '1s' }} />
-      </div>
+    <div className="min-h-screen flex flex-col" style={{ paddingTop: '80px', background: '#080b0f' }}>
 
-      <main className="player-login-page relative py-1 pt-24">
-        <div className="relative z-10 min-h-0">
-          <div className="max-w-5xl mx-auto px-2 sm:px-4 lg:px-6">
-            {/* Header */}
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              className="text-center mb-6 relative pt-4"
-            >
-              <p className="text-sm text-gray-400">Select your account to continue</p>
-            </motion.div>
+      {/* Subtle glow */}
+      <div className="fixed inset-0 pointer-events-none" style={{
+        background: 'radial-gradient(ellipse 60% 40% at 50% 30%, rgba(102,192,244,0.05) 0%, transparent 70%)'
+      }} />
 
-            {!selectedPlayer ? (
-              /* Player Selection */
-              <div className="w-full flex justify-center pb-4">
-                <div className="w-full max-w-2xl px-3 sm:px-4 md:px-6 relative">
-                  {/* Global Error Message */}
-                  {error && (
-                    <motion.div 
-                      initial={{ opacity: 0, y: -10 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      className="mb-6 p-4 bg-red-900/40 border border-red-500/60 rounded-xl backdrop-blur-sm"
-                    >
-                      <p className="text-red-200 text-sm text-center">{error}</p>
-                    </motion.div>
-                  )}
-                  
-                  {/* Player Selection Card */}
-                  <motion.div
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    className="bg-gray-800/20 backdrop-blur-xl border border-gray-600/30 rounded-2xl p-6 shadow-2xl shadow-gray-900/20 overflow-hidden"
-                  >
-                    <div className="text-center mb-6">
-                      <div className="inline-flex items-center justify-center w-12 h-12 bg-gradient-to-r from-gray-600 to-slate-600 rounded-full mb-4">
-                        <User className="w-6 h-6 text-white" />
-                      </div>
-                      <h2 className="text-xl font-bold text-white mb-2">Player Login</h2>
-                      <p className="text-gray-400 text-sm">Search for your player profile</p>
-                    </div>
+      {/* Main content — vertically centered in remaining space */}
+      <div className="flex-1 flex flex-col items-center justify-center px-4 py-12">
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.4 }}
+          className="flex flex-col items-center gap-7 text-center"
+        >
+          {/* Subtitle only — navbar already shows the brand */}
+          <p className="text-gray-400 text-base tracking-wide">
+            Sign in with your Steam account to continue
+          </p>
 
-                    {/* Search Bar */}
-                    <div className="relative mb-6">
-                      <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
-                      <input
-                        type="text"
-                        value={searchQuery}
-                        onChange={(e) => setSearchQuery(e.target.value)}
-                        className="w-full pl-12 pr-4 py-3 bg-black/30 border border-gray-600/40 rounded-xl text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:border-gray-500 transition-all duration-300 backdrop-blur-sm text-base"
-                        placeholder="Search by nickname or real name..."
-                        autoFocus
-                      />
-                    </div>
+          {/* Steam button */}
+          <button
+            onClick={() => SteamAuthService.initiateLogin()}
+            className="flex items-center gap-2.5 px-8 py-3 rounded-lg font-semibold text-sm tracking-widest uppercase transition-all duration-200 cursor-pointer"
+            style={{
+              background: 'rgba(102,192,244,0.08)',
+              border: '1px solid rgba(102,192,244,0.22)',
+              color: '#9dd4ee',
+            }}
+            onMouseEnter={e => {
+              e.currentTarget.style.background = 'rgba(102,192,244,0.15)';
+              e.currentTarget.style.borderColor = 'rgba(102,192,244,0.4)';
+              e.currentTarget.style.color = '#c2e4f5';
+            }}
+            onMouseLeave={e => {
+              e.currentTarget.style.background = 'rgba(102,192,244,0.08)';
+              e.currentTarget.style.borderColor = 'rgba(102,192,244,0.22)';
+              e.currentTarget.style.color = '#9dd4ee';
+            }}
+          >
+            <SteamIcon className="w-4 h-4" />
+            Sign in with Steam
+          </button>
 
-                    {/* Search Results */}
-                    {searchQuery && (
-                      <div className="max-h-80 overflow-y-auto space-y-3 border-t border-gray-600/30 pt-6">
-                        {filteredPlayers.slice(0, 10).map((player) => (
-                          <motion.button
-                            key={player.id}
-                            initial={{ opacity: 0, y: 10 }}
-                            animate={{ opacity: 1, y: 0 }}
-                            whileHover={{ scale: 1.02 }}
-                            whileTap={{ scale: 0.98 }}
-                            onClick={() => handlePlayerSelect(player.id)}
-                            className="w-full flex items-center gap-3 p-3 bg-gray-800/30 hover:bg-gray-700/40 border border-gray-600/20 hover:border-gray-400/50 rounded-xl transition-all duration-300 group cursor-pointer backdrop-blur-sm overflow-hidden"
-                          >
-                            <div className="relative flex-shrink-0">
-                              <img
-                                src={player.avatarUrl}
-                                alt={player.nickname}
-                                className="w-10 h-10 rounded-full border-2 border-gray-500/50 group-hover:border-gray-400 transition-colors object-cover"
-                                onError={(e) => {
-                                  e.currentTarget.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(player.nickname)}&background=6b7280&color=fff&size=40`;
-                                }}
-                              />
-                            </div>
-                            <div className="flex-1 min-w-0 text-left">
-                              <p className="text-white font-semibold group-hover:text-gray-200 transition-colors truncate text-sm">{player.nickname}</p>
-                              {player.realName && (
-                                <p className="text-xs text-gray-400 group-hover:text-gray-300 transition-colors truncate">{player.realName}</p>
-                              )}
-                              {player.currentMedalLabel && (
-                                <p className="text-xs text-gray-500 group-hover:text-gray-400 transition-colors truncate">{player.currentMedalLabel}</p>
-                              )}
-                            </div>
-                            <LogIn className="w-4 h-4 text-gray-400 group-hover:text-gray-300 transition-colors flex-shrink-0" />
-                          </motion.button>
-                        ))}
-                        {filteredPlayers.length === 0 && (
-                          <div className="text-center py-6">
-                            <User className="w-10 h-10 text-gray-500/50 mx-auto mb-2" />
-                            <p className="text-gray-400 font-medium text-sm">No players found</p>
-                            <p className="text-gray-500 text-xs">Try searching with a different name</p>
-                          </div>
-                        )}
-                        {filteredPlayers.length > 10 && (
-                          <p className="text-gray-400 text-center py-2 text-xs bg-gray-800/20 rounded-lg border border-gray-600/20">
-                            Showing first 10 results. Type more to narrow down.
-                          </p>
-                        )}
-                      </div>
-                    )}
-
-                    {!searchQuery && (
-                      <div className="text-center py-8">
-                        <Search className="w-12 h-12 text-gray-500/30 mx-auto mb-3" />
-                        <p className="text-gray-400 text-base">Start typing to search for your account</p>
-                        <p className="text-gray-500 text-sm mt-1">Enter your nickname or real name</p>
-                      </div>
-                    )}
-
-                    {/* Browse All Players Button */}
-                    <div className="mt-6 pt-6 border-t border-gray-600/30">
-                      <button
-                        onClick={() => navigate('/players')}
-                        className="w-full flex items-center justify-center gap-2 py-3 px-4 bg-gray-700/30 hover:bg-gray-600/40 border border-gray-600/40 hover:border-gray-500/60 rounded-xl transition-all duration-300 group cursor-pointer backdrop-blur-sm"
-                      >
-                        <Users className="w-5 h-5 text-gray-400 group-hover:text-gray-300 transition-colors" />
-                        <span className="text-gray-300 group-hover:text-white font-medium transition-colors">
-                          Browse All Players
-                        </span>
-                      </button>
-                    </div>
-                  </motion.div>
-                </div>
-              </div>
-            ) : (
-              /* Password Entry Form for Selected Player */
-              <div className="w-full flex justify-center pb-4">
-                <div className="w-full max-w-md px-3 sm:px-4 md:px-6 relative">
-                  <motion.div
-                    initial={{ opacity: 0, scale: 0.95 }}
-                    animate={{ opacity: 1, scale: 1 }}
-                    className="w-full"
-                  >
-                    {/* Selected Player Display */}
-                    <div className="text-center mb-6">
-                      <div className="relative w-20 h-20 mx-auto mb-4">
-                        <div className="absolute inset-0 bg-gradient-to-br from-gray-400/30 to-slate-400/30 rounded-full opacity-30" />
-                        <div className="absolute inset-0 bg-gradient-to-br from-gray-400/30 to-slate-400/30 rounded-full blur-xl opacity-40 animate-pulse" />
-                        <img
-                          src={selectedPlayerData?.avatarUrl}
-                          alt={selectedPlayerData?.nickname}
-                          className="w-full h-full object-cover rounded-full border-3 border-gray-400/50 relative z-10 shadow-lg"
-                          onError={(e) => {
-                            e.currentTarget.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(selectedPlayerData?.nickname || '')}&background=6b7280&color=fff&size=80`;
-                          }}
+          {/* Legacy login panel */}
+          <AnimatePresence>
+            {showLegacy && (
+              <motion.div
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: 10 }}
+                className="w-72 rounded-xl p-5 text-left"
+                style={{ background: 'rgba(12,15,20,0.95)', border: '1px solid rgba(255,255,255,0.07)' }}
+              >
+                <p className="text-gray-700 text-[10px] text-center tracking-widest uppercase mb-4">Legacy Login</p>
+                <AnimatePresence mode="wait">
+                  {!selectedPlayer ? (
+                    <motion.div key="search" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="space-y-2">
+                      <div className="relative">
+                        <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-gray-600" />
+                        <input type="text" value={searchQuery} onChange={e => setSearchQuery(e.target.value)} placeholder="Search nickname…"
+                          className="w-full pl-9 pr-3 py-2.5 text-sm text-gray-200 placeholder-gray-700 rounded-lg focus:outline-none transition-colors"
+                          style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)' }}
+                          onFocus={e => (e.currentTarget.style.borderColor = 'rgba(255,255,255,0.18)')}
+                          onBlur={e => (e.currentTarget.style.borderColor = 'rgba(255,255,255,0.08)')}
                         />
                       </div>
-                      <h2 className="text-xl font-bold bg-gradient-to-r from-gray-200 to-white bg-clip-text text-transparent mb-2">
-                        {selectedPlayerData?.nickname}
-                      </h2>
-                      {selectedPlayerData?.realName && (
-                        <p className="text-gray-300 text-sm mb-2 truncate">{selectedPlayerData.realName}</p>
+                      {searchQuery && (
+                        <div className="space-y-1 max-h-44 overflow-y-auto">
+                          {filteredPlayers.slice(0, 6).map(p => (
+                            <button key={p.id} onClick={() => { setSelectedPlayer(p); setSearchQuery(''); setError(''); }}
+                              className="w-full flex items-center gap-2.5 px-3 py-2 text-left rounded-lg transition-colors cursor-pointer"
+                              style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.05)' }}
+                              onMouseEnter={e => (e.currentTarget.style.background = 'rgba(255,255,255,0.07)')}
+                              onMouseLeave={e => (e.currentTarget.style.background = 'rgba(255,255,255,0.03)')}
+                            >
+                              <PlayerAvatar url={p.avatarUrl} name={p.nickname} size={7} />
+                              <span className="text-gray-200 text-sm font-medium truncate flex-1">{p.nickname}</span>
+                              <ChevronRight className="w-3 h-3 text-gray-600" />
+                            </button>
+                          ))}
+                          {filteredPlayers.length === 0 && <p className="text-center text-gray-700 text-xs py-3">No players found</p>}
+                        </div>
                       )}
-                      {selectedPlayerData?.currentMedalLabel && (
-                        <p className="text-gray-400 text-xs mb-3 truncate">{selectedPlayerData.currentMedalLabel}</p>
-                      )}
-                      <button
-                        onClick={() => setSelectedPlayer(null)}
-                        className="text-gray-400 hover:text-gray-300 text-sm transition-colors duration-300 hover:underline cursor-pointer"
-                      >
-                        ← Choose different player
-                      </button>
-                    </div>
-
-                    {/* Password Form */}
-                    <form onSubmit={handlePasswordSubmit} className="bg-gray-900/30 backdrop-blur-xl border border-gray-600/30 rounded-2xl p-6 space-y-4 shadow-2xl shadow-gray-900/20">
-                      <div>
-                        <label className="block text-sm font-medium text-gray-200 mb-2">
-                          Enter Your Password
-                        </label>
+                    </motion.div>
+                  ) : (
+                    <motion.div key="pass" initial={{ opacity: 0, y: 6 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }} className="space-y-2">
+                      <div className="flex items-center gap-2.5 px-3 py-2 rounded-lg" style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.07)' }}>
+                        <PlayerAvatar url={selectedPlayer.avatarUrl} name={selectedPlayer.nickname} size={7} />
+                        <span className="text-white font-semibold text-sm flex-1 truncate">{selectedPlayer.nickname}</span>
+                        <button onClick={() => { setSelectedPlayer(null); setPassword(''); setError(''); }} className="text-gray-600 hover:text-gray-400 text-xs transition-colors cursor-pointer">✕</button>
+                      </div>
+                      <form onSubmit={handlePasswordSubmit} className="space-y-2">
                         <div className="relative">
-                          <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
-                          <input
-                            type={showPassword ? 'text' : 'password'}
-                            value={password}
-                            onChange={(e) => {
-                              setPassword(e.target.value);
-                              setError('');
-                            }}
-                            className="w-full pl-10 pr-10 py-3 bg-black/30 border border-gray-600/40 rounded-xl text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:border-gray-500 transition-all duration-300 backdrop-blur-sm text-base"
-                            placeholder="Enter your password"
-                            required
-                            autoFocus
+                          <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-gray-600" />
+                          <input type={showPassword ? 'text' : 'password'} value={password} onChange={e => { setPassword(e.target.value); setError(''); }}
+                            placeholder="Password" required autoFocus
+                            className="w-full pl-9 pr-9 py-2.5 text-sm text-gray-200 placeholder-gray-700 rounded-lg focus:outline-none transition-colors"
+                            style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)' }}
+                            onFocus={e => (e.currentTarget.style.borderColor = 'rgba(255,255,255,0.18)')}
+                            onBlur={e => (e.currentTarget.style.borderColor = 'rgba(255,255,255,0.08)')}
                           />
-                          <button
-                            type="button"
-                            onClick={() => setShowPassword(!showPassword)}
-                            className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-300 transition-colors duration-300 cursor-pointer"
-                          >
-                            {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
+                          <button type="button" onClick={() => setShowPassword(v => !v)} className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-600 hover:text-gray-400 cursor-pointer transition-colors">
+                            {showPassword ? <EyeOff className="w-3.5 h-3.5" /> : <Eye className="w-3.5 h-3.5" />}
                           </button>
                         </div>
-                      </div>
-
-                      {/* Error Message */}
-                      {error && (
-                        <motion.div 
-                          initial={{ opacity: 0, y: -10 }}
-                          animate={{ opacity: 1, y: 0 }}
-                          className="p-3 bg-red-900/40 border border-red-500/60 rounded-xl backdrop-blur-sm"
+                        {error && <p className="text-red-400 text-xs text-center">{error}</p>}
+                        <button type="submit" disabled={isLoading}
+                          className="w-full flex items-center justify-center gap-2 py-2.5 rounded-lg text-sm font-semibold transition-all cursor-pointer disabled:opacity-40"
+                          style={{ background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.1)', color: '#d1d5db' }}
                         >
-                          <p className="text-red-200 text-sm">{error}</p>
-                        </motion.div>
-                      )}
-
-                      {/* Submit Button */}
-                      <button
-                        type="submit"
-                        disabled={isLoading}
-                        className={`w-full font-semibold py-3 px-6 rounded-xl transition-all duration-300 transform focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2 focus:ring-offset-gray-800 cursor-pointer text-base ${
-                          isLoading
-                            ? 'bg-gray-600 cursor-not-allowed text-gray-300'
-                            : 'bg-gradient-to-r from-gray-700 via-slate-700 to-gray-800 hover:from-gray-600 hover:via-slate-600 hover:to-gray-700 text-white hover:scale-[1.02] shadow-lg shadow-gray-500/20'
-                        }`}
-                      >
-                        {isLoading ? (
-                          <div className="flex items-center justify-center gap-2">
-                            <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
-                            <span>Logging in...</span>
-                          </div>
-                        ) : (
-                          <div className="flex items-center justify-center gap-2">
-                            <LogIn className="w-4 h-4" />
-                            <span>Login</span>
-                          </div>
-                        )}
-                      </button>
-                    </form>
-                  </motion.div>
-                </div>
-              </div>
+                          {isLoading ? <div className="w-4 h-4 border-2 border-white/20 border-t-white/60 rounded-full animate-spin" /> : <><LogIn className="w-3.5 h-3.5" /> Login</>}
+                        </button>
+                      </form>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+              </motion.div>
             )}
-          </div>
-        </div>
-      </main>
-    </>
+          </AnimatePresence>
+          {/* Invisible legacy trigger — click 5x anywhere below button */}
+          <div onClick={handleFooterClick} className="w-48 h-6 cursor-default select-none" />
+        </motion.div>
+      </div>
+
+    </div>
   );
 }

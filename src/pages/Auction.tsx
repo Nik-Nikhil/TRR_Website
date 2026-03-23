@@ -1,10 +1,11 @@
 import { useState, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Link } from "react-router-dom";
-import { Gavel } from "lucide-react";
+import { Gavel, Play, Pause, Square, RotateCcw, ArrowRight, Loader2, ChevronDown, ChevronUp, Search } from "lucide-react";
 import { AuctionGavel } from "../components/ui/AuctionGavel";
 import { Avatar } from "../components/ui/Avatar";
 import { AuctionService } from "../services/auctionService";
+import auctionPoolService from "../services/auctionPoolService";
 import captainService from "../services/captainService";
 import auctionChatService from "../services/auctionChatService";
 import type { AuctionState } from "../services/auctionService";
@@ -24,1703 +25,853 @@ export default function Auction() {
   const [showSuccessModal, setShowSuccessModal] = useState(false);
   const [successMessage, setSuccessMessage] = useState('');
   const [isBidding, setIsBidding] = useState(false);
-
   const [soldPlayers, setSoldPlayers] = useState<any[]>([]);
   const [selectedTeamForManualAssign, setSelectedTeamForManualAssign] = useState<string>('');
   const [manualAssignPrice, setManualAssignPrice] = useState<string>('');
-  
-  // Player Pool modal state
   const [showPlayerPoolModal, setShowPlayerPoolModal] = useState(false);
   const [allPlayers, setAllPlayers] = useState<any[]>([]);
   const [playerPoolType, setPlayerPoolType] = useState<'core' | 'support'>('core');
   const [playerPoolTab, setPlayerPoolTab] = useState<'available' | 'sold'>('available');
   const [soldPlayersInPool, setSoldPlayersInPool] = useState<any[]>([]);
-  
-  // Auction pool state
-  // const [auctionPool, setAuctionPool] = useState<any[]>([]);
-  
-  // Captain chat state
   const [chatMessages, setChatMessages] = useState<any[]>([]);
   const [chatInput, setChatInput] = useState('');
-  
-  // Hammer countdown state - synced from database
-  const [hammerStage, setHammerStage] = useState<0 | 1 | 2 | 3>(0); // 0=none, 1=once, 2=twice, 3=sold
+  const [hammerStage, setHammerStage] = useState<0 | 1 | 2 | 3>(0);
   const [hammerCountdown, setHammerCountdown] = useState(5);
   const [isHammerActive, setIsHammerActive] = useState(false);
   const [newBidDuringHammer, setNewBidDuringHammer] = useState(false);
-  
-  // Ref to track if we're in the middle of a local hammer countdown
   const isLocalHammerRunning = useRef(false);
-  
-  // Ref to track sale execution timeout
   const saleTimeoutRef = useRef<number | null>(null);
-  
-  // Ref to track if a sale is currently being processed
   const isSaleInProgress = useRef(false);
+  const [poolSearch, setPoolSearch] = useState('');
+  const [poolPlayers, setPoolPlayers] = useState<any[]>([]);
+  // Admin panel
+  const [adminPanelOpen, setAdminPanelOpen] = useState(false);
+  const [adminPoolPlayers, setAdminPoolPlayers] = useState<any[]>([]);
+  const [adminSelectedPlayer, setAdminSelectedPlayer] = useState('');
+  const [adminPoolFilter, setAdminPoolFilter] = useState<'all' | 'core' | 'support'>('all');
+  const [adminLoading, setAdminLoading] = useState(false);
+  const [adminError, setAdminError] = useState('');
 
-  // Sync hammer state from database
+  // Hammer sync
   useEffect(() => {
     if (!auctionState) return;
-    
-    // CRITICAL: Check if we're on the auction page
-    const currentPath = window.location.pathname;
-    if (!currentPath.includes('/auction')) {
-      // Not on auction page - clear any hammer state locally only
-      if (isHammerActive || hammerStage !== 0) {
-        setIsHammerActive(false);
-        setHammerStage(0);
-        setHammerCountdown(6);
-        isLocalHammerRunning.current = false;
-        if (saleTimeoutRef.current) {
-          window.clearTimeout(saleTimeoutRef.current);
-          saleTimeoutRef.current = null;
-        }
-      }
+    if (!window.location.pathname.includes('/auction')) {
+      if (isHammerActive || hammerStage !== 0) { setIsHammerActive(false); setHammerStage(0); setHammerCountdown(6); isLocalHammerRunning.current = false; if (saleTimeoutRef.current) { window.clearTimeout(saleTimeoutRef.current); saleTimeoutRef.current = null; } }
       return;
     }
-    
-    // Only sync from database if we're NOT running a local countdown
-    // This prevents the database sync from interfering with the local countdown
     if (!isLocalHammerRunning.current) {
-      setIsHammerActive(auctionState.hammer_active);
-      setHammerStage(auctionState.hammer_stage);
-      setHammerCountdown(auctionState.hammer_countdown);
-      
-      // If we're at stage 3 (SOLD) and hammer is active, execute the sale
-      if (auctionState.hammer_active && auctionState.hammer_stage === 3) {
-        isLocalHammerRunning.current = true; // Prevent multiple executions
-        // Execute sale after brief delay
-        saleTimeoutRef.current = window.setTimeout(() => {
-          executeSale();
-          saleTimeoutRef.current = null;
-        }, 800);
-      }
+      setIsHammerActive(auctionState.hammer_active); setHammerStage(auctionState.hammer_stage); setHammerCountdown(auctionState.hammer_countdown);
+      if (auctionState.hammer_active && auctionState.hammer_stage === 3) { isLocalHammerRunning.current = true; saleTimeoutRef.current = window.setTimeout(() => { executeSale(); saleTimeoutRef.current = null; }, 800); }
     }
   }, [auctionState?.highest_bid, auctionState?.hammer_active, auctionState?.hammer_stage]);
 
   useEffect(() => {
-    // Load initial data
-    loadCaptains();
-    loadAuctionState();
-    loadSoldPlayers();
-    
-    // Check for captain session
+    loadCaptains(); loadAuctionState(); loadSoldPlayers();
     const playerSession = AuthService.getCurrentPlayerSession();
-    if (playerSession) {
-      setCurrentCaptainSession(playerSession);
-    }
-
-    // Check for admin session (regular admin or superadmin)
+    if (playerSession) setCurrentCaptainSession(playerSession);
     const admin = AuthService.getCurrentAdminSession();
-    if (admin) {
-      setAdminSession(admin);
-    } else {
-      // Check for superadmin session
-      const superAdminSessionStr = localStorage.getItem('superAdminSession');
-      if (superAdminSessionStr) {
-        try {
-          const superAdmin = JSON.parse(superAdminSessionStr);
-          if (superAdmin.authenticated) {
-            setAdminSession(superAdmin);
-          }
-        } catch (e) {
-          // Silent error
-        }
-      }
+    if (admin) { setAdminSession(admin); } else {
+      const s = localStorage.getItem('superAdminSession');
+      if (s) { try { const sa = JSON.parse(s); if (sa.authenticated) setAdminSession(sa); } catch(e){} }
     }
-
-    // Subscribe to auction state changes
+    loadAdminPool();
     const stateSubscription = AuctionService.subscribeToAuctionState(async (state) => {
-      // Check if player changed by comparing player data IDs
-      const oldPlayerId = auctionState?.current_player_data?.id;
-      const newPlayerId = state.current_player_data?.id;
-      
+      const oldId = auctionState?.current_player_data?.id;
+      const newId = state.current_player_data?.id;
       setAuctionState(state);
-      
-      // When player changes, poll bids for the new player
-      if (oldPlayerId !== newPlayerId) {
-        // Only poll bids when player actually changes
-        if (state.id && newPlayerId) {
-          await pollBidsForCurrentAuction(state.id);
-        }
-      }
+      if (oldId !== newId && state.id && newId) await pollBidsForCurrentAuction(state.id);
+      loadAdminPool();
     });
-
-    // Subscribe to new bids - using a unique channel name with timestamp
-    const bidChannelName = `auction-bids-${Date.now()}`;
-    const bidChannel = supabase
-      .channel(bidChannelName)
-      .on(
-        'postgres_changes',
-        {
-          event: 'INSERT',
-          schema: 'public',
-          table: 'auction_bids'
-        },
-        async (payload) => {
-          const bid = payload.new as any;
-          
-          // Get current state to check if bid is for current player
-          const currentState = await AuctionService.getAuctionState();
-          const currentPlayerId = currentState?.current_player_id;
-          const currentPlayerDataId = currentState?.current_player_data?.id;
-          
-          // Only add bid if it's for the current player
-          const isForCurrentPlayer = bid.player_id === currentPlayerId || 
-                                     bid.player_id === currentPlayerDataId ||
-                                     (currentState?.current_player_data && 
-                                      bid.player_id === currentState.current_player_data.id);
-          
-          if (!isForCurrentPlayer) {
-            return;
-          }
-          
-          // If hammer is active, stop it automatically when new bid comes in
-          if (isHammerActive) {
-            setNewBidDuringHammer(true);
-            // Clear any pending sale execution
-            if (saleTimeoutRef.current) {
-              window.clearTimeout(saleTimeoutRef.current);
-              saleTimeoutRef.current = null;
-            }
-            // Automatically stop the hammer
-            setIsHammerActive(false);
-            setHammerStage(0);
-            setHammerCountdown(6);
-            // Update database
-            AuctionService.updateHammerState(false, 0, 6);
-          }
-          
-          // Reload auction state to get updated highest bid
-          loadAuctionState();
-        }
-      )
-      .subscribe();
-
-    // Subscribe to captain changes
-    const captainSubscription = captainService.subscribeToCaptains(() => {
-      loadCaptains();
-    });
-
-    // Subscribe to sold players (auction_results) changes
-    const soldPlayersChannel = supabase
-      .channel('auction-results-changes')
-      .on(
-        'postgres_changes',
-        {
-          event: '*',
-          schema: 'public',
-          table: 'auction_results'
-        },
-        () => {
-          loadSoldPlayers();
-        }
-      )
-      .subscribe();
-
-    // Fallback: Poll for updates every 5 seconds as backup
+    const bidChannel = supabase.channel(`auction-bids-${Date.now()}`).on('postgres_changes',
+      { event: 'INSERT', schema: 'public', table: 'auction_bids' },
+      async (payload) => {
+        const bid = payload.new as any;
+        const cs = await AuctionService.getAuctionState();
+        const isForCurrent = bid.player_id === cs?.current_player_id || bid.player_id === cs?.current_player_data?.id;
+        if (!isForCurrent) return;
+        if (isHammerActive) { setNewBidDuringHammer(true); if (saleTimeoutRef.current) { window.clearTimeout(saleTimeoutRef.current); saleTimeoutRef.current = null; } setIsHammerActive(false); setHammerStage(0); setHammerCountdown(6); AuctionService.updateHammerState(false, 0, 6); }
+        loadAuctionState();
+      }).subscribe();
+    const captainSubscription = captainService.subscribeToCaptains(() => loadCaptains());
+    const soldPlayersChannel = supabase.channel('auction-results-changes').on('postgres_changes', { event: '*', schema: 'public', table: 'auction_results' }, () => loadSoldPlayers()).subscribe();
     const pollInterval = setInterval(async () => {
-      await loadAuctionState();
-      await loadCaptains();
-      await loadSoldPlayers();
-      
-      // Poll for bids - get current state
-      const currentState = await AuctionService.getAuctionState();
-      if (currentState?.id) {
-        await pollBidsForCurrentAuction(currentState.id);
-      }
+      await loadAuctionState(); await loadCaptains(); await loadSoldPlayers(); await loadAdminPool();
+      const cs = await AuctionService.getAuctionState();
+      if (cs?.id) await pollBidsForCurrentAuction(cs.id);
     }, 5000);
-
-    return () => {
-      stateSubscription.unsubscribe();
-      supabase.removeChannel(bidChannel);
-      captainSubscription.unsubscribe();
-      supabase.removeChannel(soldPlayersChannel);
-      clearInterval(pollInterval);
-    };
+    return () => { stateSubscription.unsubscribe(); supabase.removeChannel(bidChannel); captainSubscription.unsubscribe(); supabase.removeChannel(soldPlayersChannel); clearInterval(pollInterval); };
   }, []);
 
-  // Separate effect for chat subscription based on auction state
   useEffect(() => {
     if (!auctionState?.id) return;
-
-    // Load initial messages
-    const loadMessages = async () => {
-      const messages = await auctionChatService.getMessages(auctionState.id);
-      setChatMessages(messages);
-    };
+    const loadMessages = async () => { const msgs = await auctionChatService.getMessages(auctionState.id); setChatMessages(msgs); };
     loadMessages();
-
-    // Subscribe to new messages
-    const chatSubscription = auctionChatService.subscribeToMessages(auctionState.id, (newMessage) => {
-      setChatMessages(prev => {
-        // Avoid duplicates
-        if (prev.some(m => m.id === newMessage.id)) {
-          return prev;
-        }
-        return [newMessage, ...prev]; // Add new message at the beginning (top)
-      });
-    });
-
-    // Polling fallback - check for new messages every 3 seconds
-    const pollInterval = setInterval(async () => {
-      const messages = await auctionChatService.getMessages(auctionState.id);
-      setChatMessages(prev => {
-        // Check if there are any new messages by comparing IDs
-        const prevIds = new Set(prev.map(m => m.id));
-        const newMessages = messages.filter(m => !prevIds.has(m.id));
-        
-        if (newMessages.length > 0) {
-          // Add new messages at the top (they're already sorted newest first from DB)
-          return [...newMessages, ...prev];
-        }
-        return prev;
-      });
+    const chatSub = auctionChatService.subscribeToMessages(auctionState.id, (msg) => { setChatMessages(prev => prev.some(m => m.id === msg.id) ? prev : [msg, ...prev]); });
+    const poll = setInterval(async () => {
+      const msgs = await auctionChatService.getMessages(auctionState.id);
+      setChatMessages(prev => { const ids = new Set(prev.map(m => m.id)); const nw = msgs.filter(m => !ids.has(m.id)); return nw.length > 0 ? [...nw, ...prev] : prev; });
     }, 3000);
-
-    return () => {
-      chatSubscription.unsubscribe();
-      clearInterval(pollInterval);
-    };
+    return () => { chatSub.unsubscribe(); clearInterval(poll); };
   }, [auctionState?.id]);
 
-  // Hammer countdown effect - 6 seconds per stage
   useEffect(() => {
-    // CRITICAL: Only run on auction page
-    const currentPath = window.location.pathname;
-    if (!currentPath.includes('/auction')) {
-      // Clear any stale hammer state when not on auction page
-      if (isHammerActive || hammerStage !== 0) {
-        setIsHammerActive(false);
-        setHammerStage(0);
-        setHammerCountdown(6);
-        isLocalHammerRunning.current = false;
-        if (saleTimeoutRef.current) {
-          window.clearTimeout(saleTimeoutRef.current);
-          saleTimeoutRef.current = null;
-        }
-      }
-      return;
-    }
-    
-    // Safety check: don't run hammer logic if no auction state
-    if (!auctionState) {
-      return;
-    }
-    
-    if (!isHammerActive || hammerStage === 0) {
-      if (hammerStage === 0) {
-        isLocalHammerRunning.current = false;
-      }
-      return; // Stop countdown
-    }
-
-    // If we're at stage 3 (SOLD), don't do anything - the timeout is already set
-    if (hammerStage === 3) {
-      return; // Don't clear the sale timeout
-    }
-
+    if (!window.location.pathname.includes('/auction')) { if (isHammerActive || hammerStage !== 0) { setIsHammerActive(false); setHammerStage(0); setHammerCountdown(6); isLocalHammerRunning.current = false; if (saleTimeoutRef.current) { window.clearTimeout(saleTimeoutRef.current); saleTimeoutRef.current = null; } } return; }
+    if (!auctionState) return;
+    if (!isHammerActive || hammerStage === 0) { if (hammerStage === 0) isLocalHammerRunning.current = false; return; }
+    if (hammerStage === 3) return;
     if (hammerCountdown > 0) {
-      const timer = setTimeout(() => {
-        const newCountdown = hammerCountdown - 1;
-        setHammerCountdown(newCountdown);
-        // Only update database every second, not on every render
-        if (isLocalHammerRunning.current) {
-          AuctionService.updateHammerState(isHammerActive, hammerStage, newCountdown);
-        }
-      }, 1000);
-      return () => clearTimeout(timer);
+      const t = setTimeout(() => { const nc = hammerCountdown - 1; setHammerCountdown(nc); if (isLocalHammerRunning.current) AuctionService.updateHammerState(isHammerActive, hammerStage, nc); }, 1000);
+      return () => clearTimeout(t);
     } else {
-      // Countdown finished, move to next stage
-      if (hammerStage === 1) {
-        // Going Once -> Going Twice (6 seconds)
-        const newStage = 2;
-        const newCountdown = 6;
-        setHammerStage(newStage);
-        setHammerCountdown(newCountdown);
-        // Update database
-        if (isLocalHammerRunning.current) {
-          AuctionService.updateHammerState(true, newStage, newCountdown);
-        }
-      } else if (hammerStage === 2) {
-        // Going Twice -> SOLD! (instant execution, no delay)
-        const newStage = 3;
-        setHammerStage(newStage);
-        setHammerCountdown(0);
-        // Update database
-        if (isLocalHammerRunning.current) {
-          AuctionService.updateHammerState(true, newStage, 0);
-        }
-        // Execute sale after a brief moment to show SOLD animation
-        // Store timeout ref so it can be cancelled if a bid comes in
-        saleTimeoutRef.current = window.setTimeout(() => {
-          // Execute sale - timeout will be cleared if a bid comes in
-          executeSale();
-          saleTimeoutRef.current = null;
-        }, 800); // Just 0.8 seconds to show SOLD
-      }
+      if (hammerStage === 1) { setHammerStage(2); setHammerCountdown(6); if (isLocalHammerRunning.current) AuctionService.updateHammerState(true, 2, 6); }
+      else if (hammerStage === 2) { setHammerStage(3); setHammerCountdown(0); if (isLocalHammerRunning.current) AuctionService.updateHammerState(true, 3, 0); saleTimeoutRef.current = window.setTimeout(() => { executeSale(); saleTimeoutRef.current = null; }, 800); }
     }
   }, [isHammerActive, hammerStage, hammerCountdown, auctionState]);
+
+  useEffect(() => {
+    const load = async () => {
+      const state = await AuctionService.getAuctionState();
+      if (!state) return;
+      const { data, error } = await supabase.from('auction_pool').select('*').eq('auction_id', state.id).eq('is_sold', false).order('player_data->currentMMR', { ascending: false });
+      if (!error && data) {
+        const { data: sd } = await supabase.from('auction_results').select('player_id').eq('auction_id', state.id);
+        const soldIds = new Set(sd?.map((s: any) => s.player_id) || []);
+        const seen = new Set<string>(); const players: any[] = [];
+        data.forEach((item: any) => { const pid = item.player_id; if (!soldIds.has(pid) && !seen.has(pid)) { seen.add(pid); players.push({ ...item.player_data, _poolType: item.player_type }); } });
+        setPoolPlayers(players);
+      }
+    };
+    load();
+  }, [auctionState?.id, soldPlayers.length]);
 
   const loadSoldPlayers = async () => {
     try {
       const state = await AuctionService.getAuctionState();
-      if (!state) {
-        setSoldPlayers([]);
-        return;
-      }
-
-      const { data, error } = await supabase
-        .from('auction_results')
-        .select('*')
-        .eq('auction_id', state.id)
-        .order('sold_at', { ascending: false });
-
+      if (!state) { setSoldPlayers([]); return; }
+      const { data, error } = await supabase.from('auction_results').select('*').eq('auction_id', state.id).order('sold_at', { ascending: false });
       if (!error && data) {
-        setSoldPlayers(data.map((item: any) => ({
-          id: item.id,
-          playerId: item.player_id,
-          playerNickname: item.player_data?.nickname || 'Unknown',
-          playerData: item.player_data,
-          soldTo: item.sold_to_captain_name,
-          soldToCaptainId: item.sold_to_captain_id,
-          teamName: item.sold_to_team_name,
-          soldFor: item.final_price,
-          soldAt: item.sold_at,
-          auctionId: item.auction_id
-        })));
-      } else if (error) {
-        setSoldPlayers([]);
-      }
-    } catch (error) {
-      setSoldPlayers([]);
-    }
+        setSoldPlayers(data.map((item: any) => ({ id: item.id, playerId: item.player_id, playerNickname: item.player_data?.nickname || 'Unknown', playerData: item.player_data, soldTo: item.sold_to_captain_name, soldToCaptainId: item.sold_to_captain_id, teamName: item.sold_to_team_name, soldFor: item.final_price, soldAt: item.sold_at, auctionId: item.auction_id })));
+      } else setSoldPlayers([]);
+    } catch { setSoldPlayers([]); }
   };
 
-  const loadAllPlayers = async (type: 'core' | 'support') => {
+  const loadAllPlayers = async (type?: 'core' | 'support') => {
     try {
       const state = await AuctionService.getAuctionState();
       if (!state) return;
-
-      const { data, error } = await supabase
-        .from('auction_pool')
-        .select('*')
-        .eq('auction_id', state.id)
-        .eq('player_type', type)
-        .eq('is_sold', false) // Only get unsold players
-        .order('player_data->currentMMR', { ascending: false });
-
+      let query = supabase.from('auction_pool').select('*').eq('auction_id', state.id).eq('is_sold', false).order('player_data->currentMMR', { ascending: false });
+      if (type) query = query.eq('player_type', type);
+      const { data, error } = await query;
       if (!error && data) {
-        // Get fresh sold players list from auction_results as backup check
-        const { data: soldData } = await supabase
-          .from('auction_results')
-          .select('player_id')
-          .eq('auction_id', state.id);
-        
-        const soldPlayerIds = new Set(soldData?.map(sp => sp.player_id) || []);
-        const currentPlayerId = state.current_player_id;
-        
-        // Use a Map to deduplicate by player_id
-        const uniquePlayers = new Map();
-        
-        data.forEach((poolItem: any) => {
-          const playerId = poolItem.player_id;
-          
-          // Skip if current player, sold, or already in map
-          if (playerId === currentPlayerId || soldPlayerIds.has(playerId) || uniquePlayers.has(playerId)) {
-            return;
-          }
-          
-          uniquePlayers.set(playerId, poolItem.player_data);
-        });
-        
-        setAllPlayers(Array.from(uniquePlayers.values()));
+        const { data: sd } = await supabase.from('auction_results').select('player_id').eq('auction_id', state.id);
+        const soldIds = new Set(sd?.map((s: any) => s.player_id) || []);
+        const map = new Map();
+        data.forEach((item: any) => { const pid = item.player_id; if (pid !== state.current_player_id && !soldIds.has(pid) && !map.has(pid)) map.set(pid, { ...item.player_data, _poolType: item.player_type }); });
+        setAllPlayers(Array.from(map.values()));
       }
-    } catch (error) {
-      console.error('Error loading available players:', error);
-      setAllPlayers([]);
-    }
+    } catch { setAllPlayers([]); }
   };
 
-  const loadSoldPlayersInPool = async (type: 'core' | 'support') => {
+  const loadSoldPlayersInPool = async (type?: 'core' | 'support') => {
     try {
       const state = await AuctionService.getAuctionState();
       if (!state) return;
-
-      // Get sold players from auction_results
-      const { data: soldData, error } = await supabase
-        .from('auction_results')
-        .select('*')
-        .eq('auction_id', state.id)
-        .order('sold_at', { ascending: false });
-
-      if (!error && soldData) {
-        // Use a Map to deduplicate by player_id (keep only the first/latest entry)
-        const uniquePlayers = new Map();
-        
-        soldData.forEach((result: any) => {
-          const playerId = result.player_id;
-          const playerType = result.player_data?.playerType || result.player_data?.player_type;
-          
-          // Only include if matches the type and not already in map
-          if (playerType === type && !uniquePlayers.has(playerId)) {
-            uniquePlayers.set(playerId, {
-              ...result.player_data,
-              id: playerId, // Ensure we have the player ID
-              soldTo: result.sold_to_team_name,
-              soldFor: result.final_price,
-              soldAt: result.sold_at
-            });
-          }
-        });
-        
-        // Convert Map values to array
-        setSoldPlayersInPool(Array.from(uniquePlayers.values()));
+      const { data: sd, error } = await supabase.from('auction_results').select('*').eq('auction_id', state.id).order('sold_at', { ascending: false });
+      if (!error && sd) {
+        const map = new Map();
+        sd.forEach((r: any) => { const pid = r.player_id; const pt = r.player_data?.playerType || r.player_data?.player_type; if ((!type || pt === type) && !map.has(pid)) map.set(pid, { ...r.player_data, id: pid, soldTo: r.sold_to_team_name, soldFor: r.final_price, soldAt: r.sold_at }); });
+        setSoldPlayersInPool(Array.from(map.values()));
       }
-    } catch (error) {
-      console.error('Error loading sold players:', error);
-      setSoldPlayersInPool([]);
-    }
+    } catch { setSoldPlayersInPool([]); }
   };
 
   const handleSendMessage = async () => {
     if (!chatInput.trim() || !auctionState?.id) return;
-    
-    let senderId: string;
-    let senderName: string;
-    let senderTeam: string | undefined;
-
-    // Check if user is admin
-    if (adminSession) {
-      senderId = adminSession.id || adminSession.username;
-      senderName = `Admin: ${adminSession.username}`;
-      senderTeam = undefined; // Admins don't have teams
-    } 
-    // Check if user is a captain (not just any player)
+    let senderId: string, senderName: string, senderTeam: string | undefined;
+    if (adminSession) { senderId = adminSession.id || adminSession.username; senderName = `Admin: ${adminSession.username}`; senderTeam = undefined; }
     else if (currentCaptainSession) {
-      const captainId = currentCaptainSession.playerId || currentCaptainSession.id;
-      const captain = captains.find(c => c.playerId === captainId);
-      
-      // Verify this player is actually a captain
-      if (!captain) {
-        return;
-      }
-      
-      senderId = captainId;
-      senderName = currentCaptainSession.nickname;
-      senderTeam = captain.teamName;
-    } else {
-      // Not authorized
-      return;
-    }
-
-    const messageToSend = chatInput;
-    setChatInput(''); // Clear input immediately
-
-    // Send to database - no optimistic update, let subscription handle it
-    const success = await auctionChatService.sendMessage(
-      auctionState.id,
-      senderId,
-      senderName,
-      senderTeam,
-      messageToSend
-    );
-
-    if (!success) {
-      // Restore input if send failed
-      setChatInput(messageToSend);
-    }
+      const cid = currentCaptainSession.playerId || currentCaptainSession.id;
+      const cap = captains.find(c => c.playerId === cid);
+      if (!cap) return;
+      senderId = cid; senderName = currentCaptainSession.nickname; senderTeam = cap.teamName;
+    } else return;
+    const msg = chatInput; setChatInput('');
+    const ok = await auctionChatService.sendMessage(auctionState.id, senderId, senderName, senderTeam, msg);
+    if (!ok) setChatInput(msg);
   };
 
-  const loadCaptains = async () => {
-    const captainsList = await captainService.getCaptains();
-    setCaptains(captainsList);
-  };
+  const loadCaptains = async () => { const list = await captainService.getCaptains(); setCaptains(list); };
+  const loadAuctionState = async () => { const s = await AuctionService.getAuctionState(); setAuctionState(s); };
+  const pollBidsForCurrentAuction = async (_id: string) => {};
 
-  const loadAuctionState = async () => {
+  const loadAdminPool = async () => {
     const state = await AuctionService.getAuctionState();
-    setAuctionState(state);
-    // Bids will be populated by the real-time subscription
+    if (!state) { setAdminPoolPlayers([]); return; }
+    const { data: sold } = await supabase.from('auction_results').select('player_id').eq('auction_id', state.id);
+    const soldIds = new Set(sold?.map((s: any) => s.player_id) || []);
+    const currentId = state.current_player_data?.id;
+    const pool = await auctionPoolService.getAvailablePlayers(state.id);
+    setAdminPoolPlayers(pool.filter(p => !soldIds.has(p.player_id) && p.player_id !== currentId));
   };
 
-  const pollBidsForCurrentAuction = async (_auctionId: string) => {
-    try {
-      const currentState = await AuctionService.getAuctionState();
-      
-      const hasCurrentPlayer = currentState?.current_player_id || currentState?.current_player_data?.id;
-      
-      if (!hasCurrentPlayer) {
-        return;
-      }
-
-      // Bids are now handled by TopBidsStandalone component
-      // This function is kept for compatibility but doesn't need to do anything
-    } catch (error) {
-      // Silent error
-    }
+  const handleAdminStart = async () => { setAdminLoading(true); setAdminError(''); const ok = await AuctionService.startAuction(); if (ok) { await loadAuctionState(); await loadAdminPool(); } else setAdminError('Failed to start'); setAdminLoading(false); };
+  const handleAdminPause = async () => { setAdminLoading(true); setAdminError(''); const ok = await AuctionService.pauseAuction(); if (ok) await loadAuctionState(); else setAdminError('Failed to pause'); setAdminLoading(false); };
+  const handleAdminResume = async () => { setAdminLoading(true); setAdminError(''); const ok = await AuctionService.resumeAuction(); if (ok) await loadAuctionState(); else setAdminError('Failed to resume'); setAdminLoading(false); };
+  const handleAdminStop = async () => { setAdminLoading(true); setAdminError(''); const ok = await AuctionService.stopAuction(); if (ok) await loadAuctionState(); else setAdminError('Failed to stop'); setAdminLoading(false); };
+  const handleAdminReset = async () => { setAdminLoading(true); setAdminError(''); const ok = await AuctionService.resetAuction(); if (ok) { await loadAuctionState(); await loadAdminPool(); } else setAdminError('Failed to reset'); setAdminLoading(false); };
+  const handleAdminSetPlayer = async () => {
+    if (!adminSelectedPlayer) return;
+    setAdminLoading(true); setAdminError('');
+    const poolEntry = adminPoolPlayers.find(p => p.id === adminSelectedPlayer);
+    if (!poolEntry) { setAdminError('Player not found'); setAdminLoading(false); return; }
+    const playerData = { ...poolEntry.player_data, basePrice: poolEntry.base_price || 0 };
+    const ok = await AuctionService.setCurrentPlayer(poolEntry.player_id, playerData);
+    if (ok) { setAdminSelectedPlayer(''); await loadAuctionState(); await loadAdminPool(); } else setAdminError('Failed to set player');
+    setAdminLoading(false);
   };
 
   const handlePlaceBid = async () => {
     if (!currentCaptainSession || !bidAmount || !auctionState) return;
-    
-    // Prevent simultaneous bids
-    if (isBidding) {
-      setBidError('Please wait, processing bid...');
-      return;
-    }
-
+    if (isBidding) { setBidError('Processing...'); return; }
     setBidError('');
     const amount = parseInt(bidAmount);
-    
-    if (isNaN(amount) || amount < 0) {
-      setBidError('Please enter a valid bid amount');
-      return;
-    }
-    
-    // Get minimum bid based on current state
+    if (isNaN(amount) || amount < 0) { setBidError('Invalid bid amount'); return; }
     const currentBid = auctionState.highest_bid || 0;
-    const hasExistingBids = auctionState.highest_bidder_id !== null;
-    
-    // If no bids yet, minimum is the base price (or 1 if base price is 0)
-    // If there are bids, minimum is current bid + 1
-    const minimumBid = hasExistingBids ? currentBid + 1 : (currentBid > 0 ? currentBid : 1);
-    
-    if (amount < minimumBid) {
-      if (hasExistingBids) {
-        setBidError(`Your bid must be higher than the current bid of ${currentBid}`);
-      } else {
-        setBidError(`Minimum bid is ${minimumBid}`);
-      }
-      return;
-    }
-
-    // Check if captain has enough budget
-    // Try both 'id' and 'playerId' fields to find the captain
-    const captainId = currentCaptainSession.playerId || currentCaptainSession.id;
-    const captain = captains.find(c => c.playerId === captainId);
-    
-    if (!captain) {
-      setBidError('You are not registered as a captain');
-      return;
-    }
-    
-    // Check if captain has enough budget
-    if (captain.budget <= 0) {
-      setBidError('You have no budget left');
-      return;
-    }
-    
-    if (amount > captain.budget) {
-      setBidError(`Insufficient budget. You have ${captain.budget} gold left`);
-      return;
-    }
-
-    // ✅ CHECK IF TEAM IS ALREADY FULL (5 PLAYERS including captain)
-    const teamPlayerCount = soldPlayers.filter(p => p.teamName === captain.teamName).length;
-    if (teamPlayerCount >= 4) {
-      setBidError(`Your team is full (5/5 players including captain). Cannot bid on more players.`);
-      return;
-    }
-
-    setIsBidding(true); // Lock bidding
-
-    const success = await AuctionService.placeBid(
-      captainId,
-      currentCaptainSession.nickname,
-      captain.teamName,
-      amount
-    );
-
-    if (success) {
-      setBidAmount('');
-      setBidError('');
-    } else {
-      // Service rejected the bid because it's not higher than current
-      const currentBid = auctionState.highest_bid || 0;
-      setBidError(`Your bid must be higher than the current bid of ${currentBid}`);
-    }
-    
-    setIsBidding(false); // Unlock bidding
+    const hasExisting = auctionState.highest_bidder_id !== null;
+    const minBid = hasExisting ? currentBid + 1 : (currentBid > 0 ? currentBid : 1);
+    if (amount < minBid) { setBidError(hasExisting ? `Must be > ${currentBid}` : `Min bid is ${minBid}`); return; }
+    const cid = currentCaptainSession.playerId || currentCaptainSession.id;
+    const cap = captains.find(c => c.playerId === cid);
+    if (!cap) { setBidError('Not a captain'); return; }
+    if (cap.budget <= 0) { setBidError('No budget left'); return; }
+    if (amount > cap.budget) { setBidError(`Max budget: ${cap.budget}g`); return; }
+    const teamCount = soldPlayers.filter(p => p.teamName === cap.teamName).length;
+    if (teamCount >= 4) { setBidError('Team is full'); return; }
+    setIsBidding(true);
+    const ok = await AuctionService.placeBid(cid, currentCaptainSession.nickname, cap.teamName, amount);
+    if (ok) { setBidAmount(''); setBidError(''); } else setBidError(`Must be > ${auctionState.highest_bid || 0}`);
+    setIsBidding(false);
   };
 
-  // Start hammer countdown - 6 seconds for "GOING ONCE!"
   const handleStartHammer = async () => {
-    if (!auctionState?.highest_bidder_id && !selectedTeamForManualAssign) {
-      alert('No bids placed and no team selected for manual assignment', 'Cannot Start Hammer', 'warning');
-      return;
-    }
-
-    isLocalHammerRunning.current = true; // Mark that we're starting a local countdown
-    setHammerStage(1);
-    setHammerCountdown(6); // 6 seconds for GOING ONCE
-    setIsHammerActive(true);
-    setNewBidDuringHammer(false); // Reset flag
-    // Update database
+    if (!auctionState?.highest_bidder_id && !selectedTeamForManualAssign) { alert('No bids and no team selected', 'Cannot Start Hammer', 'warning'); return; }
+    isLocalHammerRunning.current = true; setHammerStage(1); setHammerCountdown(6); setIsHammerActive(true); setNewBidDuringHammer(false);
     await AuctionService.updateHammerState(true, 1, 6);
   };
-
-  // Cancel hammer countdown
   const handleCancelHammer = async () => {
-    // Clear any pending sale execution
-    if (saleTimeoutRef.current) {
-      window.clearTimeout(saleTimeoutRef.current);
-      saleTimeoutRef.current = null;
-    }
-    
-    isLocalHammerRunning.current = false; // Mark that we're stopping the countdown
-    setHammerStage(0);
-    setHammerCountdown(6);
-    setIsHammerActive(false);
-    setNewBidDuringHammer(false); // Reset flag
-    // Update database
+    if (saleTimeoutRef.current) { window.clearTimeout(saleTimeoutRef.current); saleTimeoutRef.current = null; }
+    isLocalHammerRunning.current = false; setHammerStage(0); setHammerCountdown(6); setIsHammerActive(false); setNewBidDuringHammer(false);
     await AuctionService.updateHammerState(false, 0, 6);
   };
-
-  // Execute the sale after SOLD animation
   const executeSale = async () => {
-    // CRITICAL: Only execute on auction page
-    const currentPath = window.location.pathname;
-    if (!currentPath.includes('/auction')) {
-      isLocalHammerRunning.current = false;
-      // Clear hammer state
-      setIsHammerActive(false);
-      setHammerStage(0);
-      setHammerCountdown(6);
-      return;
-    }
-    
-    // Safety check: ensure we have an auction state
-    if (!auctionState) {
-      isLocalHammerRunning.current = false;
-      return;
-    }
-    
-    // CRITICAL: Don't show alert if this is a stale state being cleared
-    // Check if we're in a local hammer countdown - if not, this is stale
-    if (!isLocalHammerRunning.current) {
-      // This is a stale SOLD state from database, silently abort
-      await AuctionService.updateHammerState(false, 0, 6);
-      setIsHammerActive(false);
-      setHammerStage(0);
-      setHammerCountdown(6);
-      return;
-    }
-    
-    // Double-check that we have a valid bidder or manual assignment before executing
-    if (!auctionState?.highest_bidder_id && !selectedTeamForManualAssign) {
-      await alert('Sale canceled: No bids placed and no team selected', 'Cannot Complete Sale', 'warning');
-      isLocalHammerRunning.current = false;
-      await AuctionService.updateHammerState(false, 0, 6);
-      setIsHammerActive(false);
-      setHammerStage(0);
-      setHammerCountdown(6);
-      return;
-    }
-    
-    isLocalHammerRunning.current = false; // Mark that countdown is complete
-    await AuctionService.updateHammerState(false, 0, 6);
-    setIsHammerActive(false);
-    setHammerStage(0);
-    setHammerCountdown(6);
-    await finalizeSale();
+    if (!window.location.pathname.includes('/auction')) { isLocalHammerRunning.current = false; setIsHammerActive(false); setHammerStage(0); setHammerCountdown(6); return; }
+    if (!auctionState) { isLocalHammerRunning.current = false; return; }
+    if (!isLocalHammerRunning.current) { await AuctionService.updateHammerState(false, 0, 6); setIsHammerActive(false); setHammerStage(0); setHammerCountdown(6); return; }
+    if (!auctionState?.highest_bidder_id && !selectedTeamForManualAssign) { await alert('No bids and no team selected', 'Cannot Complete Sale', 'warning'); isLocalHammerRunning.current = false; await AuctionService.updateHammerState(false, 0, 6); setIsHammerActive(false); setHammerStage(0); setHammerCountdown(6); return; }
+    isLocalHammerRunning.current = false; await AuctionService.updateHammerState(false, 0, 6); setIsHammerActive(false); setHammerStage(0); setHammerCountdown(6); await finalizeSale();
   };
-
-  const handleSellPlayer = async () => {
-    if (!auctionState) return;
-    handleStartHammer();
-  };
+  const handleSellPlayer = async () => { if (!auctionState) return; handleStartHammer(); };
 
   const finalizeSale = async () => {
-    // Guard against multiple simultaneous executions
-    if (isSaleInProgress.current) {
-      console.log('Sale already in progress, skipping duplicate call');
-      return;
-    }
-    
-    if (!auctionState) {
-      return;
-    }
-    
-    // Check if player is already sold before starting
-    const { data: existingSale } = await supabase
-      .from('auction_results')
-      .select('id')
-      .eq('auction_id', auctionState.id)
-      .eq('player_id', auctionState.current_player_id)
-      .maybeSingle();
-    
-    if (existingSale) {
-      console.log('Player already sold, clearing UI');
-      // Player already sold, just clear the UI and return
-      await AuctionService.setCurrentPlayer('', null);
-      await Promise.all([
-        loadCaptains(),
-        loadSoldPlayers()
-      ]);
-      setSelectedTeamForManualAssign('');
-      setManualAssignPrice('');
-      return;
-    }
-    
-    // Mark that we're processing a sale
+    if (isSaleInProgress.current) return;
+    if (!auctionState) return;
+    const { data: existing } = await supabase.from('auction_results').select('id').eq('auction_id', auctionState.id).eq('player_id', auctionState.current_player_id).maybeSingle();
+    if (existing) { await AuctionService.setCurrentPlayer('', null); await Promise.all([loadCaptains(), loadSoldPlayers()]); setSelectedTeamForManualAssign(''); setManualAssignPrice(''); return; }
     isSaleInProgress.current = true;
-
-    if (!auctionState.highest_bidder_id && !selectedTeamForManualAssign) {
-      await alert('Please select a team to assign this player to', 'Selection Required', 'warning');
-      isSaleInProgress.current = false;
-      return;
-    }
-
+    if (!auctionState.highest_bidder_id && !selectedTeamForManualAssign) { await alert('Select a team', 'Selection Required', 'warning'); isSaleInProgress.current = false; return; }
     if (!auctionState.highest_bidder_id) {
-      if (manualAssignPrice.trim() === '') {
-        await alert('Please enter a price (0 or higher)', 'Invalid Price', 'warning');
-        isSaleInProgress.current = false;
-        return;
-      }
-      
-      const price = parseInt(manualAssignPrice);
-      if (isNaN(price) || price < 0) {
-        await alert('Please enter a valid price (0 or higher)', 'Invalid Price', 'warning');
-        isSaleInProgress.current = false;
-        return;
-      }
-
-      // Check if team has enough budget - if not, cap the price at available budget
-      const selectedCaptain = captains.find(c => c.teamName === selectedTeamForManualAssign);
-      if (selectedCaptain && selectedCaptain.budget < price) {
-        await alert(
-          `${selectedTeamForManualAssign} only has ${selectedCaptain.budget} gold left.\n\nThe player will be assigned for ${selectedCaptain.budget} gold instead of ${price}.`,
-          'Budget Adjusted',
-          'info'
-        );
-        // Price will be capped when calculating finalPrice below
-      }
+      if (manualAssignPrice.trim() === '') { await alert('Enter a price', 'Invalid Price', 'warning'); isSaleInProgress.current = false; return; }
+      const p = parseInt(manualAssignPrice);
+      if (isNaN(p) || p < 0) { await alert('Enter valid price', 'Invalid Price', 'warning'); isSaleInProgress.current = false; return; }
     }
-
     const playerNickname = auctionState.current_player_data?.nickname || 'Unknown Player';
-
-    let finalCaptainId: string;
-    let finalCaptainName: string;
-    let finalTeamName: string;
-    let finalPrice: number;
-
+    let finalCaptainId: string, finalCaptainName: string, finalTeamName: string, finalPrice: number;
     if (auctionState.highest_bidder_id) {
-      finalCaptainId = auctionState.highest_bidder_id;
-      finalCaptainName = auctionState.highest_bidder_name || '';
-      finalTeamName = auctionState.highest_bidder_team || '';
-      finalPrice = auctionState.highest_bid || 0;
+      finalCaptainId = auctionState.highest_bidder_id; finalCaptainName = auctionState.highest_bidder_name || ''; finalTeamName = auctionState.highest_bidder_team || ''; finalPrice = auctionState.highest_bid || 0;
     } else {
-      const selectedCaptain = captains.find(c => c.teamName === selectedTeamForManualAssign);
-      if (!selectedCaptain) {
-        await alert('Selected team not found', 'Error', 'warning');
-        return;
-      }
-      finalCaptainId = selectedCaptain.playerId;
-      finalCaptainName = selectedCaptain.playerNickname;
-      finalTeamName = selectedCaptain.teamName;
-      
-      // Cap the price at the team's available budget (can't go negative)
-      const requestedPrice = parseInt(manualAssignPrice) || 0;
-      finalPrice = Math.min(requestedPrice, selectedCaptain.budget);
+      const sc = captains.find(c => c.teamName === selectedTeamForManualAssign);
+      if (!sc) { await alert('Team not found', 'Error', 'warning'); return; }
+      finalCaptainId = sc.playerId; finalCaptainName = sc.playerNickname; finalTeamName = sc.teamName; finalPrice = Math.min(parseInt(manualAssignPrice) || 0, sc.budget);
     }
-
-    const teamPlayerCount = soldPlayers.filter(p => p.teamName === finalTeamName).length;
-    
-    if (teamPlayerCount >= 4) {
-      await alert(
-        `${finalTeamName} already has 5 players (including captain)!\n\nTeams cannot have more than 5 players.\n\nCurrent roster: ${teamPlayerCount + 1}/5`,
-        'Team Full',
-        'warning'
-      );
-      return;
-    }
-
-    const winningCaptain = captains.find(c => c.playerId === finalCaptainId);
-    const newBudget = winningCaptain ? winningCaptain.budget - finalPrice : 0;
-    
-    if (winningCaptain) {
-      await captainService.updateBudget(finalCaptainId, newBudget);
-    }
-
-    const { error } = await supabase
-      .from('auction_results')
-      .insert([{
-        auction_id: auctionState.id,
-        player_id: auctionState.current_player_id,
-        player_data: auctionState.current_player_data,
-        sold_to_captain_id: finalCaptainId,
-        sold_to_captain_name: finalCaptainName,
-        sold_to_team_name: finalTeamName,
-        final_price: finalPrice
-      }]);
-
-    if (error) {
-      await alert(`Failed to assign player: ${error.message}`, 'Database Error', 'warning');
-      isSaleInProgress.current = false; // Reset flag on error
-      return;
-    }
-
-    // Mark player as sold in auction pool
-    await supabase
-      .from('auction_pool')
-      .update({ 
-        is_sold: true,
-        sold_at: new Date().toISOString()
-      })
-      .eq('auction_id', auctionState.id)
-      .eq('player_id', auctionState.current_player_id);
-
-    // Send chat message about the sale
-    const chatMessage = `${playerNickname} will be playing in Team ${finalTeamName} (Captain: ${finalCaptainName}) for 🪙 ${finalPrice} gold`;
-    
-    await auctionChatService.sendMessage(
-      auctionState.id,
-      'system',
-      'Auction System',
-      undefined,
-      chatMessage
-    );
-
-    // Clear current player
+    const teamCount = soldPlayers.filter(p => p.teamName === finalTeamName).length;
+    if (teamCount >= 4) { await alert(`${finalTeamName} is full!`, 'Team Full', 'warning'); return; }
+    const wc = captains.find(c => c.playerId === finalCaptainId);
+    const newBudget = wc ? wc.budget - finalPrice : 0;
+    if (wc) await captainService.updateBudget(finalCaptainId, newBudget);
+    const { error } = await supabase.from('auction_results').insert([{ auction_id: auctionState.id, player_id: auctionState.current_player_id, player_data: auctionState.current_player_data, sold_to_captain_id: finalCaptainId, sold_to_captain_name: finalCaptainName, sold_to_team_name: finalTeamName, final_price: finalPrice }]);
+    if (error) { await alert(`Failed: ${error.message}`, 'Database Error', 'warning'); isSaleInProgress.current = false; return; }
+    await supabase.from('auction_pool').update({ is_sold: true, sold_at: new Date().toISOString() }).eq('auction_id', auctionState.id).eq('player_id', auctionState.current_player_id);
+    await auctionChatService.sendMessage(auctionState.id, 'system', 'Auction System', undefined, `${playerNickname} will be playing in Team ${finalTeamName} (Captain: ${finalCaptainName}) for 🪙 ${finalPrice} gold`);
     await AuctionService.setCurrentPlayer('', null);
-    
-    // Reload captains and sold players to update UI
-    await Promise.all([
-      loadCaptains(),
-      loadSoldPlayers()
-    ]);
-    
-    setSelectedTeamForManualAssign('');
-    setManualAssignPrice('');
-    
-    setSuccessMessage(`${playerNickname} assigned to ${finalTeamName}! Budget updated to ${newBudget}.`);
+    await Promise.all([loadCaptains(), loadSoldPlayers()]);
+    setSelectedTeamForManualAssign(''); setManualAssignPrice('');
+    setSuccessMessage(`${playerNickname} → ${finalTeamName} for ${finalPrice}g`);
     setShowSuccessModal(true);
-    
-    // Reset the sale in progress flag
     isSaleInProgress.current = false;
   };
 
   const status = auctionState?.status || 'not-started';
   const currentPlayer = auctionState?.current_player_data;
+  const teamColors = ['#c9a227','#e05c5c','#5ce0a8','#5c9ee0','#c05ce0','#e0a05c','#5ce0d4','#e05ca8'];
+  const getTeamColor = (name: string) => { let h = 0; for (let i = 0; i < name.length; i++) h = name.charCodeAt(i) + ((h << 5) - h); return teamColors[Math.abs(h) % teamColors.length]; };
+  const avatarColors = ['from-blue-500 to-indigo-600','from-purple-500 to-pink-600','from-orange-500 to-red-600','from-teal-500 to-cyan-600','from-green-500 to-emerald-600'];
+  const getAvatarColor = (name: string) => { let h = 0; for (let i = 0; i < name.length; i++) h = name.charCodeAt(i) + ((h << 5) - h); return avatarColors[Math.abs(h) % avatarColors.length]; };
+  const getInitials = (name: string) => { const w = (name || '').trim().split(/\s+/); return w.length >= 2 ? (w[0][0] + w[w.length-1][0]).toUpperCase() : (name || '??').slice(0,2).toUpperCase(); };
+  const corePlayers = poolPlayers.filter(p => p._poolType === 'core' || (p.playerType || p.player_type) === 'core');
+  const suppPlayers = poolPlayers.filter(p => p._poolType === 'support' || (p.playerType || p.player_type) === 'support');
+  const coreSold = soldPlayers.filter(p => (p.playerData?.playerType || p.playerData?.player_type) === 'core');
+  const suppSold = soldPlayers.filter(p => (p.playerData?.playerType || p.playerData?.player_type) === 'support');
+  const filteredCore = corePlayers.filter(p => !poolSearch || p.nickname?.toLowerCase().includes(poolSearch.toLowerCase()));
+  const filteredSupp = suppPlayers.filter(p => !poolSearch || p.nickname?.toLowerCase().includes(poolSearch.toLowerCase()));
+  const isAdmin = !!(adminSession || AuthService.isAdminLoggedIn());
+  const isCaptain = !!(currentCaptainSession && captains.some(c => c.playerId === (currentCaptainSession.playerId || currentCaptainSession.id)));
 
   return (
     <>
       <ModalComponent />
-      {/* Main Content - Full Page */}
-      <div className="min-h-screen bg-gradient-to-br from-gray-900 via-black to-gray-900 flex flex-col" style={{ paddingTop: '80px', paddingBottom: '60px' }}>
-        <div className="flex-1 flex flex-col px-4 sm:px-6 lg:px-8 py-6" style={{ maxWidth: '100%', minHeight: 0 }}>
-          
-          {/* Auction Status Display */}
-          <div className="w-full flex-1 flex flex-col overflow-hidden">
-            <div className="bg-black/80 backdrop-blur-xl flex-1 flex flex-col overflow-hidden rounded-2xl border border-purple-500/20" style={{ boxShadow: 'none', borderBottom: 'none' }}>
-              {/* Status Header */}
-              <div className="bg-gradient-to-r from-purple-900/50 to-indigo-900/50 px-6 py-3 flex-shrink-0 border-b-2 border-purple-500/40 shadow-[0_0_15px_rgba(168,85,247,0.2)]">
-                <div className="flex items-center justify-center gap-3">
-                  <div className="w-10 h-10 bg-gradient-to-br from-purple-500 to-indigo-600 rounded-lg flex items-center justify-center flex-shrink-0">
-                    <Gavel className="w-5 h-5 text-white" />
-                  </div>
-                  <h2 className="text-xl font-bold text-white">Auction Status</h2>
-                  <div className="flex items-center gap-2 ml-4">
-                    <div className={`w-2.5 h-2.5 rounded-full flex-shrink-0 ${
-                      status === 'live' || status === 'paused' ? 'bg-green-400 animate-pulse' :
-                      status === 'completed' ? 'bg-gray-400' :
-                      'bg-purple-400'
-                    }`} />
-                    <span className={`text-sm font-semibold px-3 py-1.5 rounded-full whitespace-nowrap ${
-                      status === 'live' || status === 'paused' 
-                        ? 'bg-green-500/20 text-green-300 border border-green-500/30' :
-                      status === 'completed' 
-                        ? 'bg-gray-500/20 text-gray-300 border border-gray-500/30' :
-                        'bg-purple-500/20 text-purple-300 border border-purple-500/30'
-                    }`}>
-                      {status === 'live' || status === 'paused' ? 'Ongoing' :
-                       status === 'completed' ? 'Finished' :
-                       'Not Started'}
-                    </span>
-                  </div>
-                  
-                  {/* Player Pool Buttons */}
-                  <div className="ml-auto flex gap-2">
-                    <button
-                      onClick={async () => {
-                        setPlayerPoolType('core');
-                        setPlayerPoolTab('available');
-                        await loadSoldPlayers();
-                        await loadAllPlayers('core');
-                        await loadSoldPlayersInPool('core');
-                        setShowPlayerPoolModal(true);
-                      }}
-                      className="px-4 py-2 bg-gradient-to-r from-red-600 to-orange-600 hover:from-red-500 hover:to-orange-500 text-white text-sm font-semibold rounded-lg transition-all duration-300 flex items-center gap-2 shadow-lg"
-                    >
-                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
-                      </svg>
-                      Core Pool
-                    </button>
-                    <button
-                      onClick={async () => {
-                        setPlayerPoolType('support');
-                        setPlayerPoolTab('available');
-                        await loadSoldPlayers();
-                        await loadAllPlayers('support');
-                        await loadSoldPlayersInPool('support');
-                        setShowPlayerPoolModal(true);
-                      }}
-                      className="px-4 py-2 bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-500 hover:to-emerald-500 text-white text-sm font-semibold rounded-lg transition-all duration-300 flex items-center gap-2 shadow-lg"
-                    >
-                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
-                      </svg>
-                      Support Pool
-                    </button>
-                  </div>
+
+      {/* Full-viewport layout below navbar */}
+      <div className="fixed inset-0 pt-16 sm:pt-[68px] md:pt-[76px] lg:pt-20 flex flex-col bg-[rgba(5,7,10,0.97)]">
+
+        {/* ── TOP BAR ── */}
+        <div className="flex-shrink-0 flex items-center gap-3 px-5 h-12 border-b border-white/8 bg-gradient-to-r from-black/60 via-black/40 to-black/60 backdrop-blur-md">
+          {/* Breadcrumb */}
+          <div className="flex items-center gap-2">
+            <Link to="/" className="text-xs text-gray-600 hover:text-gray-400 font-semibold tracking-wide transition-colors">TRR</Link>
+            <span className="text-gray-700 text-xs">/</span>
+            <span className="text-xs text-gray-300 font-bold tracking-widest uppercase">Auction</span>
+          </div>
+
+          {/* Divider */}
+          <div className="w-px h-5 bg-white/10" />
+
+          {/* Status badge */}
+          <div className={`flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold border tracking-wider ${
+            status === 'live' ? 'bg-emerald-500/10 border-emerald-500/30 text-emerald-400' :
+            status === 'paused' ? 'bg-yellow-500/10 border-yellow-500/30 text-yellow-400' :
+            status === 'completed' ? 'bg-gray-500/10 border-gray-500/30 text-gray-400' :
+            'bg-slate-500/10 border-slate-500/30 text-slate-500'
+          }`}>
+            <span className={`w-1.5 h-1.5 rounded-full flex-shrink-0 ${status === 'live' ? 'bg-emerald-400 animate-pulse' : status === 'paused' ? 'bg-yellow-400' : 'bg-gray-600'}`} />
+            {status === 'live' ? 'LIVE' : status === 'paused' ? 'PAUSED' : status === 'completed' ? 'ENDED' : 'WAITING'}
+          </div>
+
+          {/* Stats */}
+          {(status === 'live' || status === 'paused') && (
+            <>
+              <div className="w-px h-5 bg-white/10" />
+              <div className="flex items-center gap-4">
+                <div className="flex items-center gap-1.5">
+                  <span className="text-[10px] text-gray-600 font-bold tracking-widest">CORE</span>
+                  <span className="text-sm font-black text-blue-400 font-mono">{coreSold.length}</span>
+                </div>
+                <div className="flex items-center gap-1.5">
+                  <span className="text-[10px] text-gray-600 font-bold tracking-widest">SUPP</span>
+                  <span className="text-sm font-black text-emerald-400 font-mono">{suppSold.length}</span>
+                </div>
+                <div className="flex items-center gap-1.5">
+                  <span className="text-[10px] text-gray-600 font-bold tracking-widest">LEFT</span>
+                  <span className="text-sm font-black text-white font-mono">{captains.length > 0 ? Math.max(0, captains.length * 4 - soldPlayers.length) : '?'}</span>
                 </div>
               </div>
+            </>
+          )}
 
-              {/* Main Display Area */}
-              <div className="p-4 sm:p-6 overflow-hidden flex-1 flex flex-col" style={{ minHeight: '0' }}>
-                {status === 'not-started' && (
-                  <div className="flex items-center justify-center h-full">
-                    <motion.div
-                      initial={{ opacity: 0, scale: 0.9 }}
-                      animate={{ opacity: 1, scale: 1 }}
-                      className="text-center"
-                    >
-                      <AuctionGavel show={true} />
-                      <p className="text-gray-400 text-lg max-w-md mx-auto mt-8">
-                        The auction will begin shortly. Stay tuned!
-                      </p>
-                    </motion.div>
+          {/* Right side */}
+          <div className="ml-auto flex items-center gap-2">
+            <button
+              onClick={async () => {
+                setPlayerPoolTab('available');
+                await loadSoldPlayers();
+                await loadAllPlayers();
+                await loadSoldPlayersInPool();
+                setShowPlayerPoolModal(true);
+              }}
+              className="flex items-center gap-1.5 text-xs px-3.5 py-1.5 rounded-full bg-yellow-500/10 border border-yellow-500/25 text-yellow-400 hover:bg-yellow-500/20 hover:border-yellow-500/40 transition-all font-bold tracking-wider">
+              <Gavel className="w-3 h-3" />
+              POOL
+            </button>
+          </div>
+        </div>
+
+        {/* ── TEAMS STRIP ── */}
+        {captains.length > 0 && (
+          <div className="flex-shrink-0 flex gap-2 px-3 py-2 overflow-x-auto border-b border-white/5 bg-black/20 no-scrollbar">
+            {captains.map(captain => {
+              const teamPlayers = soldPlayers.filter(p => p.soldToCaptainId === captain.playerId);
+              const playerCount = teamPlayers.length + 1;
+              const isFull = playerCount >= 5;
+              const tc = getTeamColor(captain.teamName);
+              const budgetPct = Math.max(0, Math.min(100, (captain.budget / 1000) * 100));
+              return (
+                <div key={captain.playerId} className="flex-shrink-0 min-w-[140px] rounded-xl bg-black/40 backdrop-blur-sm border border-white/8 p-2.5 hover:border-white/15 transition-all" style={{ borderLeftColor: tc, borderLeftWidth: 3 }}>
+                  <div className="flex items-center justify-between mb-1.5">
+                    <Link to={`/team/${encodeURIComponent(captain.teamName)}`} className="text-sm font-bold truncate max-w-[90px] hover:text-white transition-colors" style={{ color: tc }}>{captain.teamName}</Link>
+                    <span className={`text-xs font-semibold ${isFull ? 'text-emerald-400' : 'text-gray-500'}`}>{playerCount}/5</span>
                   </div>
-                )}
-
-                {(status === 'live' || status === 'paused') && currentPlayer && (
-                  <>
-                  {/* New 4-Section Layout - Full Height with Fixed Heights */}
-                  <div className="grid grid-cols-1 lg:grid-cols-[280px_1.2fr_380px_280px] gap-3 overflow-hidden" style={{ height: 'calc(100vh - 240px)' }}>
-                    
-                    {/* Section 1: Top Bids - Standalone with own subscription */}
-                    <TopBidsStandalone 
-                      auctionId={auctionState?.id || null}
-                      currentPlayerId={auctionState?.current_player_data?.id || null}
-                      hammerStage={hammerStage}
-                    />
-
-                    {/* Center: Current Player - Scrollable with Neon Glow */}
-                    <div className="bg-gradient-to-br from-yellow-900/40 to-orange-900/40 backdrop-blur-sm rounded-xl p-3 border-2 border-yellow-500/70 shadow-[0_0_30px_rgba(234,179,8,0.4)] flex flex-col relative overflow-hidden">
-                      {/* Animated background glow */}
-                      <motion.div
-                        className="absolute inset-0 bg-gradient-to-br from-yellow-500/10 to-orange-500/10"
-                        animate={{
-                          opacity: [0.3, 0.6, 0.3],
-                        }}
-                        transition={{
-                          duration: 3,
-                          repeat: Infinity,
-                          ease: "easeInOut"
-                        }}
-                      />
-                      
-                      <motion.div
-                        initial={{ opacity: 0, y: 20 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        className="relative z-10 flex-1 flex flex-col overflow-y-auto custom-standings-scroll pr-1"
-                        style={{ minHeight: '0' }}
-                      >
-                        {/* Player Header with MMR on sides */}
-                        <div className="flex items-center justify-between gap-3 mb-3">
-                          {/* Left: Current MMR */}
-                          <div className="bg-gradient-to-br from-cyan-900/40 to-blue-900/40 border border-cyan-500/50 rounded-lg p-2 flex-shrink-0 w-28">
-                            <p className="text-cyan-400 text-[0.65rem] font-bold mb-1 text-center">CURRENT</p>
-                            <div className="flex flex-col items-center gap-1">
-                              {currentPlayer.currentMedalLabel && (
-                                <div className="relative group">
-                                  <img 
-                                    src={`/medals/${currentPlayer.currentMedalLabel.replace(' ', '_')}.png`}
-                                    alt={currentPlayer.currentMedalLabel}
-                                    title={currentPlayer.currentMedalLabel}
-                                    className="w-10 h-10 object-contain cursor-pointer transition-transform hover:scale-110"
-                                    onError={(e) => {
-                                      e.currentTarget.style.display = 'none';
-                                    }}
-                                  />
-                                  <span className="pointer-events-none absolute -bottom-9 left-1/2 -translate-x-1/2 px-2 py-1 rounded-lg bg-black/95 border border-cyan-500/70 text-[0.7rem] text-cyan-200 opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap z-20 shadow-lg">
-                                    {currentPlayer.currentMedalLabel}
-                                  </span>
-                                </div>
-                              )}
-                              <p className="text-cyan-300 text-sm font-bold">{currentPlayer.currentMMR || 'N/A'}</p>
-                            </div>
-                          </div>
-
-                          {/* Center: Avatar + Name + Badges */}
-                          <div className="flex flex-col items-center gap-2 flex-1 min-w-0">
-                            {/* Avatar */}
-                            <div className="relative flex-shrink-0">
-                              <Avatar
-                                src={currentPlayer.avatarUrl}
-                                alt={currentPlayer.nickname}
-                                name={currentPlayer.nickname}
-                                size="lg"
-                                className="border-3 border-yellow-400 shadow-xl shadow-yellow-500/50"
-                              />
-                            </div>
-                            
-                            {/* Name and Star Badge */}
-                            <div className="flex items-center gap-2 max-w-full">
-                              <h3 className="text-2xl font-bold text-white drop-shadow-lg truncate max-w-[200px]" style={{ fontSize: (currentPlayer.nickname?.length || 0) > 15 ? '1.25rem' : '1.5rem' }}>{currentPlayer.nickname}</h3>
-                              
-                              {/* Website Contributor Star Badge */}
-                              {(currentPlayer.specialBadge === 'contributor' || currentPlayer.isContributor) && (
-                                <motion.div
-                                  initial={{ scale: 0, rotate: -180 }}
-                                  animate={{ scale: 1, rotate: 0 }}
-                                  transition={{ delay: 0.3, type: "spring", stiffness: 200 }}
-                                  className="relative flex-shrink-0 group"
-                                >
-                                  <motion.div
-                                    animate={{ 
-                                      rotate: [0, 360],
-                                      scale: [1, 1.3, 1]
-                                    }}
-                                    transition={{ 
-                                      duration: 4,
-                                      repeat: Infinity,
-                                      ease: "easeInOut"
-                                    }}
-                                    className="text-2xl cursor-pointer relative z-10 drop-shadow-[0_0_8px_rgba(251,191,36,0.8)]"
-                                  >
-                                    ⭐
-                                  </motion.div>
-                                  <span className="pointer-events-none absolute -bottom-14 left-1/2 -translate-x-1/2 px-3 py-2 rounded-lg bg-gradient-to-br from-amber-900/95 to-yellow-900/95 border-2 border-yellow-400/60 text-[0.7rem] text-yellow-100 font-medium opacity-0 group-hover:opacity-100 transition-opacity duration-300 whitespace-nowrap z-20 shadow-[0_0_20px_rgba(251,191,36,0.4)]">
-                                    ✨ Website Contributor ✨
-                                  </span>
-                                </motion.div>
-                              )}
-                            </div>
-                            
-                            {/* Dotabuff Icon */}
-                            {currentPlayer.dotabuffUrl && (
-                              <a
-                                href={currentPlayer.dotabuffUrl}
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                className="flex items-center justify-center w-8 h-8 bg-red-600/90 hover:bg-red-600 border border-red-500 rounded-md transition-all duration-300 hover:scale-110 cursor-pointer"
-                                title="View Dotabuff Profile"
-                              >
-                                <img 
-                                  src="/icons/dotabuff.png" 
-                                  alt="Dotabuff" 
-                                  className="w-5 h-5"
-                                />
-                              </a>
-                            )}
-                          </div>
-
-                          {/* Right: Peak MMR */}
-                          <div className="bg-gradient-to-br from-purple-900/40 to-pink-900/40 border border-purple-500/50 rounded-lg p-2 flex-shrink-0 w-28">
-                            <p className="text-purple-400 text-[0.65rem] font-bold mb-1 text-center">PEAK</p>
-                            <div className="flex flex-col items-center gap-1">
-                              {currentPlayer.peakMedalLabel && (
-                                <div className="relative group">
-                                  <img 
-                                    src={`/medals/${currentPlayer.peakMedalLabel.replace(' ', '_')}.png`}
-                                    alt={currentPlayer.peakMedalLabel}
-                                    title={currentPlayer.peakMedalLabel}
-                                    className="w-10 h-10 object-contain cursor-pointer transition-transform hover:scale-110"
-                                    onError={(e) => {
-                                      e.currentTarget.style.display = 'none';
-                                    }}
-                                  />
-                                  <span className="pointer-events-none absolute -bottom-9 left-1/2 -translate-x-1/2 px-2 py-1 rounded-lg bg-black/95 border border-purple-500/70 text-[0.7rem] text-purple-200 opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap z-20 shadow-lg">
-                                    {currentPlayer.peakMedalLabel}
-                                  </span>
-                                </div>
-                              )}
-                              <p className="text-purple-300 text-sm font-bold">{currentPlayer.peakMMR || 'N/A'}</p>
-                            </div>
-                          </div>
-                        </div>
-
-                        {/* Preferred Roles - Horizontal Layout */}
-                        {currentPlayer.roles && currentPlayer.roles.length > 0 && (
-                          <div className="mb-2 bg-gradient-to-br from-cyan-900/30 to-blue-900/30 rounded-lg p-2 border border-cyan-500/40">
-                            <div className="flex items-center gap-3">
-                              <p className="text-cyan-400 text-[0.65rem] font-bold whitespace-nowrap w-32">PREFERRED ROLES</p>
-                              <div className="flex items-center gap-2">
-                                {currentPlayer.roles.map((role: any, idx: number) => (
-                                  <div key={idx} className="relative group">
-                                    <img
-                                      src={role.iconSrc}
-                                      alt={role.label}
-                                      title={role.label}
-                                      className="w-6 h-6 object-contain cursor-pointer hover:scale-110 transition-transform"
-                                    />
-                                    <span className="pointer-events-none absolute -bottom-8 left-1/2 -translate-x-1/2 px-2 py-1 rounded-lg bg-black/95 border border-cyan-500/70 text-[0.65rem] text-cyan-200 opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap z-20 shadow-lg">
-                                      {role.label}
-                                    </span>
-                                  </div>
-                                ))}
-                              </div>
-                            </div>
-                          </div>
-                        )}
-
-                        {/* Ping Section */}
-                        <div className="mb-2 bg-gradient-to-br from-green-900/30 to-emerald-900/30 rounded-lg p-2 border border-green-500/40">
-                          <div className="flex items-center gap-3">
-                            <p className="text-green-400 text-[0.65rem] font-bold whitespace-nowrap w-32">PING</p>
-                            <div className="flex items-center gap-2">
-                              <div className="px-3 py-1 bg-green-500/20 border border-green-400/50 rounded-lg">
-                                <span className="text-green-300 text-sm font-semibold">
-                                  {currentPlayer.pingRange ? `${currentPlayer.pingRange} ms` : 'N/A'}
-                                </span>
-                              </div>
-                            </div>
-                          </div>
-                        </div>
-
-                        {/* Seasons Played - Horizontal Layout */}
-                        {currentPlayer.seasonBadges && currentPlayer.seasonBadges.length > 0 && (
-                          <div className="mb-2 bg-gradient-to-br from-purple-900/30 to-indigo-900/30 rounded-lg p-2 border border-purple-500/40">
-                            <div className="flex items-center gap-3">
-                              <p className="text-purple-400 text-[0.65rem] font-bold whitespace-nowrap w-32">SEASONS PLAYED</p>
-                              <div className="flex items-center gap-2">
-                                {currentPlayer.seasonBadges.map((badge: any, idx: number) => {
-                                  const seasonNum = typeof badge === 'string' ? parseInt(badge.replace('s', '')) : badge;
-                                  const seasonStyles: Record<number, string> = {
-                                    1: "bg-gradient-to-br from-cyan-400 via-blue-500 to-indigo-600 border border-cyan-300/50",
-                                    2: "bg-gradient-to-br from-emerald-400 via-green-500 to-teal-600 border border-emerald-300/50",
-                                    3: "bg-gradient-to-br from-fuchsia-400 via-purple-500 to-violet-600 border border-fuchsia-300/50",
-                                    4: "bg-gradient-to-br from-rose-400 via-pink-500 to-red-600 border border-rose-300/50",
-                                    5: "bg-gradient-to-br from-amber-400 via-orange-500 to-yellow-600 border border-amber-300/50",
-                                  };
-                                  
-                                  return (
-                                    <div 
-                                      key={idx}
-                                      className={`flex items-center justify-center w-7 h-7 rounded-full transition-all duration-300 cursor-pointer hover:scale-110 ${
-                                        seasonStyles[seasonNum] || seasonStyles[1]
-                                      }`}
-                                      title={`Season ${seasonNum}`}
-                                    >
-                                      <span className="text-white text-[0.6rem] font-bold">S{seasonNum}</span>
-                                    </div>
-                                  );
-                                })}
-                              </div>
-                            </div>
-                          </div>
-                        )}
-
-                        {/* Achievements - Only if player has won */}
-                        {currentPlayer.hasWonCup && (
-                          <div className="mb-2 bg-gradient-to-br from-amber-900/30 to-yellow-900/30 rounded-lg p-2 border border-yellow-500/40">
-                            <div className="flex items-center gap-3">
-                              <p className="text-yellow-400 text-[0.65rem] font-bold whitespace-nowrap w-32">ACHIEVEMENTS</p>
-                              <div className="flex items-center gap-2">
-                                {/* Achievement Badge */}
-                                <motion.div
-                                  initial={{ opacity: 0, scale: 0.8 }}
-                                  animate={{ opacity: 1, scale: 1 }}
-                                  transition={{ delay: 0.3 }}
-                                  whileHover={{ scale: 1.05 }}
-                                  className="flex items-center gap-1.5 px-2 py-1 rounded-lg bg-gradient-to-br from-yellow-900/40 to-amber-900/40 border border-yellow-500/50 cursor-pointer transition-all"
-                                  title={currentPlayer.cupTooltip || `Season ${currentPlayer.cupSeason || ''} Champion`}
-                                >
-                                  {/* Ranking Medal */}
-                                  <span className="text-base">
-                                    {currentPlayer.cupRank === 'gold' && '🏆'}
-                                    {currentPlayer.cupRank === 'silver' && '🥈'}
-                                    {currentPlayer.cupRank === 'bronze' && '🥉'}
-                                    {!currentPlayer.cupRank && '🏆'}
-                                  </span>
-                                  {/* Season Text */}
-                                  <span className="text-yellow-300 font-bold text-[0.65rem]">Season {currentPlayer.cupSeason || '?'}</span>
-                                </motion.div>
-                                {/* Future achievements can be added here */}
-                              </div>
-                            </div>
-                          </div>
-                        )}
-
-                        {/* Notes for Captain - More Compact */}
-                        <div className="mb-2 bg-gradient-to-br from-indigo-900/30 to-purple-900/30 rounded-lg p-1.5 border border-indigo-500/40">
-                          <p className="text-indigo-400 text-[0.65rem] font-semibold mb-0.5">Notes for Captain</p>
-                          {currentPlayer.bio ? (
-                            <p className="text-gray-300 text-[0.65rem] leading-relaxed line-clamp-2">
-                              {currentPlayer.bio}
-                            </p>
-                          ) : (
-                            <p className="text-gray-500 text-[0.65rem] italic">
-                              No notes available
-                            </p>
-                          )}
-                        </div>
-
-                        {status === 'paused' && (
-                          <motion.div 
-                            className="bg-yellow-500/20 border border-yellow-500/50 rounded-lg p-1.5 text-center mb-2"
-                            animate={{ opacity: [0.7, 1, 0.7] }}
-                            transition={{ duration: 1.5, repeat: Infinity }}
-                          >
-                            <p className="text-yellow-300 text-xs font-semibold">⏸️ Auction Paused</p>
-                          </motion.div>
-                        )}
-
-                        {/* Admin Finalize/Assign Button - Always enabled */}
-                        {(adminSession || AuthService.isAdminLoggedIn()) && (
-                          <motion.div 
-                            initial={{ opacity: 0, y: 10 }}
-                            animate={{ opacity: 1, y: 0 }}
-                            transition={{ delay: 0.3 }}
-                            className="space-y-2"
-                          >
-                            {/* Team Selector - Only show when no bids */}
-                            {!auctionState?.highest_bidder_id && (
-                              <div className="bg-black/40 rounded-lg p-2 border border-purple-500/40 space-y-2">
-                                <div>
-                                  <label className="text-purple-300 text-xs font-semibold mb-1 block">
-                                    Select Team for Manual Assignment
-                                  </label>
-                                  <select
-                                    value={selectedTeamForManualAssign}
-                                    onChange={(e) => setSelectedTeamForManualAssign(e.target.value)}
-                                    className="w-full px-2 py-1.5 bg-black/60 border border-purple-500/40 rounded text-white text-xs focus:outline-none focus:ring-2 focus:ring-purple-500"
-                                  >
-                                    <option value="">-- Select Team --</option>
-                                    {captains.map((captain) => {
-                                      // Count players for this team (captain + bought players)
-                                      const teamPlayers = soldPlayers.filter(p => p.teamName === captain.teamName);
-                                      const isFull = teamPlayers.length >= 4; // 4 bought + 1 captain = 5 total
-                                      
-                                      return (
-                                        <option 
-                                          key={captain.playerId} 
-                                          value={captain.teamName}
-                                          disabled={isFull}
-                                        >
-                                          {captain.teamName} (Budget: {captain.budget}) {isFull ? '- FULL (5/5)' : ''}
-                                        </option>
-                                      );
-                                    })}
-                                  </select>
-                                </div>
-                                
-                                <div>
-                                  <label className="text-yellow-300 text-xs font-semibold mb-1 block">
-                                    Set Price (Gold)
-                                  </label>
-                                  <input
-                                    type="text"
-                                    inputMode="numeric"
-                                    pattern="[0-9]*"
-                                    value={manualAssignPrice}
-                                    onChange={(e) => {
-                                      const value = e.target.value.replace(/[^0-9]/g, '');
-                                      setManualAssignPrice(value);
-                                    }}
-                                    placeholder="Enter gold value"
-                                    className="w-full px-2 py-1.5 bg-black/60 border border-yellow-500/40 rounded text-white text-xs font-bold focus:outline-none focus:ring-2 focus:ring-yellow-500 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
-                                  />
-                                </div>
-                              </div>
-                            )}
-                            
-                            <button
-                              onClick={isHammerActive ? handleCancelHammer : handleSellPlayer}
-                              disabled={!isHammerActive && !auctionState?.highest_bidder_id && !selectedTeamForManualAssign}
-                              className={`w-full px-3 py-2 ${
-                                isHammerActive 
-                                  ? 'bg-gradient-to-r from-red-600 to-orange-600 hover:from-red-500 hover:to-orange-500'
-                                  : 'bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-500 hover:to-emerald-500'
-                              } disabled:from-gray-600 disabled:to-gray-700 disabled:cursor-not-allowed text-white text-sm font-bold rounded-lg transition-all duration-300 shadow-lg flex items-center justify-center gap-2`}
-                            >
-                              <span className="text-base">{isHammerActive ? '❌' : '🔨'}</span>
-                              <span>{isHammerActive ? 'Cancel Hammer' : 'Start Hammer'}</span>
-                            </button>
-                            
-                            {/* Stop Hammer button - shows when new bid during hammer */}
-                            {isHammerActive && newBidDuringHammer && (
-                              <motion.button
-                                initial={{ scale: 0.8, opacity: 0 }}
-                                animate={{ scale: 1, opacity: 1 }}
-                                onClick={handleCancelHammer}
-                                className="w-full px-3 py-2 bg-gradient-to-r from-yellow-600 to-amber-600 hover:from-yellow-500 hover:to-amber-500 text-white text-sm font-bold rounded-lg transition-all duration-300 shadow-lg flex items-center justify-center gap-2 animate-pulse"
-                              >
-                                <span className="text-base">⚠️</span>
-                                <span>Stop Hammer - New Bid!</span>
-                              </motion.button>
-                            )}
-                            
-                            {!auctionState?.highest_bidder_id && (
-                              <p className="text-gray-400 text-xs text-center">
-                                {selectedTeamForManualAssign 
-                                  ? `Will assign to ${selectedTeamForManualAssign} for 🪙 ${manualAssignPrice || '0'}`
-                                  : 'No bids - Select team above'}
-                              </p>
-                            )}
-                          </motion.div>
-                        )}
-                      </motion.div>
+                  <div className="flex items-center gap-2 mb-2">
+                    <div className="flex-1 h-1 rounded-full bg-white/10 overflow-hidden">
+                      <div className="h-full rounded-full transition-all duration-500" style={{ width: `${budgetPct}%`, background: captain.budget > 500 ? '#34d399' : captain.budget > 200 ? '#fbbf24' : '#f87171' }} />
                     </div>
-
-                    {/* Section 3: Teams Overview - Table Format - Scrollable with Neon Glow */}
-                    <div className="bg-black/40 backdrop-blur-sm rounded-xl p-3 border-2 border-blue-500/60 flex flex-col overflow-hidden shadow-[0_0_20px_rgba(59,130,246,0.3)]">
-                      <h3 className="text-white font-bold mb-2 text-sm text-center flex-shrink-0">Teams Overview</h3>
-                      
-                      {captains.length === 0 ? (
-                        <div className="text-gray-400 text-xs text-center py-8">
-                          No teams yet
-                        </div>
-                      ) : (
-                        <div className="flex-1 overflow-y-auto custom-standings-scroll" style={{ minHeight: '0' }}>
-                          <table className="w-full text-xs">
-                            <thead className="sticky top-0 bg-gradient-to-r from-blue-900/80 to-indigo-900/80 backdrop-blur-sm z-10">
-                              <tr className="border-b border-blue-500/30">
-                                <th className="text-left py-2 px-2 text-blue-300 font-bold">Team</th>
-                                <th className="text-center py-2 px-1 text-amber-300 font-bold text-[0.65rem]">Total Gold</th>
-                                <th className="text-center py-2 px-1 text-yellow-300 font-bold text-[0.65rem]">Gold Left</th>
-                                <th className="text-center py-2 px-1 text-green-300 font-bold">Players</th>
-                              </tr>
-                            </thead>
-                            <tbody>
-                              {captains.map((captain, index) => {
-                                // Get team players count from auction results (only bought players, not captain)
-                                const teamPlayersCount = soldPlayers.filter(
-                                  p => p.soldToCaptainId === captain.playerId
-                                ).length;
-                                const playerCount = teamPlayersCount + 1; // Add 1 for captain
-                                
-                                // Standard starting budget
-                                const startingBudget = 1000;
-
-                                return (
-                                  <motion.tr
-                                    key={captain.playerId}
-                                    initial={{ opacity: 0, x: -20 }}
-                                    animate={{ opacity: 1, x: 0 }}
-                                    transition={{ delay: index * 0.02 }}
-                                    className="border-b border-blue-500/10 hover:bg-blue-900/20 transition-colors"
-                                  >
-                                    {/* Team Name & Captain */}
-                                    <td className="py-2 px-2">
-                                      <div className="flex flex-col">
-                                        <Link 
-                                          to={`/team/${encodeURIComponent(captain.teamName)}`}
-                                          className="text-blue-300 font-semibold truncate text-xs hover:text-blue-200 hover:underline transition-colors"
-                                        >
-                                          {captain.teamName}
-                                        </Link>
-                                        <span className="text-gray-400 text-[0.65rem] truncate">
-                                          {captain.playerNickname}
-                                        </span>
-                                      </div>
-                                    </td>
-                                    
-                                    {/* Total Gold */}
-                                    <td className="py-2 px-1 text-center">
-                                      <span className="text-amber-400 font-bold">
-                                        {startingBudget}
-                                      </span>
-                                    </td>
-                                    
-                                    {/* Gold Left */}
-                                    <td className="py-2 px-1 text-center">
-                                      <span className={`font-bold ${
-                                        captain.budget > 500 ? 'text-green-400' :
-                                        captain.budget > 200 ? 'text-yellow-400' :
-                                        'text-red-400'
-                                      }`}>
-                                        {captain.budget}
-                                      </span>
-                                    </td>
-                                    
-                                    {/* Players with /5 */}
-                                    <td className="py-2 px-1 text-center">
-                                      <span className={`font-bold ${
-                                        playerCount >= 5 ? 'text-green-400' : 'text-cyan-300'
-                                      }`}>
-                                        {playerCount}/5
-                                      </span>
-                                      {playerCount >= 5 && (
-                                        <div className="text-[0.6rem] text-green-400">✓ FULL</div>
-                                      )}
-                                    </td>
-                                  </motion.tr>
-                                );
-                              })}
-                            </tbody>
-                          </table>
-                        </div>
-                      )}
-                    </div>
-
-                    {/* Section 4: Chat - Scrollable with Neon Glow */}
-                    <div className="bg-black/40 backdrop-blur-sm rounded-xl p-3 border-2 border-purple-500/60 flex flex-col overflow-hidden shadow-[0_0_20px_rgba(168,85,247,0.3)]">
-                      <h3 className="text-white font-bold mb-2 text-sm text-center flex-shrink-0">Chat</h3>
-                      
-                      {/* Chat Messages */}
-                      <div className="flex-1 overflow-y-auto custom-standings-scroll pr-1 space-y-2 mb-2" style={{ minHeight: '0' }}>
-                        {chatMessages.length === 0 ? (
-                          <div className="text-gray-400 text-xs text-center py-8">
-                            No messages yet
-                          </div>
-                        ) : (
-                          chatMessages.map((msg, index) => {
-                            const isSystemMessage = msg.sender_id === 'system';
-                            return (
-                              <motion.div
-                                key={msg.id || index}
-                                initial={{ opacity: 0, x: -10 }}
-                                animate={{ opacity: 1, x: 0 }}
-                                className={`rounded-lg p-2 border ${
-                                  isSystemMessage 
-                                    ? 'bg-green-900/20 border-green-500/30' 
-                                    : 'bg-purple-900/20 border-purple-500/30'
-                                }`}
-                              >
-                                <div className="flex items-start gap-2">
-                                  <div className="flex-1 min-w-0">
-                                    <div className="flex items-center gap-2">
-                                      <p className={`font-semibold text-xs truncate ${
-                                        isSystemMessage ? 'text-green-300' : 'text-purple-300'
-                                      }`}>
-                                        {msg.sender_name}
-                                      </p>
-                                      {msg.sender_team && (
-                                        <span className="text-purple-400 text-[0.6rem] bg-purple-900/40 px-1.5 py-0.5 rounded">
-                                          {msg.sender_team}
-                                        </span>
-                                      )}
-                                    </div>
-                                    <p className={`text-xs mt-0.5 break-words ${
-                                      isSystemMessage ? 'text-green-200 font-medium' : 'text-white'
-                                    }`}>
-                                      {msg.message}
-                                    </p>
-                                    <p className="text-gray-500 text-[0.6rem] mt-1">
-                                      {new Date(msg.created_at).toLocaleTimeString()}
-                                    </p>
-                                  </div>
-                                </div>
-                              </motion.div>
-                            );
-                          })
-                        )}
-                      </div>
-                      
-                      {/* Chat Input - Only for captains and admins */}
-                      {(() => {
-                        // Check if user is admin
-                        if (adminSession) {
-                          return (
-                            <div className="flex gap-2 flex-shrink-0">
-                              <input
-                                type="text"
-                                value={chatInput}
-                                onChange={(e) => setChatInput(e.target.value)}
-                                onKeyPress={(e) => {
-                                  if (e.key === 'Enter' && chatInput.trim()) {
-                                    handleSendMessage();
-                                  }
-                                }}
-                                placeholder="Type a message..."
-                                className="flex-1 px-2 py-1.5 bg-black/60 border border-purple-500/40 rounded text-white text-xs placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-500"
-                              />
-                              <button
-                                onClick={handleSendMessage}
-                                disabled={!chatInput.trim()}
-                                className="px-3 py-1.5 bg-purple-600 hover:bg-purple-500 disabled:bg-gray-600 disabled:cursor-not-allowed text-white text-xs font-semibold rounded transition-colors"
-                              >
-                                Send
-                              </button>
-                            </div>
-                          );
-                        }
-                        
-                        // Check if user is a captain (not just any player)
-                        if (currentCaptainSession) {
-                          const captainId = currentCaptainSession.playerId || currentCaptainSession.id;
-                          const isCaptain = captains.some(c => c.playerId === captainId);
-                          
-                          if (isCaptain) {
-                            return (
-                              <div className="flex gap-2 flex-shrink-0">
-                                <input
-                                  type="text"
-                                  value={chatInput}
-                                  onChange={(e) => setChatInput(e.target.value)}
-                                  onKeyPress={(e) => {
-                                    if (e.key === 'Enter' && chatInput.trim()) {
-                                      handleSendMessage();
-                                    }
-                                  }}
-                                  placeholder="Type a message..."
-                                  className="flex-1 px-2 py-1.5 bg-black/60 border border-purple-500/40 rounded text-white text-xs placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-500"
-                                />
-                                <button
-                                  onClick={handleSendMessage}
-                                  disabled={!chatInput.trim()}
-                                  className="px-3 py-1.5 bg-purple-600 hover:bg-purple-500 disabled:bg-gray-600 disabled:cursor-not-allowed text-white text-xs font-semibold rounded transition-colors"
-                                >
-                                  Send
-                                </button>
-                              </div>
-                            );
-                          }
-                        }
-                        
-                        // Not a captain or admin - show locked message
-                        return (
-                          <div className="bg-gray-800/50 border border-gray-600/50 rounded-lg p-2 text-center flex-shrink-0">
-                            <p className="text-gray-400 text-xs">
-                              🔒 Chat is only available for captains and admins
-                            </p>
-                          </div>
-                        );
-                      })()}
-                    </div>
+                    <span className="text-xs font-mono" style={{ color: captain.budget > 500 ? '#34d399' : captain.budget > 200 ? '#fbbf24' : '#f87171' }}>{captain.budget}g</span>
                   </div>
-
-                  {currentCaptainSession && (
-                    <motion.div 
-                      initial={{ opacity: 0, y: 10 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      className="mt-4 bg-gradient-to-br from-yellow-900/40 to-orange-900/40 backdrop-blur-sm rounded-xl p-4 border-2 border-yellow-500/50 shadow-xl"
-                    >
-                      {/* Captain Bid Section - Below the three columns */}
-                      <h3 className="text-white font-bold mb-3 text-center text-sm">
-                        💰 Place Your Bid
-                      </h3>
-                      
-                      {/* Bid Input */}
-                      <div className="max-w-md mx-auto">
-                        {(() => {
-                          const captainId = currentCaptainSession.playerId || currentCaptainSession.id;
-                          const isHighestBidder = auctionState?.highest_bidder_id === captainId;
-                          const captain = captains.find(c => c.playerId === captainId);
-                          const hasNoBudget = captain && captain.budget <= 0;
-                          
-                          // Show message if captain is highest bidder
-                          if (isHighestBidder) {
-                            return (
-                              <div className="bg-green-900/30 border border-green-500/50 rounded-lg p-4 text-center">
-                                <p className="text-green-300 font-bold text-sm mb-1">✅ You have the highest bid!</p>
-                                <p className="text-green-400/80 text-xs">
-                                  Your bid: <span className="font-bold">🪙 {auctionState?.highest_bid}</span>
-                                </p>
-                                <p className="text-gray-400 text-xs mt-2">
-                                  Wait for another captain to bid before you can bid again
-                                </p>
-                              </div>
-                            );
-                          }
-                          
-                          return (
-                            <>
-                              <div className="flex gap-2">
-                                <input
-                                  type="text"
-                                  inputMode="numeric"
-                                  pattern="[0-9]*"
-                                  value={bidAmount}
-                                  onChange={(e) => {
-                                    const value = e.target.value.replace(/[^0-9]/g, '');
-                                    setBidAmount(value);
-                                    setBidError('');
-                                  }}
-                                  onKeyPress={(e) => {
-                                    if (e.key === 'Enter' && bidAmount && status !== 'paused' && !isBidding && !hasNoBudget) {
-                                      handlePlaceBid();
-                                    }
-                                  }}
-                                  placeholder="Enter bid amount"
-                                  className="flex-1 px-4 py-2.5 bg-black/60 border border-yellow-500/40 rounded-lg text-white text-sm font-bold placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-yellow-500 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
-                                />
-                                <button
-                                  onClick={handlePlaceBid}
-                                  disabled={!bidAmount || status === 'paused' || isBidding || hasNoBudget}
-                                  className="px-6 py-2.5 bg-gradient-to-r from-yellow-600 to-orange-600 hover:from-yellow-500 hover:to-orange-500 disabled:from-gray-600 disabled:to-gray-700 disabled:cursor-not-allowed text-white font-bold rounded-lg transition-all duration-300 flex items-center justify-center gap-2 shadow-lg flex-shrink-0"
-                                >
-                                  <span className="text-base">🪙</span>
-                                  <span className="text-sm">{isBidding ? 'BIDDING...' : 'PLACE BID'}</span>
-                                </button>
-                              </div>
-                              {bidError && (
-                                <p className="text-red-400 text-xs mt-2 font-semibold text-center">⚠️ {bidError}</p>
-                              )}
-                              {status === 'paused' && (
-                                <p className="text-yellow-400 text-xs mt-2 text-center">⏸️ Bidding paused</p>
-                              )}
-                            </>
-                          );
-                        })()}
+                  <div className="flex gap-1">
+                    <div className="w-5 h-5 rounded-full flex items-center justify-center flex-shrink-0 text-black text-[9px] font-black" style={{ background: tc }} title={captain.playerNickname}>C</div>
+                    {teamPlayers.map((p, i) => (
+                      <div key={i} className={`w-5 h-5 rounded-full bg-gradient-to-br ${getAvatarColor(p.playerNickname)} flex items-center justify-center`} title={p.playerNickname}>
+                        <span className="text-[9px] font-bold text-white">{p.playerNickname[0]?.toUpperCase()}</span>
                       </div>
-                    </motion.div>
-                  )}
-                  </>
-                )}
+                    ))}
+                    {Array.from({ length: Math.max(0, 4 - teamPlayers.length) }).map((_, i) => (
+                      <div key={`e-${i}`} className="w-5 h-5 rounded-full border border-dashed border-white/15" />
+                    ))}
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        )}
 
-                {status === 'completed' && (
-                  <motion.div
-                    initial={{ opacity: 0, scale: 0.9 }}
-                    animate={{ opacity: 1, scale: 1 }}
-                    className="text-center"
-                  >
-                    <motion.div 
-                      className="w-20 h-20 bg-gradient-to-br from-green-500/20 to-emerald-500/20 rounded-full flex items-center justify-center mx-auto mb-4 border-4 border-green-500/30"
-                      animate={{ 
-                        scale: [1, 1.15, 1],
-                        rotate: [0, 10, -10, 0]
-                      }}
-                      transition={{ 
-                        duration: 2,
-                        repeat: Infinity,
-                        ease: "easeInOut"
-                      }}
-                    >
-                      <span className="text-4xl">🏆</span>
-                    </motion.div>
-                    <h3 className="text-xl font-bold text-white mb-2">Auction Completed!</h3>
-                    <p className="text-gray-400 text-sm max-w-md mx-auto">
-                      All players have been sold. Check the results below.
-                    </p>
-                  </motion.div>
-                )}
+        {/* ── MAIN 3-COLUMN GRID ── */}
+        <div className="flex-1 grid overflow-hidden min-h-0" style={{ gridTemplateColumns: '280px 1fr 260px' }}>
+
+          {/* ═══ LEFT: Player Pool ═══ */}
+          <div className="flex flex-col border-r border-white/5 overflow-hidden bg-black/20">
+            {/* Pool header */}
+            <div className="flex-shrink-0 p-3 border-b border-white/5 bg-black/30">
+              <div className="flex items-center gap-2 mb-2">
+                <Gavel className="w-3.5 h-3.5 text-yellow-400" />
+                <span className="text-sm font-bold text-yellow-400 tracking-wide">PLAYER POOL</span>
+                <span className="ml-auto text-xs text-gray-500">{filteredCore.length + filteredSupp.length} left</span>
+              </div>
+              <div className="relative">
+                <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3 h-3 text-gray-500" />
+                <input value={poolSearch} onChange={e => setPoolSearch(e.target.value)} placeholder="Search players..."
+                  className="w-full pl-7 pr-3 py-1.5 text-xs bg-white/5 border border-white/10 rounded-lg text-white placeholder-gray-600 outline-none focus:border-white/20 transition-colors" />
+              </div>
+            </div>
+            {/* Core / Supp split */}
+            <div className="flex-1 grid overflow-hidden min-h-0" style={{ gridTemplateColumns: '1fr 1fr' }}>
+              {/* Core */}
+              <div className="flex flex-col border-r border-white/5 overflow-hidden">
+                <div className="flex-shrink-0 flex items-center gap-1.5 px-2.5 py-1.5 border-b border-white/5 bg-blue-500/5">
+                  <span className="text-xs font-bold text-blue-400">CORE</span>
+                  <span className="text-xs text-gray-600">{filteredCore.length}</span>
+                </div>
+                <div className="flex-1 overflow-y-auto custom-scrollbar">
+                  {filteredCore.length === 0
+                    ? <p className="text-center text-xs text-gray-600 py-4">No core players</p>
+                    : filteredCore.map((p, i) => {
+                      const isOnBlock = currentPlayer && (currentPlayer.id === p.id || currentPlayer.nickname === p.nickname);
+                      return (
+                        <div key={p.id || i} className={`flex items-center gap-2 px-2.5 py-2 border-b border-white/5 transition-colors ${isOnBlock ? 'bg-yellow-500/10 border-l-2 border-l-yellow-400' : 'hover:bg-white/3'}`}>
+                          <div className="w-6 h-6 rounded-full bg-blue-500/20 border border-blue-500/30 flex items-center justify-center flex-shrink-0 overflow-hidden">
+                            {p.avatarUrl ? <img src={p.avatarUrl} alt={p.nickname} className="w-full h-full object-cover" onError={e => (e.currentTarget.style.display = 'none')} /> : <span className="text-[8px] font-bold text-blue-400">{getInitials(p.nickname)}</span>}
+                          </div>
+                          <div className="flex-1 min-w-0">
+                            <div className={`text-xs font-semibold truncate ${isOnBlock ? 'text-yellow-400' : 'text-white'}`}>{p.nickname}</div>
+                            <div className="text-[10px] text-blue-400 font-mono">{p.currentMMR || '?'}</div>
+                          </div>
+                          {isOnBlock && <span className="text-[9px] font-bold text-yellow-400 flex-shrink-0">●</span>}
+                        </div>
+                      );
+                    })}
+                </div>
+              </div>
+              {/* Support */}
+              <div className="flex flex-col overflow-hidden">
+                <div className="flex-shrink-0 flex items-center gap-1.5 px-2.5 py-1.5 border-b border-white/5 bg-emerald-500/5">
+                  <span className="text-xs font-bold text-emerald-400">SUPP</span>
+                  <span className="text-xs text-gray-600">{filteredSupp.length}</span>
+                </div>
+                <div className="flex-1 overflow-y-auto custom-scrollbar">
+                  {filteredSupp.length === 0
+                    ? <p className="text-center text-xs text-gray-600 py-4">No support players</p>
+                    : filteredSupp.map((p, i) => {
+                      const isOnBlock = currentPlayer && (currentPlayer.id === p.id || currentPlayer.nickname === p.nickname);
+                      return (
+                        <div key={p.id || i} className={`flex items-center gap-2 px-2.5 py-2 border-b border-white/5 transition-colors ${isOnBlock ? 'bg-yellow-500/10 border-l-2 border-l-yellow-400' : 'hover:bg-white/3'}`}>
+                          <div className="w-6 h-6 rounded-full bg-emerald-500/20 border border-emerald-500/30 flex items-center justify-center flex-shrink-0 overflow-hidden">
+                            {p.avatarUrl ? <img src={p.avatarUrl} alt={p.nickname} className="w-full h-full object-cover" onError={e => (e.currentTarget.style.display = 'none')} /> : <span className="text-[8px] font-bold text-emerald-400">{getInitials(p.nickname)}</span>}
+                          </div>
+                          <div className="flex-1 min-w-0">
+                            <div className={`text-xs font-semibold truncate ${isOnBlock ? 'text-yellow-400' : 'text-white'}`}>{p.nickname}</div>
+                            <div className="text-[10px] text-emerald-400 font-mono">{p.currentMMR || '?'}</div>
+                          </div>
+                          {isOnBlock && <span className="text-[9px] font-bold text-yellow-400 flex-shrink-0">●</span>}
+                        </div>
+                      );
+                    })}
+                </div>
               </div>
             </div>
           </div>
-        </div>
-      </div>
 
-      {/* Success Modal */}
+          {/* ═══ CENTER: Stage ═══ */}
+          <div className="flex flex-col overflow-hidden bg-[rgba(5,7,10,0.6)]">
+            {status === 'not-started' && (
+              <div className="flex-1 flex flex-col items-center justify-center gap-4">
+                <AuctionGavel show={true} />
+                <p className="text-gray-500 text-sm text-center max-w-xs">The auction will begin shortly. Stay tuned.</p>
+              </div>
+            )}
+            {status === 'completed' && (
+              <div className="flex-1 flex flex-col items-center justify-center gap-3">
+                <span className="text-5xl">🏆</span>
+                <h3 className="text-2xl font-black text-yellow-400 tracking-wider">AUCTION COMPLETE</h3>
+                <p className="text-gray-500 text-sm">All players have been assigned.</p>
+              </div>
+            )}
+            {(status === 'live' || status === 'paused') && (
+              <div className="flex-1 flex flex-col overflow-hidden">
+                {/* Stage hero area */}
+                <div className="flex-shrink-0 flex flex-col items-center px-6 py-5 gap-4 border-b border-white/5">
+                  {currentPlayer ? (
+                    <motion.div key={currentPlayer.id} initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.3 }} className="w-full flex flex-col items-center gap-4">
+                      {/* LOT + paused */}
+                      <div className="flex items-center gap-3">
+                        <span className="text-xs text-yellow-400/40 font-mono">LOT #{soldPlayers.length + 1}</span>
+                        {status === 'paused' && (
+                          <motion.span animate={{ opacity: [0.5, 1, 0.5] }} transition={{ duration: 1.5, repeat: Infinity }} className="text-xs font-bold text-yellow-400">⏸ PAUSED</motion.span>
+                        )}
+                      </div>
+                      {/* Avatar ring */}
+                      <div className="relative w-24 h-24">
+                        <div className="absolute inset-0 rounded-full border-2 border-yellow-400/20 animate-spin" style={{ animationDuration: '12s', borderStyle: 'dashed' }} />
+                        <div className="absolute inset-2 rounded-full overflow-hidden border-2 border-yellow-400/30 bg-black/50">
+                          <Avatar src={currentPlayer.avatarUrl} alt={currentPlayer.nickname} name={currentPlayer.nickname} size="lg" className="w-full h-full object-cover" />
+                        </div>
+                        {(currentPlayer.specialBadge === 'contributor' || currentPlayer.isContributor) && (
+                          <span className="absolute -top-1 -right-1 text-base">⭐</span>
+                        )}
+                      </div>
+                      {/* Name */}
+                      <h2 className="text-3xl font-black text-white tracking-wide text-center leading-none">{currentPlayer.nickname}</h2>
+                      {/* MMR + roles */}
+                      <div className="flex items-center gap-2 flex-wrap justify-center">
+                        {currentPlayer.currentMMR && <span className="text-sm font-bold text-yellow-400 font-mono">{currentPlayer.currentMMR} MMR</span>}
+                        {currentPlayer.roles?.length > 0 && currentPlayer.roles.map((r: any, i: number) => <img key={i} src={r.iconSrc} alt={r.label} title={r.label} className="w-4 h-4 object-contain opacity-80" />)}
+                        {currentPlayer.pingRange && <span className="text-xs text-emerald-400">{currentPlayer.pingRange}ms</span>}
+                        {currentPlayer.dotabuffUrl && (
+                          <a href={currentPlayer.dotabuffUrl} target="_blank" rel="noopener noreferrer" className="flex items-center gap-1 px-2 py-0.5 rounded bg-red-900/30 border border-red-500/30 text-red-300 text-xs hover:bg-red-900/50 transition-colors">
+                            <img src="/icons/dotabuff.png" alt="DB" className="w-3 h-3" />DB
+                          </a>
+                        )}
+                      </div>
+                      {/* Bid cards */}
+                      <div className="flex gap-3 w-full max-w-sm">
+                        <div className="flex-1 rounded-xl bg-black/40 backdrop-blur-sm border border-white/8 p-3 text-center">
+                          <div className="text-[10px] text-gray-500 font-medium mb-1 tracking-wider">CURRENT BID</div>
+                          <div className={`text-2xl font-black ${auctionState?.highest_bid ? 'text-yellow-400' : 'text-white/15'}`}>
+                            {auctionState?.highest_bid ? `${auctionState.highest_bid}g` : '—'}
+                          </div>
+                          {auctionState?.highest_bidder_team && <div className="text-xs text-gray-400 mt-0.5">{auctionState.highest_bidder_team}</div>}
+                        </div>
+                        <div className="flex-1 rounded-xl bg-black/40 backdrop-blur-sm border border-white/8 p-3 text-center">
+                          <div className="text-[10px] text-gray-500 font-medium mb-1 tracking-wider">BASE PRICE</div>
+                          <div className="text-2xl font-black text-gray-500">{currentPlayer.basePrice || currentPlayer.base_price || '—'}</div>
+                        </div>
+                      </div>
+                      {/* Hammer */}
+                      {isHammerActive && (
+                        <motion.div initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }}
+                          className="flex flex-col items-center gap-2 px-5 py-3 rounded-xl bg-red-500/8 border border-red-500/30 w-full max-w-sm">
+                          <div className="flex items-center gap-2">
+                            <motion.span animate={{ scale: [1, 1.3, 1] }} transition={{ duration: 0.5, repeat: Infinity }} className="text-lg">🔨</motion.span>
+                            <span className="text-lg font-black text-red-300 tracking-widest">
+                              {hammerStage === 1 ? 'GOING ONCE' : hammerStage === 2 ? 'GOING TWICE' : '🔥 SOLD!'}
+                            </span>
+                          </div>
+                          {hammerStage < 3 && (
+                            <div className="w-full h-1.5 rounded-full bg-white/10 overflow-hidden">
+                              <motion.div className="h-full rounded-full bg-red-500" animate={{ width: `${(hammerCountdown / 6) * 100}%` }} transition={{ duration: 0.3 }} />
+                            </div>
+                          )}
+                        </motion.div>
+                      )}
+                      {/* Top bids */}
+                      <div className="w-full max-w-sm">
+                        <TopBidsStandalone auctionId={auctionState?.id || null} currentPlayerId={auctionState?.current_player_data?.id || null} hammerStage={hammerStage} />
+                      </div>
+                      {/* Admin controls */}
+                      {isAdmin && (
+                        <div className="w-full max-w-sm flex flex-col gap-2">
+                          {!auctionState?.highest_bidder_id && (
+                            <div className="flex gap-2">
+                              <select value={selectedTeamForManualAssign} onChange={e => setSelectedTeamForManualAssign(e.target.value)}
+                                className="flex-1 px-3 py-2 text-xs bg-black/50 border border-white/10 rounded-lg text-white outline-none focus:border-white/20">
+                                <option value="">— Assign to Team —</option>
+                                {captains.map(c => { const full = soldPlayers.filter(p => p.teamName === c.teamName).length >= 4; return <option key={c.playerId} value={c.teamName} disabled={full}>{c.teamName} ({c.budget}g){full ? ' FULL' : ''}</option>; })}
+                              </select>
+                              <input type="text" inputMode="numeric" value={manualAssignPrice} onChange={e => setManualAssignPrice(e.target.value.replace(/[^0-9]/g, ''))} placeholder="Price"
+                                className="w-16 px-2 py-2 text-xs bg-black/50 border border-white/10 rounded-lg text-white outline-none focus:border-white/20 font-mono" />
+                            </div>
+                          )}
+                          <div className="flex gap-2">
+                            <button onClick={isHammerActive ? handleCancelHammer : handleSellPlayer}
+                              disabled={!isHammerActive && !auctionState?.highest_bidder_id && !selectedTeamForManualAssign}
+                              className={`flex-1 py-2 rounded-lg text-sm font-bold transition-all ${isHammerActive ? 'bg-red-500/20 border border-red-500/40 text-red-300 hover:bg-red-500/30' : 'bg-yellow-500/15 border border-yellow-500/30 text-yellow-400 hover:bg-yellow-500/25 disabled:opacity-30 disabled:cursor-not-allowed'}`}>
+                              {isHammerActive ? '✕ CANCEL' : '🔨 HAMMER'}
+                            </button>
+                            {isHammerActive && newBidDuringHammer && (
+                              <motion.button animate={{ scale: [1, 1.03, 1] }} transition={{ duration: 0.8, repeat: Infinity }} onClick={handleCancelHammer}
+                                className="px-3 py-2 text-xs font-bold rounded-lg bg-yellow-500/10 border border-yellow-500/30 text-yellow-300">
+                                ⚠ NEW BID
+                              </motion.button>
+                            )}
+                          </div>
+                        </div>
+                      )}
+                      {/* Captain bid */}
+                      {isCaptain && (() => {
+                        const cid = currentCaptainSession.playerId || currentCaptainSession.id;
+                        const myCap = captains.find(c => c.playerId === cid);
+                        const minBid = (auctionState?.highest_bid || 0) + 1;
+                        return (
+                          <div className="w-full max-w-sm flex flex-col gap-2">
+                            <div className="flex gap-1.5 justify-center">
+                              {[10, 50, 100, 200].map(chip => (
+                                <button key={chip} onClick={() => setBidAmount(String((parseInt(bidAmount) || (auctionState?.highest_bid || 0)) + chip))}
+                                  className="px-3 py-1 text-xs font-bold rounded-full bg-yellow-500/10 border border-yellow-500/20 text-yellow-400 hover:bg-yellow-500/20 transition-all">
+                                  +{chip}
+                                </button>
+                              ))}
+                            </div>
+                            <div className="flex gap-2">
+                              <input type="text" inputMode="numeric" value={bidAmount}
+                                onChange={e => { setBidAmount(e.target.value.replace(/[^0-9]/g, '')); setBidError(''); }}
+                                onKeyDown={e => e.key === 'Enter' && handlePlaceBid()} placeholder={`Min ${minBid}g`}
+                                className="flex-1 px-3 py-2 text-sm bg-black/50 border border-white/10 rounded-lg text-white outline-none focus:border-yellow-400/40 font-mono" />
+                              <button onClick={handlePlaceBid} disabled={isBidding || !bidAmount}
+                                className="px-5 py-2 text-sm font-black rounded-lg bg-yellow-500/20 border border-yellow-500/40 text-yellow-400 hover:bg-yellow-500/30 transition-all disabled:opacity-40 disabled:cursor-not-allowed">
+                                {isBidding ? '…' : 'BID'}
+                              </button>
+                            </div>
+                            {myCap && <div className="text-xs text-center text-gray-500 font-mono">Budget: <span className="text-yellow-400 font-bold">{myCap.budget}g</span></div>}
+                            {bidError && <div className="text-xs text-red-400 text-center">{bidError}</div>}
+                          </div>
+                        );
+                      })()}
+                    </motion.div>
+                  ) : (
+                    <div className="flex flex-col items-center gap-3 py-8">
+                      <AuctionGavel show={true} />
+                      <p className="text-gray-500 text-sm">Waiting for next player...</p>
+                    </div>
+                  )}
+                </div>
+                {/* Player detail */}
+                {currentPlayer && (
+                  <div className="flex-1 overflow-y-auto custom-scrollbar px-6 py-4">
+                    <motion.div key={`info-${currentPlayer.id}`} initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.15 }} className="flex flex-col items-center gap-3 max-w-sm mx-auto">
+                      <div className="flex gap-3 w-full">
+                        <div className="flex-1 rounded-xl bg-black/40 border border-white/8 p-3 text-center">
+                          <div className="text-[10px] text-gray-500 mb-2 tracking-wider">CURRENT MMR</div>
+                          {currentPlayer.currentMedalLabel && <img src={`/medals/${currentPlayer.currentMedalLabel.replace(' ', '_')}.png`} alt={currentPlayer.currentMedalLabel} className="w-8 h-8 object-contain mx-auto mb-1" onError={e => (e.currentTarget.style.display = 'none')} />}
+                          <div className="text-xl font-black text-white">{currentPlayer.currentMMR || 'N/A'}</div>
+                        </div>
+                        <div className="flex-1 rounded-xl bg-black/40 border border-white/8 p-3 text-center">
+                          <div className="text-[10px] text-gray-500 mb-2 tracking-wider">PEAK MMR</div>
+                          {currentPlayer.peakMedalLabel && <img src={`/medals/${currentPlayer.peakMedalLabel.replace(' ', '_')}.png`} alt={currentPlayer.peakMedalLabel} className="w-8 h-8 object-contain mx-auto mb-1" onError={e => (e.currentTarget.style.display = 'none')} />}
+                          <div className="text-xl font-black text-white">{currentPlayer.peakMMR || 'N/A'}</div>
+                        </div>
+                      </div>
+                      {currentPlayer.seasonBadges?.length > 0 && (
+                        <div className="flex gap-1.5 flex-wrap justify-center">
+                          {currentPlayer.seasonBadges.map((b: any, i: number) => {
+                            const n = typeof b === 'string' ? parseInt(b.replace('s', '')) : b;
+                            const sc: Record<number, string> = { 1: 'from-cyan-400 to-indigo-600', 2: 'from-emerald-400 to-teal-600', 3: 'from-fuchsia-400 to-violet-600', 4: 'from-rose-400 to-red-600', 5: 'from-amber-400 to-yellow-600' };
+                            return <div key={i} className={`w-6 h-6 rounded-full bg-gradient-to-br ${sc[n] || sc[1]} flex items-center justify-center`}><span className="text-white text-[9px] font-bold">S{n}</span></div>;
+                          })}
+                        </div>
+                      )}
+                      {currentPlayer.hasWonCup && (
+                        <span className="text-xs px-3 py-1.5 rounded-full bg-yellow-500/10 border border-yellow-500/25 text-yellow-300">
+                          {currentPlayer.cupRank === 'gold' ? '🏆' : currentPlayer.cupRank === 'silver' ? '🥈' : '🥉'} Season {currentPlayer.cupSeason} Champion
+                        </span>
+                      )}
+                      {currentPlayer.bio && (
+                        <div className="w-full rounded-xl bg-black/30 border border-white/8 p-3">
+                          <div className="text-[10px] text-gray-500 mb-1.5 tracking-wider">NOTES</div>
+                          <p className="text-xs text-gray-300 leading-relaxed">{currentPlayer.bio}</p>
+                        </div>
+                      )}
+                    </motion.div>
+                  </div>
+                )}
+              </div>
+            )}
+          </div>
+
+          {/* ═══ RIGHT: Chat ═══ */}
+          <div className="flex flex-col border-l border-white/5 overflow-hidden bg-black/20">
+            <div className="flex-shrink-0 flex items-center justify-between px-3 py-2.5 border-b border-white/5 bg-black/30">
+              <span className="text-sm font-bold text-gray-300 tracking-wide">CHAT</span>
+              <span className="text-xs text-yellow-400 font-mono font-bold">{soldPlayers.length} sold</span>
+            </div>
+            <div className="flex-1 overflow-y-auto custom-scrollbar p-2 flex flex-col gap-1.5 min-h-0">
+              {chatMessages.length === 0
+                ? <p className="text-center text-xs text-gray-600 py-6">No messages yet</p>
+                : chatMessages.map((msg, i) => {
+                  const isSys = msg.sender_id === 'system';
+                  return (
+                    <div key={msg.id || i} className={`rounded-lg p-2.5 border ${isSys ? 'bg-yellow-500/8 border-yellow-500/15' : 'bg-white/3 border-white/5'}`}>
+                      <div className="flex items-center gap-1.5 mb-1">
+                        <span className={`text-xs font-bold ${isSys ? 'text-yellow-400' : 'text-gray-400'}`}>{msg.sender_name}</span>
+                        {msg.sender_team && <span className="text-[10px] text-gray-600 px-1.5 py-0.5 bg-white/5 rounded">{msg.sender_team}</span>}
+                      </div>
+                      <p className={`text-xs leading-relaxed break-words ${isSys ? 'text-yellow-300/80' : 'text-gray-300'}`}>{msg.message}</p>
+                    </div>
+                  );
+                })}
+            </div>
+            {(isAdmin || isCaptain) && (
+              <div className="flex-shrink-0 flex gap-2 p-2 border-t border-white/5">
+                <input type="text" value={chatInput} onChange={e => setChatInput(e.target.value)} onKeyDown={e => e.key === 'Enter' && chatInput.trim() && handleSendMessage()} placeholder="Message..."
+                  className="flex-1 px-3 py-1.5 text-xs bg-white/5 border border-white/10 rounded-lg text-white placeholder-gray-600 outline-none focus:border-white/20 transition-colors" />
+                <button onClick={handleSendMessage} disabled={!chatInput.trim()}
+                  className="px-3 py-1.5 text-sm font-bold rounded-lg bg-yellow-500/15 border border-yellow-500/25 text-yellow-400 hover:bg-yellow-500/25 transition-all disabled:opacity-30 disabled:cursor-not-allowed">
+                  →
+                </button>
+              </div>
+            )}
+          </div>
+
+        </div>{/* end grid */}
+      </div>{/* end fixed layout */}
+
+      {/* ── ADMIN PANEL (slide-in from right) ── */}
+      {isAdmin && (
+        <>
+          <button onClick={() => { setAdminPanelOpen(o => !o); if (!adminPanelOpen) loadAdminPool(); }}
+            className="fixed right-0 top-1/2 -translate-y-1/2 z-50 flex flex-col items-center gap-1 px-1.5 py-3 bg-black/80 backdrop-blur-sm border border-yellow-500/40 border-r-0 rounded-l-lg text-yellow-400 cursor-pointer hover:bg-black/90 transition-all"
+            style={{ right: adminPanelOpen ? 300 : 0, transition: 'right 0.25s' }}>
+            {adminPanelOpen ? <ChevronDown className="w-3 h-3 rotate-90" /> : <ChevronUp className="w-3 h-3 rotate-90" />}
+            <span className="text-[9px] font-black tracking-widest" style={{ writingMode: 'vertical-rl' }}>ADMIN</span>
+          </button>
+          <AnimatePresence>
+            {adminPanelOpen && (
+              <motion.div initial={{ x: 300 }} animate={{ x: 0 }} exit={{ x: 300 }} transition={{ type: 'tween', duration: 0.25 }}
+                className="fixed right-0 top-0 bottom-0 w-[300px] z-40 bg-[rgba(5,7,10,0.98)] backdrop-blur-xl border-l border-yellow-500/20 flex flex-col"
+                style={{ paddingTop: '80px' }}>
+                <div className="flex-1 overflow-y-auto custom-scrollbar p-4 flex flex-col gap-4">
+                  {/* Header */}
+                  <div className="flex items-center gap-2 pb-3 border-b border-white/8">
+                    <Gavel className="w-4 h-4 text-yellow-400" />
+                    <span className="text-base font-black text-yellow-400 tracking-wider">ADMIN CONTROLS</span>
+                    <span className={`ml-auto text-xs px-2 py-0.5 rounded-full font-semibold border ${status === 'live' ? 'bg-emerald-500/10 border-emerald-500/30 text-emerald-400' : status === 'paused' ? 'bg-yellow-500/10 border-yellow-500/30 text-yellow-400' : 'bg-gray-500/10 border-gray-500/20 text-gray-500'}`}>
+                      {status.toUpperCase()}
+                    </span>
+                  </div>
+                  {adminError && <div className="px-3 py-2 rounded-lg bg-red-500/10 border border-red-500/30 text-xs text-red-400">{adminError}</div>}
+                  {/* State controls */}
+                  <div className="flex flex-col gap-2">
+                    <span className="text-[10px] text-gray-600 font-bold tracking-widest">AUCTION STATE</span>
+                    {status === 'not-started' && (
+                      <button onClick={handleAdminStart} disabled={adminLoading} className="flex items-center justify-center gap-2 py-2.5 rounded-xl bg-emerald-500/15 border border-emerald-500/30 text-emerald-400 text-sm font-bold hover:bg-emerald-500/25 transition-all disabled:opacity-50">
+                        {adminLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Play className="w-4 h-4" />} START AUCTION
+                      </button>
+                    )}
+                    {status === 'live' && (
+                      <div className="grid grid-cols-2 gap-2">
+                        <button onClick={handleAdminPause} disabled={adminLoading} className="flex items-center justify-center gap-1.5 py-2 rounded-xl bg-yellow-500/15 border border-yellow-500/30 text-yellow-400 text-sm font-bold hover:bg-yellow-500/25 transition-all disabled:opacity-50">
+                          {adminLoading ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Pause className="w-3.5 h-3.5" />} PAUSE
+                        </button>
+                        <button onClick={handleAdminStop} disabled={adminLoading} className="flex items-center justify-center gap-1.5 py-2 rounded-xl bg-red-500/15 border border-red-500/30 text-red-400 text-sm font-bold hover:bg-red-500/25 transition-all disabled:opacity-50">
+                          {adminLoading ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Square className="w-3.5 h-3.5" />} STOP
+                        </button>
+                      </div>
+                    )}
+                    {status === 'paused' && (
+                      <div className="grid grid-cols-2 gap-2">
+                        <button onClick={handleAdminResume} disabled={adminLoading} className="flex items-center justify-center gap-1.5 py-2 rounded-xl bg-emerald-500/15 border border-emerald-500/30 text-emerald-400 text-sm font-bold hover:bg-emerald-500/25 transition-all disabled:opacity-50">
+                          {adminLoading ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Play className="w-3.5 h-3.5" />} RESUME
+                        </button>
+                        <button onClick={handleAdminStop} disabled={adminLoading} className="flex items-center justify-center gap-1.5 py-2 rounded-xl bg-red-500/15 border border-red-500/30 text-red-400 text-sm font-bold hover:bg-red-500/25 transition-all disabled:opacity-50">
+                          {adminLoading ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Square className="w-3.5 h-3.5" />} STOP
+                        </button>
+                      </div>
+                    )}
+                    {status === 'completed' && (
+                      <button onClick={handleAdminReset} disabled={adminLoading} className="flex items-center justify-center gap-2 py-2.5 rounded-xl bg-blue-500/15 border border-blue-500/30 text-blue-400 text-sm font-bold hover:bg-blue-500/25 transition-all disabled:opacity-50">
+                        {adminLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : <RotateCcw className="w-4 h-4" />} RESET
+                      </button>
+                    )}
+                  </div>
+                  {/* Next player */}
+                  {(status === 'live' || status === 'paused') && (
+                    <div className="flex flex-col gap-3 pt-3 border-t border-white/8">
+                      <span className="text-[10px] text-gray-600 font-bold tracking-widest">NEXT PLAYER</span>
+                      {currentPlayer && (
+                        <div className="flex items-center gap-2 px-3 py-2 rounded-lg bg-yellow-500/8 border border-yellow-500/15">
+                          <span className="text-[10px] text-yellow-500 font-bold">ON BLOCK:</span>
+                          <span className="text-sm font-bold text-white truncate">{currentPlayer.nickname}</span>
+                        </div>
+                      )}
+                      <div className="flex gap-1">
+                        {(['all', 'core', 'support'] as const).map(f => (
+                          <button key={f} onClick={() => setAdminPoolFilter(f)}
+                            className={`flex-1 py-1 rounded-lg text-xs font-bold transition-all ${adminPoolFilter === f ? (f === 'core' ? 'bg-blue-500/20 border border-blue-500/40 text-blue-400' : f === 'support' ? 'bg-emerald-500/20 border border-emerald-500/40 text-emerald-400' : 'bg-yellow-500/15 border border-yellow-500/30 text-yellow-400') : 'bg-white/3 border border-white/8 text-gray-500 hover:text-gray-300'}`}>
+                            {f === 'all' ? 'ALL' : f === 'core' ? 'CORE' : 'SUPP'}
+                          </button>
+                        ))}
+                      </div>
+                      <select value={adminSelectedPlayer} onChange={e => setAdminSelectedPlayer(e.target.value)}
+                        className="w-full px-3 py-2 text-xs bg-black/50 border border-white/10 rounded-lg text-white outline-none focus:border-white/20">
+                        <option value="">— Select player —</option>
+                        {adminPoolPlayers.filter(p => adminPoolFilter === 'all' || p.player_type === adminPoolFilter).map(p => (
+                          <option key={p.id} value={p.id}>[{p.player_type === 'core' ? 'C' : 'S'}] {p.player_data?.nickname || 'Unknown'} — {p.player_data?.currentMMR || '?'} MMR — {p.base_price || 0}g</option>
+                        ))}
+                      </select>
+                      <button onClick={handleAdminSetPlayer} disabled={adminLoading || !adminSelectedPlayer}
+                        className="flex items-center justify-center gap-2 py-2.5 rounded-xl bg-yellow-500/15 border border-yellow-500/30 text-yellow-400 text-sm font-bold hover:bg-yellow-500/25 transition-all disabled:opacity-40 disabled:cursor-not-allowed">
+                        {adminLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : <ArrowRight className="w-4 h-4" />} PUT ON BLOCK
+                      </button>
+                      {adminPoolPlayers.filter(p => adminPoolFilter === 'all' || p.player_type === adminPoolFilter).length === 0 && (
+                        <p className="text-xs text-gray-600 text-center">No players in pool</p>
+                      )}
+                    </div>
+                  )}
+                  {/* Stats */}
+                  <div className="grid grid-cols-3 gap-2 pt-3 border-t border-white/8">
+                    <div className="rounded-xl bg-blue-500/8 border border-blue-500/15 p-2 text-center">
+                      <div className="text-lg font-black text-blue-400">{adminPoolPlayers.filter(p => p.player_type === 'core').length}</div>
+                      <div className="text-[9px] text-gray-600 font-bold tracking-wider">CORE</div>
+                    </div>
+                    <div className="rounded-xl bg-emerald-500/8 border border-emerald-500/15 p-2 text-center">
+                      <div className="text-lg font-black text-emerald-400">{adminPoolPlayers.filter(p => p.player_type === 'support').length}</div>
+                      <div className="text-[9px] text-gray-600 font-bold tracking-wider">SUPP</div>
+                    </div>
+                    <div className="rounded-xl bg-yellow-500/8 border border-yellow-500/15 p-2 text-center">
+                      <div className="text-lg font-black text-yellow-400">{soldPlayers.length}</div>
+                      <div className="text-[9px] text-gray-600 font-bold tracking-wider">SOLD</div>
+                    </div>
+                  </div>
+                  <button onClick={loadAdminPool} disabled={adminLoading} className="py-1.5 rounded-lg bg-white/3 border border-white/8 text-xs text-gray-500 hover:text-gray-300 hover:bg-white/5 transition-all disabled:opacity-50">
+                    ↻ Refresh Pool
+                  </button>
+                </div>
+              </motion.div>
+            )}
+          </AnimatePresence>
+        </>
+      )}
+
+      {/* ── SUCCESS MODAL ── */}
       <AnimatePresence>
         {showSuccessModal && (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
+          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
             className="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4"
-            onClick={() => setShowSuccessModal(false)}
-          >
-            <motion.div
-              initial={{ scale: 0.9, opacity: 0 }}
-              animate={{ scale: 1, opacity: 1 }}
-              exit={{ scale: 0.9, opacity: 0 }}
-              className="bg-gradient-to-br from-green-900/90 to-emerald-900/90 rounded-xl p-6 max-w-md w-full border border-green-500/40"
-              onClick={(e) => e.stopPropagation()}
-            >
+            onClick={() => setShowSuccessModal(false)}>
+            <motion.div initial={{ scale: 0.9, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} exit={{ scale: 0.9, opacity: 0 }}
+              className="rounded-2xl p-6 max-w-sm w-full bg-gradient-to-br from-gray-900/95 to-black/95 border border-yellow-500/20 shadow-2xl"
+              onClick={e => e.stopPropagation()}>
               <div className="text-center">
-                <div className="text-6xl mb-4">✅</div>
-                <h3 className="text-2xl font-bold text-white mb-4">Success!</h3>
-                <p className="text-gray-300 text-sm mb-6">
-                  {successMessage}
-                </p>
-                <button
-                  onClick={() => setShowSuccessModal(false)}
-                  className="px-6 py-2 bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-500 hover:to-emerald-500 text-white font-semibold rounded-lg transition-all duration-300"
-                >
+                <div className="text-4xl mb-3">✅</div>
+                <h3 className="text-lg font-black text-white mb-2">Player Sold!</h3>
+                <p className="text-gray-400 text-sm mb-5">{successMessage}</p>
+                <button onClick={() => setShowSuccessModal(false)}
+                  className="px-6 py-2 rounded-full bg-yellow-500/15 border border-yellow-500/30 text-yellow-400 text-sm font-bold hover:bg-yellow-500/25 transition-all cursor-pointer">
                   Continue
                 </button>
               </div>
@@ -1729,237 +880,98 @@ export default function Auction() {
         )}
       </AnimatePresence>
 
-      {/* Player Pool Modal */}
+      {/* ── PLAYER POOL MODAL ── */}
       <AnimatePresence>
         {showPlayerPoolModal && (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
+          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
             className="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4"
-            onClick={() => setShowPlayerPoolModal(false)}
-          >
-            <motion.div
-              initial={{ scale: 0.9, opacity: 0 }}
-              animate={{ scale: 1, opacity: 1 }}
-              exit={{ scale: 0.9, opacity: 0 }}
-              className="bg-gradient-to-br from-gray-900/95 to-gray-800/95 rounded-xl p-6 max-w-6xl w-full max-h-[90vh] border border-cyan-500/40 overflow-hidden flex flex-col"
-              onClick={(e) => e.stopPropagation()}
-            >
+            onClick={() => setShowPlayerPoolModal(false)}>
+            <motion.div initial={{ scale: 0.9, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} exit={{ scale: 0.9, opacity: 0 }}
+              className="rounded-2xl p-6 max-w-5xl w-full max-h-[85vh] bg-gradient-to-br from-gray-900/98 to-black/98 border border-white/10 shadow-2xl flex flex-col"
+              onClick={e => e.stopPropagation()}>
               <div className="flex items-center justify-between mb-4">
-                <div className="flex items-center gap-4">
-                  <h3 className="text-2xl font-bold text-white flex items-center gap-2">
-                    <svg className="w-6 h-6 text-cyan-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
-                    </svg>
-                    {playerPoolType === 'core' ? 'Core' : 'Support'} Player Pool
-                  </h3>
-                  
-                  {/* Tabs */}
+                <div className="flex items-center gap-3">
+                  <h3 className="text-xl font-black text-white">Player Pool</h3>
                   <div className="flex gap-2">
-                    <button
-                      onClick={() => setPlayerPoolTab('available')}
-                      className={`px-4 py-2 rounded-lg text-sm font-semibold transition-all ${
-                        playerPoolTab === 'available'
-                          ? 'bg-cyan-600 text-white'
-                          : 'bg-gray-700 text-gray-300 hover:bg-gray-600'
-                      }`}
-                    >
+                    <button onClick={() => setPlayerPoolTab('available')} className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${playerPoolTab === 'available' ? 'bg-blue-500/20 border border-blue-500/40 text-blue-400' : 'bg-white/5 border border-white/10 text-gray-400 hover:text-white'}`}>
                       Available ({allPlayers.length})
                     </button>
-                    <button
-                      onClick={() => setPlayerPoolTab('sold')}
-                      className={`px-4 py-2 rounded-lg text-sm font-semibold transition-all ${
-                        playerPoolTab === 'sold'
-                          ? 'bg-green-600 text-white'
-                          : 'bg-gray-700 text-gray-300 hover:bg-gray-600'
-                      }`}
-                    >
+                    <button onClick={() => setPlayerPoolTab('sold')} className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${playerPoolTab === 'sold' ? 'bg-emerald-500/20 border border-emerald-500/40 text-emerald-400' : 'bg-white/5 border border-white/10 text-gray-400 hover:text-white'}`}>
                       Sold ({soldPlayersInPool.length})
                     </button>
                   </div>
+                  <div className="flex gap-1.5 ml-2">
+                    {(['all', 'core', 'support'] as const).map(t => (
+                      <button key={t} onClick={async () => { setPlayerPoolType(t === 'all' ? 'core' : t); await loadAllPlayers(t === 'all' ? undefined : t); await loadSoldPlayersInPool(t === 'all' ? undefined : t); }}
+                        className={`px-2.5 py-1 rounded-lg text-xs font-bold transition-all ${
+                          (t === 'all' && playerPoolType === 'core' && allPlayers.some(p => p._poolType === 'support')) || (t !== 'all' && playerPoolType === t)
+                            ? (t === 'core' ? 'bg-blue-500/20 border border-blue-500/40 text-blue-400' : t === 'support' ? 'bg-emerald-500/20 border border-emerald-500/40 text-emerald-400' : 'bg-yellow-500/15 border border-yellow-500/30 text-yellow-400')
+                            : 'bg-white/5 border border-white/10 text-gray-500 hover:text-gray-300'
+                        }`}>
+                        {t === 'all' ? 'ALL' : t === 'core' ? 'CORE' : 'SUPP'}
+                      </button>
+                    ))}
+                  </div>
                 </div>
-                <button
-                  onClick={() => setShowPlayerPoolModal(false)}
-                  className="text-gray-400 hover:text-white transition-colors"
-                >
-                  <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                  </svg>
+                <button onClick={() => setShowPlayerPoolModal(false)} className="text-gray-500 hover:text-white transition-colors">
+                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg>
                 </button>
               </div>
-              
-              <div className="overflow-auto flex-1">
+              <div className="overflow-auto flex-1 custom-scrollbar">
                 {playerPoolTab === 'available' ? (
-                  /* Available Players Table */
                   <table className="w-full text-sm">
-                  <thead className="sticky top-0 bg-gradient-to-r from-cyan-900/80 to-blue-900/80 backdrop-blur-sm z-10">
-                    <tr className="border-b-2 border-cyan-500/30">
-                      <th className="text-left py-3 px-3 text-cyan-300 font-bold">#</th>
-                      <th className="text-left py-3 px-3 text-cyan-300 font-bold">Player Name</th>
-                      <th className="text-center py-3 px-3 text-purple-300 font-bold">Peak MMR</th>
-                      <th className="text-center py-3 px-3 text-cyan-300 font-bold">Current MMR</th>
-                      <th className="text-center py-3 px-3 text-yellow-300 font-bold">Roles</th>
-                      <th className="text-center py-3 px-3 text-green-300 font-bold">Ping</th>
-                      <th className="text-center py-3 px-3 text-red-300 font-bold">Dotabuff</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {allPlayers.map((player, index) => (
-                      <tr 
-                        key={player.id || index}
-                        className="border-b border-gray-700/50 hover:bg-cyan-500/10 transition-colors"
-                      >
-                        <td className="py-3 px-3 text-gray-400 font-semibold">{index + 1}</td>
-                        <td className="py-3 px-3">
-                          <div className="flex items-center gap-2">
-                            <Avatar
-                              src={player.avatarUrl}
-                              alt={player.nickname}
-                              name={player.nickname}
-                              size="sm"
-                              className="border border-cyan-500/50"
-                            />
-                            <span className="text-white font-semibold">
-                              {player.nickname}
-                            </span>
-                          </div>
-                        </td>
-                        <td className="py-3 px-3 text-center">
-                          <span className="text-purple-300 font-bold">
-                            {player.peakMMR || 'N/A'}
-                          </span>
-                        </td>
-                        <td className="py-3 px-3 text-center">
-                          <span className="text-cyan-300 font-bold">
-                            {player.currentMMR || 'N/A'}
-                          </span>
-                        </td>
-                        <td className="py-3 px-3">
-                          <div className="flex items-center justify-center gap-1">
-                            {player.roles && player.roles.length > 0 ? (
-                              player.roles.map((role: any, idx: number) => (
-                                <img
-                                  key={idx}
-                                  src={role.iconSrc}
-                                  alt={role.label}
-                                  title={role.label}
-                                  className="w-5 h-5 object-contain"
-                                />
-                              ))
-                            ) : (
-                              <span className="text-gray-500 text-xs">N/A</span>
-                            )}
-                          </div>
-                        </td>
-                        <td className="py-3 px-3 text-center">
-                          <span className="text-green-300 font-semibold">
-                            {player.pingRange || 'N/A'}
-                          </span>
-                        </td>
-                        <td className="py-3 px-3 text-center">
-                          {player.dotabuffUrl ? (
-                            <a
-                              href={player.dotabuffUrl}
-                              target="_blank"
-                              rel="noopener noreferrer"
-                              className="inline-flex items-center justify-center w-8 h-8 bg-red-600/90 hover:bg-red-600 border border-red-500 rounded-md transition-all duration-300 hover:scale-110"
-                              title="View Dotabuff Profile"
-                              onClick={(e) => e.stopPropagation()}
-                            >
-                              <img 
-                                src="/icons/dotabuff.png" 
-                                alt="Dotabuff" 
-                                className="w-5 h-5"
-                              />
-                            </a>
-                          ) : (
-                            <span className="text-gray-500 text-xs">N/A</span>
-                          )}
-                        </td>
+                    <thead className="sticky top-0 bg-gray-900/90 backdrop-blur-sm">
+                      <tr className="border-b border-white/10">
+                        <th className="text-left py-2.5 px-3 text-xs text-gray-500 font-bold tracking-wider">#</th>
+                        <th className="text-left py-2.5 px-3 text-xs text-gray-500 font-bold tracking-wider">PLAYER</th>
+                        <th className="text-center py-2.5 px-3 text-xs text-gray-500 font-bold tracking-wider">PEAK</th>
+                        <th className="text-center py-2.5 px-3 text-xs text-gray-500 font-bold tracking-wider">CURRENT</th>
+                        <th className="text-center py-2.5 px-3 text-xs text-gray-500 font-bold tracking-wider">ROLES</th>
+                        <th className="text-center py-2.5 px-3 text-xs text-gray-500 font-bold tracking-wider">PING</th>
+                        <th className="text-center py-2.5 px-3 text-xs text-gray-500 font-bold tracking-wider">DB</th>
                       </tr>
-                    ))}
-                  </tbody>
-                </table>
+                    </thead>
+                    <tbody>
+                      {allPlayers.map((player, idx) => (
+                        <tr key={player.id || idx} className="border-b border-white/5 hover:bg-white/3 transition-colors">
+                          <td className="py-2.5 px-3 text-gray-500 text-xs">{idx + 1}</td>
+                          <td className="py-2.5 px-3"><div className="flex items-center gap-2"><Avatar src={player.avatarUrl} alt={player.nickname} name={player.nickname} size="sm" className="border border-white/10" /><span className="text-white font-semibold text-sm">{player.nickname}</span></div></td>
+                          <td className="py-2.5 px-3 text-center"><span className="text-purple-400 font-bold text-sm">{player.peakMMR || 'N/A'}</span></td>
+                          <td className="py-2.5 px-3 text-center"><span className="text-blue-400 font-bold text-sm">{player.currentMMR || 'N/A'}</span></td>
+                          <td className="py-2.5 px-3"><div className="flex items-center justify-center gap-1">{player.roles?.length > 0 ? player.roles.map((r: any, i: number) => <img key={i} src={r.iconSrc} alt={r.label} title={r.label} className="w-4 h-4 object-contain" />) : <span className="text-gray-600 text-xs">—</span>}</div></td>
+                          <td className="py-2.5 px-3 text-center"><span className="text-emerald-400 text-sm">{player.pingRange || '—'}</span></td>
+                          <td className="py-2.5 px-3 text-center">{player.dotabuffUrl ? <a href={player.dotabuffUrl} target="_blank" rel="noopener noreferrer" className="inline-flex items-center justify-center w-7 h-7 bg-red-900/40 hover:bg-red-900/60 border border-red-500/30 rounded-lg transition-all" onClick={e => e.stopPropagation()}><img src="/icons/dotabuff.png" alt="DB" className="w-4 h-4" /></a> : <span className="text-gray-600 text-xs">—</span>}</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
                 ) : (
-                  /* Sold Players Table */
                   <table className="w-full text-sm">
-                  <thead className="sticky top-0 bg-gradient-to-r from-green-900/80 to-emerald-900/80 backdrop-blur-sm z-10">
-                    <tr className="border-b-2 border-green-500/30">
-                      <th className="text-left py-3 px-3 text-green-300 font-bold">#</th>
-                      <th className="text-left py-3 px-3 text-green-300 font-bold">Player Name</th>
-                      <th className="text-center py-3 px-3 text-purple-300 font-bold">Peak MMR</th>
-                      <th className="text-center py-3 px-3 text-cyan-300 font-bold">Current MMR</th>
-                      <th className="text-center py-3 px-3 text-yellow-300 font-bold">Sold To</th>
-                      <th className="text-center py-3 px-3 text-amber-300 font-bold">Price</th>
-                      <th className="text-center py-3 px-3 text-red-300 font-bold">Dotabuff</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {soldPlayersInPool.map((player, index) => (
-                      <tr 
-                        key={player.id || index}
-                        className="border-b border-gray-700/50 hover:bg-green-500/10 transition-colors"
-                      >
-                        <td className="py-3 px-3 text-gray-400 font-semibold">{index + 1}</td>
-                        <td className="py-3 px-3">
-                          <div className="flex items-center gap-2">
-                            <Avatar
-                              src={player.avatarUrl}
-                              alt={player.nickname}
-                              name={player.nickname}
-                              size="sm"
-                              className="border border-green-500/50"
-                            />
-                            <span className="text-white font-semibold">
-                              {player.nickname}
-                            </span>
-                          </div>
-                        </td>
-                        <td className="py-3 px-3 text-center">
-                          <span className="text-purple-300 font-bold">
-                            {player.peakMMR || 'N/A'}
-                          </span>
-                        </td>
-                        <td className="py-3 px-3 text-center">
-                          <span className="text-cyan-300 font-bold">
-                            {player.currentMMR || 'N/A'}
-                          </span>
-                        </td>
-                        <td className="py-3 px-3 text-center">
-                          <span className="text-yellow-300 font-semibold">
-                            {player.soldTo || 'N/A'}
-                          </span>
-                        </td>
-                        <td className="py-3 px-3 text-center">
-                          <span className="text-amber-300 font-bold">
-                            🪙 {player.soldFor || 0}
-                          </span>
-                        </td>
-                        <td className="py-3 px-3 text-center">
-                          {player.dotabuffUrl ? (
-                            <a
-                              href={player.dotabuffUrl}
-                              target="_blank"
-                              rel="noopener noreferrer"
-                              className="inline-flex items-center justify-center w-8 h-8 bg-red-600/90 hover:bg-red-600 border border-red-500 rounded-md transition-all duration-300 hover:scale-110"
-                              title="View Dotabuff Profile"
-                              onClick={(e) => e.stopPropagation()}
-                            >
-                              <img 
-                                src="/icons/dotabuff.png" 
-                                alt="Dotabuff" 
-                                className="w-5 h-5"
-                              />
-                            </a>
-                          ) : (
-                            <span className="text-gray-500 text-xs">N/A</span>
-                          )}
-                        </td>
+                    <thead className="sticky top-0 bg-gray-900/90 backdrop-blur-sm">
+                      <tr className="border-b border-white/10">
+                        <th className="text-left py-2.5 px-3 text-xs text-gray-500 font-bold tracking-wider">#</th>
+                        <th className="text-left py-2.5 px-3 text-xs text-gray-500 font-bold tracking-wider">PLAYER</th>
+                        <th className="text-center py-2.5 px-3 text-xs text-gray-500 font-bold tracking-wider">PEAK</th>
+                        <th className="text-center py-2.5 px-3 text-xs text-gray-500 font-bold tracking-wider">CURRENT</th>
+                        <th className="text-center py-2.5 px-3 text-xs text-gray-500 font-bold tracking-wider">SOLD TO</th>
+                        <th className="text-center py-2.5 px-3 text-xs text-gray-500 font-bold tracking-wider">PRICE</th>
+                        <th className="text-center py-2.5 px-3 text-xs text-gray-500 font-bold tracking-wider">DB</th>
                       </tr>
-                    ))}
-                  </tbody>
-                </table>
+                    </thead>
+                    <tbody>
+                      {soldPlayersInPool.map((player, idx) => (
+                        <tr key={player.id || idx} className="border-b border-white/5 hover:bg-white/3 transition-colors">
+                          <td className="py-2.5 px-3 text-gray-500 text-xs">{idx + 1}</td>
+                          <td className="py-2.5 px-3"><div className="flex items-center gap-2"><Avatar src={player.avatarUrl} alt={player.nickname} name={player.nickname} size="sm" className="border border-white/10" /><span className="text-white font-semibold text-sm">{player.nickname}</span></div></td>
+                          <td className="py-2.5 px-3 text-center"><span className="text-purple-400 font-bold text-sm">{player.peakMMR || 'N/A'}</span></td>
+                          <td className="py-2.5 px-3 text-center"><span className="text-blue-400 font-bold text-sm">{player.currentMMR || 'N/A'}</span></td>
+                          <td className="py-2.5 px-3 text-center"><span className="text-yellow-400 font-semibold text-sm">{player.soldTo || '—'}</span></td>
+                          <td className="py-2.5 px-3 text-center"><span className="text-yellow-400 font-bold text-sm">🪙 {player.soldFor || 0}</span></td>
+                          <td className="py-2.5 px-3 text-center">{player.dotabuffUrl ? <a href={player.dotabuffUrl} target="_blank" rel="noopener noreferrer" className="inline-flex items-center justify-center w-7 h-7 bg-red-900/40 hover:bg-red-900/60 border border-red-500/30 rounded-lg transition-all" onClick={e => e.stopPropagation()}><img src="/icons/dotabuff.png" alt="DB" className="w-4 h-4" /></a> : <span className="text-gray-600 text-xs">—</span>}</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
                 )}
               </div>
             </motion.div>

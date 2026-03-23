@@ -1,118 +1,177 @@
-# The Roshan Rumble - Tournament Website
+# Supabase CLI
 
-A comprehensive Dota 2 tournament management platform built with React, TypeScript, and Supabase.
+[![Coverage Status](https://coveralls.io/repos/github/supabase/cli/badge.svg?branch=develop)](https://coveralls.io/github/supabase/cli?branch=develop) [![Bitbucket Pipelines](https://img.shields.io/bitbucket/pipelines/supabase-cli/setup-cli/master?style=flat-square&label=Bitbucket%20Canary)](https://bitbucket.org/supabase-cli/setup-cli/pipelines) [![Gitlab Pipeline Status](https://img.shields.io/gitlab/pipeline-status/sweatybridge%2Fsetup-cli?label=Gitlab%20Canary)
+](https://gitlab.com/sweatybridge/setup-cli/-/pipelines)
 
-## 🚀 Features
+[Supabase](https://supabase.io) is an open source Firebase alternative. We're building the features of Firebase using enterprise-grade open source tools.
 
-- **Player Registration & Management** - Complete player profile system with medals, roles, and stats
-- **Live Auction System** - Real-time player auction with bidding, team management, and budget tracking
-- **Admin Dashboard** - Comprehensive admin tools for tournament management
-- **Super Admin Panel** - Advanced system administration and user management
-- **Tournament Brackets** - Interactive bracket visualization for multiple seasons
-- **Team Management** - Team rosters, captain assignments, and player tracking
-- **Real-time Updates** - Live auction updates using Supabase real-time subscriptions
-- **Message System** - Player-to-admin messaging with recipient-specific routing
+This repository contains all the functionality for Supabase CLI.
 
-## 📁 Project Structure
+- [x] Running Supabase locally
+- [x] Managing database migrations
+- [x] Creating and deploying Supabase Functions
+- [x] Generating types directly from your database schema
+- [x] Making authenticated HTTP requests to [Management API](https://supabase.com/docs/reference/api/introduction)
 
-```
-TRR_Website/
-├── src/
-│   ├── components/      # React components
-│   │   ├── admin/      # Admin-specific components
-│   │   └── ui/         # Reusable UI components
-│   ├── data/           # Static data (players, admins, heroes)
-│   ├── hooks/          # Custom React hooks
-│   ├── pages/          # Page components
-│   ├── services/       # API and business logic services
-│   ├── types/          # TypeScript type definitions
-│   └── utils/          # Utility functions
-├── public/             # Static assets (images, audio)
-├── database/           # SQL migration and setup files
-├── tests/              # Test files
-└── [config files]      # Vite, TypeScript, Tailwind configs
+## Getting started
+
+### Install the CLI
+
+Available via [NPM](https://www.npmjs.com) as dev dependency. To install:
+
+```bash
+npm i supabase --save-dev
 ```
 
-## 🛠️ Tech Stack
+When installing with yarn 4, you need to disable experimental fetch with the following nodejs config.
 
-- **Frontend**: React 18 + TypeScript
-- **Styling**: Tailwind CSS
-- **Database**: Supabase (PostgreSQL)
-- **Real-time**: Supabase Realtime
-- **Build Tool**: Vite
-- **Animations**: Framer Motion
-- **Icons**: Lucide React
-- **Excel Export**: xlsx
+```
+NODE_OPTIONS=--no-experimental-fetch yarn add supabase
+```
 
-## 📦 Installation
+> **Note**
+For Bun versions below v1.0.17, you must add `supabase` as a [trusted dependency](https://bun.sh/guides/install/trusted) before running `bun add -D supabase`.
 
-1. Clone the repository
-2. Install dependencies:
-   ```bash
-   npm install
-   ```
+<details>
+  <summary><b>macOS</b></summary>
 
-3. Set up environment variables in `.env`:
-   ```
-   VITE_SUPABASE_URL=your_supabase_url
-   VITE_SUPABASE_ANON_KEY=your_supabase_anon_key
-   ```
+  Available via [Homebrew](https://brew.sh). To install:
 
-4. Run database setup scripts from `database/` folder in Supabase SQL Editor
+  ```sh
+  brew install supabase/tap/supabase
+  ```
 
-5. Start development server:
-   ```bash
-   npm run dev
-   ```
+  To install the beta release channel:
+  
+  ```sh
+  brew install supabase/tap/supabase-beta
+  brew link --overwrite supabase-beta
+  ```
+  
+  To upgrade:
 
-## 🗄️ Database Setup
+  ```sh
+  brew upgrade supabase
+  ```
+</details>
 
-See `database/README.md` for detailed SQL setup instructions.
+<details>
+  <summary><b>Windows</b></summary>
 
-## 👥 User Roles
+  Available via [Scoop](https://scoop.sh). To install:
 
-- **Players** - Register, view profiles, participate in auctions
-- **Captains** - Bid on players during auctions
-- **Mini Admins** - Limited administrative access
-- **Admins** - Full tournament management capabilities
-- **Super Admins** - System administration and user management
+  ```powershell
+  scoop bucket add supabase https://github.com/supabase/scoop-bucket.git
+  scoop install supabase
+  ```
 
-## 🎮 Key Features
+  To upgrade:
 
-### Auction System
-- Real-time bidding with live updates
-- Team budget management
-- Player assignment and reassignment
-- 5-player team limit enforcement
-- Auction history with Excel export
+  ```powershell
+  scoop update supabase
+  ```
+</details>
 
-### Admin Tools
-- Player ban/unban management
-- Captain assignment
-- Registration control
-- Profile update approvals
-- Message management
-- Admin account management
+<details>
+  <summary><b>Linux</b></summary>
 
-### Super Admin Features
-- Add/disable/enable admin accounts
-- Role management
-- System-wide settings
-- Activity logs
-- Database management
+  Available via [Homebrew](https://brew.sh) and Linux packages.
 
-## 🔐 Security
+  #### via Homebrew
 
-- Role-based access control
-- Protected routes
-- Session management
-- Disabled account checks
-- Supabase Row Level Security (RLS)
+  To install:
 
-## 📝 License
+  ```sh
+  brew install supabase/tap/supabase
+  ```
 
-© 2026 TRR ESPORTS - All Rights Reserved
+  To upgrade:
 
-## 🤝 Contributing
+  ```sh
+  brew upgrade supabase
+  ```
 
-This is a private tournament management system. For access or contributions, contact the development team.
+  #### via Linux packages
+
+  Linux packages are provided in [Releases](https://github.com/supabase/cli/releases). To install, download the `.apk`/`.deb`/`.rpm`/`.pkg.tar.zst` file depending on your package manager and run the respective commands.
+
+  ```sh
+  sudo apk add --allow-untrusted <...>.apk
+  ```
+
+  ```sh
+  sudo dpkg -i <...>.deb
+  ```
+
+  ```sh
+  sudo rpm -i <...>.rpm
+  ```
+
+  ```sh
+  sudo pacman -U <...>.pkg.tar.zst
+  ```
+</details>
+
+<details>
+  <summary><b>Other Platforms</b></summary>
+
+  You can also install the CLI via [go modules](https://go.dev/ref/mod#go-install) without the help of package managers.
+
+  ```sh
+  go install github.com/supabase/cli@latest
+  ```
+
+  Add a symlink to the binary in `$PATH` for easier access:
+
+  ```sh
+  ln -s "$(go env GOPATH)/bin/cli" /usr/bin/supabase
+  ```
+
+  This works on other non-standard Linux distros.
+</details>
+
+<details>
+  <summary><b>Community Maintained Packages</b></summary>
+
+  Available via [pkgx](https://pkgx.sh/). Package script [here](https://github.com/pkgxdev/pantry/blob/main/projects/supabase.com/cli/package.yml).
+  To install in your working directory:
+
+  ```bash
+  pkgx install supabase
+  ```
+
+  Available via [Nixpkgs](https://nixos.org/). Package script [here](https://github.com/NixOS/nixpkgs/blob/master/pkgs/development/tools/supabase-cli/default.nix).
+</details>
+
+### Run the CLI
+
+```bash
+supabase bootstrap
+```
+
+Or using npx:
+
+```bash
+npx supabase bootstrap
+```
+
+The bootstrap command will guide you through the process of setting up a Supabase project using one of the [starter](https://github.com/supabase-community/supabase-samples/blob/main/samples.json) templates.
+
+## Docs
+
+Command & config reference can be found [here](https://supabase.com/docs/reference/cli/about).
+
+## Breaking changes
+
+We follow semantic versioning for changes that directly impact CLI commands, flags, and configurations.
+
+However, due to dependencies on other service images, we cannot guarantee that schema migrations, seed.sql, and generated types will always work for the same CLI major version. If you need such guarantees, we encourage you to pin a specific version of CLI in package.json.
+
+## Developing
+
+To run from source:
+
+```sh
+# Go >= 1.22
+go run . help
+```

@@ -5,6 +5,7 @@ import * as React from "react";
 import { Menu, ScrollText, House, LogIn, User, Shield, ChevronDown, UserCircle } from "lucide-react";
 import { AnimatePresence, LayoutGroup, motion } from "framer-motion";
 import AuthService from "../../services/auth";
+import SteamAuthService from "../../services/steamAuth";
 
 export default function Navbar() {
   const { pathname } = useLocation();
@@ -25,25 +26,18 @@ export default function Navbar() {
   // Check auth status on mount and when pathname changes
   useEffect(() => {
     const checkAuth = () => {
-      const user = AuthService.getCurrentUser();
-      const loggedIn = AuthService.isSessionValid();
       const adminSession = AuthService.getCurrentAdminSession();
       
-      // Also check for super admin session
+      // Check for super admin session
       const superAdminSessionStr = localStorage.getItem('superAdminSession');
       let superAdminSession = null;
       if (superAdminSessionStr) {
-        try {
-          superAdminSession = JSON.parse(superAdminSessionStr);
-        } catch (e) {
-          // Invalid JSON
-        }
+        try { superAdminSession = JSON.parse(superAdminSessionStr); } catch (e) {}
       }
       
       const superAdmin = (adminSession && (adminSession.username === 'reyuk' || adminSession.username === 'nikhil')) ||
                         (superAdminSession && superAdminSession.authenticated);
       
-      // If super admin session exists, use it as current user
       if (superAdminSession && superAdminSession.authenticated) {
         setCurrentUser({
           type: 'admin',
@@ -55,8 +49,24 @@ export default function Navbar() {
         });
         setIsLoggedIn(true);
       } else {
-        setCurrentUser(user);
-        setIsLoggedIn(loggedIn);
+        // Check Steam session first, then fall back to password session
+        const steamSession = SteamAuthService.getSession();
+        if (steamSession) {
+          setCurrentUser({
+            type: 'player',
+            playerId: steamSession.playerId,
+            nickname: steamSession.nickname,
+            steamId: steamSession.steamId,
+            avatarUrl: steamSession.avatarUrl,
+            loginMethod: 'steam',
+          });
+          setIsLoggedIn(true);
+        } else {
+          const user = AuthService.getCurrentUser();
+          const loggedIn = AuthService.isSessionValid();
+          setCurrentUser(user);
+          setIsLoggedIn(loggedIn);
+        }
       }
       
       setIsSuperAdmin(superAdmin || false);
@@ -269,6 +279,12 @@ export default function Navbar() {
                 active={pathname.startsWith("/seasons")}
               /> */}
               <NavItem
+                to="/players"
+                icon={<User className="w-3.5 h-3.5 md:w-4 md:h-4 lg:w-[18px] lg:h-[18px]" />}
+                label="Players"
+                active={pathname.startsWith("/players")}
+              />
+              <NavItem
                 to="/auction"
                 icon={<svg className="w-3.5 h-3.5 md:w-4 md:h-4 lg:w-[18px] lg:h-[18px]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>}
                 label="Auction"
@@ -362,6 +378,7 @@ export default function Navbar() {
                           <button
                             onClick={() => {
                               AuthService.logout();
+                              SteamAuthService.clearSession();
                               // Also clear super admin session
                               localStorage.removeItem('superAdminSession');
                               setLoginDropdownOpen(false);
@@ -385,7 +402,7 @@ export default function Navbar() {
                             className="flex items-center gap-3 px-4 py-2.5 text-sm text-gray-200 hover:bg-white/5 transition-colors"
                           >
                             <User className="w-4 h-4 text-white" />
-                            <span>Players</span>
+                            <span>Player Login</span>
                           </Link>
                           <Link
                             to="/admin-login"
@@ -453,6 +470,13 @@ export default function Navbar() {
                     mobile
                   /> */}
                   <NavItem
+                    to="/players"
+                    icon={<User className="w-[18px] h-[18px]" />}
+                    label="Players"
+                    active={pathname.startsWith("/players")}
+                    mobile
+                  />
+                  <NavItem
                     to="/auction"
                     icon={<svg className="w-[18px] h-[18px]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>}
                     label="Auction"
@@ -496,6 +520,7 @@ export default function Navbar() {
                         <button
                           onClick={() => {
                             AuthService.logout();
+                            SteamAuthService.clearSession();
                             // Also clear super admin session
                             localStorage.removeItem('superAdminSession');
                             setMobileNavOpen(false);
@@ -520,7 +545,7 @@ export default function Navbar() {
                           className="flex items-center gap-3 px-3 py-2.5 text-sm text-gray-200 hover:bg-white/5 rounded-lg transition-colors"
                         >
                           <User className="w-[18px] h-[18px] text-white" />
-                          <span>Players</span>
+                          <span>Player Login</span>
                         </Link>
                         <Link
                           to="/admin-login"

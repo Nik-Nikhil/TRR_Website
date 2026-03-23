@@ -34,6 +34,14 @@ export default function AdminLogin() {
       try {
         const dbAdmins = await adminService.getAdmins();
         
+        // If no admins loaded from database, show error
+        if (!dbAdmins || dbAdmins.length === 0) {
+          console.error('No admins loaded from database');
+          setError('Unable to connect to database. Please check your internet connection and try again.');
+          setLoading(false);
+          return;
+        }
+        
         // Filter only active admins and map to AdminData format
         const activeAdmins = dbAdmins
           .filter(a => a.isActive)
@@ -90,7 +98,7 @@ export default function AdminLogin() {
         setAdminData(activeAdmins);
       } catch (err) {
         console.error('Failed to load admins:', err);
-        setError('Failed to load admin accounts');
+        setError('Failed to connect to database. Please check:\n1. Your internet connection\n2. Supabase project is active (not paused)\n3. Try refreshing the page');
       } finally {
         setLoading(false);
       }
@@ -211,6 +219,36 @@ export default function AdminLogin() {
                 <div className="text-center">
                   <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-purple-500 mx-auto mb-4"></div>
                   <p className="text-gray-400">Loading admin accounts...</p>
+                </div>
+              </div>
+            ) : error && adminData.length === 0 ? (
+              /* Error State */
+              <div className="flex justify-center items-center py-20">
+                <div className="max-w-md mx-auto text-center">
+                  <div className="bg-red-900/20 border border-red-500/30 rounded-xl p-8 backdrop-blur-sm">
+                    <div className="text-red-400 mb-4">
+                      <svg className="w-16 h-16 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                      </svg>
+                    </div>
+                    <h3 className="text-xl font-bold text-white mb-3">Connection Failed</h3>
+                    <p className="text-gray-300 text-sm mb-6 whitespace-pre-line">{error}</p>
+                    <button
+                      onClick={() => window.location.reload()}
+                      className="px-6 py-3 bg-gradient-to-r from-red-600 to-red-700 hover:from-red-500 hover:to-red-600 text-white font-semibold rounded-lg transition-all duration-300 shadow-lg"
+                    >
+                      Retry Connection
+                    </button>
+                    <div className="mt-6 pt-6 border-t border-gray-700">
+                      <p className="text-xs text-gray-400 mb-2">Troubleshooting:</p>
+                      <ul className="text-xs text-gray-500 text-left space-y-1">
+                        <li>• Check your internet connection</li>
+                        <li>• Verify Supabase project is active</li>
+                        <li>• Clear browser cache (Ctrl+Shift+R)</li>
+                        <li>• Try a different browser</li>
+                      </ul>
+                    </div>
+                  </div>
                 </div>
               </div>
             ) : !selectedAdmin ? (

@@ -53,6 +53,45 @@ interface QuickStat {
   change?: string;
 }
 
+function getSAInitials(name: string): string {
+  if (!name) return '??';
+  const words = name.trim().split(' ');
+  if (words.length >= 2) return (words[0][0] + words[1][0]).toUpperCase();
+  return name.slice(0, 2).toUpperCase();
+}
+
+function getSAColorFromName(name: string): string {
+  const colors = [
+    'from-blue-500 to-blue-600', 'from-purple-500 to-purple-600',
+    'from-pink-500 to-pink-600', 'from-red-500 to-red-600',
+    'from-orange-500 to-orange-600', 'from-yellow-500 to-yellow-600',
+    'from-green-500 to-green-600', 'from-teal-500 to-teal-600',
+    'from-cyan-500 to-cyan-600', 'from-indigo-500 to-indigo-600',
+  ];
+  let hash = 0;
+  for (let i = 0; i < name.length; i++) hash = name.charCodeAt(i) + ((hash << 5) - hash);
+  return colors[Math.abs(hash) % colors.length];
+}
+
+function PlayerAvatarSA({ avatarUrl, nickname }: { avatarUrl: string; nickname: string }) {
+  const [error, setError] = useState(false);
+  if (!avatarUrl || error) {
+    return (
+      <div className={`w-12 h-12 rounded-full bg-gradient-to-br ${getSAColorFromName(nickname)} flex items-center justify-center border-2 border-orange-500 mx-auto mb-2`}>
+        <span className="font-bold text-white text-sm">{getSAInitials(nickname)}</span>
+      </div>
+    );
+  }
+  return (
+    <img
+      src={avatarUrl}
+      alt={nickname}
+      className="w-12 h-12 rounded-full object-cover border-2 border-orange-500 mx-auto mb-2"
+      onError={() => setError(true)}
+    />
+  );
+}
+
 export default function SuperAdminDashboard() {
   const navigate = useNavigate();
   const location = useLocation();
@@ -985,15 +1024,8 @@ export default function SuperAdminDashboard() {
                       </span>
                     </div>
 
-                    <div className="text-center mb-4">
-                      <img 
-                        src={player.avatarUrl} 
-                        alt={player.nickname}
-                        className="w-12 h-12 rounded-full object-cover border-2 border-orange-500 mx-auto mb-2"
-                        onError={(e) => {
-                          e.currentTarget.src = "/avatars/default.jpg";
-                        }}
-                      />
+    <div className="text-center mb-4">
+                      <PlayerAvatarSA avatarUrl={player.avatarUrl} nickname={player.nickname} />
                       <h4 className="text-white font-bold text-sm truncate">{player.nickname}</h4>
                       {player.realName && (
                         <p className="text-orange-300/70 text-xs truncate">{player.realName}</p>

@@ -18,6 +18,7 @@ import { CaptainManagement } from '../components/admin/CaptainManagement';
 import { AdminSettings } from '../components/admin/AdminSettings';
 import { ProfileUpdateRequests } from '../components/admin/ProfileUpdateRequests';
 import { PlayerPoolManagement } from '../components/admin/PlayerPoolManagement';
+import { PlayerManagement } from '../components/admin/PlayerManagement';
 import { RegistrationRequests } from '../components/admin/RegistrationRequests';
 import { AdminManagement } from '../components/admin/AdminManagement';
 import { AuctionService } from '../services/auctionService';
@@ -887,7 +888,7 @@ export default function AdminDashboard() {
               {activeSection === 'messages' && renderMessages()}
               {activeSection === 'registration-requests' && <div className="p-8"><RegistrationRequests adminUsername={currentAdmin?.username || 'admin'} /></div>}
               {activeSection === 'profile-updates' && <div className="p-8"><ProfileUpdateRequests /></div>}
-              {activeSection === 'players' && <div className="p-8"><div className="bg-black/60 backdrop-blur-sm rounded-xl p-6 border border-blue-500/40 text-center"><p className="text-white">Player Management - Coming Soon</p></div></div>}
+              {activeSection === 'players' && <div className="p-8"><PlayerManagement /></div>}
               {activeSection === 'admin-management' && <AdminManagement />}
               {activeSection === 'captains' && renderCaptainManagement()}
               {activeSection === 'registration' && renderRegistrationControl()}
