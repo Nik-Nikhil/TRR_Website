@@ -54,9 +54,13 @@ export default function PlayerLogin() {
   const [searchResults, setSearchResults] = useState<any[]>([]);
 
   useEffect(() => {
+    console.log('🔵 PlayerLogin mount — checking existing session')
     if (SteamAuthService.isLoggedIn()) {
       const s = SteamAuthService.getSession();
+      console.log('✅ Already logged in, redirecting to:', s?.playerId)
       if (s) navigate(`/players/${s.playerId}`, { replace: true });
+    } else {
+      console.log('ℹ️ No session found, showing login page')
     }
   }, [navigate]);
 

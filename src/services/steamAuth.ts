@@ -20,6 +20,7 @@ export const SteamAuthService = {
    */
   initiateLogin() {
     const initUrl = `${SUPABASE_URL}/functions/v1/steam-auth/init`
+    console.log('🔵 Steam login init URL:', initUrl)
     window.location.href = initUrl
   },
 
