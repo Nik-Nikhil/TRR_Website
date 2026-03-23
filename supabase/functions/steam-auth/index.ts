@@ -95,7 +95,8 @@ Deno.serve(async (req: Request) => {
       return Response.redirect(`${SITE_URL}/steam-callback?session=${sessionData}`, 302)
     } catch (err) {
       console.error('Steam callback error:', err)
-      return redirectWithError('Internal error')
+      const msg = err instanceof Error ? err.message : String(err)
+      return redirectWithError(`Internal error: ${msg}`)
     }
   }
 
