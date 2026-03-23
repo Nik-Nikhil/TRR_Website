@@ -1,3 +1,8 @@
+# Supabase CLI binary — never commit this
+supabase.exe
+supabase_cli.tar.gz
+*.exe
+
 # Logs
 logs
 *.log
