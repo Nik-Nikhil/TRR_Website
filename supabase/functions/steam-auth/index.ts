@@ -39,8 +39,30 @@ Deno.serve(async (req: Request) => {
     return Response.redirect(`${STEAM_OPENID_URL}?${params}`, 302)
   }
 
-  // ── VERIFY: called by frontend after Steam redirects back ─────────
-  // Frontend receives OpenID params at /steam-callback, then POSTs them here
+  // ── UPSERT: GET request with steamId, no CORS preflight ──────────
+  if (action === 'upsert') {
+    const steamId = url.searchParams.get('steamId') ?? ''
+    console.log('[upsert] steamId=' + steamId)
+    if (!steamId || !/^\d{17}$/.test(steamId)) {
+      return json({ error: 'Invalid steamId: ' + steamId }, 400)
+    }
+    try {
+      const profile = await fetchSteamProfile(steamId)
+      if (!profile) return json({ error: 'Could not fetch Steam profile' }, 500)
+      if (!SERVICE_KEY) return json({ error: 'Missing service key' }, 500)
+      const { createClient } = await import('https://esm.sh/@supabase/supabase-js@2')
+      const supabase = createClient(PROJECT_URL, SERVICE_KEY)
+      const player = await upsertPlayer(supabase, steamId, profile)
+      if (!player) return json({ error: 'Database error' }, 500)
+      return json({ playerId: player.id, nickname: player.nickname, avatarUrl: player.avatar_url ?? '', isNewAccount: player.is_new })
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : String(err)
+      console.error('[upsert] ERROR: ' + msg)
+      return json({ error: 'Internal error: ' + msg }, 500)
+    }
+  }
+
+  // ── VERIFY: POST from frontend ────────────────────────────────────
   if (action === 'verify' && req.method === 'POST') {
     console.log('[verify] received')
     try {

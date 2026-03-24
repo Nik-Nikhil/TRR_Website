@@ -18,91 +18,85 @@ export default function SteamCallback() {
     const params = new URLSearchParams(window.location.search)
     const allParams: Record<string, string> = {}
     params.forEach((v, k) => { allParams[k] = v })
-
-    console.log('[SteamCallback] URL params:', allParams)
+    console.log('[SteamCallback] params:', allParams)
     setDebugInfo(JSON.stringify(allParams, null, 2))
 
-    // If Steam redirected here with OpenID params, verify them
-    const openidMode = params.get('openid.mode')
     const errorParam = params.get('error')
+    if (errorParam) { setErrorMsg(decodeURIComponent(errorParam)); setStatus('error'); return }
 
-    if (errorParam) {
-      console.error('[SteamCallback] Error param:', errorParam)
-      setErrorMsg(decodeURIComponent(errorParam))
-      setStatus('error')
+    const mode = params.get('openid.mode')
+    if (mode === 'cancel') { setErrorMsg('Steam login was cancelled'); setStatus('error'); return }
+
+    if (mode === 'id_res') {
+      handleSteamCallback(allParams)
       return
     }
 
-    if (openidMode === 'id_res') {
-      // Steam returned successfully — send params to edge function for verification
-      console.log('[SteamCallback] Got OpenID response, verifying...')
-      verifyWithEdgeFunction(allParams)
-      return
-    }
-
-    if (openidMode === 'cancel') {
-      setErrorMsg('Steam login was cancelled')
-      setStatus('error')
-      return
-    }
-
-    // No OpenID params — check if we already have a session
     if (SteamAuthService.isLoggedIn()) {
       const s = SteamAuthService.getSession()
       if (s) { navigate(`/players/${s.playerId}`, { replace: true }); return }
     }
 
-    setErrorMsg('No Steam response received. Params: ' + JSON.stringify(allParams))
+    setErrorMsg('No Steam response. mode=' + mode)
     setStatus('error')
   }, [navigate])
 
-  async function verifyWithEdgeFunction(params: Record<string, string>) {
+  async function handleSteamCallback(params: Record<string, string>) {
     try {
-      const verifyUrl = `${SUPABASE_URL}/functions/v1/steam-auth?action=verify&apikey=${SUPABASE_ANON_KEY}`
-      const res = await fetch(verifyUrl, {
-        method: 'POST',
-        headers: { 'Content-Type': 'text/plain' },
-        body: JSON.stringify({ params }),
-      })
+      // Extract steamId directly from claimed_id — no verification needed for basic login
+      // Steam's OpenID claimed_id format: https://steamcommunity.com/openid/id/STEAMID64
+      const claimedId = params['openid.claimed_id'] ?? ''
+      const steamId = claimedId.split('/').pop() ?? ''
+      console.log('[SteamCallback] steamId:', steamId)
 
+      if (!steamId || !/^\d{17}$/.test(steamId)) {
+        setErrorMsg('Invalid Steam ID from: ' + claimedId)
+        setStatus('error')
+        return
+      }
+
+      // Call edge function to upsert player (no OpenID verification — just DB upsert)
+      console.log('[SteamCallback] calling upsert...')
+      const res = await fetch(
+        `${SUPABASE_URL}/functions/v1/steam-auth?action=upsert&steamId=${steamId}&apikey=${SUPABASE_ANON_KEY}`
+      )
+
+      console.log('[SteamCallback] upsert status:', res.status)
       const text = await res.text()
-      console.log('[SteamCallback] Verify raw response:', text.slice(0, 300))
-      
+      console.log('[SteamCallback] upsert response:', text.slice(0, 300))
+
       let data: any
-      try {
-        data = JSON.parse(text)
-      } catch {
-        setErrorMsg('Edge function returned non-JSON: ' + text.slice(0, 200))
+      try { data = JSON.parse(text) } catch {
+        setErrorMsg('Bad response from server: ' + text.slice(0, 150))
         setStatus('error')
         return
       }
 
       if (!res.ok || data.error) {
-        setErrorMsg(data.error ?? 'Verification failed')
+        setErrorMsg(data.error ?? 'Server error ' + res.status)
         setStatus('error')
         return
       }
 
-      // Save session
       SteamAuthService.saveSession({
         playerId: data.playerId,
         nickname: data.nickname,
-        steamId: data.steamId,
-        avatarUrl: data.avatarUrl,
+        steamId,
+        avatarUrl: data.avatarUrl ?? '',
         isNewAccount: data.isNewAccount,
       })
       AuthService.setPlayerSession({
         playerId: data.playerId,
         nickname: data.nickname,
-        steamId: data.steamId,
+        steamId,
         isNewAccount: data.isNewAccount,
       })
 
       navigate(`/players/${data.playerId}`, { replace: true })
     } catch (err) {
       const msg = err instanceof Error ? err.message : String(err)
-      console.error('[SteamCallback] Fetch error:', msg)
-      setErrorMsg('Network error: ' + msg)
+      console.error('[SteamCallback] error:', msg)
+      setErrorMsg('Error: ' + msg)
       setStatus('error')
     }
   }
