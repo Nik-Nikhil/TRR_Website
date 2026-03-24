@@ -63,7 +63,8 @@ export default function Onboarding() {
         localStorage.setItem('playerSession', JSON.stringify({ ...s, nickname: nickname.trim() }))
       }
 
-      navigate(`/players/${playerId}`, { replace: true })
+      // Force navbar to refresh by reloading
+      window.location.href = `/players/${playerId}`
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Something went wrong')
     } finally { setLoading(false) }

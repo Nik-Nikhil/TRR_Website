@@ -4,7 +4,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { 
   Database, Users, Settings, LogOut, Clock, CheckCircle, 
   AlertTriangle, Shield, BarChart3, UserPlus,
-  Activity, Eye, EyeOff, Info, XCircle, TrendingUp, Zap, MessageSquare, Gavel, History
+  Activity, Eye, EyeOff, Info, XCircle, TrendingUp, Zap, MessageSquare, Gavel, History, Megaphone
 } from 'lucide-react';
 import { getPendingApprovals } from '../data/pendingApprovals';
 import { getAdminByUsername } from '../data/admins';
@@ -17,10 +17,12 @@ import { AuctionHistory } from '../components/admin/AuctionHistory';
 import { CaptainManagement } from '../components/admin/CaptainManagement';
 import { AdminSettings } from '../components/admin/AdminSettings';
 import { ProfileUpdateRequests } from '../components/admin/ProfileUpdateRequests';
+import { ProfileImageRequests } from '../components/admin/ProfileImageRequests';
 import { PlayerPoolManagement } from '../components/admin/PlayerPoolManagement';
 import { PlayerManagement } from '../components/admin/PlayerManagement';
 import { RegistrationRequests } from '../components/admin/RegistrationRequests';
 import { AdminManagement } from '../components/admin/AdminManagement';
+import AnnouncementManagement from '../components/admin/AnnouncementManagement';
 import { AuctionService } from '../services/auctionService';
 import messagingService from '../services/messagingService';
 import profileUpdateService from '../services/profileUpdateService';
@@ -221,9 +223,10 @@ export default function AdminDashboard() {
     { id: 'dashboard', label: 'Dashboard', icon: BarChart3, description: 'Overview & Analytics' },
     { id: 'messages', label: 'Messages', icon: MessageSquare, description: 'Player Messages', badge: unreadCount > 0 ? unreadCount : undefined },
     { id: 'registration-requests', label: 'Registration Requests', icon: UserPlus, description: 'Approve Registrations', badge: registrationRequestsCount > 0 ? registrationRequestsCount : undefined },
-    { id: 'profile-updates', label: 'Profile Updates', icon: UserPlus, description: 'Approve Changes', badge: profileUpdateService.getPendingCount() > 0 ? profileUpdateService.getPendingCount() : undefined },
+    { id: 'profile-requests', label: 'Profile Requests', icon: UserPlus, description: 'Approve Changes', badge: profileUpdateService.getPendingCount() > 0 ? profileUpdateService.getPendingCount() : undefined },
     { id: 'players', label: 'Player Management', icon: Users, description: 'Manage Players' },
     { id: 'admin-management', label: 'Admin Management', icon: Shield, description: 'Manage Admins' },
+    { id: 'announcements', label: 'Announcements', icon: Megaphone, description: 'Manage Announcements' },
     { id: 'captains', label: 'Team Management', icon: Users, description: 'Manage Teams & Captains' },
     { id: 'registration', label: 'Registration', icon: UserPlus, description: 'Control Settings' },
     { id: 'player-pool', label: 'Player Pool', icon: Users, description: 'Manage Auction Pool' },
@@ -328,6 +331,8 @@ export default function AdminDashboard() {
              activeSection === 'registration-requests' ? 'Registration Requests' :
              activeSection === 'players' ? 'Player Management' :
              activeSection === 'admin-management' ? 'Admin Management' :
+             activeSection === 'profile-requests' ? 'Profile Requests' :
+             activeSection === 'announcements' ? 'Announcement Management' :
              activeSection === 'captains' ? 'Captain Management' :
              activeSection === 'registration' ? 'Registration Control' :
              activeSection === 'player-pool' ? 'Player Pool Management' :
@@ -342,6 +347,8 @@ export default function AdminDashboard() {
              activeSection === 'registration-requests' ? 'Review and approve player registrations' :
              activeSection === 'players' ? 'Manage registered players' :
              activeSection === 'admin-management' ? 'Add and manage admin accounts' :
+             activeSection === 'profile-requests' ? 'Review and approve profile updates and images' :
+             activeSection === 'announcements' ? 'Create and manage announcements' :
              activeSection === 'captains' ? 'Assign and manage team captains' :
              activeSection === 'registration' ? 'Control player registration settings' :
              activeSection === 'player-pool' ? 'Add players to the auction pool' :
@@ -887,9 +894,15 @@ export default function AdminDashboard() {
               {activeSection === 'dashboard' && renderDashboard()}
               {activeSection === 'messages' && renderMessages()}
               {activeSection === 'registration-requests' && <div className="p-8"><RegistrationRequests adminUsername={currentAdmin?.username || 'admin'} /></div>}
-              {activeSection === 'profile-updates' && <div className="p-8"><ProfileUpdateRequests /></div>}
+              {activeSection === 'profile-requests' && (
+                <div className="p-8 space-y-8">
+                  <ProfileUpdateRequests />
+                  <ProfileImageRequests adminUsername={currentAdmin?.username || 'admin'} />
+                </div>
+              )}
               {activeSection === 'players' && <div className="p-8"><PlayerManagement /></div>}
               {activeSection === 'admin-management' && <AdminManagement />}
+              {activeSection === 'announcements' && <div className="p-8"><AnnouncementManagement username={currentAdmin?.username || 'admin'} /></div>}
               {activeSection === 'captains' && renderCaptainManagement()}
               {activeSection === 'registration' && renderRegistrationControl()}
               {activeSection === 'player-pool' && <div className="p-8"><PlayerPoolManagement /></div>}
