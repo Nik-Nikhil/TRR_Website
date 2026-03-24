@@ -58,11 +58,10 @@ export default function SteamCallback() {
 
   async function verifyWithEdgeFunction(params: Record<string, string>) {
     try {
-      const res = await fetch(`${SUPABASE_URL}/functions/v1/steam-auth?action=verify&apikey=${SUPABASE_ANON_KEY}`, {
+      const verifyUrl = `${SUPABASE_URL}/functions/v1/steam-auth?action=verify&apikey=${SUPABASE_ANON_KEY}`
+      const res = await fetch(verifyUrl, {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
+        headers: { 'Content-Type': 'text/plain' },
         body: JSON.stringify({ params }),
       })
 

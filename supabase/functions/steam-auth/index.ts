@@ -10,15 +10,16 @@ const SERVICE_KEY = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? Deno.env.get('S
 const CALLBACK_URL = `${SITE_URL}/steam-callback`
 
 const CORS = {
-  'Access-Control-Allow-Origin': '*',
+  'Access-Control-Allow-Origin': 'https://www.trresports.in',
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
   'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
+  'Access-Control-Max-Age': '86400',
 }
 
 console.log(`[boot] SITE_URL=${SITE_URL} CALLBACK_URL=${CALLBACK_URL} HAS_KEY=${!!SERVICE_KEY}`)
 
 Deno.serve(async (req: Request) => {
-  if (req.method === 'OPTIONS') return new Response(null, { headers: CORS })
+  if (req.method === 'OPTIONS') return new Response(null, { status: 204, headers: CORS })
 
   const url = new URL(req.url)
   const action = url.searchParams.get('action') ?? url.pathname.split('/').pop()
@@ -43,7 +44,8 @@ Deno.serve(async (req: Request) => {
   if (action === 'verify' && req.method === 'POST') {
     console.log('[verify] received')
     try {
-      const body = await req.json()
+      const rawBody = await req.text()
+      const body = JSON.parse(rawBody)
       const params = new URLSearchParams(body.params ?? {})
       console.log('[verify] mode=' + params.get('openid.mode') + ' claimed_id=' + params.get('openid.claimed_id'))
 
