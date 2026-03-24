@@ -137,19 +137,28 @@ async function fetchSteamProfile(steamId: string) {
   if (!STEAM_API_KEY) {
     return { nickname: `Player_${steamId.slice(-6)}`, avatar_url: '', steam_url: `https://steamcommunity.com/profiles/${steamId}` }
   }
-  const res = await fetch(`${STEAM_API_BASE}/ISteamUser/GetPlayerSummaries/v0002/?key=${STEAM_API_KEY}&steamids=${steamId}`)
-  const data = await res.json()
-  const p = data?.response?.players?.[0]
-  if (!p) return null
-  return {
-    nickname: p.personaname as string,
-    avatar_url: (p.avatarfull ?? p.avatarmedium ?? p.avatar ?? '') as string,
-    steam_url: `https://steamcommunity.com/profiles/${steamId}`,
+  try {
+    const res = await fetch(`${STEAM_API_BASE}/ISteamUser/GetPlayerSummaries/v0002/?key=${STEAM_API_KEY}&steamids=${steamId}`)
+    const text = await res.text()
+    console.log('[fetchProfile] status=' + res.status + ' body=' + text.slice(0, 100))
+    const data = JSON.parse(text)
+    const p = data?.response?.players?.[0]
+    if (!p) return { nickname: `Player_${steamId.slice(-6)}`, avatar_url: '', steam_url: `https://steamcommunity.com/profiles/${steamId}` }
+    return {
+      nickname: p.personaname as string,
+      avatar_url: (p.avatarfull ?? p.avatarmedium ?? p.avatar ?? '') as string,
+      steam_url: `https://steamcommunity.com/profiles/${steamId}`,
+    }
+  } catch (e) {
+    console.error('[fetchProfile] error: ' + e)
+    // Fall back to basic profile so login still works
+    return { nickname: `Player_${steamId.slice(-6)}`, avatar_url: '', steam_url: `https://steamcommunity.com/profiles/${steamId}` }
   }
 }
 
 // deno-lint-ignore no-explicit-any
 async function upsertPlayer(supabase: any, steamId: string, profile: { nickname: string; avatar_url: string; steam_url: string }) {
+  // 1. Check if player already exists by steam_id
   const { data: existing, error: findErr } = await supabase
     .from('players').select('id, nickname, avatar_url').eq('steam_id', steamId).maybeSingle()
   if (findErr) console.error('[upsert] find error: ' + JSON.stringify(findErr))
@@ -159,6 +168,21 @@ async function upsertPlayer(supabase: any, steamId: string, profile: { nickname:
     return { ...existing, is_new: false }
   }
 
+  // 2. Try to find existing player by nickname and link steam_id to them
+  const { data: byNickname } = await supabase
+    .from('players').select('id, nickname, avatar_url').eq('nickname', profile.nickname).maybeSingle()
+
+  if (byNickname) {
+    console.log('[upsert] linking steam_id to existing player: ' + byNickname.nickname)
+    await supabase.from('players').update({
+      steam_id: steamId,
+      steam_url: profile.steam_url,
+      avatar_url: profile.avatar_url || byNickname.avatar_url,
+    }).eq('id', byNickname.id)
+    return { ...byNickname, is_new: false }
+  }
+
+  // 3. New player — create record
   let nickname = profile.nickname
   const { data: conflict } = await supabase.from('players').select('id').eq('nickname', nickname).maybeSingle()
   if (conflict) nickname = `${nickname}_${steamId.slice(-4)}`

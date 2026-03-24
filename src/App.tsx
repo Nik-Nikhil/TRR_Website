@@ -30,6 +30,7 @@ import PlayerLogin from "./pages/PlayerLogin";
 import AdminDashboard from "./pages/AdminDashboard";
 import SuperAdminDashboard from "./pages/SuperAdminDashboard";
 import SteamCallback from "./pages/SteamCallback";
+import Onboarding from "./pages/Onboarding";
 
 import GroupStage from "./pages/GroupStage";
 import Playoff from "./pages/Playoff";
@@ -72,6 +73,7 @@ function App() {
           <Route path="/super-admin-login" element={<SuperAdminLogin />} />
           <Route path="/player-login" element={<PlayerLogin />} />
           <Route path="/steam-callback" element={<SteamCallback />} />
+          <Route path="/onboarding" element={<Onboarding />} />
           <Route path="/set-default-passwords" element={<SetDefaultPasswords />} />
           <Route path="/update-player-data" element={<UpdatePlayerData />} />
           <Route path="/fix-captain-ids" element={<FixCaptainIds />} />

@@ -92,7 +92,7 @@ export default function SteamCallback() {
         isNewAccount: data.isNewAccount,
       })
 
-      navigate(`/players/${data.playerId}`, { replace: true })
+      navigate(data.isNewAccount ? `/onboarding?playerId=${data.playerId}` : `/players/${data.playerId}`, { replace: true })
     } catch (err) {
       const msg = err instanceof Error ? err.message : String(err)
       console.error('[SteamCallback] error:', msg)
