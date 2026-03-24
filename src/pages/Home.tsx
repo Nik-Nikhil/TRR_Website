@@ -262,7 +262,7 @@ export default function Home() {
                           <path fillRule="evenodd" d="M6.267 3.455a3.066 3.066 0 001.745-.723 3.066 3.066 0 013.976 0 3.066 3.066 0 001.745.723 3.066 3.066 0 012.812 2.812c.051.643.304 1.254.723 1.745a3.066 3.066 0 010 3.976 3.066 3.066 0 00-.723 1.745 3.066 3.066 0 01-2.812 2.812 3.066 3.066 0 00-1.745.723 3.066 3.066 0 01-3.976 0 3.066 3.066 0 00-1.745-.723 3.066 3.066 0 01-2.812-2.812 3.066 3.066 0 00-.723-1.745 3.066 3.066 0 010-3.976 3.066 3.066 0 00.723-1.745 3.066 3.066 0 012.812-2.812zm7.44 5.252a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
                         </svg>
                       </div>
-                      <h3 className="text-base font-bold text-amber-100">CHAMPION</h3>
+                      <h3 className="text-base font-bold text-amber-100">HALL OF FAME</h3>
                     </div>
                     
                     <div className="flex-1 flex flex-col justify-center mb-2">
@@ -276,7 +276,7 @@ export default function Home() {
                         to="/hall-of-fame"
                         className="inline-flex items-center justify-center rounded-full px-6 py-1.5 text-xs font-bold uppercase tracking-wider bg-white text-gray-900 shadow-lg hover:brightness-95 transition cursor-pointer"
                       >
-                        VIEW HALL OF FAME
+                        VIEW CHAMPIONS
                       </Link>
                     </div>
                   </div>

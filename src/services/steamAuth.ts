@@ -20,8 +20,7 @@ export const SteamAuthService = {
    * The edge function handles the OpenID redirect to Steam.
    */
   initiateLogin() {
-    // Pass anon key so the edge function accepts the request without JWT
-    const initUrl = `${SUPABASE_URL}/functions/v1/steam-auth/init?apikey=${SUPABASE_ANON_KEY}`
+    const initUrl = `${SUPABASE_URL}/functions/v1/steam-auth?action=init&apikey=${SUPABASE_ANON_KEY}`
     console.log('🔵 Navigating to Steam init...')
     window.location.assign(initUrl)
   },
