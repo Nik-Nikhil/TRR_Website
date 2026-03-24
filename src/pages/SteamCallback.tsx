@@ -58,18 +58,25 @@ export default function SteamCallback() {
 
   async function verifyWithEdgeFunction(params: Record<string, string>) {
     try {
-      const res = await fetch(`${SUPABASE_URL}/functions/v1/steam-auth?action=verify`, {
+      const res = await fetch(`${SUPABASE_URL}/functions/v1/steam-auth?action=verify&apikey=${SUPABASE_ANON_KEY}`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'apikey': SUPABASE_ANON_KEY,
-          'Authorization': `Bearer ${SUPABASE_ANON_KEY}`,
         },
         body: JSON.stringify({ params }),
       })
 
-      const data = await res.json()
-      console.log('[SteamCallback] Verify response:', data)
+      const text = await res.text()
+      console.log('[SteamCallback] Verify raw response:', text.slice(0, 300))
+      
+      let data: any
+      try {
+        data = JSON.parse(text)
+      } catch {
+        setErrorMsg('Edge function returned non-JSON: ' + text.slice(0, 200))
+        setStatus('error')
+        return
+      }
 
       if (!res.ok || data.error) {
         setErrorMsg(data.error ?? 'Verification failed')
