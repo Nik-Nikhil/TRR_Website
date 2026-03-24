@@ -23,7 +23,7 @@ Deno.serve(async (req: Request) => {
 
   const url = new URL(req.url)
   const action = url.searchParams.get('action') ?? url.pathname.split('/').pop()
-  console.log(`[req] ${req.method} action=${action}`)
+  console.log(`[req] ${req.method} url=${req.url} action=${action}`)
 
   // ── INIT: redirect browser to Steam ──────────────────────────────
   if (action === 'init') {
