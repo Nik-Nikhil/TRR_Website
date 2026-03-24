@@ -2,15 +2,13 @@ import { useParams, useNavigate } from "react-router-dom";
 import { FaSteam } from "react-icons/fa";
 import { motion } from "framer-motion";
 import { useState, useEffect } from "react";
-import { Edit3, LogOut, Plus, Minus, Save, X, Lock } from "lucide-react";
+import { Edit3, LogOut, Plus, Minus, Save, X } from "lucide-react";
 import AuthService from "../../services/auth";
 import { DOTA_ROLES } from "../../utils/constants";
 import { DOTA_HEROES, findHeroByName } from "../../data/heroes";
 import { useToast } from "../../hooks/useToast";
 import ToastContainer from "../../components/ui/ToastContainer";
 import { getMedalFromMMR } from "../../utils/mmrToMedal";
-import PasswordChangeModal from "../../components/PasswordChangeModal";
-import FirstLoginPasswordChange from "../../components/FirstLoginPasswordChange";
 import { PlayerService } from "../../services/supabaseService";
 import { supabase } from "../../lib/supabase";
 import type { Player } from "../../data/players";
@@ -64,8 +62,6 @@ export default function PlayerDetailPage() {
   const [heroSearchTerm, setHeroSearchTerm] = useState('');
   const [, setMmrProof] = useState<string>('');
   const [mmrValidation, setMmrValidation] = useState({ isValid: true, message: '' });
-  const [showPasswordModal, setShowPasswordModal] = useState(false);
-  const [passwordChanged, setPasswordChanged] = useState(false);
   
   // Get current user from auth service
   const currentUser = AuthService.getCurrentUser();
@@ -146,7 +142,8 @@ export default function PlayerDetailPage() {
           filter: `${filterField}=eq.${filterValue}`
         },
         (payload) => {
-          setPlayer(payload.new as Player);
+          const mapped = mapDatabasePlayerToFrontend(payload.new as any);
+          setPlayer(mapped);
         }
       )
       .subscribe();
@@ -204,60 +201,78 @@ export default function PlayerDetailPage() {
 
   const saveAllChanges = async () => {
     try {
-      
-      // Check if avatar was changed
       const avatarChanged = editedAvatar !== player?.avatarUrl;
       
-      // If avatar changed, submit to profile image service
+      // Avatar change → submit for admin approval
       if (avatarChanged && player && currentUser?.type === 'player') {
         const { default: profileImageService } = await import('../../services/profileImageService');
-        
         const result = await profileImageService.submitImageUpdate(
-          player.id,
-          'player',
-          player.avatarUrl || null,
-          editedAvatar,
+          player.id, 'player', player.avatarUrl || null, editedAvatar,
           editedAvatar.startsWith('data:') ? 'upload' : 'link'
         );
-
         if (!result.success) {
           error("Avatar Update Failed", result.error || "Failed to submit avatar change request");
           return;
         }
       }
-      
-      // Special handling for role changes - submit as request for approval
-      if (currentUser?.type === 'player' && player) {
-        // Import DatabaseService for role change requests
-        const { default: DatabaseService } = await import('../../services/database');
-        
-        const result = await DatabaseService.submitRoleChangeRequest({
-          playerId: player.id,
-          playerNickname: player.nickname,
-          currentRoles: player.roles?.map(r => r.label) || [],
-          requestedRoles: editedRoles,
-          reason: 'Profile update from player profile'
-        });
 
-        if (result.success) {
-          const message = avatarChanged 
-            ? "Your profile changes have been saved. Role changes, avatar updates, and MMR updates sent to admins for approval."
-            : "Your profile changes have been saved. Role changes and MMR updates sent to admins for approval.";
-          success("Profile Updated!", message);
-          setIsEditMode(false);
-          return;
-        } else {
-          error("Update Failed", `Failed to save profile changes: ${result.error}`);
-          return;
+      if (currentUser?.type === 'player' && player) {
+        // Save bio, MMR, heroes directly to Supabase
+        const directUpdates: Record<string, any> = {};
+        if (editedData.bio !== player.bio) directUpdates.bio = editedData.bio;
+        if (editedData.currentMMR !== (player.currentMMR?.toString() || '')) {
+          const mmr = parseInt(editedData.currentMMR) || null;
+          directUpdates.current_mmr = mmr;
+          if (mmr) {
+            const { getMedalFromMMR } = await import('../../utils/mmrToMedal');
+            const medal = getMedalFromMMR(mmr);
+            directUpdates.current_medal_label = medal.label;
+            directUpdates.current_medal_id = medal.id;
+          }
         }
+        if (editedData.peakMMR !== (player.peakMMR?.toString() || '')) {
+          const mmr = parseInt(editedData.peakMMR) || null;
+          directUpdates.peak_mmr = mmr;
+          if (mmr) {
+            const { getMedalFromMMR } = await import('../../utils/mmrToMedal');
+            const medal = getMedalFromMMR(mmr);
+            directUpdates.peak_medal_label = medal.label;
+            directUpdates.peak_medal_id = medal.id;
+          }
+        }
+        if (JSON.stringify(editedHeroes) !== JSON.stringify(player.favoriteHeroes?.map(h => h.name) || [])) {
+          directUpdates.favorite_heroes = editedHeroes.map(name => ({ name }));
+        }
+
+        if (Object.keys(directUpdates).length > 0) {
+          const { PlayerService } = await import('../../services/supabaseService');
+          await PlayerService.updatePlayer(player.id, directUpdates as any);
+        }
+
+        // Role changes → submit as request for admin approval
+        const rolesChanged = JSON.stringify(editedRoles) !== JSON.stringify(player.roles?.map(r => r.label) || []);
+        if (rolesChanged) {
+          const { default: DatabaseService } = await import('../../services/database');
+          await DatabaseService.submitRoleChangeRequest({
+            playerId: player.id,
+            playerNickname: player.nickname,
+            currentRoles: player.roles?.map(r => r.label) || [],
+            requestedRoles: editedRoles,
+            reason: 'Profile update from player profile'
+          });
+        }
+
+        const parts = [];
+        if (Object.keys(directUpdates).length > 0) parts.push('changes saved');
+        if (rolesChanged) parts.push('role change sent for approval');
+        if (avatarChanged) parts.push('avatar sent for approval');
+        success("Profile Updated!", parts.length ? parts.join(', ') + '.' : 'No changes made.');
+        setIsEditMode(false);
+        return;
       }
-      
-      // Here you would normally make an API call to save all the data
-      // For now, we'll simulate a successful save
-      
+
       setIsEditMode(false);
       success("Profile Updated!", "All your profile changes have been successfully saved.");
-      
     } catch (err) {
       console.error('Error saving profile:', err);
       error("Save Failed", "Failed to update profile. Please try again.");
@@ -440,15 +455,6 @@ export default function PlayerDetailPage() {
                   >
                     <Edit3 className="w-4 h-4" />
                     <span>Request an Edit</span>
-                  </motion.button>
-                  <motion.button
-                    whileHover={{ scale: 1.05 }}
-                    whileTap={{ scale: 0.95 }}
-                    onClick={() => setShowPasswordModal(true)}
-                    className="flex items-center gap-2 px-4 py-2 rounded-lg bg-orange-600/90 hover:bg-orange-600 border border-orange-500/50 hover:border-orange-400 transition-all duration-300 text-white font-medium text-sm shadow-lg"
-                  >
-                    <Lock className="w-4 h-4" />
-                    <span>Change Password</span>
                   </motion.button>
                 </>
               ) : (
@@ -1214,29 +1220,6 @@ export default function PlayerDetailPage() {
         </div>
       </main>
 
-      {/* Password Change Modal */}
-      {player && (
-        <>
-          <PasswordChangeModal
-            isOpen={showPasswordModal}
-            onClose={() => setShowPasswordModal(false)}
-            userId={player.id}
-            userType="player"
-            userName={player.nickname}
-            requireOldPassword={true}
-          />
-          
-          {/* First Login Password Change - Only for logged in player viewing their own profile */}
-          {canEdit && currentUser?.type === 'player' && currentUser.playerId === playerId && !passwordChanged && (
-            <FirstLoginPasswordChange
-              userId={player.id}
-              userType="player"
-              userName={player.nickname}
-              onPasswordChanged={() => setPasswordChanged(true)}
-            />
-          )}
-        </>
-      )}
     </>
   );
 }

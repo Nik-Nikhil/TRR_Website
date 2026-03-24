@@ -1,4 +1,6 @@
 // Profile Update Request Service
+import { supabase } from '../lib/supabase';
+
 export interface ProfileUpdateRequest {
   id: string;
   playerId: string;
@@ -65,7 +67,7 @@ class ProfileUpdateService {
   }
 
   // Approve a request
-  approveRequest(requestId: string, adminUsername: string): boolean {
+  async approveRequest(requestId: string, adminUsername: string): Promise<boolean> {
     const requests = this.getAllRequests();
     const request = requests.find(req => req.id === requestId);
     
@@ -78,18 +80,38 @@ class ProfileUpdateService {
     request.reviewedBy = adminUsername;
     request.reviewedAt = new Date();
 
-    // Apply changes to player profile
-    const players = JSON.parse(localStorage.getItem('players') || '[]');
-    const playerIndex = players.findIndex((p: any) => p.id === request.playerId);
-    
-    if (playerIndex !== -1) {
-      request.changes.forEach(change => {
-        players[playerIndex][change.field] = change.newValue;
-      });
-      localStorage.setItem('players', JSON.stringify(players));
+    // Build Supabase update object from changes
+    const updates: Record<string, any> = {};
+    const fieldMap: Record<string, string> = {
+      bio: 'bio',
+      realName: 'real_name',
+      currentMMR: 'current_mmr',
+      peakMMR: 'peak_mmr',
+      roles: 'roles',
+      favoriteHeroes: 'favorite_heroes',
+      discordUsername: 'discord_username',
+      steamUrl: 'steam_url',
+      dotabuffUrl: 'dotabuff_url',
+    };
+
+    request.changes.forEach(change => {
+      const dbField = fieldMap[change.field] || change.field;
+      updates[dbField] = change.newValue;
+    });
+
+    if (Object.keys(updates).length > 0) {
+      const { error } = await supabase
+        .from('players')
+        .update({ ...updates, updated_at: new Date().toISOString() })
+        .eq('id', request.playerId);
+
+      if (error) {
+        console.error('Failed to apply profile update to Supabase:', error);
+        return false;
+      }
     }
 
-    // Save updated requests
+    // Save updated requests to localStorage
     localStorage.setItem(this.storageKey, JSON.stringify(requests));
     return true;
   }

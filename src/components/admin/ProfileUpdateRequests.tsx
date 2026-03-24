@@ -28,7 +28,7 @@ export const ProfileUpdateRequests = () => {
     if (!confirmed) return;
 
     const admin = AuthService.getCurrentAdminSession();
-    const success = profileUpdateService.approveRequest(request.id, admin?.username || 'admin');
+    const success = await profileUpdateService.approveRequest(request.id, admin?.username || 'admin');
 
     if (success) {
       await alert('Profile update approved and applied!', 'Success', 'success');

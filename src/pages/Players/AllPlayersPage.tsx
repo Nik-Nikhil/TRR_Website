@@ -2,7 +2,9 @@
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import RotatingPlayerCard from "./RotatingPlayerCard";
-import { players, type Player } from "../../data/players";
+import { type Player } from "../../data/players";
+import { PlayerService } from "../../services/supabaseService";
+import { mapDatabasePlayerToFrontend } from "../../utils/playerMapper";
 
 const CARDS_PER_PAGE = 36; // Show 36 cards per page (6x6 grid on large screens)
 
@@ -27,10 +29,23 @@ function shuffleArray<T>(arr: T[]): T[] {
 }
 
 export default function AllPlayersPage() {
-  const [playerOrder] = useState<Player[]>(() => shuffleArray(players));
+  const [playerOrder, setPlayerOrder] = useState<Player[]>([]);
+  const [loadingPlayers, setLoadingPlayers] = useState(true);
   const [query, setQuery] = useState("");
   const [selectedRole, setSelectedRole] = useState("all");
   const [currentPage, setCurrentPage] = useState(1);
+
+  useEffect(() => {
+    PlayerService.getAllPlayers().then(data => {
+      const mapped = data.map(mapDatabasePlayerToFrontend);
+      setPlayerOrder(shuffleArray(mapped));
+    }).catch(() => {
+      // fallback to local data
+      import('../../data/players').then(({ players }) => {
+        setPlayerOrder(shuffleArray(players));
+      });
+    }).finally(() => setLoadingPlayers(false));
+  }, []);
 
   const searching = query.trim() !== "";
 
@@ -145,7 +160,7 @@ export default function AllPlayersPage() {
               transition={{ delay: 0.2 }}
               className="text-sm text-zinc-400"
             >
-              {players.length} registered players
+              {loadingPlayers ? 'Loading players...' : `${playerOrder.length} registered players`}
             </motion.p>
           </motion.div>
 
