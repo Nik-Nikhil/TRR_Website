@@ -1,415 +1,467 @@
-import React, { useState, useEffect } from 'react';
-import { useParams } from 'react-router-dom';
-import { 
-  User, Shield, Calendar, MessageCircle, ExternalLink, Mail, 
-  Users, CheckCircle, Trophy, Settings, Activity,
-  Clock, AlertCircle, ThumbsUp, ThumbsDown, Eye
+import React, { useState, useEffect, useRef } from 'react';
+import { useParams, useNavigate } from 'react-router-dom';
+import {
+  User, Calendar, MessageCircle, ExternalLink, Mail,
+  Edit2, Save, X, LogOut, Camera
 } from 'lucide-react';
-import { getAdminById, type Admin } from '../data/admins';
-import { getPendingApprovals, type PendingApproval } from '../data/pendingApprovals';
+import { supabase } from '../lib/supabase';
 import AuthService from '../services/auth';
+import { ImageOptimizationService } from '../services/imageOptimizationService';
+import ImageCropModal from '../components/ImageCropModal';
+
+interface AdminData {
+  id: string;
+  username: string;
+  displayName: string;
+  realName?: string;
+  role: 'Founder' | 'Admin' | 'Mini Admin';
+  avatarUrl?: string;
+  description?: string;
+  discordUsername?: string;
+  steamUrl?: string;
+  email?: string;
+  githubUrl?: string;
+  twitchUrl?: string;
+  isActive: boolean;
+  createdAt?: string;
+}
+
+const getRoleColor = (role: string) => {
+  switch (role) {
+    case 'Founder': return 'from-yellow-400 to-orange-500';
+    case 'Admin': return 'from-blue-400 to-purple-500';
+    case 'Mini Admin': return 'from-green-400 to-teal-500';
+    default: return 'from-gray-400 to-gray-500';
+  }
+};
+
+const mapRow = (row: any): AdminData => ({
+  id: row.id,
+  username: row.username,
+  displayName: row.display_name,
+  realName: row.real_name,
+  role: row.role,
+  avatarUrl: row.avatar_url,
+  description: row.description,
+  discordUsername: row.discord_username,
+  steamUrl: row.steam_url,
+  email: row.email,
+  githubUrl: row.github_url,
+  twitchUrl: row.twitch_url,
+  isActive: row.is_active,
+  createdAt: row.created_at,
+});
 
 const AdminProfile: React.FC = () => {
   const { adminId } = useParams<{ adminId: string }>();
-  const [admin, setAdmin] = useState<Admin | null>(null);
-  const [pendingApprovals, setPendingApprovals] = useState<PendingApproval[]>([]);
-  const [activeTab, setActiveTab] = useState<'overview' | 'approvals' | 'activity'>('overview');
+  const navigate = useNavigate();
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
-  const currentUser = AuthService.getCurrentUser();
-  const isCurrentUser = currentUser?.username === adminId;
-  const canViewDetails = currentUser?.type === 'admin' || isCurrentUser;
+  const [admin, setAdmin] = useState<AdminData | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [editing, setEditing] = useState(false);
+  const [saving, setSaving] = useState(false);
+  const [uploadingAvatar, setUploadingAvatar] = useState(false);
+  const [error, setError] = useState('');
+  const [successMsg, setSuccessMsg] = useState('');
+  const [cropSrc, setCropSrc] = useState<string | null>(null);
+
+  const [editForm, setEditForm] = useState({
+    displayName: '',
+    realName: '',
+    description: '',
+    discordUsername: '',
+    steamUrl: '',
+    email: '',
+  });
+
+  const adminSession = AuthService.getCurrentAdminSession();
+  const isOwnProfile = adminSession?.username === adminId;
 
   useEffect(() => {
-    if (adminId) {
-      const foundAdmin = getAdminById(adminId);
-      setAdmin(foundAdmin || null);
-      
-      // Load pending approvals
-      const approvals = getPendingApprovals();
-      setPendingApprovals(approvals);
-    }
+    if (adminId) fetchAdmin();
   }, [adminId]);
 
-  const handleApproval = (approvalId: string, action: 'approve' | 'reject', notes?: string) => {
-    // In a real implementation, this would call an API
-    
-    // Update local state for demo
-    setPendingApprovals(prev => 
-      prev.map(approval => 
-        approval.id === approvalId 
-          ? { 
-              ...approval, 
-              status: action === 'approve' ? 'approved' : 'rejected',
-              reviewedBy: currentUser?.username || 'unknown',
-              reviewedAt: new Date().toISOString(),
-              reviewNotes: notes
-            }
-          : approval
-      )
-    );
+  const fetchAdmin = async () => {
+    setLoading(true);
+    const { data, error } = await supabase
+      .from('admins')
+      .select('*')
+      .eq('username', adminId)
+      .maybeSingle();
+
+    if (error || !data) {
+      setError('Admin not found');
+      setLoading(false);
+      return;
+    }
+
+    const mapped = mapRow(data);
+    setAdmin(mapped);
+    setEditForm({
+      displayName: mapped.displayName || '',
+      realName: mapped.realName || '',
+      description: mapped.description || '',
+      discordUsername: mapped.discordUsername || '',
+      steamUrl: mapped.steamUrl || '',
+      email: mapped.email || '',
+    });
+    setLoading(false);
   };
 
-  if (!admin) {
+  const handleSave = async () => {
+    if (!admin) return;
+    setSaving(true);
+    setError('');
+
+    const { error } = await supabase
+      .from('admins')
+      .update({
+        display_name: editForm.displayName,
+        real_name: editForm.realName || null,
+        description: editForm.description || null,
+        discord_username: editForm.discordUsername || null,
+        steam_url: editForm.steamUrl || null,
+        email: editForm.email || null,
+        updated_at: new Date().toISOString(),
+      })
+      .eq('id', admin.id);
+
+    if (error) {
+      // If columns don't exist yet, try without them
+      const { error: error2 } = await supabase
+        .from('admins')
+        .update({
+          display_name: editForm.displayName,
+          real_name: editForm.realName || null,
+          description: editForm.description || null,
+          updated_at: new Date().toISOString(),
+        })
+        .eq('id', admin.id);
+
+      if (error2) {
+        setError('Failed to save: ' + error2.message);
+        setSaving(false);
+        return;
+      }
+    }
+
+    setAdmin(prev => prev ? {
+      ...prev,
+      displayName: editForm.displayName,
+      realName: editForm.realName,
+      description: editForm.description,
+      discordUsername: editForm.discordUsername,
+      steamUrl: editForm.steamUrl,
+      email: editForm.email,
+    } : prev);
+
+    setEditing(false);
+    setSaving(false);
+    setSuccessMsg('Profile updated');
+    setTimeout(() => setSuccessMsg(''), 3000);
+  };
+
+  const handleAvatarUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file || !admin) return;
+    // Show crop modal instead of uploading directly
+    const url = URL.createObjectURL(file);
+    setCropSrc(url);
+    // Reset input so same file can be re-selected
+    e.target.value = '';
+  };
+
+  const handleCropConfirm = async (croppedBlob: Blob) => {
+    if (!admin) return;
+    setCropSrc(null);
+    setUploadingAvatar(true);
+    setError('');
+    try {
+      const file = new File([croppedBlob], 'avatar.jpg', { type: 'image/jpeg' });
+      const result = await ImageOptimizationService.uploadCompressedImage(
+        file, 'avatars', `admins/${admin.username}_${Date.now()}.jpg`,
+        { maxWidth: 400, quality: 0.85 }
+      );
+      const { error: dbError } = await supabase
+        .from('admins')
+        .update({ avatar_url: result.url, updated_at: new Date().toISOString() })
+        .eq('id', admin.id);
+      if (dbError) throw dbError;
+      setAdmin(prev => prev ? { ...prev, avatarUrl: result.url } : prev);
+      setSuccessMsg('Avatar updated');
+      setTimeout(() => setSuccessMsg(''), 3000);
+    } catch (err: any) {
+      setError('Avatar upload failed: ' + (err.message || 'Unknown error'));
+    } finally {
+      setUploadingAvatar(false);
+    }
+  };
+
+  const handleLogout = () => {
+    AuthService.clearAdminSession();
+    navigate('/admin-login');
+  };
+
+  if (loading) {
     return (
-      <div className="min-h-screen bg-gray-900 flex items-center justify-center">
-        <div className="text-white text-xl">Admin not found</div>
+      <div className="min-h-screen flex items-center justify-center" style={{ background: 'rgba(5,7,10)' }}>
+        <div className="text-white/60">Loading...</div>
       </div>
     );
   }
 
-  const getRoleColor = (role: string) => {
-    switch (role) {
-      case 'Founder': return 'from-yellow-400 to-orange-500';
-      case 'Admin': return 'from-blue-400 to-purple-500';
-      case 'Mini Admin': return 'from-green-400 to-teal-500';
-      default: return 'from-gray-400 to-gray-500';
-    }
-  };
-
-  const getApprovalTypeIcon = (type: string) => {
-    switch (type) {
-      case 'avatar': return <User className="w-4 h-4" />;
-      case 'profile_update': return <Settings className="w-4 h-4" />;
-      case 'registration': return <Users className="w-4 h-4" />;
-      case 'name_change': return <MessageCircle className="w-4 h-4" />;
-      case 'role_change': return <Shield className="w-4 h-4" />;
-      default: return <AlertCircle className="w-4 h-4" />;
-    }
-  };
+  if (!admin) {
+    return (
+      <div className="min-h-screen flex items-center justify-center" style={{ background: 'rgba(5,7,10)' }}>
+        <div className="text-white/60">Admin not found</div>
+      </div>
+    );
+  }
 
   return (
-    <div className="min-h-screen bg-gray-900 text-white">
-      <div className="container mx-auto px-4 py-8">
-        {/* Header */}
-        <div className="mb-8">
-          <div className="flex items-center space-x-4 mb-4">
-            <div className="relative">
-              <div className="w-24 h-24 rounded-full overflow-hidden border-4 border-gray-600">
+    <div className="min-h-screen text-white" style={{ background: 'rgba(5,7,10)', fontFamily: 'Poppins, sans-serif' }}>
+      {cropSrc && (
+        <ImageCropModal
+          imageSrc={cropSrc}
+          onConfirm={handleCropConfirm}
+          onCancel={() => { setCropSrc(null); URL.revokeObjectURL(cropSrc); }}
+        />
+      )}
+      {/* Role gradient header bar */}
+      <div className={`h-2 w-full bg-gradient-to-r ${getRoleColor(admin.role)}`} />
+      <div className="max-w-3xl mx-auto px-4 py-10">
+        {/* Messages */}
+        {error && (
+          <div className="mb-4 px-4 py-3 rounded-xl bg-red-500/10 border border-red-500/30 text-red-400 text-sm">
+            {error}
+          </div>
+        )}
+        {successMsg && (
+          <div className="mb-4 px-4 py-3 rounded-xl bg-green-500/10 border border-green-500/30 text-green-400 text-sm">
+            {successMsg}
+          </div>
+        )}
+
+        {/* Profile card */}
+        <div className="rounded-xl border border-white/8 backdrop-blur-sm overflow-hidden" style={{ background: 'rgba(255,255,255,0.03)' }}>
+          {/* Header section */}
+          <div className="p-6 flex items-start gap-5">
+            {/* Avatar */}
+            <div className="relative flex-shrink-0">
+              <div className="w-20 h-20 rounded-full overflow-hidden border-2 border-white/10">
                 <img
-                  src={admin.avatarUrl}
-                  alt={`${admin.displayName}'s avatar`}
+                  src={admin.avatarUrl || '/avatars/default.jpg'}
+                  alt={admin.displayName}
                   className="w-full h-full object-cover"
-                  onError={(e) => {
-                    (e.target as HTMLImageElement).src = '/avatars/default.jpg';
-                  }}
+                  onError={(e) => { (e.target as HTMLImageElement).src = '/avatars/Machine.png'; }}
                 />
               </div>
-              <div className={`absolute -bottom-2 -right-2 w-8 h-8 rounded-full bg-gradient-to-r ${getRoleColor(admin.role)} flex items-center justify-center`}>
-                <Shield className="w-4 h-4 text-white" />
-              </div>
+              {isOwnProfile && (
+                <>
+                  <button
+                    onClick={() => fileInputRef.current?.click()}
+                    disabled={uploadingAvatar}
+                    className="absolute -bottom-1 -right-1 w-7 h-7 rounded-full bg-blue-600 hover:bg-blue-500 flex items-center justify-center transition-colors"
+                  >
+                    <Camera className="w-3.5 h-3.5 text-white" />
+                  </button>
+                  <input
+                    ref={fileInputRef}
+                    type="file"
+                    accept="image/*"
+                    className="hidden"
+                    onChange={handleAvatarUpload}
+                  />
+                </>
+              )}
+              {uploadingAvatar && (
+                <div className="absolute inset-0 rounded-full bg-black/60 flex items-center justify-center">
+                  <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                </div>
+              )}
             </div>
-            
-            <div>
-              <h1 className="text-3xl font-bold">{admin.displayName}</h1>
-              <p className={`text-lg font-semibold bg-gradient-to-r ${getRoleColor(admin.role)} bg-clip-text text-transparent`}>
+
+            {/* Name + role */}
+            <div className="flex-1 min-w-0">
+              <h1 className="text-2xl font-bold truncate">{admin.displayName}</h1>
+              <p className={`text-sm font-semibold bg-gradient-to-r ${getRoleColor(admin.role)} bg-clip-text text-transparent`}>
                 {admin.role}
               </p>
-              <p className="text-gray-400">@{admin.username}</p>
-            </div>
-          </div>
-
-          <p className="text-gray-300 max-w-2xl">{admin.bio}</p>
-        </div>
-
-        {/* Navigation Tabs */}
-        <div className="flex space-x-1 mb-8 bg-gray-800 rounded-lg p-1">
-          {[
-            { id: 'overview', label: 'Overview', icon: <User className="w-4 h-4" /> },
-            { id: 'approvals', label: 'Pending Approvals', icon: <Clock className="w-4 h-4" /> },
-            { id: 'activity', label: 'Activity', icon: <Activity className="w-4 h-4" /> }
-          ].map((tab) => (
-            <button
-              key={tab.id}
-              onClick={() => setActiveTab(tab.id as any)}
-              className={`flex items-center space-x-2 px-4 py-2 rounded-md transition-colors ${
-                activeTab === tab.id
-                  ? 'bg-blue-600 text-white'
-                  : 'text-gray-400 hover:text-white hover:bg-gray-700'
-              }`}
-            >
-              {tab.icon}
-              <span>{tab.label}</span>
-              {tab.id === 'approvals' && (
-                <span className="bg-red-500 text-white text-xs px-2 py-1 rounded-full">
-                  {pendingApprovals.length}
-                </span>
+              <p className="text-white/40 text-sm">@{admin.username}</p>
+              {admin.createdAt && (
+                <div className="flex items-center gap-1.5 mt-1 text-white/30 text-xs">
+                  <Calendar className="w-3 h-3" />
+                  <span>Admin since {new Date(admin.createdAt).toLocaleDateString()}</span>
+                </div>
               )}
-            </button>
-          ))}
-        </div>
+            </div>
 
-        {/* Tab Content */}
-        {activeTab === 'overview' && (
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-            {/* Stats */}
-            <div className="lg:col-span-2 space-y-6">
-              <div className="bg-gray-800 rounded-lg p-6">
-                <h2 className="text-xl font-semibold mb-4 flex items-center">
-                  <Trophy className="w-5 h-5 mr-2" />
-                  Statistics
-                </h2>
-                <div className="grid grid-cols-3 gap-4">
-                  <div className="text-center">
-                    <div className="text-2xl font-bold text-blue-400">{admin.stats.playersManaged}</div>
-                    <div className="text-sm text-gray-400">Players Managed</div>
-                  </div>
-                  <div className="text-center">
-                    <div className="text-2xl font-bold text-green-400">{admin.stats.issuesResolved}</div>
-                    <div className="text-sm text-gray-400">Issues Resolved</div>
-                  </div>
-                  <div className="text-center">
-                    <div className="text-2xl font-bold text-purple-400">{admin.stats.tournamentsOrganized}</div>
-                    <div className="text-sm text-gray-400">Tournaments</div>
-                  </div>
-                </div>
-              </div>
-
-              <div className="bg-gray-800 rounded-lg p-6">
-                <h2 className="text-xl font-semibold mb-4">Responsibilities</h2>
-                <div className="space-y-2">
-                  {admin.responsibilities.map((responsibility, index) => (
-                    <div key={index} className="flex items-center space-x-2">
-                      <CheckCircle className="w-4 h-4 text-green-400" />
-                      <span>{responsibility}</span>
-                    </div>
-                  ))}
-                </div>
-              </div>
-
-              <div className="bg-gray-800 rounded-lg p-6">
-                <h2 className="text-xl font-semibold mb-4">Specializations</h2>
-                <div className="flex flex-wrap gap-2">
-                  {admin.specializations.map((spec, index) => (
-                    <span
-                      key={index}
-                      className="px-3 py-1 bg-blue-600/20 text-blue-300 rounded-full text-sm"
+            {/* Action buttons */}
+            {isOwnProfile && (
+              <div className="flex items-center gap-2 flex-shrink-0">
+                {!editing ? (
+                  <>
+                    <button
+                      onClick={() => setEditing(true)}
+                      className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-white/5 hover:bg-white/10 border border-white/8 text-sm transition-colors"
                     >
-                      {spec}
-                    </span>
-                  ))}
-                </div>
+                      <Edit2 className="w-3.5 h-3.5" />
+                      Edit
+                    </button>
+                    <button
+                      onClick={handleLogout}
+                      className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-red-500/10 hover:bg-red-500/20 border border-red-500/20 text-red-400 text-sm transition-colors"
+                    >
+                      <LogOut className="w-3.5 h-3.5" />
+                      Logout
+                    </button>
+                  </>
+                ) : (
+                  <>
+                    <button
+                      onClick={handleSave}
+                      disabled={saving}
+                      className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-blue-600 hover:bg-blue-500 text-sm transition-colors disabled:opacity-50"
+                    >
+                      <Save className="w-3.5 h-3.5" />
+                      {saving ? 'Saving...' : 'Save'}
+                    </button>
+                    <button
+                      onClick={() => setEditing(false)}
+                      className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-white/5 hover:bg-white/10 border border-white/8 text-sm transition-colors"
+                    >
+                      <X className="w-3.5 h-3.5" />
+                      Cancel
+                    </button>
+                  </>
+                )}
               </div>
-            </div>
-
-            {/* Sidebar */}
-            <div className="space-y-6">
-              <div className="bg-gray-800 rounded-lg p-6">
-                <h2 className="text-xl font-semibold mb-4">Contact Information</h2>
-                <div className="space-y-3">
-                  {admin.contactInfo.discord && (
-                    <div className="flex items-center space-x-2">
-                      <MessageCircle className="w-4 h-4 text-indigo-400" />
-                      <span className="text-sm">{admin.contactInfo.discord}</span>
-                    </div>
-                  )}
-                  {admin.contactInfo.steam && (
-                    <div className="flex items-center space-x-2">
-                      <ExternalLink className="w-4 h-4 text-blue-400" />
-                      <a 
-                        href={admin.contactInfo.steam}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="text-sm text-blue-400 hover:underline"
-                      >
-                        Steam Profile
-                      </a>
-                    </div>
-                  )}
-                  {admin.contactInfo.email && (
-                    <div className="flex items-center space-x-2">
-                      <Mail className="w-4 h-4 text-red-400" />
-                      <span className="text-sm">{admin.contactInfo.email}</span>
-                    </div>
-                  )}
-                </div>
-              </div>
-
-              <div className="bg-gray-800 rounded-lg p-6">
-                <h2 className="text-xl font-semibold mb-4">Admin Since</h2>
-                <div className="flex items-center space-x-2">
-                  <Calendar className="w-4 h-4 text-gray-400" />
-                  <span>{new Date(admin.joinDate).toLocaleDateString()}</span>
-                </div>
-              </div>
-
-              {canViewDetails && (
-                <div className="bg-gray-800 rounded-lg p-6">
-                  <h2 className="text-xl font-semibold mb-4">Permissions</h2>
-                  <div className="space-y-2">
-                    {Object.entries(admin.permissions).map(([key, value]) => (
-                      <div key={key} className="flex items-center justify-between">
-                        <span className="text-sm capitalize">{key.replace(/([A-Z])/g, ' $1')}</span>
-                        <div className={`w-3 h-3 rounded-full ${value ? 'bg-green-400' : 'bg-red-400'}`} />
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              )}
-            </div>
+            )}
           </div>
-        )}
 
-        {activeTab === 'approvals' && canViewDetails && (
-          <div className="space-y-6">
-            <div className="bg-gray-800 rounded-lg p-6">
-              <h2 className="text-xl font-semibold mb-4">Pending Approvals ({pendingApprovals.length})</h2>
-              
-              {pendingApprovals.length === 0 ? (
-                <div className="text-center py-8 text-gray-400">
-                  <CheckCircle className="w-12 h-12 mx-auto mb-4 opacity-50" />
-                  <p>No pending approvals</p>
-                </div>
+          <div className="border-t border-white/8" />
+
+          {/* Body */}
+          <div className="p-6 space-y-5">
+            {/* Display name (edit) */}
+            {editing && (
+              <div>
+                <label className="block text-xs text-white/40 mb-1">Display Name</label>
+                <input
+                  value={editForm.displayName}
+                  onChange={e => setEditForm(f => ({ ...f, displayName: e.target.value }))}
+                  className="w-full px-3 py-2 rounded-lg bg-white/5 border border-white/10 text-white text-sm focus:outline-none focus:border-blue-500/50"
+                />
+              </div>
+            )}
+
+            {/* Real name */}
+            <div>
+              <label className="block text-xs text-white/40 mb-1">
+                <User className="w-3 h-3 inline mr-1" />Real Name
+              </label>
+              {editing ? (
+                <input
+                  value={editForm.realName}
+                  onChange={e => setEditForm(f => ({ ...f, realName: e.target.value }))}
+                  placeholder="Your real name (optional)"
+                  className="w-full px-3 py-2 rounded-lg bg-white/5 border border-white/10 text-white text-sm focus:outline-none focus:border-blue-500/50"
+                />
               ) : (
-                <div className="space-y-4">
-                  {pendingApprovals.map((approval) => (
-                    <div key={approval.id} className="bg-gray-700 rounded-lg p-4">
-                      <div className="flex items-start justify-between mb-3">
-                        <div className="flex items-center space-x-3">
-                          {getApprovalTypeIcon(approval.type)}
-                          <div>
-                            <h3 className="font-semibold">{approval.playerNickname}</h3>
-                            <p className="text-sm text-gray-400 capitalize">
-                              {approval.type.replace('_', ' ')} Request
-                            </p>
-                          </div>
-                        </div>
-                        <span className="text-xs text-gray-500">
-                          {new Date(approval.submittedAt).toLocaleDateString()}
-                        </span>
-                      </div>
-
-                      {/* Approval Details */}
-                      <div className="mb-4 p-3 bg-gray-600 rounded">
-                        {approval.type === 'avatar' && (
-                          <div className="flex items-center space-x-4">
-                            <div>
-                              <p className="text-sm text-gray-300 mb-1">Current Avatar:</p>
-                              <img 
-                                src={approval.data.oldAvatarUrl} 
-                                alt="Current" 
-                                className="w-16 h-16 rounded-full"
-                              />
-                            </div>
-                            <div>→</div>
-                            <div>
-                              <p className="text-sm text-gray-300 mb-1">New Avatar:</p>
-                              <img 
-                                src={approval.data.newAvatarUrl} 
-                                alt="New" 
-                                className="w-16 h-16 rounded-full"
-                              />
-                            </div>
-                          </div>
-                        )}
-
-                        {approval.type === 'profile_update' && (
-                          <div className="space-y-2">
-                            {approval.data.changes?.map((change, index) => (
-                              <div key={index} className="text-sm">
-                                <span className="font-medium">{change.field}:</span>
-                                <span className="text-red-400 ml-2">{String(change.oldValue)}</span>
-                                <span className="mx-2">→</span>
-                                <span className="text-green-400">{String(change.newValue)}</span>
-                              </div>
-                            ))}
-                          </div>
-                        )}
-
-                        {approval.type === 'name_change' && (
-                          <div className="text-sm">
-                            <p><span className="font-medium">From:</span> {approval.data.nameChange?.oldNickname}</p>
-                            <p><span className="font-medium">To:</span> {approval.data.nameChange?.newNickname}</p>
-                            <p><span className="font-medium">Reason:</span> {approval.data.nameChange?.reason}</p>
-                          </div>
-                        )}
-
-                        {approval.type === 'role_change' && (
-                          <div className="text-sm space-y-2">
-                            <div>
-                              <span className="font-medium">Current Roles:</span>
-                              <div className="flex flex-wrap gap-1 mt-1">
-                                {approval.data.roleChange?.currentRoles.map((role, index) => (
-                                  <span key={index} className="px-2 py-1 bg-red-600/20 text-red-300 rounded text-xs">
-                                    {role}
-                                  </span>
-                                ))}
-                              </div>
-                            </div>
-                            <div>
-                              <span className="font-medium">Requested Roles:</span>
-                              <div className="flex flex-wrap gap-1 mt-1">
-                                {approval.data.roleChange?.requestedRoles.map((role, index) => (
-                                  <span key={index} className="px-2 py-1 bg-green-600/20 text-green-300 rounded text-xs">
-                                    #{index + 1} {role}
-                                  </span>
-                                ))}
-                              </div>
-                            </div>
-                            {approval.data.roleChange?.reason && (
-                              <p><span className="font-medium">Reason:</span> {approval.data.roleChange.reason}</p>
-                            )}
-                          </div>
-                        )}
-                      </div>
-
-                      {/* Action Buttons */}
-                      <div className="flex space-x-2">
-                        <button
-                          onClick={() => handleApproval(approval.id, 'approve', 'Approved by admin')}
-                          className="flex items-center space-x-2 px-3 py-1 bg-green-600 hover:bg-green-700 rounded transition-colors"
-                        >
-                          <ThumbsUp className="w-4 h-4" />
-                          <span>Approve</span>
-                        </button>
-                        <button
-                          onClick={() => handleApproval(approval.id, 'reject', 'Rejected by admin')}
-                          className="flex items-center space-x-2 px-3 py-1 bg-red-600 hover:bg-red-700 rounded transition-colors"
-                        >
-                          <ThumbsDown className="w-4 h-4" />
-                          <span>Reject</span>
-                        </button>
-                        <button className="flex items-center space-x-2 px-3 py-1 bg-gray-600 hover:bg-gray-700 rounded transition-colors">
-                          <Eye className="w-4 h-4" />
-                          <span>View Details</span>
-                        </button>
-                      </div>
-                    </div>
-                  ))}
-                </div>
+                <p className="text-white/70 text-sm">{admin.realName || <span className="text-white/25 italic">Not set</span>}</p>
               )}
             </div>
-          </div>
-        )}
 
-        {activeTab === 'activity' && (
-          <div className="bg-gray-800 rounded-lg p-6">
-            <h2 className="text-xl font-semibold mb-4">Recent Activity</h2>
-            <div className="space-y-4">
-              {/* Mock activity data */}
-              <div className="flex items-center space-x-3 p-3 bg-gray-700 rounded">
-                <CheckCircle className="w-5 h-5 text-green-400" />
-                <div>
-                  <p className="text-sm">Approved avatar change for player "Irene"</p>
-                  <p className="text-xs text-gray-400">2 hours ago</p>
-                </div>
+            {/* Bio / description */}
+            <div>
+              <label className="block text-xs text-white/40 mb-1">Bio</label>
+              {editing ? (
+                <textarea
+                  value={editForm.description}
+                  onChange={e => setEditForm(f => ({ ...f, description: e.target.value }))}
+                  placeholder="Tell the community about yourself..."
+                  rows={3}
+                  className="w-full px-3 py-2 rounded-lg bg-white/5 border border-white/10 text-white text-sm focus:outline-none focus:border-blue-500/50 resize-none"
+                />
+              ) : (
+                <p className="text-white/70 text-sm leading-relaxed">
+                  {admin.description || <span className="text-white/25 italic">No bio yet</span>}
+                </p>
+              )}
+            </div>
+
+            <div className="border-t border-white/8" />
+
+            {/* Contact info */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              {/* Discord */}
+              <div>
+                <label className="block text-xs text-white/40 mb-1">
+                  <MessageCircle className="w-3 h-3 inline mr-1" />Discord
+                </label>
+                {editing ? (
+                  <input
+                    value={editForm.discordUsername}
+                    onChange={e => setEditForm(f => ({ ...f, discordUsername: e.target.value }))}
+                    placeholder="username#0000"
+                    className="w-full px-3 py-2 rounded-lg bg-white/5 border border-white/10 text-white text-sm focus:outline-none focus:border-blue-500/50"
+                  />
+                ) : (
+                  <p className="text-white/70 text-sm">
+                    {admin.discordUsername || <span className="text-white/25 italic">Not set</span>}
+                  </p>
+                )}
               </div>
-              <div className="flex items-center space-x-3 p-3 bg-gray-700 rounded">
-                <Users className="w-5 h-5 text-blue-400" />
-                <div>
-                  <p className="text-sm">Updated tournament schedule for Season 5</p>
-                  <p className="text-xs text-gray-400">5 hours ago</p>
-                </div>
+
+              {/* Email */}
+              <div>
+                <label className="block text-xs text-white/40 mb-1">
+                  <Mail className="w-3 h-3 inline mr-1" />Email
+                </label>
+                {editing ? (
+                  <input
+                    type="email"
+                    value={editForm.email}
+                    onChange={e => setEditForm(f => ({ ...f, email: e.target.value }))}
+                    placeholder="admin@example.com"
+                    className="w-full px-3 py-2 rounded-lg bg-white/5 border border-white/10 text-white text-sm focus:outline-none focus:border-blue-500/50"
+                  />
+                ) : (
+                  <p className="text-white/70 text-sm">
+                    {admin.email || <span className="text-white/25 italic">Not set</span>}
+                  </p>
+                )}
               </div>
-              <div className="flex items-center space-x-3 p-3 bg-gray-700 rounded">
-                <MessageCircle className="w-5 h-5 text-purple-400" />
-                <div>
-                  <p className="text-sm">Resolved dispute between Team Alpha and Team Beta</p>
-                  <p className="text-xs text-gray-400">1 day ago</p>
-                </div>
+
+              {/* Steam */}
+              <div>
+                <label className="block text-xs text-white/40 mb-1">
+                  <ExternalLink className="w-3 h-3 inline mr-1" />Steam URL
+                </label>
+                {editing ? (
+                  <input
+                    value={editForm.steamUrl}
+                    onChange={e => setEditForm(f => ({ ...f, steamUrl: e.target.value }))}
+                    placeholder="https://steamcommunity.com/id/..."
+                    className="w-full px-3 py-2 rounded-lg bg-white/5 border border-white/10 text-white text-sm focus:outline-none focus:border-blue-500/50"
+                  />
+                ) : admin.steamUrl ? (
+                  <a
+                    href={admin.steamUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-blue-400 hover:text-blue-300 text-sm flex items-center gap-1"
+                  >
+                    Steam Profile <ExternalLink className="w-3 h-3" />
+                  </a>
+                ) : (
+                  <p className="text-white/25 text-sm italic">Not set</p>
+                )}
               </div>
             </div>
           </div>
-        )}
+        </div>
       </div>
     </div>
   );

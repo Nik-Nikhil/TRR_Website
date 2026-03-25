@@ -2,7 +2,7 @@
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { useState, useRef, useEffect, type ReactNode } from "react";
 import * as React from "react";
-import { Menu, ScrollText, House, LogIn, User, Shield, ChevronDown, UserCircle } from "lucide-react";
+import { Menu, ScrollText, House, LogIn, User, Shield, ChevronDown, UserCircle, Medal } from "lucide-react";
 import { AnimatePresence, LayoutGroup, motion } from "framer-motion";
 import AuthService from "../../services/auth";
 import SteamAuthService from "../../services/steamAuth";
@@ -271,13 +271,13 @@ export default function Navbar() {
                 label="Rules"
                 active={pathname.startsWith("/rules")}
               />
-              {/* Standings - Hidden (Under Construction) */}
-              {/* <NavItem
+              {/* Standings */}
+              <NavItem
                 to="/seasons"
                 icon={<Medal className="w-3.5 h-3.5 md:w-4 md:h-4 lg:w-[18px] lg:h-[18px]" />}
                 label="Standings"
                 active={pathname.startsWith("/seasons")}
-              /> */}
+              />
               <NavItem
                 to="/players"
                 icon={<User className="w-3.5 h-3.5 md:w-4 md:h-4 lg:w-[18px] lg:h-[18px]" />}
@@ -289,6 +289,12 @@ export default function Navbar() {
                 icon={<svg className="w-3.5 h-3.5 md:w-4 md:h-4 lg:w-[18px] lg:h-[18px]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>}
                 label="Auction"
                 active={pathname.startsWith("/auction")}
+              />
+              <NavItem
+                to="/wall-of-shame"
+                icon={<svg className="w-3.5 h-3.5 md:w-4 md:h-4 lg:w-[18px] lg:h-[18px]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636" /></svg>}
+                label="Banned"
+                active={pathname.startsWith("/wall-of-shame")}
               />
               
               {/* Profile Link - Only show for logged-in players */}
@@ -461,14 +467,14 @@ export default function Navbar() {
                     active={pathname.startsWith("/rules")}
                     mobile
                   />
-                  {/* Standings - Hidden (Under Construction) */}
-                  {/* <NavItem
+                  {/* Standings */}
+                  <NavItem
                     to="/seasons"
                     icon={<Medal className="w-[18px] h-[18px]" />}
                     label="Standings"
                     active={pathname.startsWith("/seasons")}
                     mobile
-                  /> */}
+                  />
                   <NavItem
                     to="/players"
                     icon={<User className="w-[18px] h-[18px]" />}
@@ -481,6 +487,13 @@ export default function Navbar() {
                     icon={<svg className="w-[18px] h-[18px]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>}
                     label="Auction"
                     active={pathname.startsWith("/auction")}
+                    mobile
+                  />
+                  <NavItem
+                    to="/wall-of-shame"
+                    icon={<svg className="w-[18px] h-[18px]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636" /></svg>}
+                    label="Banned"
+                    active={pathname.startsWith("/wall-of-shame")}
                     mobile
                   />
                   

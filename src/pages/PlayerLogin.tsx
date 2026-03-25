@@ -1,11 +1,12 @@
 import { useState, useEffect, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Search, Lock, Eye, EyeOff, LogIn, ChevronRight } from 'lucide-react';
+import { Search, Lock, Eye, EyeOff, LogIn, ChevronRight, Users, Trophy } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import DatabaseService from '../services/database';
 import AuthService from '../services/auth';
 import SteamAuthService from '../services/steamAuth';
 import { mapDatabasePlayerToFrontend } from '../utils/playerMapper';
+import { supabase } from '../lib/supabase';
 
 function SteamIcon({ className = 'w-5 h-5' }: { className?: string }) {
   return (
@@ -15,11 +16,6 @@ function SteamIcon({ className = 'w-5 h-5' }: { className?: string }) {
   );
 }
 
-function getInitials(name: string) {
-  const w = name.trim().split(' ');
-  return w.length >= 2 ? (w[0][0] + w[1][0]).toUpperCase() : name.slice(0, 2).toUpperCase();
-}
-
 function getColor(name: string) {
   const colors = ['from-blue-500 to-indigo-600', 'from-purple-500 to-pink-600', 'from-orange-500 to-red-600', 'from-teal-500 to-cyan-600', 'from-green-500 to-emerald-600'];
   let h = 0;
@@ -27,17 +23,12 @@ function getColor(name: string) {
   return colors[Math.abs(h) % colors.length];
 }
 
-function PlayerAvatar({ url, name, size }: { url: string; name: string; size: number }) {
+function PlayerAvatar({ url, name }: { url?: string; name: string }) {
   const [err, setErr] = useState(false);
-  const cls = `w-${size} h-${size}`;
-  if (!url || err) {
-    return (
-      <div className={`${cls} rounded-full bg-gradient-to-br ${getColor(name)} flex items-center justify-center flex-shrink-0`}>
-        <span className="text-white font-bold text-xs">{getInitials(name)}</span>
-      </div>
-    );
-  }
-  return <img src={url} alt={name} className={`${cls} rounded-full object-cover flex-shrink-0`} onError={() => setErr(true)} />;
+  const initials = name.trim().split(' ').slice(0, 2).map(w => w[0]).join('').toUpperCase();
+  if (!url || err)
+    return <div className={`w-7 h-7 rounded-full bg-gradient-to-br ${getColor(name)} flex items-center justify-center flex-shrink-0`}><span className="text-white font-bold text-xs">{initials}</span></div>;
+  return <img src={url} alt={name} className="w-7 h-7 rounded-full object-cover flex-shrink-0" onError={() => setErr(true)} />;
 }
 
 export default function PlayerLogin() {
@@ -52,17 +43,23 @@ export default function PlayerLogin() {
   const [isLoading, setIsLoading] = useState(false);
   const [players, setPlayers] = useState<any[]>([]);
   const [searchResults, setSearchResults] = useState<any[]>([]);
+  const [stats, setStats] = useState({ players: 0, seasons: 5 });
 
   useEffect(() => {
-    console.log('🔵 PlayerLogin mount — checking existing session')
     if (SteamAuthService.isLoggedIn()) {
       const s = SteamAuthService.getSession();
-      console.log('✅ Already logged in, redirecting to:', s?.playerId)
       if (s) navigate(`/players/${s.playerId}`, { replace: true });
-    } else {
-      console.log('ℹ️ No session found, showing login page')
     }
   }, [navigate]);
+
+  useEffect(() => {
+    supabase
+      .from('players')
+      .select('id', { count: 'exact', head: true })
+      .then(({ count }) => {
+        if (count) setStats(s => ({ ...s, players: count }));
+      });
+  }, []);
 
   useEffect(() => {
     if (!showLegacy) return;
@@ -107,131 +104,238 @@ export default function PlayerLogin() {
   };
 
   return (
-    <div className="min-h-screen flex flex-col" style={{ paddingTop: '80px', background: '#080b0f' }}>
-
-      {/* Subtle glow */}
-      <div className="fixed inset-0 pointer-events-none" style={{
-        background: 'radial-gradient(ellipse 60% 40% at 50% 30%, rgba(102,192,244,0.05) 0%, transparent 70%)'
-      }} />
-
-      {/* Main content — vertically centered in remaining space */}
-      <div className="flex-1 flex flex-col items-center justify-center px-4 py-12">
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.4 }}
-          className="flex flex-col items-center gap-7 text-center"
-        >
-          {/* Subtitle only — navbar already shows the brand */}
-          <p className="text-gray-400 text-base tracking-wide">
-            Sign in with your Steam account to continue
-          </p>
-
-          {/* Steam button */}
-          <button
-            onClick={() => SteamAuthService.initiateLogin()}
-            className="flex items-center gap-2.5 px-8 py-3 rounded-lg font-semibold text-sm tracking-widest uppercase transition-all duration-200 cursor-pointer"
-            style={{
-              background: 'rgba(102,192,244,0.08)',
-              border: '1px solid rgba(102,192,244,0.22)',
-              color: '#9dd4ee',
-            }}
-            onMouseEnter={e => {
-              e.currentTarget.style.background = 'rgba(102,192,244,0.15)';
-              e.currentTarget.style.borderColor = 'rgba(102,192,244,0.4)';
-              e.currentTarget.style.color = '#c2e4f5';
-            }}
-            onMouseLeave={e => {
-              e.currentTarget.style.background = 'rgba(102,192,244,0.08)';
-              e.currentTarget.style.borderColor = 'rgba(102,192,244,0.22)';
-              e.currentTarget.style.color = '#9dd4ee';
-            }}
-          >
-            <SteamIcon className="w-4 h-4" />
-            Sign in with Steam
-          </button>
-
-          {/* Legacy login panel */}
-          <AnimatePresence>
-            {showLegacy && (
-              <motion.div
-                initial={{ opacity: 0, y: 10 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: 10 }}
-                className="w-72 rounded-xl p-5 text-left"
-                style={{ background: 'rgba(12,15,20,0.95)', border: '1px solid rgba(255,255,255,0.07)' }}
-              >
-                <p className="text-gray-700 text-[10px] text-center tracking-widest uppercase mb-4">Legacy Login</p>
-                <AnimatePresence mode="wait">
-                  {!selectedPlayer ? (
-                    <motion.div key="search" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="space-y-2">
-                      <div className="relative">
-                        <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-gray-600" />
-                        <input type="text" value={searchQuery} onChange={e => setSearchQuery(e.target.value)} placeholder="Search nickname…"
-                          className="w-full pl-9 pr-3 py-2.5 text-sm text-gray-200 placeholder-gray-700 rounded-lg focus:outline-none transition-colors"
-                          style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)' }}
-                          onFocus={e => (e.currentTarget.style.borderColor = 'rgba(255,255,255,0.18)')}
-                          onBlur={e => (e.currentTarget.style.borderColor = 'rgba(255,255,255,0.08)')}
-                        />
-                      </div>
-                      {searchQuery && (
-                        <div className="space-y-1 max-h-44 overflow-y-auto">
-                          {filteredPlayers.slice(0, 6).map(p => (
-                            <button key={p.id} onClick={() => { setSelectedPlayer(p); setSearchQuery(''); setError(''); }}
-                              className="w-full flex items-center gap-2.5 px-3 py-2 text-left rounded-lg transition-colors cursor-pointer"
-                              style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.05)' }}
-                              onMouseEnter={e => (e.currentTarget.style.background = 'rgba(255,255,255,0.07)')}
-                              onMouseLeave={e => (e.currentTarget.style.background = 'rgba(255,255,255,0.03)')}
-                            >
-                              <PlayerAvatar url={p.avatarUrl} name={p.nickname} size={7} />
-                              <span className="text-gray-200 text-sm font-medium truncate flex-1">{p.nickname}</span>
-                              <ChevronRight className="w-3 h-3 text-gray-600" />
-                            </button>
-                          ))}
-                          {filteredPlayers.length === 0 && <p className="text-center text-gray-700 text-xs py-3">No players found</p>}
-                        </div>
-                      )}
-                    </motion.div>
-                  ) : (
-                    <motion.div key="pass" initial={{ opacity: 0, y: 6 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }} className="space-y-2">
-                      <div className="flex items-center gap-2.5 px-3 py-2 rounded-lg" style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.07)' }}>
-                        <PlayerAvatar url={selectedPlayer.avatarUrl} name={selectedPlayer.nickname} size={7} />
-                        <span className="text-white font-semibold text-sm flex-1 truncate">{selectedPlayer.nickname}</span>
-                        <button onClick={() => { setSelectedPlayer(null); setPassword(''); setError(''); }} className="text-gray-600 hover:text-gray-400 text-xs transition-colors cursor-pointer">✕</button>
-                      </div>
-                      <form onSubmit={handlePasswordSubmit} className="space-y-2">
-                        <div className="relative">
-                          <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-gray-600" />
-                          <input type={showPassword ? 'text' : 'password'} value={password} onChange={e => { setPassword(e.target.value); setError(''); }}
-                            placeholder="Password" required autoFocus
-                            className="w-full pl-9 pr-9 py-2.5 text-sm text-gray-200 placeholder-gray-700 rounded-lg focus:outline-none transition-colors"
-                            style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)' }}
-                            onFocus={e => (e.currentTarget.style.borderColor = 'rgba(255,255,255,0.18)')}
-                            onBlur={e => (e.currentTarget.style.borderColor = 'rgba(255,255,255,0.08)')}
-                          />
-                          <button type="button" onClick={() => setShowPassword(v => !v)} className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-600 hover:text-gray-400 cursor-pointer transition-colors">
-                            {showPassword ? <EyeOff className="w-3.5 h-3.5" /> : <Eye className="w-3.5 h-3.5" />}
-                          </button>
-                        </div>
-                        {error && <p className="text-red-400 text-xs text-center">{error}</p>}
-                        <button type="submit" disabled={isLoading}
-                          className="w-full flex items-center justify-center gap-2 py-2.5 rounded-lg text-sm font-semibold transition-all cursor-pointer disabled:opacity-40"
-                          style={{ background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.1)', color: '#d1d5db' }}
-                        >
-                          {isLoading ? <div className="w-4 h-4 border-2 border-white/20 border-t-white/60 rounded-full animate-spin" /> : <><LogIn className="w-3.5 h-3.5" /> Login</>}
-                        </button>
-                      </form>
-                    </motion.div>
-                  )}
-                </AnimatePresence>
-              </motion.div>
-            )}
-          </AnimatePresence>
-          {/* Invisible legacy trigger — click 5x anywhere below button */}
-          <div onClick={handleFooterClick} className="w-48 h-6 cursor-default select-none" />
-        </motion.div>
+    <div className="min-h-screen" style={{ paddingTop: '64px', background: 'rgba(5,7,10)', fontFamily: 'Poppins, sans-serif' }}>
+      {/* Background — map at visible opacity */}
+      <div className="fixed inset-0 z-0">
+        <img src="/map2.jpg" alt="" className="w-full h-full object-cover object-center" style={{ opacity: 0.45 }} />
+        <div className="absolute inset-0" style={{ background: 'linear-gradient(105deg, rgba(5,7,10,0.92) 0%, rgba(5,7,10,0.55) 50%, rgba(5,7,10,0.88) 100%)' }} />
       </div>
 
+      <div className="relative z-10 min-h-[calc(100vh-64px)] flex items-center">
+        <div className="w-full max-w-6xl mx-auto px-6 py-12 grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+
+          {/* LEFT */}
+          <motion.div
+            initial={{ opacity: 0, x: -30 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ duration: 0.5 }}
+            className="space-y-8"
+          >
+            <div className="space-y-3">
+              <h1 className="text-5xl font-bold text-white leading-tight">
+                The Roshan<br />
+                <span className="bg-gradient-to-r from-yellow-400 to-orange-500 bg-clip-text text-transparent">
+                  Rumble
+                </span>
+              </h1>
+              <p className="text-white/50 text-base">
+                India's premier amateur league for all ranks.
+              </p>
+            </div>
+
+            {/* Stats */}
+            <div className="flex gap-6">
+              <div className="flex items-center gap-2.5">
+                <div className="w-9 h-9 rounded-lg flex items-center justify-center" style={{ background: 'rgba(234,179,8,0.1)', border: '1px solid rgba(234,179,8,0.2)' }}>
+                  <Users className="w-4 h-4 text-yellow-400" />
+                </div>
+                <div>
+                  <div className="text-white font-bold text-lg leading-none">{stats.players > 0 ? `${stats.players}+` : '200+'}</div>
+                  <div className="text-white/40 text-xs">Players</div>
+                </div>
+              </div>
+              <div className="flex items-center gap-2.5">
+                <div className="w-9 h-9 rounded-lg flex items-center justify-center" style={{ background: 'rgba(168,85,247,0.1)', border: '1px solid rgba(168,85,247,0.2)' }}>
+                  <Trophy className="w-4 h-4 text-purple-400" />
+                </div>
+                <div>
+                  <div className="text-white font-bold text-lg leading-none">{stats.seasons}</div>
+                  <div className="text-white/40 text-xs">Seasons</div>
+                </div>
+              </div>
+            </div>
+
+            {/* Feature cards */}
+            <div className="grid grid-cols-2 gap-3">
+              {[
+                {
+                  icon: '⚔️',
+                  title: 'Draft Auction',
+                  desc: 'Captains bid on players every season in a live auction',
+                  color: 'rgba(234,179,8,0.08)',
+                  border: 'rgba(234,179,8,0.18)',
+                },
+                {
+                  icon: '🏆',
+                  title: 'Prize Pool',
+                  desc: 'Real cash prizes for top teams each season',
+                  color: 'rgba(168,85,247,0.08)',
+                  border: 'rgba(168,85,247,0.18)',
+                },
+                {
+                  icon: '📊',
+                  title: 'Player Profiles',
+                  desc: 'Track your MMR, heroes, and season history',
+                  color: 'rgba(59,130,246,0.08)',
+                  border: 'rgba(59,130,246,0.18)',
+                },
+                {
+                  icon: '🎮',
+                  title: 'All Ranks',
+                  desc: 'Herald to Divine — everyone gets to play',
+                  color: 'rgba(20,184,166,0.08)',
+                  border: 'rgba(20,184,166,0.18)',
+                },
+              ].map((f, i) => (
+                <motion.div
+                  key={f.title}
+                  initial={{ opacity: 0, y: 16 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.2 + i * 0.08, duration: 0.4 }}
+                  className="rounded-xl p-4 space-y-2"
+                  style={{ background: f.color, border: `1px solid ${f.border}` }}
+                >
+                  <div className="text-xl">{f.icon}</div>
+                  <div className="text-white font-semibold text-sm">{f.title}</div>
+                  <div className="text-white/40 text-xs leading-relaxed">{f.desc}</div>
+                </motion.div>
+              ))}
+            </div>
+          </motion.div>
+
+          {/* RIGHT — Login card */}
+          <motion.div
+            initial={{ opacity: 0, x: 30 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ duration: 0.5, delay: 0.1 }}
+            className="flex justify-center lg:justify-end"
+          >
+            <div className="w-full max-w-sm">
+              <div className="rounded-2xl" style={{ background: 'rgba(10,13,18,0.85)', border: '1px solid rgba(255,255,255,0.08)', backdropFilter: 'blur(24px)' }}>
+                <div className="px-7 pt-7 pb-2">
+                  <h2 className="text-xl font-bold text-white">Welcome back</h2>
+                  <p className="text-white/40 text-sm mt-1">Sign in with Steam to access your profile</p>
+                </div>
+
+                <div className="px-7 pb-7 pt-5 space-y-3">
+                  {/* Steam button */}
+                  <button
+                    onClick={() => SteamAuthService.initiateLogin()}
+                    className="w-full flex items-center justify-center gap-3 py-3.5 rounded-xl font-semibold text-sm transition-all duration-200"
+                    style={{
+                      background: 'linear-gradient(135deg, rgba(102,192,244,0.14) 0%, rgba(102,192,244,0.07) 100%)',
+                      border: '1px solid rgba(102,192,244,0.28)',
+                      color: '#9dd4ee',
+                    }}
+                    onMouseEnter={e => {
+                      e.currentTarget.style.background = 'linear-gradient(135deg, rgba(102,192,244,0.22) 0%, rgba(102,192,244,0.12) 100%)';
+                      e.currentTarget.style.borderColor = 'rgba(102,192,244,0.5)';
+                      e.currentTarget.style.color = '#c2e4f5';
+                    }}
+                    onMouseLeave={e => {
+                      e.currentTarget.style.background = 'linear-gradient(135deg, rgba(102,192,244,0.14) 0%, rgba(102,192,244,0.07) 100%)';
+                      e.currentTarget.style.borderColor = 'rgba(102,192,244,0.28)';
+                      e.currentTarget.style.color = '#9dd4ee';
+                    }}
+                  >
+                    <SteamIcon className="w-5 h-5" />
+                    Continue with Steam
+                  </button>
+
+                  {/* Simple note */}
+                  <p className="text-white/30 text-xs text-center px-2 leading-relaxed">
+                    New here? Your profile gets created automatically after sign in.
+                  </p>
+
+                  {/* Legacy login — hidden behind 5 clicks */}
+                  <AnimatePresence>
+                    {showLegacy && (
+                      <motion.div
+                        initial={{ opacity: 0, height: 0 }}
+                        animate={{ opacity: 1, height: 'auto' }}
+                        exit={{ opacity: 0, height: 0 }}
+                        className="overflow-hidden"
+                      >
+                        <div className="pt-3 space-y-3 border-t border-white/5">
+                          <p className="text-white/20 text-[10px] text-center tracking-widest uppercase">Legacy Login</p>
+                          <AnimatePresence mode="wait">
+                            {!selectedPlayer ? (
+                              <motion.div key="search" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="space-y-2">
+                                <div className="relative">
+                                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-white/25" />
+                                  <input
+                                    type="text" value={searchQuery} onChange={e => setSearchQuery(e.target.value)}
+                                    placeholder="Search nickname…"
+                                    className="w-full pl-9 pr-3 py-2.5 text-sm text-white/80 placeholder-white/20 rounded-lg focus:outline-none transition-colors"
+                                    style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)' }}
+                                    onFocus={e => (e.currentTarget.style.borderColor = 'rgba(255,255,255,0.18)')}
+                                    onBlur={e => (e.currentTarget.style.borderColor = 'rgba(255,255,255,0.08)')}
+                                  />
+                                </div>
+                                {searchQuery && (
+                                  <div className="space-y-1 max-h-44 overflow-y-auto">
+                                    {filteredPlayers.slice(0, 6).map(p => (
+                                      <button key={p.id} onClick={() => { setSelectedPlayer(p); setSearchQuery(''); setError(''); }}
+                                        className="w-full flex items-center gap-2.5 px-3 py-2 text-left rounded-lg transition-colors"
+                                        style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.05)' }}
+                                        onMouseEnter={e => (e.currentTarget.style.background = 'rgba(255,255,255,0.07)')}
+                                        onMouseLeave={e => (e.currentTarget.style.background = 'rgba(255,255,255,0.03)')}
+                                      >
+                                        <PlayerAvatar url={p.avatarUrl} name={p.nickname} />
+                                        <span className="text-white/70 text-sm font-medium truncate flex-1">{p.nickname}</span>
+                                        <ChevronRight className="w-3 h-3 text-white/25" />
+                                      </button>
+                                    ))}
+                                    {filteredPlayers.length === 0 && <p className="text-center text-white/25 text-xs py-3">No players found</p>}
+                                  </div>
+                                )}
+                              </motion.div>
+                            ) : (
+                              <motion.div key="pass" initial={{ opacity: 0, y: 6 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }} className="space-y-2">
+                                <div className="flex items-center gap-2.5 px-3 py-2 rounded-lg" style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.07)' }}>
+                                  <PlayerAvatar url={selectedPlayer.avatarUrl} name={selectedPlayer.nickname} />
+                                  <span className="text-white font-semibold text-sm flex-1 truncate">{selectedPlayer.nickname}</span>
+                                  <button onClick={() => { setSelectedPlayer(null); setPassword(''); setError(''); }} className="text-white/25 hover:text-white/50 text-xs transition-colors">✕</button>
+                                </div>
+                                <form onSubmit={handlePasswordSubmit} className="space-y-2">
+                                  <div className="relative">
+                                    <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-white/25" />
+                                    <input type={showPassword ? 'text' : 'password'} value={password} onChange={e => { setPassword(e.target.value); setError(''); }}
+                                      placeholder="Password" required autoFocus
+                                      className="w-full pl-9 pr-9 py-2.5 text-sm text-white/80 placeholder-white/20 rounded-lg focus:outline-none transition-colors"
+                                      style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)' }}
+                                      onFocus={e => (e.currentTarget.style.borderColor = 'rgba(255,255,255,0.18)')}
+                                      onBlur={e => (e.currentTarget.style.borderColor = 'rgba(255,255,255,0.08)')}
+                                    />
+                                    <button type="button" onClick={() => setShowPassword(v => !v)} className="absolute right-3 top-1/2 -translate-y-1/2 text-white/25 hover:text-white/50 transition-colors">
+                                      {showPassword ? <EyeOff className="w-3.5 h-3.5" /> : <Eye className="w-3.5 h-3.5" />}
+                                    </button>
+                                  </div>
+                                  {error && <p className="text-red-400 text-xs text-center">{error}</p>}
+                                  <button type="submit" disabled={isLoading}
+                                    className="w-full flex items-center justify-center gap-2 py-2.5 rounded-lg text-sm font-semibold transition-all disabled:opacity-40"
+                                    style={{ background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.1)', color: '#d1d5db' }}
+                                  >
+                                    {isLoading ? <div className="w-4 h-4 border-2 border-white/20 border-t-white/60 rounded-full animate-spin" /> : <><LogIn className="w-3.5 h-3.5" /> Login</>}
+                                  </button>
+                                </form>
+                              </motion.div>
+                            )}
+                          </AnimatePresence>
+                        </div>
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
+                </div>
+              </div>
+
+              {/* Invisible legacy trigger */}
+              <div onClick={handleFooterClick} className="w-full h-5 cursor-default select-none mt-1" />
+            </div>
+          </motion.div>
+
+        </div>
+      </div>
     </div>
   );
 }

@@ -31,9 +31,11 @@ import AdminDashboard from "./pages/AdminDashboard";
 import SuperAdminDashboard from "./pages/SuperAdminDashboard";
 import SteamCallback from "./pages/SteamCallback";
 import Onboarding from "./pages/Onboarding";
+import WallOfShame from "./pages/WallOfShame";
+import SeasonShowCase from "./pages/SeasonShowCase";
 
-import GroupStage from "./pages/GroupStage";
 import Playoff from "./pages/Playoff";
+import GroupStage from "./pages/GroupStage";
 
 function App() {
   return (
@@ -67,6 +69,8 @@ function App() {
 
           <Route path="/group-stage/:season" element={<GroupStage />} />
           <Route path="/playoff/:season" element={<Playoff />} />
+          <Route path="/seasons" element={<SeasonShowCase />} />
+          <Route path="/wall-of-shame" element={<WallOfShame />} />
           <Route path="/register" element={<Registration />} />
           <Route path="/new-player-registration" element={<NewPlayerRegistration />} />
           <Route path="/admin-login" element={<AdminLogin />} />

@@ -1,37 +1,13 @@
 name: Optimize Old Images
 
+# Disabled — image compression happens client-side on upload via ImageOptimizationService
+# The original script used browser APIs (canvas, FileReader) incompatible with Node.js
 on:
-  schedule:
-    # Run daily at 2 AM UTC
-    - cron: '0 2 * * *'
-  workflow_dispatch: # Allow manual trigger
+  workflow_dispatch: # Manual trigger only, effectively disabled
 
 jobs:
   optimize:
     runs-on: ubuntu-latest
-    
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v3
-      
-      - name: Setup Node.js
-        uses: actions/setup-node@v3
-        with:
-          node-version: '18'
-          cache: 'npm'
-          cache-dependency-path: TRR_Website/package-lock.json
-      
-      - name: Install dependencies
-        working-directory: TRR_Website
-        run: npm ci
-      
-      - name: Run image optimization
-        working-directory: TRR_Website
-        env:
-          VITE_SUPABASE_URL: ${{ secrets.VITE_SUPABASE_URL }}
-          VITE_SUPABASE_ANON_KEY: ${{ secrets.VITE_SUPABASE_ANON_KEY }}
-        run: npx tsx src/scripts/optimizeImages.ts
-      
-      - name: Report results
-        if: always()
-        run: echo "Image optimization job completed"
+      - name: Skip
+        run: echo "Image optimization is handled client-side on upload. No server-side job needed."

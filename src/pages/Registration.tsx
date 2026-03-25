@@ -1,1335 +1,435 @@
-import { useState } from "react";
-import { Search, User, UserPlus, CheckCircle, Star, ArrowLeft, Upload } from "lucide-react";
-import { players } from "../data/players";
+import { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { motion, AnimatePresence } from 'framer-motion';
+import { CheckCircle, ChevronRight, ChevronLeft } from 'lucide-react';
+import SteamAuthService from '../services/steamAuth';
+import registrationService from '../services/registrationService';
+import registrationRequestService from '../services/registrationRequestService';
+import { supabase } from '../lib/supabase';
+import { getMedalFromMMR } from '../utils/mmrToMedal';
 
-// Define the Player type locally based on the structure we saw
-type Player = {
-  id: string;
-  nickname: string;
-  realName?: string;
-  avatarUrl: string;
-  seasonBadges: string[];
-  hasWonCup: boolean;
-  cupRank?: "gold" | "silver" | "bronze";
-  cupTooltip?: string;
-  cupSeason?: number;
-  currentMedalLabel: string;
-  currentMedalId: string;
-  currentMMR?: number;
-  peakMedalLabel: string;
-  peakMedalId: string;
-  peakMMR?: number;
-  bio: string;
-  roles: Array<{ iconSrc: string; label: string }>;
-  steamUrl: string;
-  dotabuffUrl: string;
-  favoriteHeroes: Array<{ videoSrc: string; name: string }>;
-  behaviorScore?: {
-    mechanicalSkill?: number;
-    teamwork?: number;
-    communication?: number;
-    consistency?: number;
-  };
-  specialBadge?: "contributor" | "founder" | "mvp";
-};
+const ROLES = [
+  { id: 'pos1', label: 'Carry', pos: 'Position 1', icon: '/icons/pos_1.png' },
+  { id: 'pos2', label: 'Mid', pos: 'Position 2', icon: '/icons/pos_2.png' },
+  { id: 'pos3', label: 'Offlane', pos: 'Position 3', icon: '/icons/pos_3.png' },
+  { id: 'pos4', label: 'Soft Support', pos: 'Position 4', icon: '/icons/pos_4.png' },
+  { id: 'pos5', label: 'Hard Support', pos: 'Position 5', icon: '/icons/pos_5.png' },
+];
+
+const PING_OPTIONS = ['< 50ms', '50–100ms', '100–150ms', '150ms+'];
 
 export default function Registration() {
-  const [searchTerm, setSearchTerm] = useState('');
-  const [showNewPlayerForm, setShowNewPlayerForm] = useState(false);
-  const [selectedPlayer, setSelectedPlayer] = useState<Player | null>(null);
-  const [currentMMR, setCurrentMMR] = useState('');
-  const [inGameName, setInGameName] = useState('');
-  const [showMMRUpload, setShowMMRUpload] = useState(false);
-  const [selectedRoles, setSelectedRoles] = useState<string[]>([]);
+  const navigate = useNavigate();
+  const [regOpen, setRegOpen] = useState<boolean | null>(null);
+  const [regMessage, setRegMessage] = useState('');
+  const [season, setSeason] = useState(1);
+  const [player, setPlayer] = useState<any>(null);
+  const [alreadyRegistered, setAlreadyRegistered] = useState(false);
+  const [loading, setLoading] = useState(true);
+  const [step, setStep] = useState(1);
+  const [submitting, setSubmitting] = useState(false);
+  const [done, setDone] = useState(false);
+  const totalSteps = 4;
+
+  // Form state
+  const [discord, setDiscord] = useState('');
+  const [whatsapp, setWhatsapp] = useState('');
+  const [mmr, setMmr] = useState('');
   const [playerType, setPlayerType] = useState<'core' | 'support' | ''>('');
-  const [currentStep, setCurrentStep] = useState(1);
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [showSuccessModal, setShowSuccessModal] = useState(false);
-  const totalSteps = 9;
+  const [roles, setRoles] = useState<string[]>([]);
+  const [ping, setPing] = useState('');
+  const [isCaptain, setIsCaptain] = useState(false);
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    
-    if (!selectedPlayer || !playerType) {
-      alert('Please complete all required fields');
-      return;
-    }
-
-    setIsSubmitting(true);
-
-    try {
-      // Get current season from registration settings
-      const { default: registrationService } = await import('../services/registrationService');
-      const currentSeason = await registrationService.getCurrentSeason();
-
-      // Import the registration request service
-      const { default: registrationRequestService } = await import('../services/registrationRequestService');
-
-      // Prepare form data
-      const formData = {
-        player_id: selectedPlayer.id,
-        player_nickname: selectedPlayer.nickname,
-        player_data: selectedPlayer,
-        in_game_name: inGameName,
-        discord_username: '', // Get from form
-        whatsapp_number: '', // Get from form
-        current_mmr: parseInt(currentMMR) || 0,
-        player_type: playerType as 'core' | 'support',
-        selected_roles: selectedRoles,
-        ping_range: '', // Get from form
-        is_captain_available: false, // Get from form
-        season_number: currentSeason,
-        mmr_proof_url: '', // Upload to storage if needed
-        mmr_changed: showMMRUpload
-      };
-
-      // Submit registration request
-      const result = await registrationRequestService.submitRegistration(formData);
-
-      if (result.success) {
-        setShowSuccessModal(true);
-      } else {
-        alert(`❌ Registration failed: ${result.error}`);
+  useEffect(() => {
+    const init = async () => {
+      // Check Steam session first — redirect if not logged in
+      const session = SteamAuthService.getSession();
+      if (!session) {
+        navigate('/player-login', { replace: true });
+        return;
       }
-    } catch (error) {
-      console.error('Registration error:', error);
-      alert('❌ An error occurred during registration. Please try again.');
-    } finally {
-      setIsSubmitting(false);
-    }
-  };
 
-  const handleCloseSuccessModal = () => {
-    setShowSuccessModal(false);
-    handleBackToSelection();
-  };
+      // Check registration open
+      const [open, msg, s] = await Promise.all([
+        registrationService.isRegistrationEnabled(),
+        registrationService.getRegistrationMessage(),
+        registrationService.getCurrentSeason(),
+      ]);
+      setRegOpen(open);
+      setRegMessage(msg);
+      setSeason(s);
 
-  const handlePlayerSelect = (player: Player) => {
-    setSelectedPlayer(player);
-    setCurrentMMR(player.currentMMR?.toString() || '');
-    setInGameName(player.nickname);
-    // Initialize selected roles as empty (don't pre-fill from player data)
-    setSelectedRoles([]);
-  };
+      // Fetch player from DB
+      const { data } = await supabase
+        .from('players')
+        .select('id, nickname, avatar_url, current_mmr, discord_username, steam_url')
+        .eq('id', session.playerId)
+        .maybeSingle();
 
-  const handleBackToSelection = () => {
-    setSelectedPlayer(null);
-    setSearchTerm('');
-    setCurrentMMR('');
-    setInGameName('');
-    setShowMMRUpload(false);
-    setSelectedRoles([]);
-    setPlayerType('');
-    setCurrentStep(1);
-  };
-
-  const handleNextStep = () => {
-    if (currentStep < totalSteps) {
-      setCurrentStep(prev => prev + 1);
-    }
-  };
-
-  const handlePrevStep = () => {
-    if (currentStep > 1) {
-      setCurrentStep(prev => prev - 1);
-    }
-  };
-
-  const canProceedToNext = () => {
-    switch (currentStep) {
-      case 3: // Player Type step
-        return playerType !== '';
-      case 4: // Roles step
-        return selectedRoles.length === 3;
-      default:
-        return true;
-    }
-  };
-
-  const handleMMRChange = (value: string) => {
-    // If empty, revert to original value
-    if (value === '') {
-      setCurrentMMR(selectedPlayer?.currentMMR?.toString() || '');
-      setShowMMRUpload(false);
-    } else {
-      setCurrentMMR(value);
-      const originalMMR = selectedPlayer?.currentMMR?.toString() || '';
-      setShowMMRUpload(value !== originalMMR);
-    }
-  };
-
-  const handleInGameNameChange = (value: string) => {
-    // If empty, revert to original value
-    if (value === '') {
-      setInGameName(selectedPlayer?.nickname || '');
-    } else {
-      setInGameName(value);
-    }
-  };
-
-  const handleRoleToggle = (roleId: string) => {
-    setSelectedRoles(prev => {
-      if (prev.includes(roleId)) {
-        // Remove role if already selected
-        return prev.filter(id => id !== roleId);
-      } else {
-        // Add role if less than 3 are selected
-        if (prev.length < 3) {
-          return [...prev, roleId];
-        }
-        return prev;
+      if (data) {
+        setPlayer(data);
+        setMmr(data.current_mmr?.toString() || '');
+        setDiscord(data.discord_username || '');
       }
+
+      // Check if already registered this season
+      const existing = await registrationRequestService.getRequestByPlayerId(session.playerId);
+      if (existing) setAlreadyRegistered(true);
+
+      setLoading(false);
+    };
+    init();
+  }, []);
+
+  const toggleRole = (id: string) => {
+    setRoles(prev => prev.includes(id)
+      ? prev.filter(r => r !== id)
+      : prev.length < 3 ? [...prev, id] : prev
+    );
+  };
+
+  const canNext = () => {
+    if (step === 1) return discord.trim().length > 0;
+    if (step === 2) return mmr.trim().length > 0 && playerType !== '';
+    if (step === 3) return roles.length >= 1;
+    return true;
+  };
+
+  const handleSubmit = async () => {
+    if (!player) return;
+    setSubmitting(true);
+    const mmrNum = parseInt(mmr) || 0;
+    const medal = getMedalFromMMR(mmrNum);
+
+    const result = await registrationRequestService.submitRegistration({
+      player_id: player.id,
+      player_nickname: player.nickname,
+      player_data: { ...player, currentMmr: mmrNum, currentMedalLabel: medal?.label },
+      in_game_name: player.nickname,
+      discord_username: discord,
+      whatsapp_number: whatsapp || undefined,
+      current_mmr: mmrNum,
+      player_type: playerType as 'core' | 'support',
+      selected_roles: roles,
+      ping_range: ping,
+      is_captain_available: isCaptain,
+      season_number: season,
+      mmr_changed: mmrNum !== (player.current_mmr || 0),
     });
-  };
 
-  const getRolePriority = (roleId: string) => {
-    const index = selectedRoles.indexOf(roleId);
-    return index !== -1 ? index + 1 : null;
-  };
-
-  const getPriorityText = (priority: number) => {
-    switch (priority) {
-      case 1: return "Highest Priority";
-      case 2: return "Second Priority"; 
-      case 3: return "Last Priority";
-      default: return "";
+    setSubmitting(false);
+    if (result.success) {
+      // Also update discord in players table
+      if (discord) {
+        await supabase.from('players').update({ discord_username: discord }).eq('id', player.id);
+      }
+      setDone(true);
+    } else {
+      alert('Registration failed: ' + result.error);
     }
   };
 
+  // ── Loading ──
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center" style={{ background: 'rgba(5,7,10)', paddingTop: '64px' }}>
+        <div className="w-6 h-6 border-2 border-white/20 border-t-white/60 rounded-full animate-spin" />
+      </div>
+    );
+  }
+
+  // ── Registration closed ──
+  if (regOpen === false) {
+    return (
+      <div className="min-h-screen flex items-center justify-center px-4" style={{ background: 'rgba(5,7,10)', paddingTop: '64px', fontFamily: 'Poppins, sans-serif' }}>
+        <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} className="text-center max-w-sm">
+          <div className="text-5xl mb-5">🔒</div>
+          <h2 className="text-xl font-bold text-white mb-2">Registration is closed</h2>
+          <p className="text-white/40 text-sm">{regMessage}</p>
+        </motion.div>
+      </div>
+    );
+  }
+
+  // ── Already registered ──
+  if (alreadyRegistered) {
+    return (
+      <div className="min-h-screen flex items-center justify-center px-4" style={{ background: 'rgba(5,7,10)', paddingTop: '64px', fontFamily: 'Poppins, sans-serif' }}>
+        <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} className="text-center max-w-sm">
+          <div className="w-14 h-14 rounded-2xl flex items-center justify-center mx-auto mb-5"
+            style={{ background: 'rgba(34,197,94,0.08)', border: '1px solid rgba(34,197,94,0.2)' }}>
+            <CheckCircle className="w-7 h-7 text-green-400" />
+          </div>
+          <h2 className="text-xl font-bold text-white mb-2">Already registered</h2>
+          <p className="text-white/40 text-sm">You've already submitted a registration for Season {season}. Admins will review it shortly.</p>
+        </motion.div>
+      </div>
+    );
+  }
+
+  // ── Success ──
+  if (done) {
+    return (
+      <div className="min-h-screen flex items-center justify-center px-4" style={{ background: 'rgba(5,7,10)', paddingTop: '64px', fontFamily: 'Poppins, sans-serif' }}>
+        <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} className="text-center max-w-sm">
+          <motion.div initial={{ scale: 0 }} animate={{ scale: 1 }} transition={{ delay: 0.2, type: 'spring' }}
+            className="w-16 h-16 rounded-2xl flex items-center justify-center mx-auto mb-5"
+            style={{ background: 'rgba(34,197,94,0.1)', border: '1px solid rgba(34,197,94,0.25)' }}>
+            <CheckCircle className="w-8 h-8 text-green-400" />
+          </motion.div>
+          <h2 className="text-2xl font-bold text-white mb-2">You're registered!</h2>
+          <p className="text-white/40 text-sm mb-6">Your registration for Season {season} has been submitted. Admins will review and approve it.</p>
+          <button onClick={() => navigate(`/players/${player?.id}`)}
+            className="px-6 py-2.5 rounded-xl text-sm font-semibold text-white"
+            style={{ background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.1)' }}>
+            View my profile
+          </button>
+        </motion.div>
+      </div>
+    );
+  }
+
+  // ── Main form ──
   return (
-    <>
-      {/* Fixed Background */}
-      <div className="absolute inset-0 z-0" style={{ top: '64px', bottom: '60px' }}>
-        <div 
-          className="absolute inset-0 bg-cover bg-center bg-no-repeat"
-          style={{
-            backgroundImage: `url('/bg6.webp')`,
-          }}
-        />
-        {/* Dark overlay for better text readability */}
-        <div className="absolute inset-0 bg-black/50"></div>
+    <div className="min-h-screen" style={{ background: 'rgba(5,7,10)', paddingTop: '64px', fontFamily: 'Poppins, sans-serif' }}>
+      {/* Subtle bg */}
+      <div className="fixed inset-0 z-0 pointer-events-none">
+        <img src="/bg5.webp" alt="" className="w-full h-full object-cover opacity-10" />
+        <div className="absolute inset-0" style={{ background: 'linear-gradient(180deg, rgba(5,7,10,0.8) 0%, rgba(5,7,10,0.95) 100%)' }} />
       </div>
 
-      {/* Animated Background Elements */}
-      <div className="absolute inset-0 z-0" style={{ top: '64px', bottom: '60px' }}>
-        <div className="absolute top-20 left-20 w-32 h-32 bg-blue-500/10 rounded-full blur-3xl animate-pulse"></div>
-        <div className="absolute bottom-20 right-20 w-40 h-40 bg-purple-500/10 rounded-full blur-3xl animate-pulse delay-1000"></div>
-      </div>
+      <div className="relative z-10 max-w-xl mx-auto px-4 py-12">
+        {/* Header */}
+        <div className="text-center mb-8">
+          <div className="text-xs font-semibold tracking-widest uppercase text-white/30 mb-2">Season {season}</div>
+          <h1 className="text-3xl font-bold text-white">Register to Play</h1>
+          <p className="text-white/40 text-sm mt-1">India's premier amateur Dota 2 league</p>
+        </div>
 
-      <main className="registration-page relative flex items-center justify-center" style={{ minHeight: 'calc(100vh - 140px)' }}>
-        <div className="relative z-10 w-full py-4">
-          <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
-            
-            {/* Header - Only show when not in form mode */}
-            {!selectedPlayer && !showNewPlayerForm && (
-              <>
-                <div className="text-center mb-3 relative pt-1">
-                    Join The Roshan Rumble
-                  <h1 className="text-3xl font-black bg-gradient-to-r from-blue-400 via-purple-400 to-cyan-400 bg-clip-text text-transparent mb-2">
-                  </h1>
-                  <p className="text-sm text-slate-300 max-w-2xl mx-auto">
-                    Register now to compete in the ultimate Dota 2 tournament experience
-                  </p>
+        {/* Player identity card */}
+        {player && (
+          <div className="flex items-center gap-3 px-4 py-3 rounded-xl mb-6"
+            style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.07)' }}>
+            <img src={player.avatar_url || '/avatars/Machine.png'} alt={player.nickname}
+              className="w-10 h-10 rounded-full object-cover flex-shrink-0"
+              onError={e => { (e.target as HTMLImageElement).src = '/avatars/Machine.png'; }} />
+            <div>
+              <div className="text-white font-semibold text-sm">{player.nickname}</div>
+              <div className="text-white/35 text-xs">Registering as this account</div>
+            </div>
+            <div className="ml-auto">
+              <span className="px-2 py-0.5 rounded-full text-[10px] font-semibold text-green-400"
+                style={{ background: 'rgba(34,197,94,0.1)', border: '1px solid rgba(34,197,94,0.2)' }}>
+                Steam verified
+              </span>
+            </div>
+          </div>
+        )}
+
+        {/* Progress */}
+        <div className="flex items-center gap-2 mb-8">
+          {Array.from({ length: totalSteps }, (_, i) => (
+            <div key={i} className="flex-1 h-1 rounded-full transition-all duration-300"
+              style={{ background: i < step ? 'rgba(255,255,255,0.7)' : 'rgba(255,255,255,0.1)' }} />
+          ))}
+        </div>
+
+        {/* Steps */}
+        <AnimatePresence mode="wait">
+          <motion.div key={step} initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }} transition={{ duration: 0.2 }}>
+
+            {/* Step 1 — Contact */}
+            {step === 1 && (
+              <div className="space-y-5">
+                <div>
+                  <h2 className="text-lg font-bold text-white mb-1">Contact Info</h2>
+                  <p className="text-white/35 text-sm">We'll use this to reach you about matches.</p>
                 </div>
-
-                {/* Registration Status */}
-                <div className="text-center mb-4">
-                  <div className="inline-flex items-center gap-2 bg-slate-900/85 backdrop-blur-xl border border-slate-700/50 rounded-full px-3 py-1 mb-1">
-                    <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
-                    <span className="text-green-400 font-semibold text-sm">Registration is currently OPEN</span>
+                <div className="space-y-4">
+                  <div>
+                    <label className="block text-xs text-white/50 mb-1.5">Discord Username <span className="text-red-400">*</span></label>
+                    <input value={discord} onChange={e => setDiscord(e.target.value)}
+                      placeholder="username or user#0000"
+                      className="w-full px-4 py-3 rounded-xl text-sm text-white placeholder-white/20 focus:outline-none transition-colors"
+                      style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)' }}
+                      onFocus={e => (e.currentTarget.style.borderColor = 'rgba(255,255,255,0.25)')}
+                      onBlur={e => (e.currentTarget.style.borderColor = 'rgba(255,255,255,0.1)')} />
                   </div>
-                  <p className="text-slate-300 text-sm">
-                    Don't miss your chance to compete in India's premier amateur Dota 2 league!
-                  </p>
+                  <div>
+                    <label className="block text-xs text-white/50 mb-1.5">WhatsApp Number <span className="text-white/25">(optional)</span></label>
+                    <input value={whatsapp} onChange={e => setWhatsapp(e.target.value)}
+                      placeholder="+91 XXXXX XXXXX" type="tel"
+                      className="w-full px-4 py-3 rounded-xl text-sm text-white placeholder-white/20 focus:outline-none transition-colors"
+                      style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)' }}
+                      onFocus={e => (e.currentTarget.style.borderColor = 'rgba(255,255,255,0.25)')}
+                      onBlur={e => (e.currentTarget.style.borderColor = 'rgba(255,255,255,0.1)')} />
+                  </div>
                 </div>
-              </>
+              </div>
             )}
 
-            {/* Main Content */}
-            <div className="w-full flex justify-center">
-              <div className="w-full max-w-8xl px-2 sm:px-4 lg:px-6">
-                
-                {selectedPlayer ? (
-                  /* Player Registration Form */
-                  <div className="w-full flex justify-center">
-                    <div className="w-full max-w-5xl px-2 sm:px-3 md:px-4 relative">
-                      <div className="bg-slate-900/30 backdrop-blur-xl border border-slate-600/30 rounded-2xl p-3 shadow-2xl shadow-slate-900/20">
-                      
-                      {/* Player Avatar - Moved above header */}
-                      <div className="text-center mb-4">
-                        <div className="relative w-16 h-16 mx-auto mb-2">
-                          <div className="absolute inset-0 bg-gradient-to-br from-blue-400/30 to-cyan-400/30 rounded-full opacity-40 animate-pulse" />
-                          <img 
-                            src={selectedPlayer.avatarUrl} 
-                            alt={selectedPlayer.nickname}
-                            className="w-full h-full rounded-full object-cover border-2 border-blue-400/50 relative z-10 shadow-lg"
-                            onError={(e) => {
-                              e.currentTarget.src = "/avatars/default.jpg";
-                            }}
-                          />
+            {/* Step 2 — MMR + Type */}
+            {step === 2 && (
+              <div className="space-y-5">
+                <div>
+                  <h2 className="text-lg font-bold text-white mb-1">Your Rank</h2>
+                  <p className="text-white/35 text-sm">Tell us your current MMR and how you play.</p>
+                </div>
+                <div>
+                  <label className="block text-xs text-white/50 mb-1.5">Current MMR <span className="text-red-400">*</span></label>
+                  <input value={mmr} onChange={e => setMmr(e.target.value)} type="number" placeholder="e.g. 3500"
+                    className="w-full px-4 py-3 rounded-xl text-sm text-white placeholder-white/20 focus:outline-none transition-colors"
+                    style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)' }}
+                    onFocus={e => (e.currentTarget.style.borderColor = 'rgba(255,255,255,0.25)')}
+                    onBlur={e => (e.currentTarget.style.borderColor = 'rgba(255,255,255,0.1)')} />
+                </div>
+                <div>
+                  <label className="block text-xs text-white/50 mb-3">Player Type <span className="text-red-400">*</span></label>
+                  <div className="grid grid-cols-2 gap-3">
+                    {[
+                      { value: 'core', label: 'Core', desc: 'Pos 1–3', emoji: '⚔️' },
+                      { value: 'support', label: 'Support', desc: 'Pos 4–5', emoji: '🛡️' },
+                    ].map(t => (
+                      <button key={t.value} type="button" onClick={() => setPlayerType(t.value as any)}
+                        className="flex flex-col items-center gap-2 py-5 rounded-xl transition-all"
+                        style={{
+                          background: playerType === t.value ? 'rgba(255,255,255,0.08)' : 'rgba(255,255,255,0.03)',
+                          border: `1px solid ${playerType === t.value ? 'rgba(255,255,255,0.25)' : 'rgba(255,255,255,0.08)'}`,
+                        }}>
+                        <span className="text-3xl">{t.emoji}</span>
+                        <div>
+                          <div className="text-white font-semibold text-sm">{t.label}</div>
+                          <div className="text-white/35 text-xs">{t.desc}</div>
                         </div>
-                        <h2 className="text-sm font-bold bg-gradient-to-r from-blue-200 to-cyan-200 bg-clip-text text-transparent mb-1">{selectedPlayer.nickname}</h2>
-                        {selectedPlayer.realName && (
-                          <p className="text-sm text-slate-300 mb-1">{selectedPlayer.realName}</p>
-                        )}
-                        <p className="text-blue-400 font-semibold text-sm mb-1">{selectedPlayer.currentMedalLabel}</p>
-                      </div>
-
-                      {/* Form Title and Progress */}
-                      <div className="text-center mb-2">
-                        <h3 className="text-sm font-bold text-white mb-1">Registration Form</h3>
-                        <div className="flex items-center justify-center gap-2 mb-1">
-                          <span className="text-slate-400 text-sm">Step {currentStep} of {totalSteps}</span>
-                          <div className="flex gap-1 ml-2">
-                            {Array.from({ length: totalSteps }, (_, i) => (
-                              <div
-                                key={i}
-                                className={`w-1.5 h-1.5 rounded-full ${
-                                  i + 1 <= currentStep ? 'bg-blue-500' : 'bg-slate-600'
-                                }`}
-                              />
-                            ))}
-                          </div>
-                        </div>
-                      </div>
-
-                      {/* Registration Form */}
-                      <form className="space-y-2" onSubmit={handleSubmit}>
-                        {/* Step 1: Player Information */}
-                        {currentStep === 1 && (
-                          <div className="bg-slate-800/50 border border-slate-600/50 rounded-lg p-2">
-                            <div className="text-center mb-2">
-                              <div className="inline-flex items-center gap-2 px-3 py-1 bg-gradient-to-r from-blue-600/20 to-cyan-600/20 border border-blue-500/30 rounded-full">
-                                <div className="w-1.5 h-1.5 bg-blue-400 rounded-full"></div>
-                                <h3 className="text-sm font-bold bg-gradient-to-r from-blue-400 to-cyan-400 bg-clip-text text-transparent">
-                                  Player Information
-                                </h3>
-                                <div className="w-1.5 h-1.5 bg-cyan-400 rounded-full"></div>
-                              </div>
-                            </div>
-                            <div className="grid md:grid-cols-2 gap-2">
-                              <div>
-                                <label className="block text-sm font-medium text-slate-300 mb-1">
-                                  In-Game Name <span className="text-red-400">*</span>
-                                </label>
-                                <input
-                                  type="text"
-                                  value={inGameName}
-                                  onChange={(e) => handleInGameNameChange(e.target.value)}
-                                  className="w-full px-3 py-1.5 bg-slate-800/70 border border-slate-600/50 rounded-lg text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500/50 transition-all text-sm"
-                                  placeholder="Enter your in-game name"
-                                  required
-                                />
-                              </div>
-                              <div>
-                                <label className="block text-sm font-medium text-slate-300 mb-1">
-                                  Name <span className="text-slate-500">(optional)</span>
-                                </label>
-                                <input
-                                  type="text"
-                                  defaultValue={selectedPlayer.realName || ''}
-                                  className="w-full px-3 py-1.5 bg-slate-800/70 border border-slate-600/50 rounded-lg text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500/50 transition-all text-sm"
-                                  placeholder="Enter your real name"
-                                />
-                              </div>
-                              <div>
-                                <label className="block text-sm font-medium text-slate-300 mb-1">
-                                  Discord Username <span className="text-red-400">*</span>
-                                </label>
-                                <input
-                                  type="text"
-                                  className="w-full px-3 py-1.5 bg-slate-800/70 border border-slate-600/50 rounded-lg text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500/50 transition-all text-sm"
-                                  placeholder="Enter your Discord username"
-                                  required
-                                />
-                              </div>
-                              <div>
-                                <label className="block text-sm font-medium text-slate-300 mb-1">
-                                  WhatsApp Number <span className="text-slate-500">(optional)</span>
-                                </label>
-                                <input
-                                  type="tel"
-                                  className="w-full px-3 py-1.5 bg-slate-800/70 border border-slate-600/50 rounded-lg text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500/50 transition-all text-sm"
-                                  placeholder="Enter your WhatsApp number"
-                                />
-                              </div>
-                              <div>
-                                <label className="block text-sm font-medium text-slate-300 mb-1">
-                                  Steam Profile URL <span className="text-red-400">*</span>
-                                </label>
-                                <input
-                                  type="url"
-                                  defaultValue={selectedPlayer.steamUrl || ''}
-                                  className="w-full px-3 py-1.5 bg-slate-800/70 border border-slate-600/50 rounded-lg text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500/50 transition-all text-sm"
-                                  placeholder="Enter your Steam profile URL"
-                                  required
-                                />
-                              </div>
-                              <div>
-                                <label className="block text-sm font-medium text-slate-300 mb-1">
-                                  Dotabuff Profile URL <span className="text-red-400">*</span>
-                                </label>
-                                <input
-                                  type="url"
-                                  defaultValue={selectedPlayer.dotabuffUrl || ''}
-                                  className="w-full px-3 py-1.5 bg-slate-800/70 border border-slate-600/50 rounded-lg text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500/50 transition-all text-sm"
-                                  placeholder="Enter your Dotabuff profile URL"
-                                  required
-                                />
-                              </div>
-                            </div>
-                          </div>
-                        )}
-
-                        {/* Step 2: MMR Information */}
-                        {currentStep === 2 && (
-                          <div className="bg-slate-800/50 border border-slate-600/50 rounded-lg p-6">
-                            <div className="text-center mb-6">
-                              <div className="inline-flex items-center gap-3 px-4 py-2 bg-gradient-to-r from-purple-600/20 to-pink-600/20 border border-purple-500/30 rounded-full">
-                                <div className="w-2 h-2 bg-purple-400 rounded-full"></div>
-                                <h3 className="text-lg font-bold bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent">
-                                  MMR Information
-                                </h3>
-                                <div className="w-2 h-2 bg-pink-400 rounded-full"></div>
-                              </div>
-                            </div>
-                            <div className="grid md:grid-cols-2 gap-4">
-                              <div>
-                                <label className="block text-sm font-medium text-slate-300 mb-2">
-                                  Current MMR
-                                </label>
-                                <input
-                                  type="number"
-                                  value={currentMMR}
-                                  onChange={(e) => handleMMRChange(e.target.value)}
-                                  className="w-full px-4 py-2 bg-slate-800/70 border border-slate-600/50 rounded-lg text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500/50 transition-all text-sm"
-                                  placeholder="Enter your current MMR"
-                                />
-                                {showMMRUpload && (
-                                  <div className="mt-2 p-3 bg-orange-900/30 border border-orange-500/50 rounded-lg">
-                                    <p className="text-orange-300 text-xs mb-2">Upload a screenshot of your MMR</p>
-                                    <p className="text-red-300 text-xs mb-2">* Without image the value will be denied to the user</p>
-                                    <div className="flex items-center gap-2">
-                                      <input
-                                        type="file"
-                                        accept="image/*"
-                                        className="hidden"
-                                        id="mmr-proof"
-                                      />
-                                      <label
-                                        htmlFor="mmr-proof"
-                                        className="flex items-center justify-center w-8 h-8 bg-orange-600 hover:bg-orange-700 text-white rounded cursor-pointer transition-colors"
-                                      >
-                                        <Upload className="w-4 h-4" />
-                                      </label>
-                                    </div>
-                                  </div>
-                                )}
-                              </div>
-                              <div>
-                                <label className="block text-sm font-medium text-slate-300 mb-2">
-                                  Peak MMR
-                                </label>
-                                <input
-                                  type="number"
-                                  value={selectedPlayer.peakMMR || ''}
-                                  readOnly
-                                  className="w-full px-4 py-2 bg-slate-700/50 border border-slate-600/50 rounded-lg text-white text-sm"
-                                />
-                              </div>
-                            </div>
-                          </div>
-                        )}
-
-                        {/* Step 3: Player Type Selection */}
-                        {currentStep === 3 && (
-                          <div className="bg-slate-800/50 border border-slate-600/50 rounded-lg p-6">
-                            <div className="text-center mb-6">
-                              <div className="inline-flex items-center gap-3 px-4 py-2 bg-gradient-to-r from-purple-600/20 to-pink-600/20 border border-purple-500/30 rounded-full">
-                                <div className="w-2 h-2 bg-purple-400 rounded-full"></div>
-                                <h3 className="text-lg font-bold bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent">
-                                  Player Type <span className="text-red-400">*</span>
-                                </h3>
-                                <div className="w-2 h-2 bg-pink-400 rounded-full"></div>
-                              </div>
-                            </div>
-                            
-                            <p className="text-slate-300 text-sm text-center mb-6">
-                              Choose your player type. This determines which auction pool you'll be placed in.
-                            </p>
-
-                            <div className="grid md:grid-cols-2 gap-4 max-w-3xl mx-auto">
-                              {/* Core Player Option */}
-                              <label className="relative block cursor-pointer">
-                                <input
-                                  type="radio"
-                                  name="playerType"
-                                  value="core"
-                                  checked={playerType === 'core'}
-                                  onChange={(e) => setPlayerType(e.target.value as 'core' | 'support')}
-                                  className="sr-only peer"
-                                />
-                                <div className={`relative flex flex-col items-center gap-4 p-6 border-2 rounded-xl transition-all ${
-                                  playerType === 'core'
-                                    ? 'bg-orange-600/20 border-orange-500/50 shadow-lg shadow-orange-500/20'
-                                    : 'bg-slate-800/50 border-slate-600/50 hover:bg-slate-700/50 hover:border-slate-500/50'
-                                }`}>
-                                  <div className="text-6xl">⚔️</div>
-                                  <div className="text-center">
-                                    <h4 className="text-xl font-bold text-orange-400 mb-2">Core Player</h4>
-                                    <p className="text-slate-300 text-sm mb-3">
-                                      Positions 1, 2, 3 (Carry, Mid, Offlane)
-                                    </p>
-                                    <ul className="text-slate-400 text-xs space-y-1 text-left">
-                                      <li>• Primary damage dealers</li>
-                                      <li>• Farm-dependent heroes</li>
-                                      <li>• Late game impact</li>
-                                      <li>• Requires high mechanical skill</li>
-                                    </ul>
-                                  </div>
-                                  {playerType === 'core' && (
-                                    <div className="absolute -top-2 -right-2 w-8 h-8 bg-orange-500 text-white rounded-full flex items-center justify-center">
-                                      ✓
-                                    </div>
-                                  )}
-                                </div>
-                              </label>
-
-                              {/* Support Player Option */}
-                              <label className="relative block cursor-pointer">
-                                <input
-                                  type="radio"
-                                  name="playerType"
-                                  value="support"
-                                  checked={playerType === 'support'}
-                                  onChange={(e) => setPlayerType(e.target.value as 'core' | 'support')}
-                                  className="sr-only peer"
-                                />
-                                <div className={`relative flex flex-col items-center gap-4 p-6 border-2 rounded-xl transition-all ${
-                                  playerType === 'support'
-                                    ? 'bg-cyan-600/20 border-cyan-500/50 shadow-lg shadow-cyan-500/20'
-                                    : 'bg-slate-800/50 border-slate-600/50 hover:bg-slate-700/50 hover:border-slate-500/50'
-                                }`}>
-                                  <div className="text-6xl">🛡️</div>
-                                  <div className="text-center">
-                                    <h4 className="text-xl font-bold text-cyan-400 mb-2">Support Player</h4>
-                                    <p className="text-slate-300 text-sm mb-3">
-                                      Positions 4, 5 (Soft Support, Hard Support)
-                                    </p>
-                                    <ul className="text-slate-400 text-xs space-y-1 text-left">
-                                      <li>• Enable team success</li>
-                                      <li>• Vision and map control</li>
-                                      <li>• Early game impact</li>
-                                      <li>• Strategic decision making</li>
-                                    </ul>
-                                  </div>
-                                  {playerType === 'support' && (
-                                    <div className="absolute -top-2 -right-2 w-8 h-8 bg-cyan-500 text-white rounded-full flex items-center justify-center">
-                                      ✓
-                                    </div>
-                                  )}
-                                </div>
-                              </label>
-                            </div>
-
-                            {!playerType && (
-                              <div className="text-center mt-4 p-3 bg-blue-900/20 border border-blue-500/30 rounded-lg">
-                                <p className="text-blue-300 text-sm font-medium">
-                                  ℹ️ Please select your player type to continue
-                                </p>
-                              </div>
-                            )}
-
-                            {playerType && (
-                              <div className="text-center mt-4 p-3 bg-green-900/20 border border-green-500/30 rounded-lg">
-                                <p className="text-green-300 text-sm font-medium">
-                                  ✅ You selected: {playerType === 'core' ? 'Core Player' : 'Support Player'}
-                                </p>
-                              </div>
-                            )}
-                          </div>
-                        )}
-
-                        {/* Step 4: Preferred Roles */}
-                        {currentStep === 4 && (
-                          <div className="bg-slate-800/50 border border-slate-600/50 rounded-lg p-6">
-                            <div className="text-center mb-6">
-                              <div className="inline-flex items-center gap-3 px-4 py-2 bg-gradient-to-r from-orange-600/20 to-yellow-600/20 border border-orange-500/30 rounded-full">
-                                <div className="w-2 h-2 bg-orange-400 rounded-full"></div>
-                                <h3 className="text-lg font-bold bg-gradient-to-r from-orange-400 to-yellow-400 bg-clip-text text-transparent">
-                                  Preferred Roles <span className="text-red-400">*</span>
-                                  <span className="text-sm text-slate-400 ml-2">({selectedRoles.length}/3 required)</span>
-                                </h3>
-                                <div className="w-2 h-2 bg-yellow-400 rounded-full"></div>
-                              </div>
-                            </div>
-                            
-                            {selectedRoles.length < 3 && (
-                              <div className="text-center mb-4 p-3 bg-blue-900/20 border border-blue-500/30 rounded-lg">
-                                <p className="text-blue-300 text-sm font-medium">
-                                  ℹ️ Please select exactly 3 roles in order of preference
-                                </p>
-                              </div>
-                            )}
-                            
-                            <div className="flex flex-col items-center gap-2">
-                              {/* Top row: Carry, Mid, Offlane */}
-                              <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 w-full max-w-3xl">
-                                {[
-                                  { id: 'carry', label: 'Carry', icon: '/icons/pos_1.png' },
-                                  { id: 'mid', label: 'Mid', icon: '/icons/pos_2.png' },
-                                  { id: 'offlane', label: 'Offlane', icon: '/icons/pos_3.png' }
-                                ].map((role) => (
-                                  <div key={role.id} className="space-y-2">
-                                    <label className="relative block">
-                                      <input
-                                        type="checkbox"
-                                        checked={selectedRoles.includes(role.id)}
-                                        onChange={() => handleRoleToggle(role.id)}
-                                        className="sr-only peer"
-                                      />
-                                      <div className={`relative flex items-center justify-center gap-2 p-2 border rounded-lg cursor-pointer transition-all ${
-                                        selectedRoles.includes(role.id)
-                                          ? 'bg-blue-600/20 border-blue-500/50 text-blue-300 shadow-lg shadow-blue-500/20'
-                                          : selectedRoles.length >= 3
-                                          ? 'bg-slate-800/30 border-slate-600/30 text-slate-500 cursor-not-allowed'
-                                          : 'bg-slate-800/50 border-slate-600/50 text-slate-300 hover:bg-slate-700/50 hover:border-slate-500/50 hover:shadow-lg'
-                                      }`}>
-                                        <img src={role.icon} alt={role.label} className="w-4 h-4" />
-                                        <span className="text-sm font-bold">{role.label}</span>
-                                        {selectedRoles.includes(role.id) && (
-                                          <div className="absolute -top-1 -right-1 w-5 h-5 bg-blue-500 text-white text-xs font-bold rounded-full flex items-center justify-center">
-                                            {getRolePriority(role.id)}
-                                          </div>
-                                        )}
-                                      </div>
-                                    </label>
-                                    
-                                    {/* Priority indicator for selected roles */}
-                                    {selectedRoles.includes(role.id) && (
-                                      <div className="text-center">
-                                        <div className="inline-flex items-center gap-1 px-2 py-1 bg-blue-600/20 border border-blue-500/30 rounded-full">
-                                          <span className="text-blue-300 text-xs font-medium">
-                                            {getPriorityText(getRolePriority(role.id)!)}
-                                          </span>
-                                        </div>
-                                      </div>
-                                    )}
-                                  </div>
-                                ))}
-                              </div>
-                              
-                              {/* Bottom row: Support roles centered */}
-                              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 w-full max-w-xl">
-                                {[
-                                  { id: 'support', label: 'Soft Support', icon: '/icons/pos_4.png' },
-                                  { id: 'hard-support', label: 'Hard Support', icon: '/icons/pos_5.png' }
-                                ].map((role) => (
-                                  <div key={role.id} className="space-y-2">
-                                    <label className="relative block">
-                                      <input
-                                        type="checkbox"
-                                        checked={selectedRoles.includes(role.id)}
-                                        onChange={() => handleRoleToggle(role.id)}
-                                        className="sr-only peer"
-                                      />
-                                      <div className={`relative flex items-center justify-center gap-2 p-2 border rounded-lg cursor-pointer transition-all ${
-                                        selectedRoles.includes(role.id)
-                                          ? 'bg-blue-600/20 border-blue-500/50 text-blue-300 shadow-lg shadow-blue-500/20'
-                                          : selectedRoles.length >= 3
-                                          ? 'bg-slate-800/30 border-slate-600/30 text-slate-500 cursor-not-allowed'
-                                          : 'bg-slate-800/50 border-slate-600/50 text-slate-300 hover:bg-slate-700/50 hover:border-slate-500/50 hover:shadow-lg'
-                                      }`}>
-                                        <img src={role.icon} alt={role.label} className="w-4 h-4" />
-                                        <span className="text-sm font-bold">{role.label}</span>
-                                        {selectedRoles.includes(role.id) && (
-                                          <div className="absolute -top-1 -right-1 w-5 h-5 bg-blue-500 text-white text-xs font-bold rounded-full flex items-center justify-center">
-                                            {getRolePriority(role.id)}
-                                          </div>
-                                        )}
-                                      </div>
-                                    </label>
-                                    
-                                    {/* Priority indicator for selected roles */}
-                                    {selectedRoles.includes(role.id) && (
-                                      <div className="text-center">
-                                        <div className="inline-flex items-center gap-1 px-2 py-1 bg-blue-600/20 border border-blue-500/30 rounded-full">
-                                          <span className="text-blue-300 text-xs font-medium">
-                                            {getPriorityText(getRolePriority(role.id)!)}
-                                          </span>
-                                        </div>
-                                      </div>
-                                    )}
-                                  </div>
-                                ))}
-                              </div>
-                              
-                              {selectedRoles.length >= 3 && (
-                                <div className="text-center p-2 bg-green-900/20 border border-green-500/30 rounded-lg">
-                                  <p className="text-green-300 text-sm font-medium">
-                                    ✅ All 3 roles selected
-                                  </p>
-                                </div>
-                              )}
-                            </div>
-                          </div>
-                        )}
-
-                        {/* Step 5: Captain Availability */}
-                        {currentStep === 5 && (
-                          <div className="bg-slate-800/50 border border-slate-600/50 rounded-lg p-6">
-                            <div className="text-center mb-6">
-                              <div className="inline-flex items-center gap-3 px-4 py-2 bg-gradient-to-r from-green-600/20 to-emerald-600/20 border border-green-500/30 rounded-full">
-                                <div className="w-2 h-2 bg-green-400 rounded-full"></div>
-                                <h3 className="text-lg font-bold bg-gradient-to-r from-green-400 to-emerald-400 bg-clip-text text-transparent">
-                                  Captain Availability
-                                </h3>
-                                <div className="w-2 h-2 bg-emerald-400 rounded-full"></div>
-                              </div>
-                            </div>
-                            <p className="text-slate-400 text-sm mb-4">
-                              Are you willing to be the captain? As a captain, you will be bidding in the player auction and serving as the primary contact point for your team.
-                            </p>
-                            <div className="space-y-3">
-                              <label className="flex items-center p-3 bg-slate-700/30 rounded-lg hover:bg-slate-700/50 transition-colors cursor-pointer">
-                                <input
-                                  type="radio"
-                                  name="captain"
-                                  value="yes"
-                                  className="mr-3 text-green-500"
-                                />
-                                <div>
-                                  <span className="text-slate-300 font-medium">Yes, I'm willing to be a captain</span>
-                                  <p className="text-slate-500 text-xs mt-1">I want to lead a team and participate in the auction</p>
-                                </div>
-                              </label>
-                              <label className="flex items-center p-3 bg-slate-700/30 rounded-lg hover:bg-slate-700/50 transition-colors cursor-pointer">
-                                <input
-                                  type="radio"
-                                  name="captain"
-                                  value="no"
-                                  defaultChecked
-                                  className="mr-3 text-red-500"
-                                />
-                                <div>
-                                  <span className="text-slate-300 font-medium">No, I prefer to be a regular player</span>
-                                  <p className="text-slate-500 text-xs mt-1">I want to focus on playing and let others handle team management</p>
-                                </div>
-                              </label>
-                              <label className="flex items-center p-3 bg-slate-700/30 rounded-lg hover:bg-slate-700/50 transition-colors cursor-pointer">
-                                <input
-                                  type="radio"
-                                  name="captain"
-                                  value="if-necessary"
-                                  className="mr-3 text-yellow-500"
-                                />
-                                <div>
-                                  <span className="text-slate-300 font-medium">Only if necessary</span>
-                                  <p className="text-slate-500 text-xs mt-1">I can captain if needed, but prefer to be a regular player</p>
-                                </div>
-                              </label>
-                            </div>
-                            <div className="mt-4 p-3 bg-amber-900/20 border border-amber-500/30 rounded-lg">
-                              <p className="text-amber-300 text-xs">
-                                ⚠️ <strong>Note:</strong> We may assign captaincy based on tournament needs and volunteer availability.
-                              </p>
-                            </div>
-                          </div>
-                        )}
-
-                        {/* Step 6: Notes for Captain */}
-                        {currentStep === 6 && (
-                          <div className="bg-slate-800/50 border border-slate-600/50 rounded-lg p-6">
-                            <div className="text-center mb-6">
-                              <div className="inline-flex items-center gap-3 px-4 py-2 bg-gradient-to-r from-indigo-600/20 to-purple-600/20 border border-indigo-500/30 rounded-full">
-                                <div className="w-2 h-2 bg-indigo-400 rounded-full"></div>
-                                <h3 className="text-lg font-bold bg-gradient-to-r from-indigo-400 to-purple-400 bg-clip-text text-transparent">
-                                  Notes for Captain
-                                </h3>
-                                <div className="w-2 h-2 bg-purple-400 rounded-full"></div>
-                              </div>
-                            </div>
-                            <p className="text-slate-400 text-sm mb-4">
-                              Please do not write something like "I only want to be under his/her team" as it may affect the auction.
-                            </p>
-                            <textarea
-                              rows={4}
-                              className="w-full px-4 py-3 bg-slate-800/70 border border-slate-600/50 rounded-lg text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500/50 transition-all text-sm resize-none"
-                              placeholder="Share any relevant information for your future captain (playstyle, availability, preferences, etc.)"
-                            />
-                          </div>
-                        )}
-
-                        {/* Step 7: Connection Info */}
-                        {currentStep === 7 && (
-                          <div className="bg-slate-800/50 border border-slate-600/50 rounded-lg p-6">
-                            <div className="text-center mb-6">
-                              <div className="inline-flex items-center gap-3 px-4 py-2 bg-gradient-to-r from-red-600/20 to-orange-600/20 border border-red-500/30 rounded-full">
-                                <div className="w-2 h-2 bg-red-400 rounded-full"></div>
-                                <h3 className="text-lg font-bold bg-gradient-to-r from-red-400 to-orange-400 bg-clip-text text-transparent">
-                                  Connection Information
-                                </h3>
-                                <div className="w-2 h-2 bg-orange-400 rounded-full"></div>
-                              </div>
-                            </div>
-                            <div>
-                              <label className="block text-sm font-medium text-slate-300 mb-3">
-                                What is your ping for games played in SEA (Singapore) Server? <span className="text-red-400">*</span>
-                              </label>
-                              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                                <label className="flex items-center p-3 bg-slate-700/30 rounded-lg hover:bg-slate-700/50 transition-colors cursor-pointer">
-                                  <input
-                                    type="radio"
-                                    name="ping"
-                                    value="0-50"
-                                    className="mr-3 text-green-500"
-                                    required
-                                  />
-                                  <div>
-                                    <span className="text-slate-300 font-medium">0-50ms</span>
-                                    <p className="text-green-400 text-xs">Excellent</p>
-                                  </div>
-                                </label>
-                                <label className="flex items-center p-3 bg-slate-700/30 rounded-lg hover:bg-slate-700/50 transition-colors cursor-pointer">
-                                  <input
-                                    type="radio"
-                                    name="ping"
-                                    value="51-100"
-                                    className="mr-3 text-yellow-500"
-                                    required
-                                  />
-                                  <div>
-                                    <span className="text-slate-300 font-medium">51-100ms</span>
-                                    <p className="text-yellow-400 text-xs">Good</p>
-                                  </div>
-                                </label>
-                                <label className="flex items-center p-3 bg-slate-700/30 rounded-lg hover:bg-slate-700/50 transition-colors cursor-pointer">
-                                  <input
-                                    type="radio"
-                                    name="ping"
-                                    value="101-150"
-                                    className="mr-3 text-orange-500"
-                                    required
-                                  />
-                                  <div>
-                                    <span className="text-slate-300 font-medium">101-199ms</span>
-                                    <p className="text-orange-400 text-xs">Playable</p>
-                                  </div>
-                                </label>
-                                <label className="flex items-center p-3 bg-slate-700/30 rounded-lg hover:bg-slate-700/50 transition-colors cursor-pointer">
-                                  <input
-                                    type="radio"
-                                    name="ping"
-                                    value="150+"
-                                    className="mr-3 text-red-500"
-                                    required
-                                  />
-                                  <div>
-                                    <span className="text-slate-300 font-medium">200+ms</span>
-                                    <p className="text-red-400 text-xs">High Latency</p>
-                                  </div>
-                                </label>
-                              </div>
-                            </div>
-                          </div>
-                        )}
-
-                        {/* Step 8: Payment */}
-                        {currentStep === 8 && (
-                          <div className="bg-slate-800/50 border border-slate-600/50 rounded-lg p-6">
-                            <div className="text-center mb-6">
-                              <div className="inline-flex items-center gap-3 px-4 py-2 bg-gradient-to-r from-yellow-600/20 to-orange-600/20 border border-yellow-500/30 rounded-full">
-                                <div className="w-2 h-2 bg-yellow-400 rounded-full"></div>
-                                <h3 className="text-lg font-bold bg-gradient-to-r from-yellow-400 to-orange-400 bg-clip-text text-transparent">
-                                  Payment Information
-                                </h3>
-                                <div className="w-2 h-2 bg-orange-400 rounded-full"></div>
-                              </div>
-                            </div>
-                            <div className="space-y-6">
-                              {/* Entry Fee Notice */}
-                              <div className="text-center p-4 bg-gradient-to-r from-yellow-900/20 to-orange-900/20 border border-yellow-500/30 rounded-lg">
-                                <h4 className="text-2xl font-bold text-yellow-300 mb-2">₹250</h4>
-                                <p className="text-slate-300 text-sm">Entry Fee (Non-refundable)</p>
-                              </div>
-
-                              {/* Payment Methods */}
-                              <div className="grid md:grid-cols-2 gap-6">
-                                {/* PayTM Payment */}
-                                <div className="bg-slate-700/30 border border-slate-600/30 rounded-lg p-4">
-                                  <div className="text-center mb-4">
-                                    <h4 className="text-lg font-semibold text-slate-300 mb-2">PayTM</h4>
-                                    <p className="text-slate-400 text-sm">Scan QR code for instant payment</p>
-                                  </div>
-                                  <div className="flex justify-center mb-4">
-                                    <div className="bg-white p-4 rounded-lg shadow-lg">
-                                      <img 
-                                        src="/Payment/Paytm.jpg" 
-                                        alt="PayTM QR Code"
-                                        className="w-48 h-48 object-contain"
-                                      />
-                                    </div>
-                                  </div>
-                                  <div className="text-center">
-                                    <p className="text-slate-400 text-xs mb-2">UPI ID:</p>
-                                    <p className="text-slate-300 text-sm font-mono bg-slate-800/50 px-3 py-2 rounded">
-                                      9004862493@pthdfc
-                                    </p>
-                                  </div>
-                                </div>
-
-                                {/* PayPal Payment */}
-                                <div className="bg-slate-700/30 border border-slate-600/30 rounded-lg p-4">
-                                  <div className="text-center mb-4">
-                                    <h4 className="text-lg font-semibold text-slate-300 mb-2">PayPal</h4>
-                                    <p className="text-slate-400 text-sm">Scan QR code for international payments</p>
-                                  </div>
-                                  <div className="flex justify-center mb-4">
-                                    <div className="bg-white p-4 rounded-lg shadow-lg">
-                                      <img 
-                                        src="/Payment/Paypal.jpg" 
-                                        alt="PayPal QR Code"
-                                        className="w-48 h-48 object-contain"
-                                      />
-                                    </div>
-                                  </div>
-                                  <div className="text-center">
-                                    <p className="text-slate-400 text-xs mb-2">PayPal ID:</p>
-                                    <p className="text-slate-300 text-sm font-mono bg-slate-800/50 px-3 py-2 rounded">
-                                      @keyur4393
-                                    </p>
-                                  </div>
-                                </div>
-                              </div>
-
-                              {/* Payment Proof Upload */}
-                              <div className="bg-orange-900/20 border border-orange-500/30 rounded-lg p-4">
-                                <h4 className="text-lg font-semibold text-orange-300 mb-3">Upload Payment Proof <span className="text-red-400">*</span></h4>
-                                <p className="text-slate-300 text-sm mb-4">
-                                  Please upload a screenshot of your payment confirmation. Include transaction ID and amount.
-                                </p>
-                                <div className="space-y-3">
-                                  <input
-                                    type="file"
-                                    accept="image/*"
-                                    className="w-full px-4 py-3 bg-slate-800/70 border border-slate-600/50 rounded-lg text-white file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-orange-600 file:text-white hover:file:bg-orange-700 transition-all"
-                                    required
-                                  />
-                                  <div className="grid md:grid-cols-2 gap-3">
-                                    <div>
-                                      <label className="block text-sm font-medium text-slate-300 mb-2">
-                                        Transaction ID <span className="text-red-400">*</span>
-                                      </label>
-                                      <input
-                                        type="text"
-                                        className="w-full px-4 py-2 bg-slate-800/70 border border-slate-600/50 rounded-lg text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-orange-500/50 focus:border-orange-500/50 transition-all text-sm"
-                                        placeholder="Enter transaction ID"
-                                        required
-                                      />
-                                    </div>
-                                    <div>
-                                      <label className="block text-sm font-medium text-slate-300 mb-2">
-                                        Payment Method Used <span className="text-red-400">*</span>
-                                      </label>
-                                      <select
-                                        className="w-full px-4 py-2 bg-slate-800/70 border border-slate-600/50 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-orange-500/50 focus:border-orange-500/50 transition-all text-sm"
-                                        required
-                                      >
-                                        <option value="">Select payment method</option>
-                                        <option value="paytm">PayTM</option>
-                                        <option value="paypal">PayPal</option>
-                                        <option value="upi">Other UPI</option>
-                                        <option value="bank">Bank Transfer</option>
-                                      </select>
-                                    </div>
-                                  </div>
-                                </div>
-                              </div>
-
-                              {/* Important Notice */}
-                              <div className="bg-red-900/20 border border-red-500/30 rounded-lg p-4">
-                                <h4 className="text-red-300 font-semibold mb-2">⚠️ Important Payment Instructions</h4>
-                                <ul className="text-slate-300 text-sm space-y-1">
-                                  <li>• Registration is only confirmed after payment verification</li>
-                                  <li>• Please mention your Discord name or in-game name in payment reference</li>
-                                  <li>• Payment verification may take 24-48 hours</li>
-                                  <li>• Entry fee is non-refundable once tournament starts</li>
-                                  <li>• Contact support if payment issues occur</li>
-                                </ul>
-                              </div>
-                            </div>
-                          </div>
-                        )}
-
-                        {/* Step 9: Terms & Conditions and Feedback */}
-                        {currentStep === 9 && (
-                          <>
-                            {/* Terms and Conditions Section */}
-                            <div className="bg-slate-800/50 border border-slate-600/50 rounded-lg p-6">
-                              <div className="text-center mb-6">
-                                <div className="inline-flex items-center gap-3 px-4 py-2 bg-gradient-to-r from-slate-600/20 to-gray-600/20 border border-slate-500/30 rounded-full">
-                                  <div className="w-2 h-2 bg-slate-400 rounded-full"></div>
-                                  <h3 className="text-lg font-bold bg-gradient-to-r from-slate-400 to-gray-400 bg-clip-text text-transparent">
-                                    Terms & Conditions
-                                  </h3>
-                                  <div className="w-2 h-2 bg-gray-400 rounded-full"></div>
-                                </div>
-                              </div>
-                              <div className="space-y-4">
-                                <div className="p-4 bg-slate-700/30 border border-slate-600/30 rounded-lg">
-                                  <p className="text-slate-300 text-sm leading-relaxed">
-                                    Do you confirm that the information provided is accurate to the best of your knowledge and understand that any false or misleading details may result in disqualification, removal from the tournament, or a ban from the server and further events?
-                                  </p>
-                                  <br />
-                                  <p className="text-slate-300 text-sm leading-relaxed">
-                                    Additionally, your gameplay videos and footage may be used at our discretion for promotional, streaming, or content-related purposes.
-                                  </p>
-                                  <br />
-                                  <p className="text-slate-300 text-sm leading-relaxed">
-                                    By submitting, you also confirm that you have joined the TRR Discord server and accepted the server conditions (mandatory for participation).
-                                  </p>
-                                </div>
-                                <label className="flex items-start gap-3 p-4 bg-slate-700/20 rounded-lg cursor-pointer hover:bg-slate-700/30 transition-colors">
-                                  <input
-                                    type="checkbox"
-                                    className="mt-1 text-blue-500"
-                                    required
-                                  />
-                                  <div>
-                                    <span className="text-slate-300 font-medium">I agree to all terms and conditions <span className="text-red-400">*</span></span>
-                                    <p className="text-slate-500 text-xs mt-1">
-                                      By checking this box, you confirm your agreement to all the above terms
-                                    </p>
-                                  </div>
-                                </label>
-                              </div>
-                            </div>
-
-                            {/* Feedback Section */}
-                            <div className="bg-slate-800/50 border border-slate-600/50 rounded-lg p-6">
-                              <div className="text-center mb-6">
-                                <div className="inline-flex items-center gap-3 px-4 py-2 bg-gradient-to-r from-teal-600/20 to-cyan-600/20 border border-teal-500/30 rounded-full">
-                                  <div className="w-2 h-2 bg-teal-400 rounded-full"></div>
-                                  <h3 className="text-lg font-bold bg-gradient-to-r from-teal-400 to-cyan-400 bg-clip-text text-transparent">
-                                    Feedback
-                                  </h3>
-                                  <div className="w-2 h-2 bg-cyan-400 rounded-full"></div>
-                                </div>
-                              </div>
-                              <div className="space-y-6">
-                                {/* Feedback Text */}
-                                <div>
-                                  <label className="block text-sm font-medium text-slate-300 mb-3">
-                                    Please give your honest opinions
-                                  </label>
-                                  <textarea
-                                    rows={4}
-                                    className="w-full px-4 py-3 bg-slate-800/70 border border-slate-600/50 rounded-lg text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-teal-500/50 focus:border-teal-500/50 transition-all text-sm resize-none"
-                                    placeholder="Share your thoughts about TRR, suggestions for improvement, or any feedback you'd like to give..."
-                                  />
-                                </div>
-
-                                {/* Rating Section */}
-                                <div>
-                                  <label className="block text-sm font-medium text-slate-300 mb-3">
-                                    Please rate your Roshan Rumble experience
-                                  </label>
-                                  <div className="flex justify-center items-center gap-4">
-                                    {[1, 2, 3, 4, 5].map((rating) => (
-                                      <label key={rating} className="flex flex-col items-center gap-2 cursor-pointer group">
-                                        <input
-                                          type="radio"
-                                          name="rating"
-                                          value={rating}
-                                          className="sr-only peer"
-                                        />
-                                        <div className="text-3xl transition-all duration-200 peer-checked:text-yellow-400 text-slate-600 group-hover:text-yellow-300 group-hover:scale-110">
-                                          ⭐
-                                        </div>
-                                        <span className="text-xs text-slate-400 peer-checked:text-yellow-300 group-hover:text-slate-300">
-                                          {rating}
-                                        </span>
-                                      </label>
-                                    ))}
-                                  </div>
-                                </div>
-
-                                {/* Suggestions */}
-                                <div>
-                                  <label className="block text-sm font-medium text-slate-300 mb-3">
-                                    How can we improve your experience?
-                                  </label>
-                                  <textarea
-                                    rows={3}
-                                    className="w-full px-4 py-3 bg-slate-800/70 border border-slate-600/50 rounded-lg text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-teal-500/50 focus:border-teal-500/50 transition-all text-sm resize-none"
-                                    placeholder="Suggestions for tournaments, features, community improvements, etc..."
-                                  />
-                                </div>
-                              </div>
-                            </div>
-                          </>
-                        )}
-
-                        {/* Navigation Buttons */}
-                        <div className="flex justify-between pt-2">
-                          <button
-                            type="button"
-                            onClick={currentStep === 1 ? handleBackToSelection : handlePrevStep}
-                            className="flex items-center gap-1 bg-slate-700 hover:bg-slate-600 text-white font-bold py-2 px-4 rounded-lg transition-all duration-300 text-sm cursor-pointer"
-                          >
-                            <ArrowLeft className="w-3 h-3" />
-                            {currentStep === 1 ? 'Back to Selection' : 'Previous'}
-                          </button>
-                          
-                          {currentStep < totalSteps ? (
-                            <button
-                              type="button"
-                              onClick={handleNextStep}
-                              disabled={!canProceedToNext()}
-                              className={`flex items-center gap-1 font-bold py-2 px-4 rounded-lg transition-all duration-300 text-sm cursor-pointer ${
-                                canProceedToNext()
-                                  ? 'bg-gradient-to-r from-blue-500 to-cyan-500 hover:from-blue-600 hover:to-cyan-600 text-white'
-                                  : 'bg-slate-600 text-slate-400 cursor-not-allowed'
-                              }`}
-                            >
-                              Next
-                              <ArrowLeft className="w-3 h-3 rotate-180" />
-                            </button>
-                          ) : (
-                            <button
-                              type="submit"
-                              disabled={isSubmitting}
-                              className="flex items-center gap-1 bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-600 hover:to-emerald-600 disabled:opacity-50 disabled:cursor-not-allowed text-white font-bold py-2 px-4 rounded-lg transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-xl text-sm cursor-pointer"
-                            >
-                              {isSubmitting ? 'Submitting...' : 'Complete Registration'}
-                              <CheckCircle className="w-3 h-3" />
-                            </button>
-                          )}
-                        </div>
-                      </form>
-                      </div>
-                    </div>
+                      </button>
+                    ))}
                   </div>
-                ) : !showNewPlayerForm ? (
-                  <div className="grid md:grid-cols-2 gap-10 max-w-8xl mx-auto">
-                    
-                    {/* Existing Player Card */}
-                    <div className="group relative h-full">
-                      <div className="absolute inset-0 bg-gradient-to-r from-blue-500/20 to-cyan-500/20 rounded-xl blur-xl group-hover:blur-2xl transition-all duration-500"></div>
-                      <div className="relative bg-slate-900/85 backdrop-blur-xl border border-slate-700/50 rounded-xl p-6 hover:border-blue-500/50 transition-all duration-300 h-full flex flex-col">
-                        
-                        <div className="text-center mb-4 flex-shrink-0">
-                          <div className="w-12 h-12 bg-gradient-to-r from-blue-500/20 to-cyan-500/20 rounded-full flex items-center justify-center mx-auto mb-3 group-hover:scale-110 transition-transform duration-300">
-                            <User className="w-6 h-6 text-blue-400" />
-                          </div>
-                          <h2 className="text-lg font-bold text-white mb-1">Existing Player</h2>
-                          <p className="text-slate-300 text-sm">
-                            Already participated in TRR? Register with your existing profile
-                          </p>
-                        </div>
-
-                        <div className="space-y-3 flex-1 flex flex-col">
-                          <div className="relative">
-                            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-400 w-4 h-4" />
-                            <input
-                              type="text"
-                              placeholder="Search by nickname or real name..."
-                              value={searchTerm}
-                              onChange={(e) => setSearchTerm(e.target.value)}
-                              className="w-full pl-10 pr-4 py-2 bg-slate-800/70 border border-slate-600/50 rounded-lg text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500/50 transition-all text-sm"
-                            />
-                          </div>
-                          
-                          {!searchTerm && (
-                            <div className="text-center text-slate-400 text-sm bg-slate-800/30 rounded-lg p-2">
-                              <p>Start typing to search for your existing profile</p>
-                            </div>
-                          )}
-                          
-                          {searchTerm && (
-                            <div className="space-y-2 max-h-32 overflow-y-auto">
-                              {(() => {
-                                // Filter players from actual database
-                                const filteredPlayers = players.filter(player => 
-                                  player.nickname.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                                  (player.realName && player.realName.toLowerCase().includes(searchTerm.toLowerCase()))
-                                );
-                                
-                                return filteredPlayers.length > 0 ? filteredPlayers.slice(0, 10).map((player) => (
-                                  <div key={player.id} className="bg-slate-800/50 border border-slate-600/30 rounded-lg p-2 animate-in fade-in duration-300">
-                                    <div className="flex items-center gap-3">
-                                      <img 
-                                        src={player.avatarUrl} 
-                                        alt={player.nickname}
-                                        className="w-8 h-8 rounded-full object-cover border-2 border-blue-400"
-                                        onError={(e) => {
-                                          e.currentTarget.src = "/avatars/default.jpg";
-                                        }}
-                                      />
-                                      <div className="flex-1">
-                                        <h3 className="text-white font-bold text-sm">{player.nickname}</h3>
-                                        {player.realName && (
-                                          <p className="text-slate-400 text-xs">{player.realName}</p>
-                                        )}
-                                      </div>
-                                      <button 
-                                        onClick={() => handlePlayerSelect(player)}
-                                        className="bg-gradient-to-r from-blue-500 to-cyan-500 text-white px-3 py-1 rounded-md font-semibold hover:from-blue-600 hover:to-cyan-600 transition-all transform hover:scale-105 text-xs cursor-pointer"
-                                      >
-                                        Select
-                                      </button>
-                                    </div>
-                                  </div>
-                                )) : (
-                                  <div className="text-center text-slate-400 text-sm bg-slate-800/30 rounded-lg p-2">
-                                    <p>No players found matching "{searchTerm}"</p>
-                                  </div>
-                                );
-                              })()}
-                            </div>
-                          )}
-                          
-                          <div className="flex-1"></div>
-                        </div>
-                      </div>
-                    </div>
-
-                    {/* New Player Card */}
-                    <div className="group relative h-full">
-                      <div className="absolute inset-0 bg-gradient-to-r from-green-500/20 to-emerald-500/20 rounded-xl blur-xl group-hover:blur-2xl transition-all duration-500"></div>
-                      <div className="relative bg-slate-900/85 backdrop-blur-xl border border-slate-700/50 rounded-xl p-6 hover:border-green-500/50 transition-all duration-300 h-full flex flex-col">
-                        
-                        <div className="text-center mb-4 flex-shrink-0">
-                          <div className="w-12 h-12 bg-gradient-to-r from-green-500/20 to-emerald-500/20 rounded-full flex items-center justify-center mx-auto mb-3 group-hover:scale-110 transition-transform duration-300">
-                            <UserPlus className="w-6 h-6 text-green-400" />
-                          </div>
-                          <h2 className="text-lg font-bold text-white mb-1">New Player</h2>
-                          <p className="text-slate-300 text-sm">
-                            First time joining TRR? Create a new profile and register
-                          </p>
-                        </div>
-
-                        <div className="space-y-3 flex-1 flex flex-col">
-                          <div className="bg-slate-800/50 rounded-lg p-3 flex-1">
-                            <h3 className="text-sm font-semibold text-white mb-2 flex items-center">
-                              <Star className="w-4 h-4 mr-2 text-green-400" />
-                              What you'll need:
-                            </h3>
-                            <ul className="space-y-1 text-slate-300 text-xs">
-                              <li className="flex items-center">
-                                <CheckCircle className="w-3 h-3 text-green-400 mr-2 flex-shrink-0" />
-                                <span>Your Dota 2 in-game name</span>
-                              </li>
-                              <li className="flex items-center">
-                                <CheckCircle className="w-3 h-3 text-green-400 mr-2 flex-shrink-0" />
-                                <span>Real name (optional)</span>
-                              </li>
-                              <li className="flex items-center">
-                                <CheckCircle className="w-3 h-3 text-green-400 mr-2 flex-shrink-0" />
-                                <span>Steam profile URL</span>
-                              </li>
-                              <li className="flex items-center">
-                                <CheckCircle className="w-3 h-3 text-green-400 mr-2 flex-shrink-0" />
-                                <span>Preferred playing roles</span>
-                              </li>
-                              <li className="flex items-center">
-                                <CheckCircle className="w-3 h-3 text-green-400 mr-2 flex-shrink-0" />
-                                <span>Connection ping information</span>
-                              </li>
-                            </ul>
-                          </div>
-
-                          <button
-                            onClick={() => setShowNewPlayerForm(true)}
-                            className="w-full bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-600 hover:to-emerald-600 text-white font-bold py-2 px-4 rounded-lg transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-xl text-sm flex-shrink-0 cursor-pointer"
-                          >
-                            Create New Profile
-                          </button>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                ) : (
-                  /* New Player Form Modal */
-                  <div className="max-w-xl mx-auto">
-                    <div className="bg-slate-900/90 backdrop-blur-xl border border-slate-700/50 rounded-xl p-5">
-                      <div className="flex justify-between items-center mb-4">
-                        <h2 className="text-lg font-bold text-white">Create New Profile</h2>
-                        <button
-                          onClick={() => setShowNewPlayerForm(false)}
-                          className="text-slate-400 hover:text-white text-xl transition-colors cursor-pointer"
-                        >
-                          ×
-                        </button>
-                      </div>
-                      
-                      <div className="text-center py-4">
-                        <div className="w-12 h-12 bg-gradient-to-r from-green-500/20 to-emerald-500/20 rounded-full flex items-center justify-center mx-auto mb-4">
-                          <UserPlus className="w-6 h-6 text-green-400" />
-                        </div>
-                        <h3 className="text-lg font-bold text-white mb-3">Registration Form Coming Soon</h3>
-                        <p className="text-slate-300 text-sm mb-4">
-                          The full registration system is being prepared by our tournament administrators.
-                        </p>
-                        <p className="text-slate-400 text-xs">
-                          Please check back later or contact administrators for assistance with registration.
-                        </p>
-                      </div>
-                    </div>
-                  </div>
-                )}
-            </div>
-          </div>
-        </div>
-      
-      </div>
-      </main>
-
-      {/* Success Modal */}
-      {showSuccessModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm">
-          <div className="bg-gradient-to-br from-slate-900 to-slate-800 rounded-2xl p-8 max-w-md w-full border border-green-500/30 shadow-2xl shadow-green-500/20 animate-in fade-in zoom-in duration-300">
-            {/* Success Icon */}
-            <div className="text-center mb-6">
-              <div className="w-20 h-20 bg-gradient-to-br from-green-500 to-emerald-500 rounded-full flex items-center justify-center mx-auto mb-4 animate-bounce">
-                <CheckCircle className="w-12 h-12 text-white" />
+                </div>
               </div>
-              <h2 className="text-2xl font-bold text-white mb-2">Registration Submitted!</h2>
-              <div className="w-16 h-1 bg-gradient-to-r from-green-500 to-emerald-500 mx-auto rounded-full"></div>
-            </div>
+            )}
 
-            {/* Message */}
-            <div className="bg-slate-800/50 rounded-lg p-4 mb-6 border border-green-500/20">
-              <p className="text-green-300 text-center mb-3">
-                ✅ Your registration has been submitted successfully!
-              </p>
-              <p className="text-slate-300 text-sm text-center">
-                Your registration is pending admin approval. You will be notified once it has been reviewed.
-              </p>
-            </div>
+            {/* Step 3 — Roles */}
+            {step === 3 && (
+              <div className="space-y-5">
+                <div>
+                  <h2 className="text-lg font-bold text-white mb-1">Preferred Roles</h2>
+                  <p className="text-white/35 text-sm">Pick up to 3 roles in order of preference.</p>
+                </div>
+                <div className="space-y-2">
+                  {ROLES.map((r) => {
+                    const idx = roles.indexOf(r.id);
+                    const selected = idx !== -1;
+                    return (
+                      <button key={r.id} type="button" onClick={() => toggleRole(r.id)}
+                        className="w-full flex items-center gap-4 px-4 py-3 rounded-xl transition-all"
+                        style={{
+                          background: selected ? 'rgba(255,255,255,0.07)' : 'rgba(255,255,255,0.03)',
+                          border: `1px solid ${selected ? 'rgba(255,255,255,0.2)' : 'rgba(255,255,255,0.07)'}`,
+                        }}>
+                        <img src={r.icon} alt={r.label} className="w-6 h-6 object-contain opacity-80" />
+                        <div className="flex-1 text-left">
+                          <div className="text-white text-sm font-medium">{r.label}</div>
+                          <div className="text-white/35 text-xs">{r.pos}</div>
+                        </div>
+                        {selected && (
+                          <span className="w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold text-white"
+                            style={{ background: 'rgba(255,255,255,0.15)' }}>
+                            {idx + 1}
+                          </span>
+                        )}
+                      </button>
+                    );
+                  })}
+                </div>
+                <p className="text-white/25 text-xs text-center">{roles.length}/3 selected</p>
+              </div>
+            )}
 
-            {/* Info Box */}
-            <div className="bg-blue-900/20 border border-blue-500/30 rounded-lg p-4 mb-6">
-              <h3 className="text-blue-300 font-semibold text-sm mb-2">What happens next?</h3>
-              <ul className="text-slate-300 text-xs space-y-1">
-                <li>• Admin will review your registration</li>
-                <li>• You'll be notified of approval/denial</li>
-                <li>• If approved, you'll be added to the auction pool</li>
-                <li>• Check your profile for updates</li>
-              </ul>
-            </div>
+            {/* Step 4 — Final details */}
+            {step === 4 && (
+              <div className="space-y-5">
+                <div>
+                  <h2 className="text-lg font-bold text-white mb-1">Almost done</h2>
+                  <p className="text-white/35 text-sm">A couple more things before you submit.</p>
+                </div>
+                <div>
+                  <label className="block text-xs text-white/50 mb-2">Ping Range</label>
+                  <div className="grid grid-cols-2 gap-2">
+                    {PING_OPTIONS.map(p => (
+                      <button key={p} type="button" onClick={() => setPing(p)}
+                        className="py-2.5 rounded-xl text-sm transition-all"
+                        style={{
+                          background: ping === p ? 'rgba(255,255,255,0.08)' : 'rgba(255,255,255,0.03)',
+                          border: `1px solid ${ping === p ? 'rgba(255,255,255,0.2)' : 'rgba(255,255,255,0.07)'}`,
+                          color: ping === p ? 'white' : 'rgba(255,255,255,0.45)',
+                        }}>
+                        {p}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+                <div className="flex items-center gap-3 px-4 py-3 rounded-xl cursor-pointer"
+                  style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.07)' }}
+                  onClick={() => setIsCaptain(v => !v)}>
+                  <div className="w-5 h-5 rounded flex items-center justify-center flex-shrink-0 transition-all"
+                    style={{ background: isCaptain ? 'rgba(255,255,255,0.9)' : 'rgba(255,255,255,0.08)', border: '1px solid rgba(255,255,255,0.2)' }}>
+                    {isCaptain && <CheckCircle className="w-3.5 h-3.5 text-black" />}
+                  </div>
+                  <div>
+                    <div className="text-white text-sm font-medium">Available as Captain</div>
+                    <div className="text-white/35 text-xs">I'm willing to lead a team this season</div>
+                  </div>
+                </div>
 
-            {/* Close Button */}
-            <button
-              onClick={handleCloseSuccessModal}
-              className="w-full bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-600 hover:to-emerald-600 text-white font-bold py-3 px-6 rounded-lg transition-all duration-300 transform hover:scale-105 shadow-lg"
-            >
-              OK
+                {/* Summary */}
+                <div className="rounded-xl px-4 py-4 space-y-2" style={{ background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.06)' }}>
+                  <div className="text-xs font-semibold text-white/30 uppercase tracking-widest mb-3">Summary</div>
+                  {[
+                    { label: 'Player', value: player?.nickname },
+                    { label: 'Discord', value: discord },
+                    { label: 'MMR', value: mmr ? `${mmr} MMR` : '—' },
+                    { label: 'Type', value: playerType || '—' },
+                    { label: 'Roles', value: roles.map(r => ROLES.find(x => x.id === r)?.label).join(', ') || '—' },
+                    { label: 'Ping', value: ping || '—' },
+                  ].map(row => (
+                    <div key={row.label} className="flex justify-between text-sm">
+                      <span className="text-white/35">{row.label}</span>
+                      <span className="text-white/80 capitalize">{row.value}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+          </motion.div>
+        </AnimatePresence>
+
+        {/* Navigation */}
+        <div className="flex gap-3 mt-8">
+          {step > 1 && (
+            <button onClick={() => setStep(s => s - 1)}
+              className="flex items-center gap-1.5 px-4 py-3 rounded-xl text-sm text-white/50 hover:text-white/80 transition-colors flex-shrink-0"
+              style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)' }}>
+              <ChevronLeft className="w-4 h-4" /> Back
             </button>
-          </div>
+          )}
+          {step < totalSteps ? (
+            <button onClick={() => setStep(s => s + 1)} disabled={!canNext()}
+              className="flex-1 flex items-center justify-center gap-1.5 py-3 rounded-xl text-sm font-semibold text-white transition-all disabled:opacity-30"
+              style={{ background: 'rgba(255,255,255,0.08)', border: '1px solid rgba(255,255,255,0.12)' }}>
+              Continue <ChevronRight className="w-4 h-4" />
+            </button>
+          ) : (
+            <button onClick={handleSubmit} disabled={submitting}
+              className="flex-1 flex items-center justify-center gap-2 py-3 rounded-xl text-sm font-semibold text-white transition-all disabled:opacity-50"
+              style={{ background: 'rgba(255,255,255,0.1)', border: '1px solid rgba(255,255,255,0.15)' }}>
+              {submitting
+                ? <><div className="w-4 h-4 border-2 border-white/20 border-t-white/60 rounded-full animate-spin" /> Submitting...</>
+                : <><CheckCircle className="w-4 h-4" /> Submit Registration</>}
+            </button>
+          )}
         </div>
-      )}
-    </>
+      </div>
+    </div>
   );
 }
-

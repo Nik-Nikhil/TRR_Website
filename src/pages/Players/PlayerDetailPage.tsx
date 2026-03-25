@@ -13,6 +13,7 @@ import { PlayerService } from "../../services/supabaseService";
 import { supabase } from "../../lib/supabase";
 import type { Player } from "../../data/players";
 import { mapDatabasePlayerToFrontend } from "../../utils/playerMapper";
+import ImageCropModal from "../../components/ImageCropModal";
 
 // Colored season badge styles
 const coloredSeasonBadgeStyles: Record<number, string> = {
@@ -58,6 +59,7 @@ export default function PlayerDetailPage() {
   });
   const [editedRoles, setEditedRoles] = useState<string[]>([]);
   const [editedAvatar, setEditedAvatar] = useState<string>('');
+  const [cropSrc, setCropSrc] = useState<string | null>(null);
   const [editedHeroes, setEditedHeroes] = useState<string[]>([]);
   const [heroSearchTerm, setHeroSearchTerm] = useState('');
   const [, setMmrProof] = useState<string>('');
@@ -393,6 +395,23 @@ export default function PlayerDetailPage() {
     <>
       {/* Toast Container */}
       <ToastContainer toasts={toasts} onClose={removeToast} />
+
+      {/* Crop Modal */}
+      {cropSrc && (
+        <ImageCropModal
+          imageSrc={cropSrc}
+          onConfirm={(blob) => {
+            const reader = new FileReader();
+            reader.onload = (e) => {
+              setEditedAvatar(e.target?.result as string);
+            };
+            reader.readAsDataURL(blob);
+            URL.revokeObjectURL(cropSrc);
+            setCropSrc(null);
+          }}
+          onCancel={() => { URL.revokeObjectURL(cropSrc); setCropSrc(null); }}
+        />
+      )}
       
       {/* Fixed Background with bg5.webp - Cyan/Teal Theme */}
       <div className="fixed inset-0 z-0">
@@ -565,7 +584,7 @@ export default function PlayerDetailPage() {
                       )}
                     </div>
 
-                    {/* Avatar Upload Input when editing - Smaller and better positioned */}
+                    {/* Avatar Upload Input when editing */}
                     {isEditMode && (
                       <motion.div
                         initial={{ opacity: 0, y: 10 }}
@@ -579,11 +598,9 @@ export default function PlayerDetailPage() {
                           onChange={(e) => {
                             const file = e.target.files?.[0];
                             if (file) {
-                              const reader = new FileReader();
-                              reader.onload = (e) => {
-                                setEditedAvatar(e.target?.result as string);
-                              };
-                              reader.readAsDataURL(file);
+                              const url = URL.createObjectURL(file);
+                              setCropSrc(url);
+                              e.target.value = '';
                             }
                           }}
                           className="w-full text-[0.6rem] text-cyan-200 file:mr-1 file:py-0.5 file:px-1 file:rounded file:border-0 file:text-[0.6rem] file:bg-cyan-600/20 file:text-cyan-300 hover:file:bg-cyan-600/40"
