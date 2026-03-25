@@ -1,4 +1,3 @@
-// Profile Update Request Service
 import { supabase } from '../lib/supabase';
 
 export interface ProfileUpdateRequest {
@@ -6,149 +5,150 @@ export interface ProfileUpdateRequest {
   playerId: string;
   playerNickname: string;
   timestamp: Date;
-  changes: {
-    field: string;
-    oldValue: any;
-    newValue: any;
-  }[];
+  changes: { field: string; oldValue: any; newValue: any }[];
   status: 'pending' | 'approved' | 'rejected';
   reviewedBy?: string;
   reviewedAt?: Date;
 }
 
-class ProfileUpdateService {
-  private storageKey = 'profileUpdateRequests';
+const FIELD_MAP: Record<string, string> = {
+  bio: 'bio',
+  realName: 'real_name',
+  currentMMR: 'current_mmr',
+  peakMMR: 'peak_mmr',
+  roles: 'roles',
+  favoriteHeroes: 'favorite_heroes',
+  discordUsername: 'discord_username',
+  steamUrl: 'steam_url',
+  dotabuffUrl: 'dotabuff_url',
+};
 
-  // Submit a profile update request
-  submitUpdateRequest(
+function mapRow(r: any): ProfileUpdateRequest {
+  return {
+    id: r.id,
+    playerId: r.player_id,
+    playerNickname: r.player_nickname,
+    timestamp: new Date(r.created_at),
+    changes: r.changes || [],
+    status: r.status,
+    reviewedBy: r.reviewed_by,
+    reviewedAt: r.reviewed_at ? new Date(r.reviewed_at) : undefined,
+  };
+}
+
+class ProfileUpdateService {
+
+  async submitUpdateRequest(
     playerId: string,
     playerNickname: string,
     changes: { field: string; oldValue: any; newValue: any }[]
-  ): ProfileUpdateRequest {
-    const requests = this.getAllRequests();
-    
-    const newRequest: ProfileUpdateRequest = {
-      id: `req_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
-      playerId,
-      playerNickname,
-      timestamp: new Date(),
-      changes,
-      status: 'pending'
-    };
+  ): Promise<ProfileUpdateRequest | null> {
+    const { data, error } = await supabase
+      .from('profile_update_requests')
+      .insert({ player_id: playerId, player_nickname: playerNickname, changes, status: 'pending' })
+      .select()
+      .single();
 
-    requests.push(newRequest);
-    localStorage.setItem(this.storageKey, JSON.stringify(requests));
-
-    return newRequest;
+    if (error) { console.error('submitUpdateRequest:', error); return null; }
+    return mapRow(data);
   }
 
-  // Get all requests
-  getAllRequests(): ProfileUpdateRequest[] {
-    const data = localStorage.getItem(this.storageKey);
-    if (!data) return [];
-    
-    const requests = JSON.parse(data);
-    // Convert timestamp strings back to Date objects
-    return requests.map((req: any) => ({
-      ...req,
-      timestamp: new Date(req.timestamp),
-      reviewedAt: req.reviewedAt ? new Date(req.reviewedAt) : undefined
-    }));
+  async getAllRequests(): Promise<ProfileUpdateRequest[]> {
+    const { data, error } = await supabase
+      .from('profile_update_requests')
+      .select('*')
+      .order('created_at', { ascending: false });
+
+    if (error) { console.error('getAllRequests:', error); return []; }
+    return (data || []).map(mapRow);
   }
 
-  // Get pending requests
-  getPendingRequests(): ProfileUpdateRequest[] {
-    return this.getAllRequests().filter(req => req.status === 'pending');
+  async getPendingRequests(): Promise<ProfileUpdateRequest[]> {
+    const { data, error } = await supabase
+      .from('profile_update_requests')
+      .select('*')
+      .eq('status', 'pending')
+      .order('created_at', { ascending: false });
+
+    if (error) { console.error('getPendingRequests:', error); return []; }
+    return (data || []).map(mapRow);
   }
 
-  // Get requests for a specific player
-  getPlayerRequests(playerId: string): ProfileUpdateRequest[] {
-    return this.getAllRequests().filter(req => req.playerId === playerId);
+  async getPlayerRequests(playerId: string): Promise<ProfileUpdateRequest[]> {
+    const { data, error } = await supabase
+      .from('profile_update_requests')
+      .select('*')
+      .eq('player_id', playerId)
+      .order('created_at', { ascending: false });
+
+    if (error) { console.error('getPlayerRequests:', error); return []; }
+    return (data || []).map(mapRow);
   }
 
-  // Approve a request
+  async getPendingCount(): Promise<number> {
+    const { count, error } = await supabase
+      .from('profile_update_requests')
+      .select('*', { count: 'exact', head: true })
+      .eq('status', 'pending');
+
+    if (error) return 0;
+    return count || 0;
+  }
+
   async approveRequest(requestId: string, adminUsername: string): Promise<boolean> {
-    const requests = this.getAllRequests();
-    const request = requests.find(req => req.id === requestId);
-    
-    if (!request || request.status !== 'pending') {
-      return false;
-    }
+    // Get the request first
+    const { data: req, error: fetchErr } = await supabase
+      .from('profile_update_requests')
+      .select('*')
+      .eq('id', requestId)
+      .single();
 
-    // Update request status
-    request.status = 'approved';
-    request.reviewedBy = adminUsername;
-    request.reviewedAt = new Date();
+    if (fetchErr || !req) return false;
 
-    // Build Supabase update object from changes
+    // Apply changes to players table
     const updates: Record<string, any> = {};
-    const fieldMap: Record<string, string> = {
-      bio: 'bio',
-      realName: 'real_name',
-      currentMMR: 'current_mmr',
-      peakMMR: 'peak_mmr',
-      roles: 'roles',
-      favoriteHeroes: 'favorite_heroes',
-      discordUsername: 'discord_username',
-      steamUrl: 'steam_url',
-      dotabuffUrl: 'dotabuff_url',
-    };
-
-    request.changes.forEach(change => {
-      const dbField = fieldMap[change.field] || change.field;
+    (req.changes || []).forEach((change: any) => {
+      const dbField = FIELD_MAP[change.field] || change.field;
       updates[dbField] = change.newValue;
     });
 
     if (Object.keys(updates).length > 0) {
-      const { error } = await supabase
+      const { error: updateErr } = await supabase
         .from('players')
         .update({ ...updates, updated_at: new Date().toISOString() })
-        .eq('id', request.playerId);
+        .eq('id', req.player_id);
 
-      if (error) {
-        console.error('Failed to apply profile update to Supabase:', error);
-        return false;
-      }
+      if (updateErr) { console.error('approveRequest apply:', updateErr); return false; }
     }
 
-    // Save updated requests to localStorage
-    localStorage.setItem(this.storageKey, JSON.stringify(requests));
+    // Mark as approved
+    const { error } = await supabase
+      .from('profile_update_requests')
+      .update({ status: 'approved', reviewed_by: adminUsername, reviewed_at: new Date().toISOString() })
+      .eq('id', requestId);
+
+    if (error) { console.error('approveRequest update:', error); return false; }
     return true;
   }
 
-  // Reject a request
-  rejectRequest(requestId: string, adminUsername: string): boolean {
-    const requests = this.getAllRequests();
-    const request = requests.find(req => req.id === requestId);
-    
-    if (!request || request.status !== 'pending') {
-      return false;
-    }
+  async rejectRequest(requestId: string, adminUsername: string): Promise<boolean> {
+    const { error } = await supabase
+      .from('profile_update_requests')
+      .update({ status: 'rejected', reviewed_by: adminUsername, reviewed_at: new Date().toISOString() })
+      .eq('id', requestId);
 
-    request.status = 'rejected';
-    request.reviewedBy = adminUsername;
-    request.reviewedAt = new Date();
-
-    localStorage.setItem(this.storageKey, JSON.stringify(requests));
+    if (error) { console.error('rejectRequest:', error); return false; }
     return true;
   }
 
-  // Delete a request
-  deleteRequest(requestId: string): boolean {
-    const requests = this.getAllRequests();
-    const filtered = requests.filter(req => req.id !== requestId);
-    
-    if (filtered.length === requests.length) {
-      return false; // Request not found
-    }
+  async deleteRequest(requestId: string): Promise<boolean> {
+    const { error } = await supabase
+      .from('profile_update_requests')
+      .delete()
+      .eq('id', requestId);
 
-    localStorage.setItem(this.storageKey, JSON.stringify(filtered));
+    if (error) { console.error('deleteRequest:', error); return false; }
     return true;
-  }
-
-  // Get count of pending requests
-  getPendingCount(): number {
-    return this.getPendingRequests().length;
   }
 }
 

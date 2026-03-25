@@ -430,34 +430,26 @@ export class DatabaseService {
     reason?: string;
   }) {
     try {
-      // In a real implementation, this would insert into a pending_approvals table
-      // For now, we'll just log it and return success
-      const approvalRequest = {
-        id: `role_change_${Date.now()}`,
-        type: 'role_change',
-        playerId: requestData.playerId,
-        playerNickname: requestData.playerNickname,
-        submittedAt: new Date().toISOString(),
-        submittedBy: requestData.playerId,
-        status: 'pending',
-        data: {
-          roleChange: {
-            currentRoles: requestData.currentRoles,
-            requestedRoles: requestData.requestedRoles,
-            reason: requestData.reason
-          }
-        }
-      };
+      const { data, error } = await supabase
+        .from('role_change_requests')
+        .insert({
+          player_id: requestData.playerId,
+          player_nickname: requestData.playerNickname,
+          current_roles: requestData.currentRoles,
+          requested_roles: requestData.requestedRoles,
+          reason: requestData.reason || '',
+          status: 'pending',
+          requested_at: new Date().toISOString(),
+        })
+        .select()
+        .single();
 
-      
-      // In production, you would insert this into the database:
-      // const { data, error } = await supabase
-      //   .from('pending_approvals')
-      //   .insert([approvalRequest])
-      //   .select()
-      //   .single();
-      
-      return { success: true, data: approvalRequest };
+      if (error) {
+        console.error('submitRoleChangeRequest error:', error);
+        return { success: false, error: error.message };
+      }
+
+      return { success: true, data };
     } catch (error) {
       console.error('Error submitting role change request:', error);
       return { success: false, error: (error as Error).message };

@@ -271,32 +271,16 @@ export default function Navbar() {
                 label="Rules"
                 active={pathname.startsWith("/rules")}
               />
-              {/* Standings */}
-              <NavItem
-                to="/seasons"
-                icon={<Medal className="w-3.5 h-3.5 md:w-4 md:h-4 lg:w-[18px] lg:h-[18px]" />}
-                label="Standings"
-                active={pathname.startsWith("/seasons")}
-              />
               <NavItem
                 to="/players"
                 icon={<User className="w-3.5 h-3.5 md:w-4 md:h-4 lg:w-[18px] lg:h-[18px]" />}
                 label="Players"
                 active={pathname.startsWith("/players")}
               />
-              <NavItem
-                to="/auction"
-                icon={<svg className="w-3.5 h-3.5 md:w-4 md:h-4 lg:w-[18px] lg:h-[18px]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>}
-                label="Auction"
-                active={pathname.startsWith("/auction")}
-              />
-              <NavItem
-                to="/wall-of-shame"
-                icon={<svg className="w-3.5 h-3.5 md:w-4 md:h-4 lg:w-[18px] lg:h-[18px]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636" /></svg>}
-                label="Banned"
-                active={pathname.startsWith("/wall-of-shame")}
-              />
-              
+
+              {/* More dropdown — Standings, Auction, Banned */}
+              <MoreDropdown pathname={pathname} />
+
               {/* Profile Link - Only show for logged-in players */}
               {authChecked && isLoggedIn && currentUser?.type === 'player' && (
                 <NavItem
@@ -590,6 +574,68 @@ type NavItemProps = {
   active: boolean;
   mobile?: boolean;
 };
+
+function MoreDropdown({ pathname }: { pathname: string }) {
+  const [open, setOpen] = useState(false);
+  const ref = React.useRef<HTMLDivElement>(null);
+  const isActive = pathname.startsWith('/seasons') || pathname.startsWith('/auction') || pathname.startsWith('/wall-of-shame');
+
+  React.useEffect(() => {
+    const handler = (e: MouseEvent) => {
+      if (ref.current && !ref.current.contains(e.target as Node)) setOpen(false);
+    };
+    document.addEventListener('mousedown', handler);
+    return () => document.removeEventListener('mousedown', handler);
+  }, []);
+
+  const items = [
+    { to: '/seasons', label: 'Standings', icon: <Medal className="w-4 h-4" /> },
+    { to: '/auction', label: 'Auction', icon: <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg> },
+    { to: '/wall-of-shame', label: 'Banned', icon: <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636" /></svg> },
+  ];
+
+  return (
+    <div className="relative" ref={ref}>
+      <button
+        onClick={() => setOpen(v => !v)}
+        className={`relative inline-flex items-center gap-1.5 px-2 lg:px-3 py-1.5
+          text-[0.7rem] lg:text-[0.75rem] uppercase tracking-[0.15em]
+          transition-all duration-300 rounded-lg
+          ${isActive ? 'text-white' : 'text-zinc-400 hover:text-white hover:bg-white/5'}`}
+      >
+        Arena
+        <ChevronDown className={`w-3 h-3 transition-transform ${open ? 'rotate-180' : ''}`} />
+        {isActive && <span className="absolute bottom-0 left-1/2 -translate-x-1/2 w-4 h-0.5 bg-white rounded-full" />}
+      </button>
+
+      <AnimatePresence>
+        {open && (
+          <motion.div
+            initial={{ opacity: 0, y: 6, scale: 0.97 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            exit={{ opacity: 0, y: 6, scale: 0.97 }}
+            transition={{ duration: 0.15 }}
+            className="absolute top-full left-1/2 -translate-x-1/2 mt-2 w-44 rounded-xl overflow-hidden z-50"
+            style={{ background: 'rgba(10,12,16,0.97)', border: '1px solid rgba(255,255,255,0.08)', backdropFilter: 'blur(12px)' }}
+          >
+            {items.map(item => (
+              <Link
+                key={item.to}
+                to={item.to}
+                onClick={() => setOpen(false)}
+                className={`flex items-center gap-3 px-4 py-2.5 text-sm transition-colors
+                  ${pathname.startsWith(item.to) ? 'text-white bg-white/8' : 'text-zinc-400 hover:text-white hover:bg-white/5'}`}
+              >
+                {item.icon}
+                {item.label}
+              </Link>
+            ))}
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </div>
+  );
+}
 
 function NavItem({ to, icon, label, active, mobile = false }: NavItemProps) {
   // Mobile rendering
