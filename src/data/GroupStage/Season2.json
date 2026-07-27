@@ -1,98 +1,612 @@
 {
-  "season": 2,
-  "stage": "group",
-
   "groups": {
-    "A": [
-      {
-        "captain": "Irox",
-        "color": "#B6D7A8",
-        "team": "Kasuali Tigers",
-        "wdl": "3-2-0",
-        "pts": 11
-      },
-      {
-        "captain": "Atom1c",
-        "color": "#B6D7A8",
-        "team": "Impacts",
-        "wdl": "2-3-0",
-        "pts": 9
-      },
-      {
-        "captain": "Bazinga",
-        "color": "#6D9EEB",
-        "team": "Ohh Yes Dabba Kadiya",
-        "wdl": "2-2-1",
-        "pts": 8
-      },
-      {
-        "captain": "Reciprocal",
-        "color": "#674EA7",
-        "team": "Monarchs",
-        "wdl": "1-4-0",
-        "pts": 7
-      },
-      {
-        "captain": "Banner",
-        "color": "#3C78D8",
-        "team": "Mango Juice",
-        "wdl": "1-1-3",
-        "pts": 4
-      },
-      {
-        "captain": "gxnova",
-        "color": "#76A5AF",
-        "team": "Team Liquid",
-        "wdl": "0-0-5",
-        "pts": 0
-      }
+    "Group A": [
+      { "captain": "Irox", "color": "#38bdf8", "team": "Kasuali Tigers", "wdl": "3-2-0", "pts": 11 },
+      { "captain": "@tom1c", "color": "#f97316", "team": "Imposters", "wdl": "2-3-0", "pts": 9 },
+      { "captain": "Bazinga", "color": "#a78bfa", "team": "Ohh Yes Dabba Kardiya", "wdl": "2-2-1", "pts": 8 },
+      { "captain": "r3ciprocal", "color": "#f43f5e", "team": "Monarchs", "wdl": "1-4-0", "pts": 7 },
+      { "captain": "Banner", "color": "#34d399", "team": "Mango Juice", "wdl": "1-1-3", "pts": 4 },
+      { "captain": "gxnova", "color": "#fbbf24", "team": "Team Liquor", "wdl": "0-0-5", "pts": 0 }
     ],
-
-    "B": [
-      {
-        "captain": "Madlad",
-        "color": "#FFD966",
-        "team": "Blink Feed Repeat",
-        "wdl": "3-1-1",
-        "pts": 10
-      },
-      {
-        "captain": "Machine",
-        "color": "#4A86E8",
-        "team": "Fish Hunters",
-        "wdl": "3-0-2",
-        "pts": 9
-      },
-      {
-        "captain": "MSlayer",
-        "color": "#F6B26B",
-        "team": "Devilish Slayers",
-        "wdl": "2-2-1",
-        "pts": 8
-      },
-      {
-        "captain": "MaDaRa",
-        "color": "#F4CCCC",
-        "team": "Demonic Empire",
-        "wdl": "2-2-1",
-        "pts": 8
-      },
-      {
-  "captain": "GRIMM",
-  "color": "#8E7CC3",
-  "team": "Immortals",
-  "wdl": "2-1-2",
-  "pts": 7,
-  "dq": true
-}
-,
-      {
-        "captain": "JINXED",
-        "color": "#B4A7D6",
-        "team": "Python Hunters",
-        "wdl": "0-0-5",
-        "pts": 0
-      }
+    "Group B": [
+      { "captain": "Madlad", "color": "#38bdf8", "team": "Blink Feed Repeat", "wdl": "3-1-1", "pts": 10 },
+      { "captain": "Machine", "color": "#f97316", "team": "Hilf Munters", "wdl": "3-0-2", "pts": 9 },
+      { "captain": "MSlayer_", "color": "#a78bfa", "team": "Stylish Slayers", "wdl": "2-2-1", "pts": 8 },
+      { "captain": "MaDaRa", "color": "#f43f5e", "team": "Demonic Empire", "wdl": "2-2-1", "pts": 8 },
+      { "captain": "GRIMM", "color": "#34d399", "team": "Immortals", "wdl": "2-1-2", "pts": 7 },
+      { "captain": "»Jjn[X]eD«", "color": "#fbbf24", "team": "Python Hunterz", "wdl": "0-0-5", "pts": 0 }
     ]
+  },
+
+  "series": {
+    "Group A": {
+      "series1": [
+        { 
+          "team1": "Banner", 
+          "result": "1-1", 
+          "team2": "r3ciprocal",
+           "games": [
+            {
+              "game": 1,
+              "duration": "51:38",
+              "winner": "Banner",
+              "radiant": "Banner",
+              "dire": "r3ciprocal",
+              "radiantScore":43,
+              "direScore":33,
+              "radiantHeroes": ["Ancient Apparition","Storm Spirit","Shadow Shaman","Tidehunter","Spectre"],
+              "direHeroes": ["Phantom Assassin","Queen of Pain","Doom","Oracle","Crystal Maiden"],
+              "dotabuffUrl": "https://www.dotabuff.com/matches/8242690136"
+            },
+            {
+              "game": 2,
+              "duration": "38:16",
+              "winner": "r3ciprocal",
+              "radiant": "r3ciprocal",
+              "dire":"Banner" ,
+              "radiantScore":40,
+              "direScore": 22,
+              "radiantHeroes":["Ogre Magi","Dawnbreaker","Tiny","Ursa","Silencer"] ,
+              "direHeroes": ["Grimstroke","Magnus","Nyx Assassin","Jakiro","Nature's Prophet"],
+              "dotabuffUrl": "https://www.dotabuff.com/matches/8242831053"
+            }
+          ]
+        },
+        { 
+          "team1": "Irox", 
+          "result": "2-0", 
+          "team2": "gxnova",
+          "games": [
+            {
+              "game": 1,
+              "duration": "34:09",
+              "winner": "Irox",
+              "radiant": "gxnova",
+              "dire": "Irox",
+              "radiantScore":18,
+              "direScore":39,
+              "radiantHeroes": ["Jakiro","Lion","Centaur Warrunner","Pangolier","Juggernaut"],
+              "direHeroes": ["Abaddon","Crystal Maiden","Lifestealer","Queen of Pain","Legion Commander"],
+              "dotabuffUrl": "https://www.dotabuff.com/matches/8234217901"
+            },
+            {
+              "game": 2,
+              "duration": "41:51",
+              "winner": "Irox",
+              "radiant": "Irox",
+              "dire": "gxnova",
+              "radiantScore":24,
+              "direScore": 50,
+              "radiantHeroes":["Clockwerk","Night Stalker","Leshrac","Lion","Alchemist"] ,
+              "direHeroes": ["Silencer","Slark","Tidehunter","Vengeful Spirit","Viper"],
+              "dotabuffUrl": "https://www.dotabuff.com/matches/8234319069"
+            }
+          ]
+        },
+        { 
+          "team1": "@tom1c", 
+          "result": "1-1", 
+          "team2": "Bazinga",
+           "games": [
+            {
+              "game": 1,
+              "duration": "31:57",
+              "winner": "@tom1c",
+              "radiant": "@tom1c",
+              "dire": "Bazinga",
+              "radiantScore":29,
+              "direScore":10,
+              "radiantHeroes": ["Shadow Shaman","Ringmaster","Tidehunter","Invoker","Nature's Prophet"],
+              "direHeroes": ["Jakiro","Skywrath Mage","Doom","Drow Ranger","Kunkka"],
+              "dotabuffUrl": "https://www.dotabuff.com/matches/8234264082"
+            },
+            {
+              "game": 2,
+              "duration": "78:30",
+              "winner": "Bazinga",
+              "radiant": "@tom1c",
+              "dire": "Bazinga",
+              "radiantScore": 54,
+              "direScore": 56,
+              "radiantHeroes": ["Lifestealer", "Viper","Axe","Witch Doctor","Shadow Shaman"],
+              "direHeroes": ["Ursa", "Sniper", "Centaur Warrunner","Jakiro","Silencer"],
+              "dotabuffUrl": "https://www.dotabuff.com/matches/8235110301"
+            }
+          ]
+        }
+      ],
+      "series2": [
+        { 
+          "team1": "Banner", 
+          "result": "2-0", 
+          "team2": "gxnova",
+          "games": []
+        },
+        { 
+          "team1": "r3ciprocal", 
+          "result": "2-0", 
+          "team2": "@tom1c",
+          "games": [
+            {
+              "game": 1,
+              "duration": "19:25",
+              "winner": "r3ciprocal",
+              "radiant": "r3ciprocal",
+              "dire": "@tom1c",
+              "radiantScore": 29,
+              "direScore": 3,
+              "radiantHeroes": ["Lifestealer", "Queen of Pain", "Muerta", "Clockwerk", "Night Stalker"],
+              "direHeroes": ["Lich", "Ogre Magi", "Centaur Warrunner", "Leshrac", "Clinkz"],
+              "dotabuffUrl": "https://www.dotabuff.com/matches/8235731217"
+            },
+            {
+              "game": 2,
+              "duration": "56:59",
+              "winner": "r3ciprocal",
+              "radiant": "r3ciprocal",
+              "dire": "@tom1c",
+              "radiantScore":37,
+              "direScore": 28,
+              "radiantHeroes": ["Phantom Assassin", "Jakiro", "Dazzle", "Void Spirit", "Abaddon"],
+              "direHeroes": ["Tinker", "Ursa", "Shadow Shaman", "Weaver", "Lion"],
+              "dotabuffUrl": "https://www.dotabuff.com/matches/8235791289"
+            }
+          ]
+        },
+        { 
+          "team1": "Irox", 
+          "result": "2-0", 
+          "team2": "Bazinga",
+          "games": [
+            {
+              "game": 1,
+              "duration": "31:29",
+              "winner": "Irox",
+              "radiant": "Irox",
+              "dire": "Bazinga",
+              "radiantScore":28,
+              "direScore":20,
+              "radiantHeroes": ["Abaddon","Morphling","Vengeful Spirit","Centaur Warrunner","Invoker"],
+              "direHeroes": ["Medusa","Lion","Undying","Chaos Knight","Monkey King"],
+              "dotabuffUrl": "https://www.dotabuff.com/matches/8243986403"
+            },
+            {
+              "game": 2,
+              "duration": "24:22",
+              "winner": "Irox",
+              "radiant": "Bazinga",
+              "dire": "Irox",
+              "radiantScore":13,
+              "direScore": 40,
+              "radiantHeroes":["Shadow Demon","Tidehunter","Invoker","Earthshaker","Tiny"] ,
+              "direHeroes": ["Lion","Slark","Night Stalker","Void Spirit","Nyx Assassin"],
+              "dotabuffUrl": "https://www.dotabuff.com/matches/8244048491"
+            }
+          ]
+        }
+      ],
+      "series3": [
+        { 
+          "team1": "Banner", 
+          "result": "0-2", 
+          "team2": "Irox",
+         "games": [
+            {
+              "game": 1,
+              "duration": "54:18",
+              "winner": "Irox",
+              "radiant": "Irox",
+              "dire": "Banner",
+              "radiantScore":33,
+              "direScore":31,
+              "radiantHeroes": ["Wraith King","Sniper","Jakiro","Tidehunter","Shadow Demon"],
+              "direHeroes": ["Viper","Dark Willow","Bristleback","Anti-Mage","Ringmaster"],
+              "dotabuffUrl": "https://www.dotabuff.com/matches/8235299329"
+            },
+            {
+              "game": 2,
+              "duration": "41:51",
+              "winner": "Irox",
+              "radiant": "Irox",
+              "dire": "gxnova",
+              "radiantScore":24,
+              "direScore": 50,
+              "radiantHeroes":["Clockwerk","Night Stalker","Leshrac","Lion","Alchemist"] ,
+              "direHeroes": ["Silencer","Slark","Tidehunter","Vengeful Spirit","Viper"],
+              "dotabuffUrl": "https://www.dotabuff.com/matches/8234319069"
+            }
+          ]
+        },
+        { 
+          "team1": "gxnova", 
+          "result": "0-2", 
+          "team2": "@tom1c",
+           "games": [
+            {
+              "game": 1,
+              "duration": "53:53",
+              "winner": "@tom1c",
+              "radiant": "gxnova",
+              "dire": "@tom1c",
+              "radiantScore":30,
+              "direScore":45,
+              "radiantHeroes": ["Doom","Juggernaut","Tiny","Clockwerk","Ancient Apparition"],
+              "direHeroes": ["Storm Spirit","Tidehunter","Gyrocopter","Dark Willow","Ringmaster"],
+              "dotabuffUrl": "https://www.dotabuff.com/matches/8243147507"
+            },
+            {
+              "game": 2,
+              "duration": "41:51",
+              "winner": "@tom1c",
+              "radiant": "gxnova",
+              "dire": "@tom1c",
+              "radiantScore":23,
+              "direScore":32,
+              "radiantHeroes":["Sniper","Tidehunter","Dazzle","Wraith King","Spirit Breaker"] ,
+              "direHeroes": ["Centaur Warrunner","Phantom Lancer","Outworld Destroyer","Shadow Shaman","Ringmaster"],
+              "dotabuffUrl": "https://www.dotabuff.com/matches/8243297396"
+            }
+          ]
+        },
+        { 
+          "team1": "r3ciprocal", 
+          "result": "1-1", 
+          "team2": "Bazinga",
+          "games": [
+            {
+              "game": 1,
+              "duration": "49:43",
+              "winner": "Bazinga",
+              "radiant": "Bazinga",
+              "dire": "r3ciprocal",
+              "radiantScore": 37,
+              "direScore": 38,
+              "radiantHeroes": ["Silencer","Clinkz","Centaur Warrunner","Ogre Magi","Razor"],
+              "direHeroes": ["Jakiro","Night Stalker","Weaver", "Tiny","Slark"],
+              "dotabuffUrl": "https://www.dotabuff.com/matches/8233652836"
+            },
+            {
+              "game": 2,
+              "duration": "42:28",
+              "winner": "r3ciprocal",
+              "radiant": "Bazinga",
+              "dire": "r3ciprocal",
+              "radiantScore": 35,
+              "direScore": 48,
+              "radiantHeroes": ["Silencer", "Ogre Magi", "Centaur Warrunner","Lifestealer", "Huskar"],
+              "direHeroes": ["Clockwerk", "Night Stalker","Lich","Monkey King","Riki"],
+              "dotabuffUrl": "https://www.dotabuff.com/matches/8233737737"
+            }
+          ]
+        }
+      ],
+      "series4": [
+        { 
+          "team1": "Banner", 
+          "result": "0-2", 
+          "team2": "@tom1c",
+          "games": []
+        },
+        { 
+          "team1": "r3ciprocal", 
+          "result": "1-1", 
+          "team2": "Irox",
+          "games": [
+            {
+              "game": 1,
+              "duration": "49:54",
+              "winner": "r3ciprocal",
+              "radiant": "Irox",
+              "dire": "r3ciprocal",
+              "radiantScore":36,
+              "direScore":12,
+              "radiantHeroes": ["Abaddon","Ringmaster","Lion","Tiny","Windranger"],
+              "direHeroes": ["Night Stalker","Wraith King","Ember Spirit","Ancient Apparition","Dark Willow"],
+              "dotabuffUrl": "https://www.dotabuff.com/matches/8241723853"
+            },
+            {
+              "game": 2,
+              "duration": "51:20",
+              "winner": "Irox",
+              "radiant": "Irox",
+              "dire": "r3ciprocal",
+              "radiantScore":46,
+              "direScore": 24,
+              "radiantHeroes":["Drow Ranger","Wraith King","Void Spirit","Abaddon","Jakiro"] ,
+              "direHeroes": ["Dark Willow","Dazzle","Tidehunter","Riki","Gyrocopter"],
+              "dotabuffUrl": "https://www.dotabuff.com/matches/8241838455"
+            }
+          ]
+        },
+        { 
+          "team1": "gxnova", 
+          "result": "0-2", 
+          "team2": "Bazinga",
+          "games": []
+        }
+      ],
+      "series5": [
+        { 
+          "team1": "Banner", 
+          "result": "0-2", 
+          "team2": "Bazinga",
+          "games": [
+            {
+              "game": 1,
+              "duration": "49:19",
+              "winner": "Bazinga",
+              "radiant": "Banner",
+              "dire": "Bazinga",
+              "radiantScore":31,
+              "direScore":47,
+              "radiantHeroes": ["Necrophos","Storm Spirit","Night Stalker","Grimstroke","Lich"],
+              "direHeroes": ["Queen of Pain","Tiny","Axe","Silencer","Vengeful Spirit"],
+              "dotabuffUrl": "https://www.dotabuff.com/matches/8243103271"
+            },
+            {
+              "game": 2,
+              "duration": "37:33",
+              "winner": "Bazinga",
+              "radiant": "Banner",
+              "dire": "Bazinga",
+              "radiantScore":18,
+              "direScore": 42,
+              "radiantHeroes":["Luna","Grimstroke","Lion","Leshrac","Tidehunter"] ,
+              "direHeroes": ["Outworld Destroyer","Night Stalker","Jakiro","Shadow Shaman","Gyrocopter"],
+              "dotabuffUrl": "https://www.dotabuff.com/matches/8253159329"
+            }
+          ]
+        },
+        { 
+          "team1": "r3ciprocal", 
+          "result": "2-0", 
+          "team2": "gxnova",
+          "games": []
+        },
+        { 
+          "team1": "Irox", 
+          "result": "1-1", 
+          "team2": "@tom1c",
+          "games": [
+            {
+              "game": 1,
+              "duration": "34:45",
+              "winner": "@tom1c",
+              "radiant": "Irox",
+              "dire": "@tom1c",
+              "radiantScore": 27,
+              "direScore": 47,
+              "radiantHeroes": ["Lifestealer", "Weaver", "Night Stalker", "Vengeful Spirit", "Clockwerk"],
+              "direHeroes": ["Nature's Prophet", "Tidehunter", "Jakiro", "Dark Willow", "Phantom Lancer"],
+              "dotabuffUrl": "https://www.dotabuff.com/matches/8253646702"
+            },
+            {
+              "game": 2,
+              "duration": "50:09",
+              "winner": "Irox",
+              "radiant": "Irox",
+              "dire": "@tom1c",
+              "radiantScore":47,
+              "direScore": 18,
+              "radiantHeroes": ["Ursa", "Phoenix", "Doom", "Windranger", "Jakiro"],
+              "direHeroes": ["Slardar", "Lina", "Naga Siren", "Disruptor", "Night Stalker"],
+              "dotabuffUrl": "https://www.dotabuff.com/matches/8253743836"
+            }
+          ]
+        }
+      ]
+    },
+    "Group B": {
+      "series1": [
+        { 
+          "team1": "GRIMM", 
+          "result": "1-1", 
+          "team2": "MSlayer_",
+           "games": [
+            {
+              "game": 1,
+              "duration": "38:39",
+              "winner": "GRIMM",
+              "radiant": "GRIMM",
+              "dire": "MSlayer_",
+              "radiantScore": 44,
+              "direScore":24,
+              "radiantHeroes": ["Lich","Rubick","Tidehunter","Riki","Lifestealer"],
+              "direHeroes": ["Oracle","Earthshaker","Ursa","Snapfire","Meepo"],
+              "dotabuffUrl": "https://www.dotabuff.com/matches/8233682026"
+            },
+            {
+              "game": 2,
+              "duration": "35:07",
+              "winner": "MSlayer_",
+              "radiant": "MSlayer_",
+              "dire": "GRIMM",
+              "radiantScore": 45,
+              "direScore": 29,
+              "radiantHeroes": ["Dark Seer", "Grimstroke","Lich","Ursa","Sven"],
+              "direHeroes": ["Lion", "DawnBreaker", "Phantom Assassin","Phoenix","Monkey King"],
+              "dotabuffUrl": "https://www.dotabuff.com/matches/8233752578"
+            }
+          ]
+          
+        },
+        { 
+          "team1": "»Jjn[X]eD«", 
+          "result": "0-2", 
+          "team2": "Madlad",
+          "games": []
+        },
+        { 
+          "team1": "MaDaRa", 
+          "result": "0-2", 
+          "team2": "Machine",
+          "games": [
+            {
+              "game": 1,
+              "duration": "39:55",
+              "winner": "Machine",
+              "radiant": "Machine",
+              "dire": "MaDaRa",
+              "radiantScore": 47,
+              "direScore": 25,
+              "radiantHeroes": ["Tiny","Jakiro","Disruptor","Dragon Knight", "Invoker"],
+              "direHeroes": ["Witch Doctor","Ogre Magi","Night Stalker","Juggernaut","Shadow Fiend"],
+              "dotabuffUrl": "https://www.dotabuff.com/matches/8233642772"
+            },
+            {
+              "game": 2,
+              "duration": "38:21",
+              "winner": "Machine",
+              "radiant": "Machine",
+              "dire": "MaDaRa",
+              "radiantScore":46,
+              "direScore": 12,
+              "radiantHeroes": ["Shadow Shaman", "Hoodwink", "Riki","Chaos Knight", "Slark"],
+              "direHeroes": ["Lion", "Ogre Magi","Tidehunter","Sven","Invoker"],
+              "dotabuffUrl": "https://www.dotabuff.com/matches/8235385599"
+            }
+          ]
+        }
+      ],
+      "series2": [
+        { 
+          "team1": "GRIMM", 
+          "result": "0-2", 
+          "team2": "Madlad",
+          "games": []
+        },
+        { 
+          "team1": "MSlayer_", 
+          "result": "1-1", 
+          "team2": "MaDaRa",
+          "games": [
+            {
+              "game": 1,
+              "duration": "39:13",
+              "winner": "MSlayer_",
+              "radiant": "MSlayer_",
+              "dire": "MaDaRa",
+              "radiantScore": 50,
+              "direScore": 28,
+              "radiantHeroes": ["Ursa","Grimstroke","Lich","Dark Seer", "Wraith King"],
+              "direHeroes": ["Witch Doctor","Disruptor","Legion Commander","Lifestealer","Earthshaker"],
+              "dotabuffUrl": "https://www.dotabuff.com/matches/8235179657"
+            },
+            {
+              "game": 2,
+              "duration": "46:27",
+              "winner": "MaDaRa",
+              "radiant": "MaDaRa",
+              "dire": "MSlayer_",
+              "radiantScore": 43,
+              "direScore": 25,
+              "radiantHeroes": ["Pudge", "Earthshaker", "Phantom Assassin","Ogre Magi", "Witch Doctor"],
+              "direHeroes": ["Arc Warden", "Shadow Fiend","Tidehunter","Invoker","Ringmaster"],
+              "dotabuffUrl": "https://www.dotabuff.com/matches/8235277741"
+            }
+          ]
+        },
+        { 
+          "team1": "»Jjn[X]eD«", 
+          "result": "0-2", 
+          "team2": "Machine",
+          "games": []
+        }
+      ],
+      "series3": [
+        { 
+          "team1": "GRIMM", 
+          "result": "1-1", 
+          "team2": "»Jjn[X]eD«",
+          "games": [
+            {
+              "game": 1,
+              "duration": "51:23",
+              "winner": "»Jjn[X]eD«",
+              "radiant": "»Jjn[X]eD«",
+              "dire": "MaDaRa",
+              "radiantScore": 44,
+              "direScore": 40,
+              "radiantHeroes": ["Ursa","Outworld Destroyer","Dawnbreaker","Silencer", "Witch Doctor"],
+              "direHeroes": ["Drow Ranger","Storm Spirit","Tidehunter","Earthshaker","Lich"],
+              "dotabuffUrl": "https://www.dotabuff.com/matches/8235148698"
+            },
+            {
+              "game": 2,
+              "duration": "60:22",
+              "winner": "GRIMM",
+              "radiant": "»Jjn[X]eD«",
+              "dire": "GRIMM",
+              "radiantScore": 39,
+              "direScore":53,
+              "radiantHeroes": ["Tiny","Lina","Tidehunter","Rubick","Shadow Shaman"],
+              "direHeroes": ["Ursa","Outworld Destroyer","Mars","Zeus","Lich"],
+              "dotabuffUrl": "https://www.dotabuff.com/matches/8235244847"
+            }
+          ]
+        },
+        { 
+          "team1": "Madlad", 
+          "result": "1-1", 
+          "team2": "MaDaRa",
+          "games": []
+        },
+        { 
+          "team1": "MSlayer_", 
+          "result": "2-0", 
+          "team2": "Machine",
+          "games": []
+        }
+      ],
+      "series4": [
+        { 
+          "team1": "GRIMM", 
+          "result": "0-2", 
+          "team2": "MaDaRa",
+          "games": []
+        },
+        { 
+          "team1": "MSlayer_", 
+          "result": "2-0", 
+          "team2": "»Jjn[X]eD«",
+          "games": []
+        },
+        { 
+          "team1": "Madlad", 
+          "result": "0-2", 
+          "team2": "Machine",
+          "games": []
+        }
+      ],
+      "series5": [
+        { 
+          "team1": "GRIMM", 
+          "result": "2-0", 
+          "team2": "Machine",
+          "games": []
+        },
+        { 
+          "team1": "MSlayer_", 
+          "result": "0-2", 
+          "team2": "Madlad",
+          "games": []
+        },
+        { 
+          "team1": "»Jjn[X]eD«", 
+          "result": "0-2", 
+          "team2": "MaDaRa",
+          "games": []
+        }
+      ]
+    }
+  },
+
+  "tiebreakers": {
+    "Group B": {
+      "match": "MSlayer_ vs MaDaRa",
+      "result": "1-0",
+      "winner": "MSlayer_",
+      "games": []
+    }
   }
 }

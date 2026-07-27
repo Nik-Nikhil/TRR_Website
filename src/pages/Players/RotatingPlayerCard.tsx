@@ -15,10 +15,7 @@ export default function RotatingPlayerCard({ player }: RotatingPlayerCardProps) 
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0, y: -20 }}
-      transition={{
-        duration: 0.3,
-        ease: "easeOut",
-      }}
+      transition={{ duration: 0.3, ease: "easeOut" }}
     >
       <PlayerSummaryCard
         id={player.id}
@@ -29,6 +26,9 @@ export default function RotatingPlayerCard({ player }: RotatingPlayerCardProps) 
         cupRank={player.cupRank}
         cupTooltip={player.cupTooltip}
         roles={player.roles}
+        currentMedalId={player.currentMedalId}
+        currentMedalLabel={player.currentMedalLabel}
+        currentMMR={player.currentMMR}
       />
     </motion.div>
   );

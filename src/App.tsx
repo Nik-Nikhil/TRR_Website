@@ -35,7 +35,7 @@ import WallOfShame from "./pages/WallOfShame";
 import SeasonShowCase from "./pages/SeasonShowCase";
 
 import Playoff from "./pages/Playoff";
-import GroupStage from "./pages/GroupStage";
+import GroupStage from "./pages/GroupStage/GroupStage";
 
 function App() {
   return (

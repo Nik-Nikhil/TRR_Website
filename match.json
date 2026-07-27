@@ -1,0 +1,117 @@
+{
+  "data": {
+    "match": {
+      "id": 8540027147,
+      "didRadiantWin": false,
+      "durationSeconds": 1630,
+      "radiantTeam": {
+        "name": "Temp"
+      },
+      "direTeam": {
+        "name": "Nemesis"
+      },
+      "players": [
+        {
+          "playerSlot": 0,
+          "hero": {
+            "displayName": "Pudge",
+            "id": 14
+          },
+          "kills": 5,
+          "deaths": 5,
+          "assists": 9
+        },
+        {
+          "playerSlot": 1,
+          "hero": {
+            "displayName": "Medusa",
+            "id": 94
+          },
+          "kills": 0,
+          "deaths": 3,
+          "assists": 3
+        },
+        {
+          "playerSlot": 2,
+          "hero": {
+            "displayName": "Skywrath Mage",
+            "id": 101
+          },
+          "kills": 0,
+          "deaths": 10,
+          "assists": 8
+        },
+        {
+          "playerSlot": 3,
+          "hero": {
+            "displayName": "Mars",
+            "id": 129
+          },
+          "kills": 8,
+          "deaths": 7,
+          "assists": 2
+        },
+        {
+          "playerSlot": 4,
+          "hero": {
+            "displayName": "Abaddon",
+            "id": 102
+          },
+          "kills": 1,
+          "deaths": 11,
+          "assists": 6
+        },
+        {
+          "playerSlot": 128,
+          "hero": {
+            "displayName": "Tidehunter",
+            "id": 29
+          },
+          "kills": 6,
+          "deaths": 2,
+          "assists": 14
+        },
+        {
+          "playerSlot": 129,
+          "hero": {
+            "displayName": "Shadow Shaman",
+            "id": 27
+          },
+          "kills": 2,
+          "deaths": 2,
+          "assists": 15
+        },
+        {
+          "playerSlot": 130,
+          "hero": {
+            "displayName": "Templar Assassin",
+            "id": 46
+          },
+          "kills": 23,
+          "deaths": 2,
+          "assists": 8
+        },
+        {
+          "playerSlot": 131,
+          "hero": {
+            "displayName": "Treant Protector",
+            "id": 83
+          },
+          "kills": 1,
+          "deaths": 6,
+          "assists": 27
+        },
+        {
+          "playerSlot": 132,
+          "hero": {
+            "displayName": "Leshrac",
+            "id": 52
+          },
+          "kills": 4,
+          "deaths": 4,
+          "assists": 12
+        }
+      ]
+    }
+  }
+}

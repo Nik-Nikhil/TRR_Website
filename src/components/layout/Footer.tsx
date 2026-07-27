@@ -1,4 +1,4 @@
-import { primaryTournament } from "../../data/mockTournaments";
+import { useAppSelector } from "../../store/hook";
 
 // 1. Define Props for TypeScript
 interface InstagramIconProps {
@@ -30,7 +30,10 @@ function InstagramIcon({ className }: InstagramIconProps) {
 }
 
 export default function Footer() {
-  const year = primaryTournament.year;
+  // Was: `const year = primaryTournament.year;` importing the mock file directly.
+  // Now reads from the store, so Footer stays correct if/when tournament data
+  // starts coming from a real fetch instead of the mock.
+  const year = useAppSelector((s) => s.tournament.current.year);
 
   // 3. Simplified social links - render ONE icon with responsive classes
   const socialLinks = [
@@ -75,7 +78,15 @@ export default function Footer() {
   ];
 
   return (
-    <footer className="bg-[#111216] relative overflow-hidden" style={{ marginTop: '0', paddingTop: '0', borderTop: 'none', boxShadow: 'none' }}>
+    <footer
+      className="relative overflow-hidden border-t border-[rgba(192,192,192,0.15)]"
+      style={{
+        background: '#0a0c10',
+        marginTop: '0',
+        paddingTop: '0',
+        boxShadow: '0 -1px 0 rgba(255,255,255,0.06)',
+      }}
+    >
 
       <div className="relative z-10 w-full max-w-[880px] mx-auto px-4 py-3 sm:py-4 flex flex-col items-center gap-2 sm:gap-2.5 text-center">
         <div className="flex items-center justify-center gap-5 sm:gap-6 md:gap-8">
@@ -99,7 +110,7 @@ export default function Footer() {
           ))}
         </div>
 
-        <p className="text-[0.58rem] sm:text-[0.62rem] md:text-[0.68rem] text-[#bdbdbd]/80 uppercase tracking-[0.14em] leading-relaxed">
+        <p className="text-[0.58rem] sm:text-[0.62rem] md:text-[0.68rem] text-[#d4d4d8]/90 uppercase tracking-[0.14em] leading-relaxed">
           © {year}, TRR Esports <b> — All Rights Reserved.</b>
         </p>
       </div>

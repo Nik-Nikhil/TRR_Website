@@ -1,0 +1,1230 @@
+{
+  "groups": {
+    "Group A": [
+      {
+        "captain": "bull",
+        "color": "#C00000",
+        "team": "bull",
+        "wdl": "4-1-1",
+        "pts": 13
+      },
+      {
+        "captain": "Sai",
+        "color": "#F6B26B",
+        "team": "Sai",
+        "wdl": "3-2-1",
+        "pts": 11
+      },
+      {
+        "captain": "Helm",
+        "color": "#F1C232",
+        "team": "Helm",
+        "wdl": "3-2-1",
+        "pts": 11
+      },
+      {
+        "captain": "Razer",
+        "color": "#DBA900",
+        "team": "Razer",
+        "wdl": "2-4-0",
+        "pts": 10
+      },
+      {
+        "captain": "EXe",
+        "color": "#3C78D8",
+        "team": "EXe",
+        "wdl": "1-2-3",
+        "pts": 5
+      },
+      {
+        "captain": "rA'VI",
+        "color": "#B45F06",
+        "team": "rA'VI",
+        "wdl": "1-2-3",
+        "pts": 5
+      },
+      {
+        "captain": "Billy",
+        "color": "#E69138",
+        "team": "Billy",
+        "wdl": "0-1-5",
+        "pts": 1
+      }
+    ],
+    "Group B": [
+      {
+        "captain": "shadow",
+        "color": "#F4CCCC",
+        "team": "shadow",
+        "wdl": "4-2-0",
+        "pts": 14
+      },
+      {
+        "captain": "S1mpleO",
+        "color": "#F4CCCC",
+        "team": "S1mpleO",
+        "wdl": "4-1-1",
+        "pts": 13
+      },
+      {
+        "captain": "Ltng Goku",
+        "color": "#6FA8DC",
+        "team": "Ez | LightNing Goku",
+        "wdl": "3-3-0",
+        "pts": 12
+      },
+      {
+        "captain": "Roronoa Zoro",
+        "color": "#93C47D",
+        "team": "Roronoa Zoro",
+        "wdl": "3-1-2",
+        "pts": 10
+      },
+      {
+        "captain": "Hina",
+        "color": "#F9CB9C",
+        "team": "Hina",
+        "wdl": "1-2-3",
+        "pts": 5
+      },
+      {
+        "captain": "Bakabot",
+        "color": "#6AA84F",
+        "team": "Bakabot",
+        "wdl": "1-1-4",
+        "pts": 4
+      },
+      {
+        "captain": "zRomep",
+        "color": "#FFD966",
+        "team": "zRomep",
+        "wdl": "0-0-6",
+        "pts": 0
+      }
+    ],
+    "Group C": [
+      {
+        "captain": "✪KungFuPanda",
+        "color": "#6AA84F",
+        "team": "✪KungFuPanda",
+        "wdl": "5-1-0",
+        "pts": 16
+      },
+      {
+        "captain": "Dr_Nemesis_X",
+        "color": "#A4C2F4",
+        "team": "Dr_Nemesis_X",
+        "wdl": "3-1-2",
+        "pts": 10
+      },
+      {
+        "captain": "Sexy",
+        "color": "#E06666",
+        "team": "Sexy",
+        "wdl": "3-1-2",
+        "pts": 10
+      },
+      {
+        "captain": "Midas",
+        "color": "#FFD966",
+        "team": "Midas",
+        "wdl": "2-3-1",
+        "pts": 9
+      },
+      {
+        "captain": "N1KHIL",
+        "color": "#E69138",
+        "team": "N1KHIL",
+        "wdl": "1-2-3",
+        "pts": 5
+      },
+      {
+        "captain": "Shikamaru",
+        "color": "#A64D79",
+        "team": "Shikamaru",
+        "wdl": "1-1-4",
+        "pts": 4
+      },
+      {
+        "captain": "Fyt",
+        "color": "#FFD966",
+        "team": "Fyt",
+        "wdl": "0-3-3",
+        "pts": 3
+      }
+    ],
+    "Group D": [
+      {
+        "captain": "Sasuke",
+        "color": "#B4A7D6",
+        "team": "Sasuke",
+        "wdl": "3-3-0",
+        "pts": 12
+      },
+      {
+        "captain": "Shirleythomas",
+        "color": "#93C47D",
+        "team": "Shirleythomas",
+        "wdl": "2-3-1",
+        "pts": 9
+      },
+      {
+        "captain": "FluX-",
+        "color": "#FFE599",
+        "team": "FluX-",
+        "wdl": "2-2-2",
+        "pts": 8
+      },
+      {
+        "captain": "Goku-Shery",
+        "color": "#C27BA0",
+        "team": "Goku-Shery",
+        "wdl": "2-2-2",
+        "pts": 8
+      },
+      {
+        "captain": "Banner",
+        "color": "#FFE599",
+        "team": "Banner",
+        "wdl": "1-3-2",
+        "pts": 6
+      },
+      {
+        "captain": "killua",
+        "color": "#FFE599",
+        "team": "killua",
+        "wdl": "1-2-3",
+        "pts": 5
+      },
+      {
+        "captain": "Future",
+        "color": "#F1C232",
+        "team": "Future",
+        "wdl": "0-5-1",
+        "pts": 5
+      }
+    ]
+  },
+  "series": {
+    "Group A": {
+      "series1": [
+        {
+          "team1": "EXe",
+          "result": "0-2",
+          "team2": "Billy",
+          "games": []
+        }
+      ],
+      "series2": [
+        {
+          "team1": "bull",
+          "result": "0-2",
+          "team2": "Razer",
+          "games": []
+        },
+        {
+          "team1": "Helm",
+          "result": "2-0",
+          "team2": "Billy",
+          "games": []
+        }
+      ],
+      "series3": [
+        {
+          "team1": "Sai",
+          "result": "1-1",
+          "team2": "EXe",
+          "games": []
+        }
+      ],
+      "series4": [
+        {
+          "team1": "Sai",
+          "result": "2-0",
+          "team2": "rA'VI",
+          "games": []
+        }
+      ],
+      "series5": [
+        {
+          "team1": "Helm",
+          "result": "2-0",
+          "team2": "EXe",
+          "games": []
+        },
+        {
+          "team1": "Razer",
+          "result": "1-1",
+          "team2": "rA'VI",
+          "games": []
+        },
+        {
+          "team1": "Billy",
+          "result": "0-2",
+          "team2": "bull",
+          "games": []
+        }
+      ],
+      "series6": [
+        {
+          "team1": "rA'VI",
+          "result": "0-2",
+          "team2": "bull",
+          "games": []
+        },
+        {
+          "team1": "Razer",
+          "result": "1-1",
+          "team2": "Billy",
+          "games": []
+        }
+      ],
+      "series7": [
+        {
+          "team1": "Billy",
+          "result": "0-2",
+          "team2": "Sai",
+          "games": []
+        },
+        {
+          "team1": "Helm",
+          "result": "2-0",
+          "team2": "rA'VI",
+          "games": []
+        }
+      ],
+      "series8": [
+        {
+          "team1": "EXe",
+          "result": "0-2",
+          "team2": "Razer",
+          "games": []
+        },
+        {
+          "team1": "Sai",
+          "result": "0-2",
+          "team2": "bull",
+          "games": []
+        }
+      ],
+      "series9": [
+        {
+          "team1": "Billy",
+          "result": "0-2",
+          "team2": "rA'VI",
+          "games": []
+        },
+        {
+          "team1": "Helm",
+          "result": "0-2",
+          "team2": "Sai",
+          "games": []
+        }
+      ],
+      "series10": [
+        {
+          "team1": "EXe",
+          "result": "0-2",
+          "team2": "bull",
+          "games": []
+        },
+        {
+          "team1": "Helm",
+          "result": "1-1",
+          "team2": "Razer",
+          "games": []
+        }
+      ],
+      "series11": [
+        {
+          "team1": "Sai",
+          "result": "1-1",
+          "team2": "Razer",
+          "games": []
+        },
+        {
+          "team1": "EXe",
+          "result": "1-1",
+          "team2": "rA'VI",
+          "games": []
+        },
+        {
+          "team1": "bull",
+          "result": "1-1",
+          "team2": "Helm",
+          "games": []
+        }
+      ]
+    },
+    "Group B": {
+      "series1": [
+        {
+          "team1": "Ltng Goku",
+          "result": "1-1",
+          "team2": "Roronoa Zoro",
+          "games": [
+            {
+              "game": 1,
+              "duration": "32:23",
+              "winner": "Roronoa Zoro",
+              "radiant": "Ltng Goku",
+              "dire": "Roronoa Zoro",
+              "radiantScore": 18,
+              "direScore": 41,
+              "radiantHeroes": [
+                "Tusk",
+                "Kunkka",
+                "Pugna",
+                "Juggernaut",
+                "Muerta"
+              ],
+              "direHeroes": [
+                "Lion",
+                "Dawnbreaker",
+                "Magnus",
+                "Undying",
+                "Morphling"
+              ],
+              "dotabuffUrl": "https://www.dotabuff.com/matches/8537807705"
+            },
+            {
+              "game": 2,
+              "duration": "48:07",
+              "winner": "Ltng Goku",
+              "radiant": "Roronoa Zoro",
+              "dire": "Ltng Goku",
+              "radiantScore": 50,
+              "direScore": 33,
+              "radiantHeroes": [
+                "Slardar",
+                "Ursa",
+                "Invoker",
+                "Lion",
+                "Skywrath Mage"
+              ],
+              "direHeroes": [
+                "Viper",
+                "Abaddon",
+                "Vengeful Spirit",
+                "Pudge",
+                "Earthshaker"
+              ],
+              "dotabuffUrl": "https://www.dotabuff.com/matches/8537861124"
+            }
+          ]
+        },
+        {
+          "team1": "Bakabot",
+          "result": "0-2",
+          "team2": "shadow",
+          "games": []
+        }
+      ],
+      "series2": [
+        {
+          "team1": "S1mpleO",
+          "result": "2-0",
+          "team2": "Hina",
+          "games": []
+        },
+        {
+          "team1": "zRomep",
+          "result": "0-2",
+          "team2": "Roronoa Zoro",
+          "games": []
+        }
+      ],
+      "series3": [
+        {
+          "team1": "zRomep",
+          "result": "0-2",
+          "team2": "Ltng Goku",
+          "games": []
+        },
+        {
+          "team1": "Bakabot",
+          "result": "0-2",
+          "team2": "S1mpleO",
+          "games": []
+        }
+      ],
+      "series4": [
+        {
+          "team1": "shadow",
+          "result": "1-1",
+          "team2": "Hina",
+          "games": []
+        }
+      ],
+      "series5": [
+        {
+          "team1": "zRomep",
+          "result": "0-2",
+          "team2": "Bakabot",
+          "games": []
+        },
+        {
+          "team1": "shadow",
+          "result": "2-0",
+          "team2": "Roronoa Zoro",
+          "games": []
+        }
+      ],
+      "series6": [
+        {
+          "team1": "Hina",
+          "result": "0-2",
+          "team2": "Roronoa Zoro",
+          "games": []
+        },
+        {
+          "team1": "Ltng Goku",
+          "result": "1-1",
+          "team2": "S1mpleO",
+          "games": []
+        }
+      ],
+      "series7": [
+        {
+          "team1": "zRomep",
+          "result": "0-2",
+          "team2": "S1mpleO",
+          "games": []
+        }
+      ],
+      "series8": [
+        {
+          "team1": "Ltng Goku",
+          "result": "1-1",
+          "team2": "shadow",
+          "games": []
+        }
+      ],
+      "series9": [
+        {
+          "team1": "Ltng Goku",
+          "result": "2-0",
+          "team2": "Hina",
+          "games": []
+        },
+        {
+          "team1": "zRomep",
+          "result": "0-2",
+          "team2": "shadow",
+          "games": []
+        },
+        {
+          "team1": "Bakabot",
+          "result": "0-2",
+          "team2": "Roronoa Zoro",
+          "games": []
+        }
+      ],
+      "series10": [
+        {
+          "team1": "Ltng Goku",
+          "result": "2-0",
+          "team2": "Bakabot",
+          "games": []
+        },
+        {
+          "team1": "S1mpleO",
+          "result": "2-0",
+          "team2": "Roronoa Zoro",
+          "games": []
+        }
+      ],
+      "series11": [
+        {
+          "team1": "zRomep",
+          "result": "0-2",
+          "team2": "Hina",
+          "games": []
+        },
+        {
+          "team1": "S1mpleO",
+          "result": "0-2",
+          "team2": "shadow",
+          "games": []
+        },
+        {
+          "team1": "Bakabot",
+          "result": "1-1",
+          "team2": "Hina",
+          "games": []
+        }
+      ]
+    },
+    "Group C": {
+      "series1": [
+        {
+          "team1": "✪KungFuPanda",
+          "result": "2-0",
+          "team2": "Sexy",
+          "games": [
+            {
+              "game": 1,
+              "duration": "51:59",
+              "winner": "✪KungFuPanda",
+              "radiant": "Sexy",
+              "dire": "✪KungFuPanda",
+              "radiantScore": 29,
+              "direScore": 43,
+              "radiantHeroes": [
+                "Kez",
+                "Vengeful Spirit",
+                "Lifestealer",
+                "Pudge",
+                "Snapfire"
+              ],
+              "direHeroes": [
+                "Nature's Prophet",
+                "Lion",
+                "Disruptor",
+                "Troll Warlord",
+                "Legion Commander"
+              ],
+              "dotabuffUrl": "https://www.dotabuff.com/matches/8537805707"
+            },
+            {
+              "game": 2,
+              "duration": "28:27",
+              "winner": "✪KungFuPanda",
+              "radiant": "✪KungFuPanda",
+              "dire": "Sexy",
+              "radiantScore": 46,
+              "direScore": 15,
+              "radiantHeroes": [
+                "Timbersaw",
+                "Vengeful Spirit",
+                "Shadow Shaman",
+                "Legion Commander",
+                "Gyrocopter"
+              ],
+              "direHeroes": [
+                "Earthshaker",
+                "Jakiro",
+                "Dragon Knight",
+                "Axe",
+                "Clockwerk"
+              ],
+              "dotabuffUrl": "https://www.dotabuff.com/matches/8537886328"
+            }
+          ]
+        },
+        {
+          "team1": "Shikamaru",
+          "result": "2-0",
+          "team2": "Fyt",
+          "games": [
+            {
+              "game": 1,
+              "duration": "41:34",
+              "winner": "Shikamaru",
+              "radiant": "Shikamaru",
+              "dire": "Fyt",
+              "radiantScore": 16,
+              "direScore": 39,
+              "radiantHeroes": [
+                "Timbersaw",
+                "Vengeful Spirit",
+                "Ursa",
+                "Slardar",
+                "Ringmaster"
+              ],
+              "direHeroes": [
+                "Void Spirit",
+                "Razor",
+                "Oracle",
+                "Lion",
+                "Axe"
+              ],
+              "dotabuffUrl": "https://www.dotabuff.com/matches/8537784115"
+            }
+          ]
+        }
+      ],
+      "series2": [
+        {
+          "team1": "N1KHIL",
+          "result": "1-1",
+          "team2": "Fyt",
+          "games": [
+            {
+              "game": 1,
+              "duration": "50:59",
+              "winner": "Fyt",
+              "radiant": "N1KHIL",
+              "dire": "Fyt",
+              "radiantScore": 43,
+              "direScore": 42,
+              "radiantHeroes": [
+                "Lifestealer",
+                "Mars",
+                "Rubick",
+                "Sniper",
+                "Lion"
+              ],
+              "direHeroes": [
+                "Axe",
+                "Gyrocopter",
+                "Outworld Destroyer",
+                "Snapfire",
+                "Spectre"
+              ],
+              "dotabuffUrl": "https://www.dotabuff.com/matches/8538002406"
+            },
+            {
+              "game": 2,
+              "duration": "47:00",
+              "winner": "N1KHIL",
+              "radiant": "N1KHIL",
+              "dire": "Fyt",
+              "radiantScore": 35,
+              "direScore": 29,
+              "radiantHeroes": [
+                "Terrorblade",
+                "Riki",
+                "Nyx Assassin",
+                "Slardar",
+                "Shadow Shaman"
+              ],
+              "direHeroes": [
+                "Ursa",
+                "Dawnbreaker",
+                "Earthshaker",
+                "Rubick",
+                "Oracle"
+              ],
+              "dotabuffUrl": "https://www.dotabuff.com/matches/8548231921"
+            }
+          ]
+        },
+        {
+          "team1": "Dr_Nemesis_X",
+          "result": "0-2",
+          "team2": "✪KungFuPanda",
+          "games": [
+            {
+              "game": 1,
+              "duration": "50:59",
+              "winner": "MERE LUND SE",
+              "radiant": "Temp",
+              "dire": "MERE LUND SE",
+              "radiantScore": 43,
+              "direScore": 42,
+              "radiantHeroes": [
+                "Lifestealer",
+                "Mars",
+                "Rubick",
+                "Sniper",
+                "Lion"
+              ],
+              "direHeroes": [
+                "Axe",
+                "Gyrocopter",
+                "Outworld Destroyer",
+                "Snapfire",
+                "Spectre"
+              ],
+              "dotabuffUrl": "https://www.dotabuff.com/matches/8538002406"
+            }
+          ]
+        }
+      ],
+      "series3": [
+        {
+          "team1": "Sexy",
+          "result": "2-0",
+          "team2": "Dr_Nemesis_X",
+          "games": [
+            {
+              "game": 1,
+              "duration": "37:07",
+              "winner": "Sexy",
+              "radiant": "Dr_Nemesis_X",
+              "dire": "Sexy",
+              "radiantScore": 20,
+              "direScore": 48,
+              "radiantHeroes": [
+                "Luna",
+                "Puck",
+                "Shadow Shaman",
+                "Silencer",
+                "Underlord"
+              ],
+              "direHeroes": [
+                "Ember Spirit",
+                "Rubick",
+                "Nature's Prophet",
+                "Ogre Magi",
+                "Necrophos"
+              ],
+              "dotabuffUrl": "https://www.dotabuff.com/matches/8538198898"
+            },
+            {
+              "game": 2,
+              "duration": "46:34",
+              "winner": "Sexy",
+              "radiant": "Sexy",
+              "dire": "Dr_Nemesis_X",
+              "radiantScore": 31,
+              "direScore": 43,
+              "radiantHeroes": [
+                "Void Spirit",
+                "Lich",
+                "Vengeful Spirit",
+                "Dawnbreaker",
+                "Medusa"
+              ],
+              "direHeroes": [
+                "Monkey King",
+                "Ursa",
+                "Centaur Warrunner",
+                "Dark Willow",
+                "Disruptor"
+              ],
+              "dotabuffUrl": "https://www.dotabuff.com/matches/8538325431"
+            }
+          ]
+        },
+        {
+          "team1": "Midas",
+          "result": "1-1",
+          "team2": "N1KHIL",
+          "games": []
+        }
+      ],
+      "series4": [
+        {
+          "team1": "Midas",
+          "result": "2-0",
+          "team2": "Shikamaru",
+          "games": []
+        }
+      ],
+      "series5": [
+        {
+          "team1": "Dr_Nemesis_X",
+          "result": "1-1",
+          "team2": "Midas",
+          "games": []
+        },
+        {
+          "team1": "Fyt",
+          "result": "1-1",
+          "team2": "✪KungFuPanda",
+          "games": []
+        }
+      ],
+      "series6": [
+        {
+          "team1": "N1KHIL",
+          "result": "0-2",
+          "team2": "✪KungFuPanda",
+          "games": [
+            {
+              "game": 1,
+              "duration": "22:03",
+              "winner": "✪KungFuPanda",
+              "radiant": "N1KHIL",
+              "dire": "✪KungFuPanda",
+              "radiantScore": 18,
+              "direScore": 31,
+              "radiantHeroes": [
+                "Anti-Mage",
+                "Mars",
+                "Viper",
+                "Snapfire",
+                "Disruptor"
+              ],
+              "direHeroes": [
+                "Invoker",
+                "Vengeful Spirit",
+                "Dragon Knight",
+                "Pudge",
+                "Morphling"
+              ],
+              "dotabuffUrl": "https://www.dotabuff.com/matches/8539702985"
+            },
+            {
+              "game": 2,
+              "duration": "36:51",
+              "winner": "✪KungFuPanda",
+              "radiant": "✪KungFuPanda",
+              "dire": "N1KHIL",
+              "radiantScore": 52,
+              "direScore": 30,
+              "radiantHeroes": [
+                "Techies",
+                "Sand King",
+                "Silencer",
+                "Abaddon",
+                "Juggernaut"
+              ],
+              "direHeroes": [
+                "Ursa",
+                "Pugna",
+                "Spirit Breaker",
+                "Centaur Warrunner",
+                "Shadow Shaman"
+              ],
+              "dotabuffUrl": "https://www.dotabuff.com/matches/8539765098"
+            }
+          ]
+        },
+        {
+          "team1": "Sexy",
+          "result": "1-1",
+          "team2": "Shikamaru",
+          "games": []
+        }
+      ],
+      "series7": [
+        {
+          "team1": "Sexy",
+          "result": "2-0",
+          "team2": "Fyt",
+          "games": []
+        },
+        {
+          "team1": "Dr_Nemesis_X",
+          "result": "2-0",
+          "team2": "N1KHIL",
+          "games": [
+            {
+              "game": 1,
+              "duration": "27:10",
+              "winner": "Dr_Nemesis_X",
+              "radiant": "N1KHIL",
+              "dire": "Dr_Nemesis_X",
+              "radiantScore": 14,
+              "direScore": 36,
+              "radiantHeroes": [
+                "Pudge",
+                "Medusa",
+                "Skywrath Mage",
+                "Mars",
+                "Abaddon"
+              ],
+              "direHeroes": [
+                "Tidehunter",
+                "Shadow Shaman",
+                "Templar Assassin",
+                "Treant Protector",
+                "Leshrac"
+              ],
+              "dotabuffUrl": "https://www.dotabuff.com/matches/8540027147"
+            }
+          ]
+        }
+      ],
+      "series8": [
+        {
+          "team1": "Shikamaru",
+          "result": "0-2",
+          "team2": "✪KungFuPanda",
+          "games": []
+        },
+        {
+          "team1": "Midas",
+          "result": "1-1",
+          "team2": "Fyt",
+          "games": []
+        }
+      ],
+      "series9": [
+        {
+          "team1": "Sexy",
+          "result": "0-2",
+          "team2": "Midas",
+          "games": [
+            {
+              "game": 1,
+              "duration": "42:51",
+              "winner": "Midas",
+              "radiant": "Midas",
+              "dire": "Sexy",
+              "radiantScore": 45,
+              "direScore": 39,
+              "radiantHeroes": [
+                "Ancient Apparition",
+                "Magnus",
+                "Templar Assassin",
+                "Slardar",
+                "Lion"
+              ],
+              "direHeroes": [
+                "Kez",
+                "Weaver",
+                "Disruptor",
+                "Nature's Prophet",
+                "Axe"
+              ],
+              "dotabuffUrl": "https://www.dotabuff.com/matches/8548203951"
+            },
+            {
+              "game": 2,
+              "duration": "34:30",
+              "winner": "Midas",
+              "radiant": "Midas",
+              "dire": "Sexy",
+              "radiantScore": 42,
+              "direScore": 22,
+              "radiantHeroes": [
+                "Night Stalker",
+                "Abaddon",
+                "Lion",
+                "Witch Doctor",
+                "Magnus"
+              ],
+              "direHeroes": [
+                "Rubick",
+                "Ember Spirit",
+                "Ogre Magi",
+                "Nature's Prophet",
+                "Legion Commander"
+              ],
+              "dotabuffUrl": "https://www.dotabuff.com/matches/8548271953"
+            }
+          ]
+        },
+        {
+          "team1": "Shikamaru",
+          "result": "0-2",
+          "team2": "N1KHIL",
+          "games": []
+        }
+      ],
+      "series10": [
+        {
+          "team1": "Dr_Nemesis_X",
+          "result": "2-0",
+          "team2": "Fyt",
+          "games": []
+        },
+        {
+          "team1": "Midas",
+          "result": "0-2",
+          "team2": "✪KungFuPanda",
+          "games": []
+        }
+      ],
+      "series11": [
+        {
+          "team1": "Sexy",
+          "result": "2-0",
+          "team2": "N1KHIL",
+          "games": [
+            {
+              "game": 1,
+              "duration": "53:24",
+              "winner": "Sexy",
+              "radiant": "N1KHIL",
+              "dire": "Sexy",
+              "radiantScore": 25,
+              "direScore": 32,
+              "radiantHeroes": [
+                "Necrophos",
+                "Windranger",
+                "Underlord",
+                "Spirit Breaker",
+                "Shadow Shaman"
+              ],
+              "direHeroes": [
+                "Lina",
+                "Vengeful Spirit",
+                "Ogre Magi",
+                "Lifestealer",
+                "Axe"
+              ],
+              "dotabuffUrl": "https://www.dotabuff.com/matches/8548585505"
+            }
+          ]
+        },
+        {
+          "team1": "Dr_Nemesis_X",
+          "result": "2-0",
+          "team2": "Shikamaru",
+          "games": []
+        }
+      ]
+    },
+    "Group D": {
+      "series1": [
+        {
+          "team1": "Goku-Shery",
+          "result": "1-1",
+          "team2": "Future",
+          "games": []
+        }
+      ],
+      "series2": [
+        {
+          "team1": "Goku-Shery",
+          "result": "2-0",
+          "team2": "killua",
+          "games": []
+        },
+        {
+          "team1": "Future",
+          "result": "1-1",
+          "team2": "FluX-",
+          "games": []
+        }
+      ],
+      "series3": [
+        {
+          "team1": "Banner",
+          "result": "1-1",
+          "team2": "Sasuke",
+          "games": []
+        },
+        {
+          "team1": "Shirleythomas",
+          "result": "2-0",
+          "team2": "Future",
+          "games": []
+        }
+      ],
+      "series4": [
+        {
+          "team1": "Banner",
+          "result": "0-2",
+          "team2": "killua",
+          "games": []
+        },
+        {
+          "team1": "Sasuke",
+          "result": "1-1",
+          "team2": "Shirleythomas",
+          "games": []
+        },
+        {
+          "team1": "Goku-Shery",
+          "result": "2-0",
+          "team2": "FluX-",
+          "games": []
+        }
+      ],
+      "series5": [
+        {
+          "team1": "Goku-Shery",
+          "result": "0-2",
+          "team2": "Banner",
+          "games": []
+        },
+        {
+          "team1": "Sasuke",
+          "result": "2-0",
+          "team2": "FluX-",
+          "games": []
+        }
+      ],
+      "series6": [
+        {
+          "team1": "Goku-Shery",
+          "result": "1-1",
+          "team2": "Sasuke",
+          "games": []
+        },
+        {
+          "team1": "Banner",
+          "result": "1-1",
+          "team2": "Shirleythomas",
+          "games": []
+        }
+      ],
+      "series7": [
+        {
+          "team1": "Sasuke",
+          "result": "1-1",
+          "team2": "Future",
+          "games": []
+        },
+        {
+          "team1": "Shirleythomas",
+          "result": "1-1",
+          "team2": "FluX-",
+          "games": []
+        }
+      ],
+      "series8": [
+        {
+          "team1": "Banner",
+          "result": "0-2",
+          "team2": "FluX-",
+          "games": []
+        },
+        {
+          "team1": "Shirleythomas",
+          "result": "1-1",
+          "team2": "killua",
+          "games": []
+        }
+      ],
+      "series9": [
+        {
+          "team1": "Future",
+          "result": "1-1",
+          "team2": "killua",
+          "games": []
+        }
+      ],
+      "series10": [
+        {
+          "team1": "killua",
+          "result": "0-2",
+          "team2": "FluX-",
+          "games": []
+        },
+        {
+          "team1": "Goku-Shery",
+          "result": "0-2",
+          "team2": "Shirleythomas",
+          "games": []
+        }
+      ],
+      "series11": [
+        {
+          "team1": "Banner",
+          "result": "1-1",
+          "team2": "Future",
+          "games": []
+        },
+        {
+          "team1": "Sasuke",
+          "result": "2-0",
+          "team2": "killua",
+          "games": []
+        }
+      ]
+    }
+  },
+  "tiebreakers": {
+    "Group A": [
+      {
+        "match": "Sai vs Helm",
+        "result": "1-0",
+        "winner": "Sai",
+        "games": []
+      }
+    ],
+    "Group C": [
+      {
+        "match": "Sexy vs Dr_Nemesis_X",
+        "result": "0-1",
+        "winner": "Dr_Nemesis_X",
+        "games": []
+      }
+    ],
+    "Group D": [
+      {
+        "match": "FluX- vs Goku-Shery",
+        "result": "0-1",
+        "winner": "Goku-Shery",
+        "games": []
+      }
+    ]
+  }
+}

@@ -1,0 +1,370 @@
+{
+  "teams": [
+    { "id": "banner",     "name": "Banner",     "color": "#3C78D8" },
+    { "id": "reciprocal", "name": "Reciprocal", "color": "#674EA7" },
+    { "id": "billy",      "name": "Billy",      "color": "#E06666" },
+    { "id": "godspeed",   "name": "Godspeed",   "color": "#B45F06" },
+    { "id": "helm",       "name": "Helm",        "color": "#F1C232" },
+    { "id": "kolly",      "name": "Kolly",       "color": "#C27BA0" },
+    { "id": "nabeel",     "name": "Nabeel",      "color": "#76A5AF" },
+    { "id": "bazinga",    "name": "Bazinga",     "color": "#93C47D" }
+  ],
+
+  "upperBracket": {
+    "rounds": [
+      {
+        "id": "UB_R1",
+        "label": "Round 1",
+        "format": "BO1",
+        "matches": [
+          {
+            "id": "UB_R1_M1",
+            "teams": ["banner", "reciprocal"],
+            "winner": "reciprocal",
+            "games": [
+              {
+                "game": 1,
+                "duration": "44:04",
+                "winner": "reciprocal",
+                "radiant": "banner",
+                "dire": "reciprocal",
+                "radiantScore": 44,
+                "direScore": 34,
+                "radiantHeroes": ["Ursa", "Jakiro", "Windranger", "Marci", "Night Stalker"],
+                "direHeroes": ["Clockwerk", "Timbersaw", "Legion Commander", "Rubick", "Lifestealer"],
+                "dotabuffUrl": "https://www.dotabuff.com/matches/8214684429"
+              }
+            ]
+          },
+          {
+            "id": "UB_R1_M2",
+            "teams": ["billy", "godspeed"],
+            "winner": "godspeed",
+            "games": [
+              { 
+                "game": 1, 
+                "duration": "34:52", 
+                "winner": "godspeed", 
+                "radiant": "billy", 
+                "dire": "godspeed", 
+                "radiantScore": 12, 
+                "direScore": 54,
+                "radiantHeroes": ["Clockwerk", "Mars", "Tinker", "Ringmaster", "Lifestealer"],
+                "direHeroes": ["Magnus", "Earthshaker", "Witch Doctor", "Phantom Assassin", "Zeus"],
+                "dotabuffUrl": "https://www.dotabuff.com/matches/8214693710"
+              }
+            ]
+          },
+          {
+            "id": "UB_R1_M3",
+            "teams": ["helm", "kolly"],
+            "winner": "kolly",
+            "games": [
+              { 
+                "game": 1, 
+                "duration": "36:03", 
+                "winner": "kolly", 
+                "radiant": "kolly", 
+                "dire": "helm", 
+                "radiantScore": 52, 
+                "direScore": 21,
+                "radiantHeroes": ["Storm Spirit", "Skywrath Mage", "Spectre", "Tidehunter", "Abaddon"],
+                "direHeroes": ["Weaver", "Dawnbreaker", "Shadow Shaman", "Clockwerk", "Ursa"],
+                "dotabuffUrl": "https://www.dotabuff.com/matches/8214710987"
+              }
+            ]
+          },
+          {
+            "id": "UB_R1_M4",
+            "teams": ["nabeel", "bazinga"],
+            "winner": "bazinga",
+            "games": [
+              { 
+                "game": 1, 
+                "duration": "53:46", 
+                "winner": "bazinga", 
+                "radiant": "nabeel", 
+                "dire": "bazinga", 
+                "radiantScore": 34, 
+                "direScore": 54,
+                "radiantHeroes": ["Clockwerk", "Shadow Shaman", "Sniper", "Centaur Warrunner", "Nature's Prophet"],
+                "direHeroes": ["Dazzle", "Lion", "Tidehunter", "Ursa", "Silencer"],
+                "dotabuffUrl": "https://www.dotabuff.com/matches/8214704368"
+              }
+            ]
+          }
+        ]
+      },
+
+      {
+        "id": "UB_R2",
+        "label": "Round 2",
+        "format": "BO1",
+        "matches": [
+          {
+            "id": "UB_R2_M1",
+            "from": ["UB_R1_M1", "UB_R1_M2"],
+            "teams": [ "reciprocal","godspeed" ],
+            "winner": "reciprocal",
+            "games": [
+              { 
+                "game": 1, 
+                "duration": "43:42", 
+                "winner": "reciprocal",
+                "radiant": "godspeed",
+                "dire": "reciprocal", 
+                "radiantScore": 31, 
+                "direScore": 41,
+                "radiantHeroes": ["Sniper","Tiny","Beastmaster","Lich","Ogre magi"],
+
+                
+                "direHeroes": ["Axe","Rubick","Arc Warden","Invoker","Jakiro"],
+                "dotabuffUrl": "https://www.dotabuff.com/matches/8214783687"
+              }
+            ]
+          },
+          {
+            "id": "UB_R2_M2",
+            "from": ["UB_R1_M3", "UB_R1_M4"],
+            "teams": ["kolly", "bazinga"],
+            "winner": "kolly",
+            "games": [
+              { 
+                "game": 1, 
+                "duration": "44:58", 
+                "winner": "kolly", 
+                "radiant": "kolly", 
+                "dire": "bazinga", 
+                "radiantScore": 42, 
+                "direScore": 27,
+                "radiantHeroes": ["Nature's Prophet", "Skywrath Mage", "Timbersaw", "Outworld Destroyer", "Abaddon"],
+                "direHeroes": ["Invoker", "Legion Commander", "Juggernaut", "Lich", "Dazzle"],
+                "dotabuffUrl": "https://www.dotabuff.com/matches/8214795639"
+              }
+            ]
+          }
+        ]
+      },
+
+      {
+        "id": "UB_FINAL",
+        "label": "Upper Bracket Final",
+        "format": "BO1",
+        "matches": [
+          {
+  "id": "UB_F_M1",
+  "from": ["UB_R2_M1", "UB_R2_M2"],
+  "teams": ["reciprocal", "kolly"],
+  "winner": "reciprocal",
+  "dqTeamId": "kolly",
+  "advanceReason": "Opponent disqualified for smurfing",
+  "games": [
+    {
+      "game": 1,
+      "duration": "33:07",
+      "winner": "kolly",
+      "advancedTeam": "reciprocal",
+      "radiant": "kolly",
+      "dire": "reciprocal",
+      "radiantScore": 48,
+      "direScore": 24,
+      "radiantHeroes": ["Storm Spirit", "Vengeful Spirit", "Lifestealer", "Bristleback", "Jakiro"],
+      "direHeroes": ["Axe", "Rubick", "Shadow Fiend", "Earthshaker", "Muerta"],
+      "dotabuffUrl": "https://www.dotabuff.com/matches/8215006945",
+      "note": "Team Kolly won the match but was disqualified for smurfing. Team Reciprocal advanced to Grand Final."
+    }
+  ]
+}
+        ]
+      },
+
+      {
+        "id": "UB_WINNER",
+        "label": "Upper Bracket Winner",
+        "matches": [
+          {
+            "id": "UB_WINNER_M1",
+            "from": ["UB_F_M1"],
+            "teams": ["reciprocal"],
+            "winner": "reciprocal"
+          }
+        ]
+      }
+    ]
+  },
+
+  "lowerBracket": {
+    "rounds": [
+      {
+        "id": "LB_R1",
+        "label": "Round 1",
+        "format": "BO1",
+        "matches": [
+          {
+  "id": "LB_R1_M1",
+  "from": ["UB_R1_M1", "UB_R1_M2"],
+  "teams": ["banner", "billy"],
+  "winner": "banner",
+  "games": [
+    {
+      "game": 1,
+      "duration": "40:36",
+      "winner": "banner",
+      "radiant": "banner",
+      "dire": "billy",
+      "radiantScore": 32,
+      "direScore": 30,
+      "radiantHeroes": ["Juggernaut", "Razor", "Slardar", "Oracle", "Phoenix"],
+      "direHeroes": ["Morphling", "Jakiro", "Riki", "Timbersaw", "Silencer"],
+      "dotabuffUrl": "https://www.dotabuff.com/matches/8214769354"
+    }
+  ]
+},
+         {
+  "id": "LB_R1_M2",
+  "from": ["UB_R1_M3", "UB_R1_M4"],
+  "teams": ["helm", "nabeel"],
+  "winner": "helm",
+  "games": [
+    {
+      "game": 1,
+      "duration": "50:31",
+      "winner": "helm",
+      "radiant": "helm",
+      "dire": "nabeel",
+      "radiantScore": 51,
+      "direScore": 31,
+      "radiantHeroes": ["Silencer", "Shadow Shaman", "Muerta", "Timbersaw", "Invoker"],
+      "direHeroes": ["Clockwerk", "Lina", "Witch Doctor", "Tidehunter", "Phantom Assassin"],
+      "dotabuffUrl": "https://www.dotabuff.com/matches/8214795292"
+    }
+  ]
+}
+        ]
+      },
+
+      {
+        "id": "LB_R2",
+        "label": "Round 2",
+        "format": "BO1",
+        "matches": [
+          {
+  "id": "LB_R2_M1",
+  "from": ["LB_R1_M1"],
+  "teams": ["banner", "bazinga"],
+  "winner": "banner",
+  "games": [
+    {
+      "game": 1,
+      "duration": "39:28",
+      "winner": "banner",
+      "radiant": "banner",
+      "dire": "bazinga",
+      "radiantScore": 43,
+      "direScore": 24,
+      "radiantHeroes": ["Lifestealer", "Jakiro", "Windranger", "Nyx Assassin", "Dawnbreaker"],
+      "direHeroes": ["Necrophos", "Witch Doctor", "Drow Ranger", "Undying", "Slardar"],
+      "dotabuffUrl": "https://www.dotabuff.com/matches/8214936123"
+    }
+  ]
+},
+         {
+  "id": "LB_R2_M2",
+  "from": ["LB_R1_M2"],
+  "teams": ["helm", "godspeed"],
+  "winner": "godspeed",
+  "games": [
+    {
+      "game": 1,
+      "duration": "59:40",
+      "winner": "godspeed",
+      "radiant": "helm",
+      "dire": "godspeed",
+      "radiantScore": 41,
+      "direScore": 70,
+      "radiantHeroes": ["Warlock", "Underlord", "Medusa", "Shadow Shaman", "Tiny"],
+      "direHeroes": ["Pudge", "Witch Doctor", "Ursa", "Dawnbreaker", "Jakiro"],
+      "dotabuffUrl": "https://www.dotabuff.com/matches/8214920334"
+    }
+  ]
+}
+        ]
+      },
+
+      {
+        "id": "LB_R3",
+        "label": "Lower Bracket Final",
+        "format": "BO1",
+        "matches": [
+{
+  "id": "LB_R3_M1",
+  "from": ["LB_R2_M1", "LB_R2_M2"],
+  "teams": ["banner", "godspeed"],
+  "winner": "godspeed",
+  "games": [
+    {
+      "game": 1,
+      "duration": "44:33",
+      "winner": "godspeed",
+      "radiant": "banner",
+      "dire": "godspeed",
+      "radiantScore": 23,
+      "direScore": 38,
+      "radiantHeroes": ["Tiny", "Jakiro", "Phoenix", "Windranger", "Underlord"],
+      "direHeroes": ["Necrophos", "Grimstroke", "Ancient Apparition", "Juggernaut", "Earth Spirit"],
+      "dotabuffUrl": "https://www.dotabuff.com/matches/8216299681"
+    }
+  ]
+}
+        ]
+      },
+
+      {
+        "id": "LB_WINNER",
+        "label": "Lower Bracket Winner",
+        "matches": [
+          {
+            "id": "LB_WINNER_M1",
+            "from": ["LB_R3_M1"],
+            "teams": ["godspeed"],
+            "winner": "godspeed"
+          }
+        ]
+      }
+    ]
+  },
+
+ "grandFinal": {
+  "id": "GF_M1",
+  "format": "BO3",
+  "from": ["UB_WINNER_M1", "LB_WINNER_M1"],
+  "teams": ["reciprocal", "godspeed"],
+  "winner": "godspeed",
+  "games": [
+    {
+      "game": 1,
+      "duration": "46:21",
+      "winner": "godspeed",
+      "radiant": "reciprocal",
+      "dire": "godspeed",
+      "radiantScore": 32,
+      "direScore": 52,
+      "radiantHeroes": ["Rubick", "Marci", "Tinker", "Disruptor", "Ursa"],
+      "direHeroes": ["Pugna", "Magnus", "Jakiro", "Night Stalker", "Meepo"],
+      "dotabuffUrl": "https://www.dotabuff.com/matches/8216445616"
+    },
+    {
+      "game": 2,
+      "duration": "35:37",
+      "winner": "godspeed",
+      "radiant": "godspeed",
+      "dire": "reciprocal",
+      "radiantScore": 51,
+      "direScore": 20,
+      "radiantHeroes": ["Legion Commander", "Weaver", "Tusk", "Sniper", "Dawnbreaker"],
+      "direHeroes": ["Viper", "Tidehunter", "Abaddon", "Lion", "Slark"],
+      "dotabuffUrl": "https://www.dotabuff.com/matches/8216560681"
+    }
+  ]
+}
+}

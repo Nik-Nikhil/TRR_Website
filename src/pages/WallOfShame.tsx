@@ -38,129 +38,119 @@ function getInitials(name: string) {
   return w.length >= 2 ? (w[0][0] + w[1][0]).toUpperCase() : name.slice(0, 2).toUpperCase();
 }
 
-function PlayerCard({ player, i }: { player: BannedPlayer; i: number }) {
+function BanCard({ player, i }: { player: BannedPlayer; i: number }) {
   const [imgErr, setImgErr] = useState(false);
   const isDQ = player.isDQ;
 
-  const accentColor = isDQ ? '#f59e0b' : '#ef4444';
-  const accentDim = isDQ ? 'rgba(245,158,11,0.15)' : 'rgba(239,68,68,0.15)';
-  const accentBorder = isDQ ? 'rgba(245,158,11,0.35)' : 'rgba(239,68,68,0.35)';
-  const label = isDQ ? `S${player.season} DQ` : 'BANNED';
-
   return (
     <motion.div
-      initial={{ opacity: 0, y: 24 }}
-      animate={{ opacity: 1, y: 0 }}
-      whileHover={{ y: -6, scale: 1.02 }}
-      transition={{ delay: i * 0.1, duration: 0.4 }}
-      className="relative flex-shrink-0"
-      style={{ width: 200 }}
+      initial={{ opacity: 0, scale: 0.96 }}
+      animate={{ opacity: 1, scale: 1 }}
+      transition={{ delay: i * 0.12, duration: 0.5 }}
+      className="relative overflow-hidden rounded-3xl"
+      style={{
+        background: 'linear-gradient(135deg, #0d0f14 0%, #080a0e 100%)',
+        border: isDQ ? '1px solid rgba(245,158,11,0.25)' : '1px solid rgba(239,68,68,0.25)',
+        boxShadow: isDQ
+          ? '0 25px 80px rgba(0,0,0,0.6), 0 0 60px rgba(245,158,11,0.06)'
+          : '0 25px 80px rgba(0,0,0,0.6), 0 0 60px rgba(239,68,68,0.06)',
+      }}
     >
-      {/* Card */}
-      <div
-        className="rounded-2xl overflow-hidden"
-        style={{
-          background: 'linear-gradient(160deg, #1c1f26 0%, #13151a 60%, #0e1014 100%)',
-          border: `1px solid ${accentBorder}`,
-          boxShadow: `0 0 0 1px rgba(255,255,255,0.04), 0 20px 60px rgba(0,0,0,0.6), 0 0 30px ${accentDim}`,
-        }}
-      >
-        {/* Top accent bar */}
-        <div className="h-1 w-full" style={{ background: `linear-gradient(90deg, transparent, ${accentColor}, transparent)` }} />
+      {/* Background glow blob */}
+      <div className="absolute top-0 right-0 w-64 h-64 rounded-full blur-3xl pointer-events-none"
+        style={{ background: isDQ ? 'rgba(245,158,11,0.06)' : 'rgba(239,68,68,0.06)', transform: 'translate(30%, -30%)' }} />
 
-        {/* Status badge */}
-        <div className="flex justify-center pt-4 pb-2">
-          <span
-            className="px-3 py-0.5 rounded-full text-[10px] font-black tracking-[0.2em] uppercase"
-            style={{ background: accentDim, border: `1px solid ${accentBorder}`, color: accentColor }}
-          >
-            {label}
-          </span>
-        </div>
+      {/* Top bar */}
+      <div className="h-1 w-full"
+        style={{ background: isDQ ? 'linear-gradient(90deg, transparent, #f59e0b 40%, #d97706 60%, transparent)' : 'linear-gradient(90deg, transparent, #ef4444 40%, #b91c1c 60%, transparent)' }} />
 
-        {/* Avatar */}
-        <div className="flex justify-center px-5 pb-3">
-          <div
-            className="relative overflow-hidden"
-            style={{
-              width: 100, height: 100,
-              borderRadius: '50%',
-              border: `2px solid ${accentBorder}`,
-              boxShadow: `0 0 20px ${accentDim}, inset 0 0 10px rgba(0,0,0,0.4)`,
-            }}
-          >
-            {player.avatarUrl && !imgErr ? (
-              <img
-                src={player.avatarUrl}
-                alt={player.nickname}
-                className="w-full h-full object-cover"
-                style={{ filter: 'grayscale(30%) brightness(0.85)' }}
-                onError={() => setImgErr(true)}
-              />
-            ) : (
-              <div
-                className="w-full h-full flex items-center justify-center"
-                style={{ background: 'linear-gradient(135deg, #2a2d35, #1a1c22)' }}
-              >
-                <span className="text-2xl font-black" style={{ color: accentColor, fontFamily: 'Poppins, sans-serif' }}>
-                  {getInitials(player.nickname)}
-                </span>
+      <div className="p-8">
+        <div className="flex gap-8 items-start">
+
+          {/* Avatar column */}
+          <div className="flex-shrink-0 flex flex-col items-center gap-3">
+            <div className="relative">
+              {/* Outer ring */}
+              <div className="absolute inset-0 rounded-2xl blur-md opacity-60"
+                style={{ background: isDQ ? 'rgba(245,158,11,0.3)' : 'rgba(239,68,68,0.3)', margin: '-4px' }} />
+              <div className="relative w-24 h-24 rounded-2xl overflow-hidden"
+                style={{ border: isDQ ? '2px solid rgba(245,158,11,0.4)' : '2px solid rgba(239,68,68,0.4)' }}>
+                {player.avatarUrl && !imgErr ? (
+                  <img src={player.avatarUrl} alt={player.nickname}
+                    className="w-full h-full object-cover"
+                    style={{ filter: 'grayscale(20%) contrast(1.1)' }}
+                    onError={() => setImgErr(true)} />
+                ) : (
+                  <div className="w-full h-full flex items-center justify-center"
+                    style={{ background: isDQ ? 'rgba(245,158,11,0.08)' : 'rgba(239,68,68,0.08)' }}>
+                    <span className="text-3xl font-black"
+                      style={{ color: isDQ ? '#f59e0b' : '#ef4444' }}>
+                      {getInitials(player.nickname)}
+                    </span>
+                  </div>
+                )}
               </div>
-            )}
-            {/* Overlay tint */}
-            <div className="absolute inset-0" style={{ background: `radial-gradient(circle at 50% 100%, ${accentDim}, transparent 70%)` }} />
-          </div>
-        </div>
-
-        {/* Name */}
-        <div className="text-center px-4 pb-1">
-          <div className="text-white font-bold text-base tracking-wide" style={{ fontFamily: 'Poppins, sans-serif' }}>
-            {player.nickname}
-          </div>
-          {player.team && (
-            <div className="text-xs mt-0.5" style={{ color: 'rgba(255,255,255,0.35)' }}>{player.team}</div>
-          )}
-          {player.currentMmr && (
-            <div className="text-xs mt-0.5" style={{ color: 'rgba(255,255,255,0.35)' }}>{player.currentMmr} MMR</div>
-          )}
-        </div>
-
-        {/* Divider */}
-        <div className="mx-5 my-3 h-px" style={{ background: 'rgba(255,255,255,0.06)' }} />
-
-        {/* Reason */}
-        <div className="px-5 pb-4 text-center">
-          <div className="text-[9px] font-bold tracking-[0.15em] uppercase mb-1.5" style={{ color: 'rgba(255,255,255,0.25)' }}>
-            Reason
-          </div>
-          <p className="text-xs leading-relaxed" style={{ color: 'rgba(255,255,255,0.5)', fontStyle: 'italic' }}>
-            {player.banReason || 'Violated community rules'}
-          </p>
-        </div>
-
-        {/* Footer */}
-        <div
-          className="px-5 py-3 flex items-center justify-between"
-          style={{ background: 'rgba(0,0,0,0.3)', borderTop: '1px solid rgba(255,255,255,0.05)' }}
-        >
-          <div className="text-[9px] uppercase tracking-widest" style={{ color: 'rgba(255,255,255,0.2)' }}>
-            {isDQ ? `Season ${player.season}` : 'Permanent'}
-          </div>
-          {player.bannedAt && (
-            <div className="text-[9px]" style={{ color: 'rgba(255,255,255,0.2)' }}>
-              {new Date(player.bannedAt).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: '2-digit' })}
             </div>
-          )}
-          {player.bannedBy && (
-            <div className="text-[9px]" style={{ color: 'rgba(255,255,255,0.2)' }}>
-              by {player.bannedBy}
-            </div>
-          )}
-        </div>
 
-        {/* Bottom accent bar */}
-        <div className="h-0.5 w-full" style={{ background: `linear-gradient(90deg, transparent, ${accentColor}80, transparent)` }} />
+            {/* Status pill */}
+            <div className="px-3 py-1 rounded-full text-[10px] font-black tracking-widest uppercase whitespace-nowrap"
+              style={{
+                background: isDQ ? 'rgba(245,158,11,0.1)' : 'rgba(239,68,68,0.1)',
+                border: isDQ ? '1px solid rgba(245,158,11,0.3)' : '1px solid rgba(239,68,68,0.3)',
+                color: isDQ ? '#f59e0b' : '#ef4444',
+              }}>
+              {isDQ ? `S${player.season} DQ` : 'Banned'}
+            </div>
+          </div>
+
+          {/* Content */}
+          <div className="flex-1 min-w-0 pt-1">
+            {/* Name row */}
+            <div className="flex items-baseline gap-3 flex-wrap mb-1">
+              <h2 className="text-3xl font-black text-white tracking-tight">{player.nickname}</h2>
+              {player.team && (
+                <span className="text-white/30 text-base font-medium">{player.team}</span>
+              )}
+            </div>
+
+            {/* Season / date */}
+            <div className="text-white/25 text-xs uppercase tracking-widest mb-5">
+              {isDQ ? `Season ${player.season} · Disqualified` : player.bannedAt
+                ? `Banned ${new Date(player.bannedAt).toLocaleDateString('en-IN', { day: 'numeric', month: 'long', year: 'numeric' })}`
+                : 'Permanently Banned'}
+              {player.bannedBy && ` · by ${player.bannedBy}`}
+            </div>
+
+            {/* Divider */}
+            <div className="h-px mb-5 w-full"
+              style={{ background: 'rgba(255,255,255,0.06)' }} />
+
+            {/* Offense label */}
+            <div className="text-[10px] font-bold tracking-[0.2em] uppercase mb-2"
+              style={{ color: isDQ ? 'rgba(245,158,11,0.5)' : 'rgba(239,68,68,0.5)' }}>
+              Offense
+            </div>
+
+            {/* Reason */}
+            <p className="text-white/60 text-base leading-relaxed max-w-lg">
+              {player.banReason || 'Violated community rules.'}
+            </p>
+          </div>
+
+          {/* Right — large number */}
+          <div className="flex-shrink-0 hidden lg:flex items-center justify-center w-20 h-20 rounded-2xl self-center"
+            style={{ background: isDQ ? 'rgba(245,158,11,0.05)' : 'rgba(239,68,68,0.05)', border: isDQ ? '1px solid rgba(245,158,11,0.1)' : '1px solid rgba(239,68,68,0.1)' }}>
+            <span className="text-4xl font-black"
+              style={{ color: isDQ ? 'rgba(245,158,11,0.3)' : 'rgba(239,68,68,0.3)' }}>
+              {String(i + 1).padStart(2, '0')}
+            </span>
+          </div>
+        </div>
       </div>
+
+      {/* Bottom bar */}
+      <div className="h-px w-full"
+        style={{ background: isDQ ? 'rgba(245,158,11,0.08)' : 'rgba(239,68,68,0.08)' }} />
     </motion.div>
   );
 }
@@ -189,61 +179,80 @@ export default function WallOfShame() {
 
   return (
     <div className="min-h-screen text-white" style={{ background: 'rgba(5,7,10)', fontFamily: 'Poppins, sans-serif', paddingTop: '64px' }}>
-      {/* Background */}
+      {/* Full-page background */}
       <div className="fixed inset-0 z-0 pointer-events-none">
-        <img src="/Roshan1.jpg" alt="" className="w-full h-full object-cover object-center" style={{ opacity: 0.1 }} />
-        <div className="absolute inset-0" style={{ background: 'linear-gradient(180deg, rgba(5,7,10,0.8) 0%, rgba(5,7,10,0.95) 100%)' }} />
-        <div className="absolute inset-0" style={{ background: 'radial-gradient(ellipse 60% 40% at 50% 0%, rgba(100,100,120,0.06) 0%, transparent 60%)' }} />
+        <img src="/Roshan1.jpg" alt="" className="w-full h-full object-cover object-top"
+          style={{ opacity: 0.12 }} />
+        <div className="absolute inset-0"
+          style={{ background: 'linear-gradient(180deg, rgba(5,7,10,0.7) 0%, rgba(5,7,10,0.92) 40%, rgba(5,7,10,1) 80%)' }} />
+        <div className="absolute inset-0"
+          style={{ background: 'radial-gradient(ellipse 70% 50% at 50% 0%, rgba(139,0,0,0.15) 0%, transparent 60%)' }} />
       </div>
 
-      <div className="relative z-10 max-w-6xl mx-auto px-6 py-14">
+      <div className="relative z-10 max-w-4xl mx-auto px-6 py-16">
 
-        {/* Header */}
-        <motion.div initial={{ opacity: 0, y: -12 }} animate={{ opacity: 1, y: 0 }} className="text-center mb-16">
-          {/* Silver accent line */}
-          <div className="flex items-center justify-center gap-4 mb-6">
-            <div className="h-px flex-1 max-w-24" style={{ background: 'linear-gradient(90deg, transparent, rgba(192,192,192,0.3))' }} />
-            <div className="w-2 h-2 rounded-full" style={{ background: 'rgba(192,192,192,0.5)' }} />
-            <div className="h-px flex-1 max-w-24" style={{ background: 'linear-gradient(90deg, rgba(192,192,192,0.3), transparent)' }} />
+        {/* Hero header */}
+        <motion.div initial={{ opacity: 0, y: -20 }} animate={{ opacity: 1, y: 0 }} className="mb-16">
+          {/* Eyebrow */}
+          <div className="flex items-center gap-3 mb-4">
+            <div className="h-px w-8" style={{ background: 'rgba(239,68,68,0.5)' }} />
+            <span className="text-xs font-bold tracking-[0.3em] uppercase text-red-500/70">The Roshan Rumble</span>
           </div>
-          <h1 className="text-5xl font-black tracking-tight text-white mb-3"
-            style={{ textShadow: '0 0 60px rgba(192,192,192,0.15)' }}>
-            Banned Players
+
+          <h1 className="text-6xl font-black text-white mb-4 leading-none"
+            style={{ textShadow: '0 0 120px rgba(239,68,68,0.15)' }}>
+            Banned<br />
+            <span style={{ color: 'rgba(255,255,255,0.25)' }}>Players</span>
           </h1>
-          <p className="text-white/30 text-sm">
-            Players permanently removed or disqualified from The Roshan Rumble
+
+          <p className="text-white/35 text-base max-w-md leading-relaxed">
+            Players who have been permanently removed or disqualified from competing in The Roshan Rumble.
           </p>
+
           {/* Stats */}
-          <div className="flex items-center justify-center gap-6 mt-5">
-            <div className="text-center">
-              <div className="text-2xl font-black text-white">{dbBanned.length}</div>
-              <div className="text-[10px] uppercase tracking-widest text-red-400/70">Banned</div>
+          <div className="flex gap-8 mt-8">
+            <div>
+              <div className="text-4xl font-black text-red-500">{dbBanned.length}</div>
+              <div className="text-white/25 text-xs uppercase tracking-widest mt-0.5">Banned</div>
             </div>
-            <div className="w-px h-8" style={{ background: 'rgba(255,255,255,0.1)' }} />
-            <div className="text-center">
-              <div className="text-2xl font-black text-white">{DQ_ENTRIES.length}</div>
-              <div className="text-[10px] uppercase tracking-widest text-yellow-400/70">Disqualified</div>
+            <div className="w-px" style={{ background: 'rgba(255,255,255,0.08)' }} />
+            <div>
+              <div className="text-4xl font-black text-yellow-500">{DQ_ENTRIES.length}</div>
+              <div className="text-white/25 text-xs uppercase tracking-widest mt-0.5">Disqualified</div>
+            </div>
+            <div className="w-px" style={{ background: 'rgba(255,255,255,0.08)' }} />
+            <div>
+              <div className="text-4xl font-black text-white/20">{all.length}</div>
+              <div className="text-white/25 text-xs uppercase tracking-widest mt-0.5">Total</div>
             </div>
           </div>
         </motion.div>
 
+        {/* Cards */}
         {loading ? (
-          <div className="flex items-center justify-center py-32 text-white/25 text-sm">Loading...</div>
+          <div className="space-y-4">
+            {[1, 2].map(i => (
+              <div key={i} className="h-40 rounded-3xl animate-pulse"
+                style={{ background: 'rgba(255,255,255,0.03)' }} />
+            ))}
+          </div>
         ) : all.length === 0 ? (
-          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="text-center py-24">
-            <div className="text-6xl mb-4">🛡️</div>
-            <p className="text-white/50 text-lg font-semibold">Clean record</p>
-            <p className="text-white/25 text-sm mt-1">No players have been banned yet.</p>
+          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }}
+            className="rounded-3xl py-24 text-center"
+            style={{ background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.05)' }}>
+            <div className="text-6xl mb-5">🛡️</div>
+            <p className="text-white/50 text-xl font-bold">Clean record</p>
+            <p className="text-white/20 text-sm mt-2">No players have been banned yet.</p>
           </motion.div>
         ) : (
-          <div className="flex flex-wrap justify-center items-start gap-8 w-full">
-            {all.map((p, i) => <PlayerCard key={p.id} player={p} i={i} />)}
+          <div className="space-y-5">
+            {all.map((p, i) => <BanCard key={p.id} player={p} i={i} />)}
           </div>
         )}
 
         {all.length > 0 && (
-          <p className="text-center text-white/15 text-xs mt-16">
-            {all.length} player{all.length !== 1 ? 's' : ''} · Appeals via Discord
+          <p className="text-center text-white/15 text-xs mt-12 tracking-widest uppercase">
+            Appeals via Discord · Decisions are final
           </p>
         )}
       </div>

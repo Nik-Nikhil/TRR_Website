@@ -1,0 +1,186 @@
+{
+  "teams": [
+    { "id": "atomic", "captain": "Atomic", "color": "#B6D7A8" },
+    { "id": "mslayer", "captain": "MSlayer", "color": "#F6B26B" },
+    { "id": "irox", "captain": "Irox", "color": "#76A5AF" },
+    { "id": "machine", "captain": "Machine", "color": "#4A86E8" },
+    { "id": "madlad", "captain": "Madlad", "color": "#E06666" },
+    { "id": "bazinga", "captain": "Bazinga", "color": "#FFD966" }
+  ],
+
+  "knockout": {
+    "rounds": [
+      {
+        "id": "QF",
+        "label": "Quarter Finals",
+        "matches": [
+          {
+            "id": "QF_M1",
+            "teams": ["atomic","mslayer"],
+            "winner": "mslayer",
+            "games": [
+    {
+      "game": 1,
+      "duration": "27:05",
+      "winner": "mslayer",
+      "radiant": "mslayer",
+      "dire": "atomic",
+      "radiantScore": 35,
+      "direScore": 5,
+      "radiantHeroes": ["Nightstalker", "Outworld Destryoyer", "GrimStroke", "Clinkz", "Lich"],
+      "direHeroes": ["Doom", "Templar Assassin", "Jakiro", "Lifestealer", "Shadow Shaman"],
+      "dotabuffUrl": "https://www.dotabuff.com/matches/8260559082"
+    },
+    {
+      "game": 2,
+      "duration": "51:05",
+      "winner": "atomic",
+      "radiant": "mslayer",
+      "dire": "atomic",
+      "radiantScore": 39,
+      "direScore": 49,
+      "radiantHeroes": ["Disruptor", "Sniper", "Mars", "Abaddon", "Ursa"],
+      "direHeroes": ["Wraith King", "Sand King", "Lion", "Dark Willow", "Viper"],
+      "dotabuffUrl": "https://www.dotabuff.com/matches/8260610939"
+    },
+     {
+      "game": 3,
+      "duration": "38:58",
+      "winner": "mslayer",
+      "radiant": "atomic",
+      "dire": "mslayer",
+      "radiantScore": 24,
+      "direScore": 45,
+      "radiantHeroes": ["Windranger", "Lich", "Tidehunter", "Sven", "Dark Willow"],
+      "direHeroes": ["Jakiro", "Dawnbreaker", "Lion", "Clinkz", "Magnus"],
+      "dotabuffUrl": "https://www.dotabuff.com/matches/8260704738"
+    }
+  ]
+          },
+          {
+            "id": "QF_M2",
+            "teams": ["machine", "bazinga"],
+            "winner": "bazinga",
+            "games": [
+    {
+      "game": 1,
+      "duration": "51:34",
+      "winner": "bazinga",
+      "radiant": "machine",
+      "dire": "bazinga",
+      "radiantScore": 43,
+      "direScore": 44,
+      "radiantHeroes": ["Tiny", "Abaddon", "Dawnbreaker", "Marci", "Kunkka"],
+      "direHeroes": ["Lion", "Rubick", "Axe", "Pudge", "Dragon Knight"],
+      "dotabuffUrl": "https://www.dotabuff.com/matches/8260656681"
+    }
+  ]
+          }
+        ]
+      },
+
+      {
+        "id": "SF",
+        "label": "Semi Finals",
+        "matches": [
+          {
+            "id": "SF_M1",
+            "teams": ["irox", "mslayer"],
+            "winner": "mslayer",
+                      "games": [
+    {
+      "game": 1,
+      "duration": "13:51",
+      "winner": "mslayer",
+      "radiant": "mslayer",
+      "dire": "irox",
+      "radiantScore": 13,
+      "direScore": 4,
+      "radiantHeroes": ["Jakiro", "Shadow Fiend", "Dark Seer", "Phantom Lancer", "Abaddon"],
+      "direHeroes": ["Wraith King", "Kunkka", "Dragon Knight", "Lion"],
+      "dotabuffUrl": "https://www.dotabuff.com/matches/8260896162"
+    }
+    
+  ]
+          },
+          {
+            "id": "SF_M2",
+            "teams": ["madlad", "bazinga"],
+            "winner": "bazinga",
+            "games": [
+    {
+      "game": 1,
+      "duration": "23:12",
+      "winner": "madlad",
+      "radiant": "bazinga",
+      "dire": "madlad",
+      "radiantScore": 9,
+      "direScore": 28,
+      "radiantHeroes": ["Disruptor", "Beastmaster", "Skywrath Mage", "Legion Commander", "Ursa"],
+      "direHeroes": ["Templar Assassin", "Ogre Magi", "Wraith King", "Silencer", "Leshrac"],
+      "dotabuffUrl": "https://www.dotabuff.com/matches/8260867326"
+    },
+    {
+      "game": 2,
+      "duration": "57:45",
+      "winner": "bazinga",
+      "radiant": "madlad",
+      "dire": "bazinga",
+      "radiantScore": 27,
+      "direScore": 36,
+      "radiantHeroes": ["Silencer", "Bounty Hunter", "Centaur Warrunner", "Invoker", "Anti-Mage"],
+      "direHeroes": ["Lifestealer", "Wraith King", "Abaddon", "Jakiro", "Sniper"],
+      "dotabuffUrl": "https://www.dotabuff.com/matches/8260942421"
+    },
+    {
+      "game": 3,
+      "duration": "44:41",
+      "winner": "bazinga",
+      "radiant": "bazinga",
+      "dire": "madlad",
+      "radiantScore": 49,
+      "direScore": 31,
+      "radiantHeroes": ["Lich", "Shadow Shaman", "Ursa","Tidehunter", "Puck"],
+      "direHeroes": ["Leshrac", "Silencer", "Warlock", "Dawnbreaker", "Medusa"],
+      "dotabuffUrl": "https://www.dotabuff.com/matches/8261093052"
+    }
+  ]
+          }
+        ]
+      }
+    ]
+  },
+
+  "grandFinal": {
+    "id": "GF",
+    "format": "BO3",
+    "teams": ["mslayer", "bazinga"],
+    "winner": "mslayer",
+    "games": [
+    {
+      "game": 1,
+      "duration": "33:45",
+      "winner": "mslayer",
+      "radiant": "mslayer",
+      "dire": "bazinga",
+      "radiantScore": 49,
+      "direScore": 20,
+      "radiantHeroes": ["Wraith King", "GrimStroke", "Dark Seer", "Lich", "Pangolier"],
+      "direHeroes": ["Phantom Assassin", "Rubick", "Invoker", "Shadow Shaman", "Tidehunter"],
+      "dotabuffUrl": "https://www.dotabuff.com/matches/8262285214"
+    },
+    {
+      "game": 2,
+      "duration": "29:54",
+      "winner": "mslayer",
+      "radiant": "mslayer",
+      "dire": "bazinga",
+      "radiantScore": 44,
+      "direScore": 22,
+      "radiantHeroes": ["Lich", "Dragon Knight", "Centaur Warrunner", "Viper", "Dark Willow"],
+      "direHeroes": ["Ursa", "Dark Seer", "Abaddon", "Jakiro", "Clinkz"],
+      "dotabuffUrl": "https://www.dotabuff.com/matches/8262398850"
+    }
+  ]
+  }
+}

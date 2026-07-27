@@ -1,12 +1,7 @@
 import { useState } from 'react'
 import { useNavigate, useSearchParams } from 'react-router-dom'
 import { motion } from 'framer-motion'
-import { createClient } from '@supabase/supabase-js'
-
-const supabase = createClient(
-  import.meta.env.VITE_SUPABASE_URL,
-  import.meta.env.VITE_SUPABASE_ANON_KEY
-)
+import { supabase } from '../lib/supabase'
 
 const ROLES = ['Carry', 'Mid', 'Offlane', 'Soft Support', 'Hard Support']
 const MEDALS = ['Herald', 'Guardian', 'Crusader', 'Archon', 'Legend', 'Ancient', 'Divine', 'Immortal']
@@ -15,8 +10,10 @@ export default function Onboarding() {
   const navigate = useNavigate()
   const [params] = useSearchParams()
   const playerId = params.get('playerId') ?? ''
+  // Pre-fill with Steam username so players see their name and can keep or change it
+  const steamName = params.get('steamName') ?? ''
 
-  const [nickname, setNickname] = useState('')
+  const [nickname, setNickname] = useState(steamName)
   const [mmr, setMmr] = useState('')
   const [discord, setDiscord] = useState('')
   const [roles, setRoles] = useState<string[]>([])
@@ -91,6 +88,7 @@ export default function Onboarding() {
           {/* Nickname */}
           <div className="space-y-1.5">
             <label className="text-gray-400 text-xs uppercase tracking-widest">TRR Nickname *</label>
+            <p className="text-gray-600 text-[11px]">This is how you'll appear on the site. You can change it from your Steam name.</p>
             <input
               value={nickname} onChange={e => setNickname(e.target.value)}
               placeholder="Your in-game name"
@@ -167,16 +165,15 @@ export default function Onboarding() {
 
           {error && <p className="text-red-400 text-xs text-center">{error}</p>}
 
-          <div className="flex gap-3 pt-1">
-            <button type="button" onClick={() => navigate(`/players/${playerId}`, { replace: true })}
-              className="flex-1 py-2.5 rounded-lg text-sm text-gray-500 hover:text-gray-300 transition-colors cursor-pointer"
-              style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.06)' }}>
-              Skip for now
-            </button>
+          <div className="flex flex-col gap-2 pt-1">
             <button type="submit" disabled={loading}
-              className="flex-1 py-2.5 rounded-lg text-sm font-semibold transition-all cursor-pointer disabled:opacity-40"
+              className="w-full py-2.5 rounded-lg text-sm font-semibold transition-all cursor-pointer disabled:opacity-40"
               style={{ background: 'rgba(102,192,244,0.15)', border: '1px solid rgba(102,192,244,0.3)', color: '#9dd4ee' }}>
               {loading ? <span className="inline-block w-4 h-4 border-2 border-[#66c0f4]/30 border-t-[#66c0f4] rounded-full animate-spin" /> : 'Save & Continue'}
+            </button>
+            <button type="button" onClick={() => navigate(`/players/${playerId}`, { replace: true })}
+              className="w-full py-1.5 text-xs text-gray-700 hover:text-gray-500 transition-colors cursor-pointer">
+              Skip for now
             </button>
           </div>
         </form>

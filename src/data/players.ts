@@ -39,7 +39,13 @@ export interface Player {
 
   roles: PlayerRole[];
   steamUrl: string;
+  steamId?: string;
   dotabuffUrl: string;
+  recentGames?: {
+    wins: number;
+    losses: number;
+    total: number;
+  };
   favoriteHeroes: PlayerHero[];
   pingRange?: string; // Ping range (e.g., "50-100", "100-150")
 

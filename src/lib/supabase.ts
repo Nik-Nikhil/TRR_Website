@@ -5,7 +5,20 @@ import { DATABASE_CONFIG } from '../utils'
 const supabaseUrl = DATABASE_CONFIG.supabaseUrl
 const supabaseAnonKey = DATABASE_CONFIG.supabaseAnonKey
 
-export const supabase = createClient(supabaseUrl, supabaseAnonKey)
+// Use a global singleton to avoid creating multiple GoTrueClient instances
+// (which causes the runtime warning when HMR or multiple imports occur).
+declare global {
+  // Allow attaching to globalThis in TS
+  interface Window { __supabase?: ReturnType<typeof createClient> }
+  var __supabase: ReturnType<typeof createClient> | undefined
+}
+
+const _global = (typeof globalThis !== 'undefined' ? globalThis : window) as any;
+if (!_global.__supabase) {
+  _global.__supabase = createClient(supabaseUrl, supabaseAnonKey)
+}
+
+export const supabase = _global.__supabase as ReturnType<typeof createClient>
 
 // Database types for TypeScript
 export interface Player {

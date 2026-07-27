@@ -1,199 +1,210 @@
-// src/pages/TeamDetail.tsx
-import { Link, useParams, useNavigate } from "react-router-dom";
+// src/pages/TeamDeatail.tsx
+import { useParams, useNavigate, Link } from "react-router-dom";
+import { motion } from "framer-motion";
+import { Crown, TrendingUp, Coins } from "lucide-react";
 import { getTeamById } from "../data/teams";
-import { Crown } from "lucide-react";
 import { dbNick } from "../data/dotabuffsteam";
+
+const GOLD_COLOR = "#f5c542";
 
 export default function TeamDetail() {
   const { teamId } = useParams<{ teamId: string }>();
   const navigate = useNavigate();
-
   const team = teamId ? getTeamById(teamId) : undefined;
 
   if (!team) {
     return (
-      <main className="w-full flex justify-center pt-24 pb-16 bg-[#050608]">
-        <div className="w-full max-w-[880px] px-6">
-          <h1 className="text-2xl font-semibold mb-4">Team not found</h1>
-          <button
-            onClick={() => navigate("/seasons/1")}
-            className="px-4 py-2 rounded-full border border-slate-600/80 bg-black/40 text-xs uppercase tracking-[0.16em] text-slate-100 hover:bg-white/5 transition"
-          >
-            Back to Season 1 Standings
-          </button>
+      <div className="min-h-screen flex items-center justify-center" style={{ background: "#050608" }}>
+        <div className="text-center">
+          <p className="text-slate-500 text-sm mb-4">Team not found</p>
+          <button onClick={() => navigate(-1)}
+            className="px-3 sm:px-4 py-1.5 sm:py-2 rounded-full text-[0.65rem] sm:text-[0.72rem] font-semibold uppercase tracking-[0.12em] bg-gradient-to-tr from-white/90 via-zinc-200 to-zinc-300 text-[#050608] shadow-[0_8px_26px_rgba(2,6,23,0.55)] hover:brightness-105 transition-all duration-200 backdrop-blur-sm border border-white/10 cursor-pointer"
+            type="button">Go Back</button>
         </div>
-      </main>
+      </div>
     );
   }
 
   const captain = team.players[0];
+  const totalGold = team.players.reduce((s, p) => s + p.gold, 0);
 
   return (
-    <main className="w-full flex justify-center pt-24 pb-4 bg-[#050608]">
-      <div className="w-full max-w-[880px] px-6">
-        {/* TOP HEADER */}
-        <header className="flex flex-col gap-5 mb-8">
-          <div className="flex items-center justify-between gap-4">
-            <button
-              onClick={() => navigate(-1)}
-              className="px-4 py-2 rounded-full text-[0.8rem] font-semibold uppercase tracking-[0.18em]
-              bg-white/10 hover:bg-white/20 text-slate-200 transition shadow-[0_0_12px_rgba(148,163,184,0.5)]"
-            >
-              ← Back
-            </button>
+    <div className="relative min-h-screen overflow-hidden">
+      {/* Background */}
+      <div className="fixed inset-0 z-0">
+        <div className="absolute inset-0 bg-cover bg-center bg-no-repeat"
+          style={{ backgroundImage: "url(/bg_qop.jpg)" }} />
+        <div className="absolute inset-0"
+          style={{ background: "linear-gradient(135deg,rgba(4,6,10,0.88) 0%,rgba(4,8,14,0.80) 50%,rgba(4,6,10,0.88) 100%)" }} />
+      </div>
 
-           
-          </div>
-        </header>
+      {/* Content */}
+      <div className="relative z-10 min-h-screen flex flex-col items-center justify-center px-4 py-24">
 
-        {/* ROSTER CARD */}
-        <section className="w-full flex justify-center">
-          <div className="w-full max-w-[720px] rounded-2xl border border-slate-600/60 bg-[radial-gradient(circle_at_top,rgba(20,184,166,0.08),transparent_55%),radial-gradient(circle_at_bottom,rgba(37,99,235,0.08),transparent_65%),#020617] shadow-[0_18px_50px_rgba(0,0,0,0.9)] overflow-hidden">
-            {/* Colored header inside card */}
-            <div
-              className="w-full px-6 py-6 border-b border-black/20 flex items-center justify-center"
+        {/* Back */}
+        <div className="w-full max-w-[560px] mb-3">
+          <button onClick={() => navigate(-1)}
+            className="px-3 sm:px-4 py-1.5 sm:py-2 rounded-full text-[0.65rem] sm:text-[0.72rem] font-semibold uppercase tracking-[0.12em] bg-gradient-to-tr from-white/90 via-zinc-200 to-zinc-300 text-[#050608] shadow-[0_8px_26px_rgba(2,6,23,0.55)] hover:brightness-105 transition-all duration-200 backdrop-blur-sm border border-white/10 cursor-pointer"
+            type="button">← Back</button>
+        </div>
+
+        {/* Card */}
+        <motion.div
+          initial={{ opacity: 0, y: 14 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.35, ease: "easeOut" }}
+          className="w-full max-w-[560px] rounded-xl overflow-hidden"
+          style={{
+            border: `1px solid ${team.logoColor}40`,
+            background: "rgba(7,9,15,0.92)",
+            boxShadow: `0 0 50px ${team.logoColor}14, 0 20px 50px rgba(0,0,0,0.9)`,
+            backdropFilter: "blur(20px)",
+          }}
+        >
+          {/* Header */}
+          <div className="relative flex flex-col items-center gap-2 px-6 py-5 overflow-hidden"
+            style={{
+              background: `linear-gradient(160deg,${team.logoColor}22 0%,${team.logoColor}08 60%,transparent 100%)`,
+              borderBottom: `1px solid ${team.logoColor}20`,
+            }}>
+            <div className="absolute inset-0 pointer-events-none"
+              style={{ background: `radial-gradient(ellipse 70% 55% at 50% 0%,${team.logoColor}16 0%,transparent 70%)` }} />
+
+            {/* Orb */}
+            <div className="relative z-10 w-9 h-9 rounded-full flex items-center justify-center"
               style={{
-                background: team.logoColor,
-                boxShadow: `0 0 25px ${team.logoColor}80 inset`,
-              }}
-            >
-              <div className="flex flex-col items-center gap-1">
-                <span
-                  className="
-                    inline-block
-                    bg-linear-to-r from-[#111827] via-[#020617] to-[#0b1120]
-                    bg-clip-text text-transparent
-                    text-[clamp(1.4rem,3vw,1.9rem)]
-                    font-bold uppercase tracking-[0.32em]
-                    text-center
-                  "
-                  style={{
-                    textShadow: `
-                      0 0 10px rgba(0,0,0,0.6),
-                      0 0 28px rgba(0,0,0,0.9)
-                    `,
-                  }}
-                >
-                  {team.name}
-                </span>
+                background: `radial-gradient(circle,${team.logoColor}44 0%,${team.logoColor}18 100%)`,
+                border: `1.5px solid ${team.logoColor}66`,
+                boxShadow: `0 0 18px ${team.logoColor}44`,
+              }}>
+              <span className="text-sm font-black uppercase" style={{ color: team.logoColor }}>
+                {team.shortName?.[0] ?? team.name[0]}
+              </span>
+            </div>
 
-                {captain && (
-                  <div className="flex items-center gap-2 text-[0.8rem] uppercase tracking-[0.18em] text-[#000000]">
-                    <span className="font-medium"><u>{captain.nickname}</u></span>
-                    <span className="relative group">
-                      <Crown
-                        className="w-4 h-4 cursor-default"
-                        style={{
-                          color: "#facc15",
-                          filter: `
-                            drop-shadow(0 0 4px rgba(0,0,0,0.9))
-                            drop-shadow(0 0 7px ${team.logoColor})
-                          `,
-                        }}
-                      />
-                      <span
-                        className="
-                          absolute left-1/2 -translate-x-1/2 mt-1
-                          px-2 py-0.5 rounded-md text-[0.68rem]
-                          bg-black/85 text-white whitespace-nowrap
-                          opacity-0 pointer-events-none
-                          group-hover:opacity-100 group-hover:pointer-events-auto
-                          transition-opacity duration-200
-                        "
-                      >
-                        Captain
-                      </span>
-                    </span>
-                  </div>
-                )}
+            {/* Name */}
+            <h1 className="relative z-10 text-[clamp(0.95rem,3vw,1.15rem)] font-black uppercase tracking-[0.26em] text-center leading-tight"
+              style={{ color: "#f0ede6", textShadow: `0 0 16px ${team.logoColor}44` }}>
+              {team.name}
+            </h1>
+
+            {/* Inline badges */}
+            <div className="relative z-10 flex items-center gap-2 flex-wrap justify-center">
+              {captain && (
+                <div className="flex items-center gap-1 px-2 py-0.5 rounded-full text-[0.6rem] uppercase tracking-[0.1em]"
+                  style={{ background: "rgba(0,0,0,0.45)", border: `1px solid ${team.logoColor}30` }}>
+                  <Crown className="w-2.5 h-2.5 shrink-0" style={{ color: GOLD_COLOR }} />
+                  <span style={{ color: GOLD_COLOR }}>{captain.nickname}</span>
+                  <span className="text-slate-600">· Captain</span>
+                </div>
+              )}
+              <div className="flex items-center gap-1 px-2 py-0.5 rounded-full text-[0.6rem] uppercase tracking-[0.1em]"
+                style={{ background: "rgba(0,0,0,0.45)", border: "1px solid rgba(56,189,248,0.22)" }}>
+                <TrendingUp className="w-2.5 h-2.5 text-sky-400" />
+                <span className="text-sky-400">{team.averageMMR.toLocaleString()}</span>
+                <span className="text-slate-600">avg mmr</span>
+              </div>
+              <div className="flex items-center gap-1 px-2 py-0.5 rounded-full text-[0.6rem] uppercase tracking-[0.1em]"
+                style={{ background: "rgba(0,0,0,0.45)", border: `1px solid ${GOLD_COLOR}22` }}>
+                <Coins className="w-2.5 h-2.5" style={{ color: `${GOLD_COLOR}bb` }} />
+                <span style={{ color: GOLD_COLOR }}>{totalGold}</span>
+                <span className="text-slate-600">gold</span>
               </div>
             </div>
+          </div>
 
-            {/* Header row */}
-            <div className="grid grid-cols-[2.7fr_1.2fr_1fr_1fr] px-6 py-3 text-[0.75rem] uppercase tracking-[0.16em] text-slate-400 border-b border-slate-700/80">
-              <span className="text-left">Player</span>
-              <span className="text-center">Dotabuff</span>
-              <span className="text-right">MMR</span>
-              <span className="text-right">Gold</span>
-            </div>
+          {/* Table header */}
+          <div className="grid grid-cols-[1fr_44px_68px_56px] px-4 py-2 text-[0.58rem] uppercase tracking-[0.16em]"
+            style={{ color: "#3d4d60", borderBottom: "1px solid rgba(255,255,255,0.05)" }}>
+            <span>Player</span>
+            <span className="text-center">DB</span>
+            <span className="text-right">MMR</span>
+            <span className="text-right">Gold</span>
+          </div>
 
-            {/* Players */}
-            <div>
-              {team.players.map((p) => (
-                <div
+          {/* Rows */}
+          <div>
+            {team.players.map((p, idx) => {
+              const isCaptain = idx === 0;
+              const dbUrl = dbNick(p.nickname);
+              return (
+                <motion.div
                   key={p.id}
-                  className="
-                    grid grid-cols-[2.7fr_1.2fr_1fr_1fr]
-                    items-center
-                    px-6 py-2.5
-                    text-sm
-                    odd:bg-slate-900/90
-                    even:bg-slate-900/70
-                    hover:bg-white/5
-                    transition-colors
-                  "
+                  initial={{ opacity: 0, x: -5 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{ delay: idx * 0.04, duration: 0.25 }}
+                  className="grid grid-cols-[1fr_44px_68px_56px] items-center px-4 py-2 hover:bg-white/[0.022] transition-colors"
+                  style={{
+                    borderBottom: "1px solid rgba(255,255,255,0.035)",
+                    background: isCaptain ? `linear-gradient(90deg,${team.logoColor}0e 0%,transparent 70%)` : undefined,
+                  }}
                 >
-                  {/* Player + avatar */}
-                  <div className="flex items-center gap-3">
-                    <Link to={`/players/${p.id}`} className="shrink-0">
-                      <div
-                        className="
-                          w-10 h-10 rounded-full
-                          border border-slate-500/80
-                          bg-[radial-gradient(circle_at_30%_0%,#111827,#020617)]
-                          flex items-center justify-center
-                          text-[0.85rem] font-semibold tracking-[0.12em] uppercase text-slate-100
-                          shadow-[0_0_14px_rgba(15,23,42,0.9)]
-                        "
-                      >
-                        {p.nickname[0]}
-                      </div>
-                    </Link>
-                    <span className="text-[0.9rem] font-medium text-slate-50">
-  {p.nickname}
-</span>
-                  </div>
+                  {/* Avatar + name — full cell is clickable */}
+                  <Link to={`/players/${p.id}`} className="flex items-center gap-2 min-w-0 group/player">
+                    <div className="w-6 h-6 rounded-full flex items-center justify-center text-[0.65rem] font-bold uppercase shrink-0 group-hover/player:brightness-125 transition-all"
+                      style={{
+                        background: isCaptain ? `linear-gradient(135deg,${team.logoColor}50,${team.logoColor}1a)` : "rgba(255,255,255,0.07)",
+                        border: isCaptain ? `1.5px solid ${team.logoColor}70` : "1px solid rgba(255,255,255,0.1)",
+                        color: isCaptain ? team.logoColor : "#56606e",
+                        boxShadow: isCaptain ? `0 0 8px ${team.logoColor}35` : "none",
+                      }}>
+                      {p.nickname[0]}
+                    </div>
+                    <div className="min-w-0">
+                      <p className="text-[0.78rem] font-medium truncate leading-none group-hover/player:text-white transition-colors"
+                        style={{ color: isCaptain ? "#f0ede6" : "#b0aca6" }}>
+                        {p.nickname}
+                      </p>
+                      {isCaptain && (
+                        <p className="text-[0.55rem] uppercase tracking-[0.12em] mt-0.5"
+                          style={{ color: `${team.logoColor}aa` }}>Captain</p>
+                      )}
+                    </div>
+                  </Link>
 
-                  {/* Dotabuff icon */}
+                  {/* Dotabuff */}
                   <div className="flex items-center justify-center">
-                    <a
-                      href={dbNick(p.nickname)}
-                      target="_blank"
-                      rel="noreferrer"
-                      className="inline-flex"
-                    >
-                      <img
-                        src="/icons/dotabuff.png"
-                        alt="Dotabuff"
-                        className="
-                          w-[26px] h-[26px] rounded-md
-                          shadow-[0_0_12px_rgba(248,113,113,0.85),0_0_26px_rgba(220,38,38,0.45)]
-                        "
-                      />
-                    </a>
+                    {dbUrl !== "#" ? (
+                      <a href={dbUrl} target="_blank" rel="noreferrer"
+                        className="inline-flex items-center justify-center w-6 h-6 rounded hover:scale-110 transition-transform"
+                        style={{ background: "rgba(200,40,40,0.18)", border: "1px solid rgba(220,38,38,0.28)" }}>
+                        <img src="/icons/dotabuff.png" alt="DB" className="w-3.5 h-3.5" />
+                      </a>
+                    ) : (
+                      <span className="text-slate-700 text-xs">—</span>
+                    )}
                   </div>
 
                   {/* MMR */}
-                  <div className="text-right text-slate-100 tabular-nums text-[0.86rem]">
-                    {p.mmr}
+                  <div className="text-right tabular-nums text-[0.76rem]"
+                    style={{ color: isCaptain ? "#dde3ed" : "#6b7785" }}>
+                    {p.mmr.toLocaleString()}
                   </div>
 
                   {/* Gold */}
-                  <div className="text-right text-slate-100 tabular-nums text-[0.86rem]">
-                    {p.gold}
+                  <div className="text-right tabular-nums text-[0.76rem] font-semibold">
+                    {p.gold > 0 ? (
+                      <span style={{ color: GOLD_COLOR }}>🪙 {p.gold}</span>
+                    ) : (
+                      <span style={{ color: "#2e3740" }}>0</span>
+                    )}
                   </div>
-                </div>
-              ))}
-            </div>
-
-            {/* Footer: Average MMR */}
-            <div className="flex items-center justify-between px-6 py-3 border-t border-slate-600/70 text-[0.86rem] text-slate-200">
-              <span>Average MMR</span>
-              <span className="tabular-nums">{team.averageMMR}</span>
-            </div>
+                </motion.div>
+              );
+            })}
           </div>
-        </section>
+
+          {/* Footer */}
+          <div className="grid grid-cols-[1fr_44px_68px_56px] items-center px-4 py-2"
+            style={{ borderTop: "1px solid rgba(255,255,255,0.07)", background: "rgba(0,0,0,0.25)" }}>
+            <span className="text-[0.58rem] uppercase tracking-[0.16em] text-slate-600">Average MMR</span>
+            <span /><span className="text-right tabular-nums text-[0.8rem] font-black" style={{ color: "#38bdf8" }}>
+              {team.averageMMR.toLocaleString()}
+            </span>
+            <span />
+          </div>
+        </motion.div>
       </div>
-    </main>
+    </div>
   );
 }

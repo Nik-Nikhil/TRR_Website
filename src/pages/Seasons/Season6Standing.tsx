@@ -18,6 +18,8 @@ export default function Season6Standings() {
   }, []);
 
   const backgrounds = [
+
+
     { id: 1, url: '/bg1.jpg', name: 'BG1' },
     { id: 2, url: '/bg2.jpg', name: 'BG2' },
     { id: 3, url: '/bg3.jpg', name: 'BG3' }
@@ -40,10 +42,10 @@ export default function Season6Standings() {
             background: "radial-gradient(circle at 0% 0%, rgba(192,192,192,0.05), transparent 60%), radial-gradient(circle at 100% 100%, rgba(136,144,150,0.03), transparent 60%), rgba(5,7,10,0.3)"
           }}
         />
-        <div className="absolute inset-0 bg-gradient-to-br from-gray-800/10 via-slate-900/15 to-gray-900/20" />
+        <div className="absolute inset-0 bg-linear-to-br from-gray-800/10 via-slate-900/15 to-gray-900/20" />
         {/* Subtle animated orbs with reduced opacity */}
-        <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-gradient-to-r from-gray-400/5 to-slate-400/5 rounded-full blur-3xl animate-pulse" />
-        <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-gradient-to-r from-slate-500/5 to-gray-500/5 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '1s' }} />
+        <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-linear-to-r from-gray-400/5 to-slate-400/5 rounded-full blur-3xl animate-pulse" />
+        <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-linear-to-r from-slate-500/5 to-gray-500/5 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '1s' }} />
       </div>
 
       {/* Main Content - Same pattern as Homepage */}
@@ -58,7 +60,7 @@ export default function Season6Standings() {
                 animate={{ opacity: 1, y: 0 }}
                 className="mb-4"
               >
-                <h1 className="text-3xl md:text-4xl lg:text-5xl font-bold bg-gradient-to-r from-orange-400 via-red-400 to-orange-500 bg-clip-text text-transparent mb-2">
+                <h1 className="text-3xl md:text-4xl lg:text-5xl font-bold bg-linear-to-rrom-orange-400 via-red-400 to-orange-500 bg-clip-text text-transparent mb-2">
                   Season 6 Standings
                 </h1>
                 <p className="text-base md:text-lg lg:text-xl text-gray-400">Current tournament standings and results</p>
@@ -77,7 +79,7 @@ export default function Season6Standings() {
                   className="bg-gray-800/20 backdrop-blur-xl border border-gray-600/30 rounded-xl p-8 hover:border-gray-400/50 hover:bg-gray-700/20 transition-all duration-300 group text-center relative"
                 >
                   {/* Subtle glow effect on hover */}
-                  <div className="absolute inset-0 bg-gradient-to-br from-gray-400/5 to-slate-400/5 opacity-0 group-hover:opacity-100 transition-opacity duration-300 rounded-xl" />
+                  <div className="absolute inset-0 bg-linear-to-br from-gray-400/5 to-slate-400/5 opacity-0 group-hover:opacity-100 transition-opacity duration-300 rounded-xl" />
                   
                   <div className="relative z-10">
                     <div className="flex items-center justify-center mb-4">
@@ -89,7 +91,7 @@ export default function Season6Standings() {
                     <h2 className="text-2xl font-bold text-white mb-2">Season 6 Standings</h2>
                     <p className="text-gray-300 text-lg mb-6">Tournament standings will be available once Season 6 begins</p>
                     
-                    <div className="inline-block px-6 py-3 bg-gradient-to-r from-orange-600/20 to-red-600/20 border border-orange-500/30 rounded-full text-orange-300 font-medium">
+                    <div className="inline-block px-6 py-3 bg-linear-to-r from-orange-600/20 to-red-600/20 border border-orange-500/30 rounded-full text-orange-300 font-medium">
                       <span className="text-xl font-semibold tracking-wider uppercase">Coming Soon</span>
                     </div>
                   </div>

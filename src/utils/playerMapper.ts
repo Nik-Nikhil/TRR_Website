@@ -20,6 +20,7 @@ export function mapDatabasePlayerToFrontend(dbPlayer: DatabasePlayer): FrontendP
     // Bio and URLs
     bio: dbPlayer.bio || '',
     steamUrl: dbPlayer.steam_url || '',
+    steamId: dbPlayer.steam_id || '',
     dotabuffUrl: dbPlayer.dotabuff_url || '',
     pingRange: dbPlayer.ping_range,
     

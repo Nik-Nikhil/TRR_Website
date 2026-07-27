@@ -5,7 +5,7 @@ import { useState, useEffect } from "react";
 import { Edit3, LogOut, Plus, Minus, Save, X } from "lucide-react";
 import AuthService from "../../services/auth";
 import { DOTA_ROLES } from "../../utils/constants";
-import { DOTA_HEROES, findHeroByName } from "../../data/heroes";
+import { DOTA_HEROES, findHeroByName, getHeroImageUrl } from "../../data/heroes";
 import { useToast } from "../../hooks/useToast";
 import ToastContainer from "../../components/ui/ToastContainer";
 import { getMedalFromMMR } from "../../utils/mmrToMedal";
@@ -14,6 +14,7 @@ import { supabase } from "../../lib/supabase";
 import type { Player } from "../../data/players";
 import { mapDatabasePlayerToFrontend } from "../../utils/playerMapper";
 import ImageCropModal from "../../components/ImageCropModal";
+import MatchHistory from "../../components/player/MatchHistory";
 
 // Colored season badge styles
 const coloredSeasonBadgeStyles: Record<number, string> = {
@@ -803,7 +804,7 @@ export default function PlayerDetailPage() {
                                 <img
                                   src={`/medals/${isEditMode ? editedData.currentMedalId : player.currentMedalId}.png`}
                                   alt={isEditMode ? editedData.currentMedalLabel : player.currentMedalLabel}
-                                  className="w-8 h-8 object-contain transition-all duration-300 group-hover:drop-shadow-[0_0_8px_rgba(6,182,212,0.8)]"
+                                  className="w-12 h-12 object-contain transition-all duration-300 group-hover:drop-shadow-[0_0_8px_rgba(6,182,212,0.8)]"
                                 />
                               </motion.div>
                             )}
@@ -829,7 +830,7 @@ export default function PlayerDetailPage() {
                                 <img
                                   src={`/medals/${player.peakMedalId}.png`}
                                   alt={player.peakMedalLabel}
-                                  className="w-8 h-8 object-contain transition-all duration-300 group-hover:drop-shadow-[0_0_8px_rgba(20,184,166,0.8)]"
+                                  className="w-12 h-12 object-contain transition-all duration-300 group-hover:drop-shadow-[0_0_8px_rgba(20,184,166,0.8)]"
                                 />
                               </motion.div>
                             )}
@@ -869,15 +870,20 @@ export default function PlayerDetailPage() {
                                 >
                                   <div className="rounded-2xl overflow-hidden border-2 border-cyan-400/40 shadow-lg transition-all duration-300">
                                     <div className="relative w-24 h-24">
-                                      {heroData && (
-                                        <video
-                                          src={heroData.videoSrc}
-                                          autoPlay
-                                          loop
-                                          muted
-                                          playsInline
-                                          className="w-full h-full object-cover"
-                                        />
+                                      {heroData ? (
+                                        heroData.videoSrc ? (
+                                          <video src={heroData.videoSrc} autoPlay loop muted playsInline className="w-full h-full object-cover" />
+                                        ) : (
+                                          <img
+                                            src={getHeroImageUrl(heroName)}
+                                            alt={heroName}
+                                            className="w-full h-full object-cover object-top"
+                                          />
+                                        )
+                                      ) : (
+                                        <div className="w-full h-full bg-cyan-900/30 flex items-center justify-center">
+                                          <span className="text-cyan-300/50 text-xs">{heroName.slice(0,2)}</span>
+                                        </div>
                                       )}
                                       <div className="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent" />
                                     </div>
@@ -958,14 +964,16 @@ export default function PlayerDetailPage() {
                                       className="w-full flex items-center gap-3 p-3 hover:bg-cyan-500/20 rounded-lg text-left transition-all duration-200 group/item"
                                     >
                                       <div className="w-12 h-12 rounded-lg overflow-hidden border border-cyan-400/30 group-hover/item:border-cyan-400/60 transition-colors flex-shrink-0">
-                                        <video
-                                          src={hero.videoSrc}
-                                          autoPlay
-                                          loop
-                                          muted
-                                          playsInline
-                                          className="w-full h-full object-cover"
-                                        />
+                                        {hero.videoSrc ? (
+                                          <video src={hero.videoSrc} autoPlay loop muted playsInline className="w-full h-full object-cover" />
+                                        ) : (
+                                          <img
+                                            src={getHeroImageUrl(hero.name)}
+                                            alt={hero.name}
+                                            className="w-full h-full object-cover object-top"
+                                            onError={e => { (e.target as HTMLImageElement).style.display = 'none'; }}
+                                          />
+                                        )}
                                       </div>
                                       <span className="text-sm text-cyan-200 group-hover/item:text-cyan-100 font-medium transition-colors">
                                         {hero.name}
@@ -985,7 +993,9 @@ export default function PlayerDetailPage() {
                         </div>
                       ) : (
                         <div className="flex gap-3">
-                          {player.favoriteHeroes.slice(0, 3).map((hero, idx) => (
+                          {player.favoriteHeroes.slice(0, 3).map((hero, idx) => {
+                            const heroData = findHeroByName(hero.name);
+                            return (
                             <motion.div
                               key={hero.name}
                               initial={{ opacity: 0, scale: 0.8 }}
@@ -996,14 +1006,22 @@ export default function PlayerDetailPage() {
                             >
                               <div className="rounded-2xl overflow-hidden border-2 border-cyan-400/40 hover:border-cyan-400 shadow-lg hover:shadow-[0_0_30px_rgba(6,182,212,0.7)] transition-all duration-300">
                                 <div className="relative w-24 h-24">
-                                  <video
-                                    src={hero.videoSrc}
-                                    autoPlay
-                                    loop
-                                    muted
-                                    playsInline
-                                    className="w-full h-full object-cover"
-                                  />
+                                  {heroData?.videoSrc ? (
+                                    <video
+                                      src={heroData.videoSrc}
+                                      autoPlay
+                                      loop
+                                      muted
+                                      playsInline
+                                      className="w-full h-full object-cover"
+                                    />
+                                  ) : (
+                                    <img
+                                      src={getHeroImageUrl(hero.name)}
+                                      alt={hero.name}
+                                      className="w-full h-full object-cover object-top"
+                                    />
+                                  )}
                                   <div className="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent" />
                                 </div>
                               </div>
@@ -1011,7 +1029,8 @@ export default function PlayerDetailPage() {
                                 {hero.name}
                               </span>
                             </motion.div>
-                          ))}
+                            );
+                          })}
                           
                           {player.favoriteHeroes && player.favoriteHeroes.length === 0 && !isEditMode && (
                             <div className="text-center text-cyan-300/60 text-xs italic py-4">
@@ -1178,17 +1197,16 @@ export default function PlayerDetailPage() {
                     </div>
                   </motion.div>
                 </div>
-                {/* Right Column - Seasons */}
+                {/* Right Column */}
                 <div className="space-y-4">
 
-                {/* Seasons */}
-                <motion.div
-                  initial={{ opacity: 0, x: 20 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  transition={{ delay: 0.2 }}
-                  className="rounded-xl border border-cyan-500/20 bg-gradient-to-br from-cyan-900/20 to-teal-900/10 overflow-hidden"
-                >
-                  <div className="px-4 py-3 border-b border-cyan-500/20 bg-gradient-to-br from-cyan-900/30 via-teal-900/20 to-transparent">
+                  {/* Seasons Played */}
+                  <motion.div
+                    initial={{ opacity: 0, x: 20 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    transition={{ delay: 0.2 }}
+                    className="rounded-xl border border-cyan-500/20 bg-gradient-to-br from-cyan-900/20 to-teal-900/10 p-4"
+                  >
                     <div className="flex items-center gap-3 mb-3">
                       <div className="flex-1 h-px bg-gradient-to-r from-transparent via-cyan-500/30 to-cyan-500/30" />
                       <h3 className="text-xs uppercase tracking-widest text-cyan-300/70 font-semibold whitespace-nowrap">
@@ -1196,7 +1214,6 @@ export default function PlayerDetailPage() {
                       </h3>
                       <div className="flex-1 h-px bg-gradient-to-l from-transparent via-cyan-500/30 to-cyan-500/30" />
                     </div>
-                    
                     {playerSeasons.length > 0 ? (
                       <div className="flex flex-wrap gap-2 justify-center">
                         {playerSeasons.map((season) => (
@@ -1220,16 +1237,60 @@ export default function PlayerDetailPage() {
                         ))}
                       </div>
                     ) : (
-                      <p className="text-xs text-cyan-300/60 text-center">No season data available</p>
+                      <p className="text-xs text-cyan-300/60 text-center italic">No season data available</p>
                     )}
-                  </div>
+                  </motion.div>
 
-                  {/* Match History Placeholder */}
-                  <div className="p-8 text-center text-cyan-300/60">
-                    <p className="text-sm">Match history will be displayed here</p>
-                    <p className="text-xs mt-2">Season {selectedSeason || latestSeason || 'N/A'} matches</p>
-                  </div>
-                </motion.div>
+                  {/* Recent Matches — last 5 from OpenDota */}
+                  <motion.div
+                    initial={{ opacity: 0, x: 20 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    transition={{ delay: 0.3 }}
+                    className="rounded-xl border border-cyan-500/20 bg-gradient-to-br from-cyan-900/20 to-teal-900/10 overflow-hidden"
+                  >
+                    <div className="px-4 pt-4 pb-2">
+                      <div className="flex items-center gap-3 mb-3">
+                        <div className="flex-1 h-px bg-gradient-to-r from-transparent via-cyan-500/30 to-cyan-500/30" />
+                        <h3 className="text-xs uppercase tracking-widest text-cyan-300/70 font-semibold whitespace-nowrap">
+                          Recent Games
+                        </h3>
+                        <div className="flex-1 h-px bg-gradient-to-l from-transparent via-cyan-500/30 to-cyan-500/30" />
+                      </div>
+                    </div>
+                    <div className="px-3 pb-4">
+                      {player.steamId ? (
+                        <MatchHistory steamId={player.steamId} limit={5} />
+                      ) : (
+                        <div className="text-center text-cyan-300/30 text-xs italic py-6">
+                          Connect Steam to see recent games
+                        </div>
+                      )}
+                    </div>
+                  </motion.div>
+
+                  {/* Season Matches placeholder */}
+                  <motion.div
+                    initial={{ opacity: 0, x: 20 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    transition={{ delay: 0.4 }}
+                    className="rounded-xl border border-cyan-500/20 bg-gradient-to-br from-cyan-900/20 to-teal-900/10 p-4"
+                  >
+                    <div className="flex items-center gap-3 mb-3">
+                      <div className="flex-1 h-px bg-gradient-to-r from-transparent via-cyan-500/30 to-cyan-500/30" />
+                      <h3 className="text-xs uppercase tracking-widest text-cyan-300/70 font-semibold whitespace-nowrap">
+                        Season Matches
+                      </h3>
+                      <div className="flex-1 h-px bg-gradient-to-l from-transparent via-cyan-500/30 to-cyan-500/30" />
+                    </div>
+                    <div className="text-center py-6">
+                      <p className="text-cyan-300/30 text-xs italic">
+                        {selectedSeason
+                          ? `Season ${selectedSeason} match data coming soon`
+                          : 'Select a season above to view matches'}
+                      </p>
+                    </div>
+                  </motion.div>
+
                 </div>
               </div>
             </div>

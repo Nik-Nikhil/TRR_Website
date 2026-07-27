@@ -428,11 +428,11 @@ const season3TeamsRaw: Omit<Team, "averageMMR">[] = [
     wins: 0,
     losses: 0,
     players: [
-      { id: "s3-alc-1", nickname: "Alcromido",  mmr: 3203, gold: 0 }, // gold not shown -> 0
-      { id: "s3-alc-2", nickname: "dante",  mmr: 4303, gold: 0 },   // TODO: confirm gold
-      { id: "s3-alc-3", nickname: "Kakashi",  mmr: 5640, gold: 0 }, // TODO
-      { id: "s3-alc-4", nickname: "bull",  mmr: 2666, gold: 0 },       // TODO
-      { id: "s3-alc-5", nickname: "pYro",  mmr: 3568, gold: 0 },   // TODO
+      { id: "s3-alc-1", nickname: "Alcromido",  mmr: 3203, gold: 0 },
+      { id: "s3-alc-2", nickname: "dante",  mmr: 4303, gold: 59 },
+      { id: "s3-alc-3", nickname: "Kakashi",  mmr: 5640, gold: 86 },
+      { id: "s3-alc-4", nickname: "bull",  mmr: 2666, gold: 20 },
+      { id: "s3-alc-5", nickname: "pYro",  mmr: 3568, gold: 11 },
     ],
   },
 
@@ -460,10 +460,10 @@ const season3TeamsRaw: Omit<Team, "averageMMR">[] = [
     wins: 0,
     losses: 0,
     players: [
-      { id: "s3-nj-1", nickname: "Nj",  mmr: 3307, gold: 2 },
+      { id: "s3-nj-1", nickname: "Nj",  mmr: 3307, gold: 0 },
       { id: "s3-nj-2", nickname: "pEnduUu",  mmr: 5631, gold: 54 }, // TODO: verify nick
-      { id: "s3-nj-3", nickname: "Setupathi",  mmr: 4610, gold: 37 },    // TODO: full nick
-      { id: "s3-nj-4", nickname: "rA'V!",  mmr: 2600, gold: 22 },
+      { id: "s3-nj-3", nickname: "Setupathi",  mmr: 4610, gold: 38 },    // TODO: full nick
+      { id: "s3-nj-4", nickname: "rA'V!",  mmr: 2600, gold: 27 },
       { id: "s3-nj-5", nickname: "RyuGa",  mmr: 2881, gold: 34 },
     ],
   },
@@ -479,8 +479,8 @@ const season3TeamsRaw: Omit<Team, "averageMMR">[] = [
       { id: "s3-rut-1", nickname: "zRomep",  mmr: 3262, gold: 0 },
       { id: "s3-rut-2", nickname: "Uma1s",  mmr: 9200, gold: 105 },
       { id: "s3-rut-3", nickname: "Slappy",  mmr: 2900, gold: 60 },
-      { id: "s3-rut-4", nickname: "Madlad",  mmr: 4000, gold: 32 }, // TODO: replace name + stats
-      { id: "s3-rut-5", nickname: "Sphere",  mmr: 2000, gold: 8 },
+      { id: "s3-rut-4", nickname: "Madlad",  mmr: 3024, gold: 8 }, // TODO: replace name + stats
+      { id: "s3-rut-5", nickname: "Sphere",  mmr: 2000, gold: 0},
     ],
   },
 
@@ -494,9 +494,9 @@ const season3TeamsRaw: Omit<Team, "averageMMR">[] = [
     players: [
       { id: "s3-maldini-1", nickname: "Maldini",  mmr: 3286, gold: 0 },
       { id: "s3-maldini-2", nickname: "Dranzer",  mmr: 6185, gold: 87 },
-      { id: "s3-maldini-3", nickname: "AaRoN",  mmr: 3200, gold: 69 },
-      { id: "s3-maldini-4", nickname: "Gorki",  mmr: 6600, gold: 100 },
-      { id: "s3-maldini-5", nickname: "Bluediamond",  mmr: 2788, gold: 0 }, // TODO: gold
+      { id: "s3-maldini-3", nickname: "AaRoN",  mmr: 3200, gold: 19 },
+      { id: "s3-maldini-4", nickname: "Gorki",  mmr: 6600, gold: 60 },
+      { id: "s3-maldini-5", nickname: "Bluediamond",  mmr: 2788, gold: 6 }, // TODO: gold
     ],
   },
 
@@ -559,14 +559,14 @@ const season3TeamsRaw: Omit<Team, "averageMMR">[] = [
       { id: "s3-jinx-1", nickname: "Jinx",  mmr: 4079, gold: 0 },
       { id: "s3-jinx-2", nickname: "RockeR",  mmr: 5800, gold: 91 },
       { id: "s3-jinx-3", nickname: "No One",  mmr: 4300, gold: 39 },
-      { id: "s3-jinx-4", nickname: "Tundra.Goku",  mmr: 2276, gold: 0 },
-      { id: "s3-jinx-5", nickname: "Swaggy Brisngr",  mmr: 3050, gold: 15 },
+      { id: "s3-jinx-4", nickname: "Tundra.Goku",  mmr: 2276, gold: 4 },
+      { id: "s3-jinx-5", nickname: "Swaggy Brisngr",  mmr: 3050, gold: 10 },
     ],
   },
 
   {
     id: "shikamaru-s3",
-    name: "Faith REDBORN",
+    name: "Faith REBORN",
     shortName: "FRB",
     logoColor: "#8E7CC3", // purple
     wins: 0,
@@ -590,8 +590,8 @@ const season3TeamsRaw: Omit<Team, "averageMMR">[] = [
     players: [
       { id: "s3-shai-1", nickname: "Shaidota",  mmr: 3900, gold: 0 },
       { id: "s3-shai-2", nickname: "Voodoo",  mmr: 6100, gold: 101 },
-      { id: "s3-shai-3", nickname: "BrõwÑ ẞöy",  mmr: 5100, gold: 35 },
-      { id: "s3-shai-4", nickname: "SSM-iwnl",  mmr: 3300, gold: 23 },
+      { id: "s3-shai-3", nickname: "BrõwÑ ẞöy",  mmr: 5100, gold: 28 },
+      { id: "s3-shai-4", nickname: "SSM-iwnl",  mmr: 3300, gold: 8 },
       { id: "s3-shai-5", nickname: "MYM|LUCKY13",  mmr: 2933, gold: 13 },
     ],
   },
@@ -629,7 +629,7 @@ const season4TeamsRaw: Omit<Team, "averageMMR">[] = [
     id: "future-s4",
     name: "Future",
     shortName: "FUT",
-    logoColor: "#FFC000", // yellow
+    logoColor: "#A4C2F4",
     wins: 0,
     losses: 0,
     players: [
@@ -646,7 +646,7 @@ const season4TeamsRaw: Omit<Team, "averageMMR">[] = [
     id: "s1mpleo-s4",
     name: "S1mpleO",
     shortName: "S1M",
-    logoColor: "#E06666", // red
+    logoColor: "#B02525",
     wins: 0,
     losses: 0,
     players: [
@@ -663,7 +663,7 @@ const season4TeamsRaw: Omit<Team, "averageMMR">[] = [
     id: "helm-s4",
     name: "Helm",
     shortName: "HLM4",
-    logoColor: "#FFD966", // gold
+    logoColor: "#FCD34D",
     wins: 0,
     losses: 0,
     players: [
@@ -675,12 +675,29 @@ const season4TeamsRaw: Omit<Team, "averageMMR">[] = [
     ],
   },
 
+
+  // --- Team 5: plutoski ---
+  {
+    id: "plutoski-s4",
+    name: "plutoski",
+    shortName: "PLT",
+    logoColor: "#F1C232",
+    wins: 0,
+    losses: 0,
+    players: [
+      { id: "s4-plut-1", nickname: "plutoski",    mmr: 4300, gold: 0 },
+      { id: "s4-plut-2", nickname: "bull",        mmr: 2700, gold: 18 },
+      { id: "s4-plut-3", nickname: "Dranzer",     mmr: 6511, gold: 41 },
+      { id: "s4-plut-4", nickname: "Toji Khan",   mmr: 6999, gold: 42 },
+      { id: "s4-plut-5", nickname: "Mind_Flay3R", mmr: 5339, gold: 51 },
+    ],
+  },
   // --- Team 1: pYro ---
   {
     id: "pyro-s4",
     name: "pYro",
     shortName: "PYR",
-    logoColor: "#4A86E8", // blue
+    logoColor: "#3C78D8",
     wins: 0,
     losses: 0,
     players: [
@@ -697,14 +714,14 @@ const season4TeamsRaw: Omit<Team, "averageMMR">[] = [
     id: "lightninggoku-s4",
     name: "LightNing Goku",
     shortName: "LNG",
-    logoColor: "#E06666", // red-ish
+    logoColor: "#E06666",
     wins: 0,
     losses: 0,
     players: [
-      { id: "s4-lng-1", nickname: "LightNing Goku",  mmr: 4710, gold: 0 },
+      { id: "s4-lng-1", nickname: "LightNing Goku",  mmr: 4770, gold: 0 },
       { id: "s4-lng-2", nickname: "Sejlur",          mmr: 7882, gold: 110 },
       { id: "s4-lng-3", nickname: "Iceman-",         mmr: 3368, gold: 17 },
-      { id: "s4-lng-4", nickname: "aizEn-",          mmr: 4242, gold: 20 },
+      { id: "s4-lng-4", nickname: "aizEn-",          mmr: 3350, gold: 9 },
       { id: "s4-lng-5", nickname: "*Foujii",         mmr: 2990, gold: 6 },
     ],
   },
@@ -714,14 +731,14 @@ const season4TeamsRaw: Omit<Team, "averageMMR">[] = [
     id: "rinne-s4",
     name: "Rinne",
     shortName: "RIN4",
-    logoColor: "#B45F06", // brown
+    logoColor: "#B45F06",
     wins: 0,
     losses: 0,
     players: [
       { id: "s4-rinne-1", nickname: "Rinne",     mmr: 4500, gold: 0 },
       { id: "s4-rinne-2", nickname: "Fyt",       mmr: 6691, gold: 113 },
       { id: "s4-rinne-3", nickname: "Flamy",     mmr: 2403, gold: 19 },
-      { id: "s4-rinne-4", nickname: "Mr Pudge",  mmr: 4142, gold: 40 },
+      { id: "s4-rinne-4", nickname: "Mr Pudge",  mmr: 3100, gold: 14 },
       { id: "s4-rinne-5", nickname: "The Beast", mmr: 1026, gold: 2 },
     ],
   },
@@ -731,7 +748,7 @@ const season4TeamsRaw: Omit<Team, "averageMMR">[] = [
     id: "tambamgod-s4",
     name: "TamBamGOD",
     shortName: "TBG",
-    logoColor: "#F6B26B", // orange
+    logoColor: "#FF9900",
     wins: 0,
     losses: 0,
     players: [
@@ -748,7 +765,7 @@ const season4TeamsRaw: Omit<Team, "averageMMR">[] = [
     id: "draco-s4",
     name: "Draco~",
     shortName: "DRC",
-    logoColor: "#6AA84F", // green
+    logoColor: "#44DF77",
     wins: 0,
     losses: 0,
     players: [
@@ -765,15 +782,83 @@ const season4TeamsRaw: Omit<Team, "averageMMR">[] = [
     id: "primeone-s4",
     name: "Prime.One",
     shortName: "PRM",
-    logoColor: "#E691B8", // pink
+    logoColor: "#E12FA5",
     wins: 0,
     losses: 0,
     players: [
       { id: "s4-prime-1", nickname: "Prime.One",   mmr: 4517, gold: 0 },
       { id: "s4-prime-2", nickname: "Razer",       mmr: 5600, gold: 70 },
-      { id: "s4-prime-3", nickname: "Dis.Traction", mmr: 3320, gold: 17 },
+      { id: "s4-prime-3", nickname: "Dis.Traction", mmr: 3100, gold: 17 },
       { id: "s4-prime-4", nickname: "BOOM",        mmr: 4500, gold: 22 },
       { id: "s4-prime-5", nickname: "RB",          mmr: 5400, gold: 38 },
+    ],
+  },
+  // --- Team 3: KaKaroT ---
+  {
+    id: "kakarot",
+    name: "KaKaroT",
+    shortName: "KKT",
+    logoColor: "#674EA7",
+    wins: 0,
+    losses: 0,
+    players: [
+      { id: "s4-kakarot-1", nickname: "KaKaroT",  mmr: 4985, gold: 0 },
+      { id: "s4-kakarot-2", nickname: "Icarus-",  mmr: 8000, gold: 127 },
+      { id: "s4-kakarot-3", nickname: "ZukeGod",  mmr: 3041, gold: 9 },
+      { id: "s4-kakarot-4", nickname: "Ronbawa",  mmr: 1700, gold: 2 },
+      { id: "s4-kakarot-5", nickname: "Lucifer",  mmr: 1304, gold: 0 },
+    ],
+  },
+
+  // --- Team 10: Phola -----
+   {
+    id: "phola",
+    name: "Phola",
+    shortName: "PLA",
+    logoColor: "#29AF78",
+    wins: 0,
+    losses: 0,
+    players: [
+      { id: "s4-phola-1", nickname: "Phola", mmr: 4920, gold: 0 },
+      { id: "s4-phola-2", nickname: "Ov3rconfidenc3", mmr: 3721, gold: 18 },
+      { id: "s4-phola-3", nickname: "Brown boy", mmr:5047, gold: 49 },
+      { id: "s4-phola-4", nickname: "Dosage", mmr: 5800 ,gold: 39 },
+      { id: "s4-phola-5", nickname: "[Zoro]", mmr: 4554, gold: 33 },
+    ],
+  },
+
+    // --- Team 16: Sherry-----
+   {
+    id: "sherry",
+    name: "Sherry",
+    shortName: "SRY",
+    logoColor: "#B47BD1",
+    wins: 0,
+    losses: 0,
+    players: [
+      { id: "s4-sherry-1", nickname: "Sherry", mmr: 4772, gold: 0 },
+      { id: "s4-sherry-2", nickname: "Faith", mmr: 4500, gold:42 },
+      { id: "s4-sherry-3", nickname: "azfar", mmr:5100, gold: 35 },
+      { id: "s4-sherry-4", nickname: "luna", mmr: 5576 ,gold: 62 },
+      { id: "s4-sherry-5", nickname: "THORFINN OF DOTO", mmr: 1993, gold: 3 },
+    ],
+  },
+
+
+    // --- Team 16: Sexy-----
+   {
+    id: "sexy",
+    name: "Sexy",
+    shortName: "SxY",
+    logoColor: "#007900",
+    wins: 0,
+    losses: 0,
+    players: [
+      { id: "s4-sexy-1", nickname: "Sexy", mmr: 3500, gold: 0 },
+      { id: "s4-sexy-2", nickname: "KING IN THE NORTH", mmr: 6300, gold:90 },
+      { id: "s4-sexy-3", nickname: "Blitzip", mmr:4400, gold: 50 },
+      { id: "s4-sexy-4", nickname: "killua", mmr: 5050 ,gold:29 },
+      { id: "s4-sexy-5", nickname: "VV0lVER!N3", mmr: 3542, gold: 7 },
     ],
   },
 
@@ -782,7 +867,7 @@ const season4TeamsRaw: Omit<Team, "averageMMR">[] = [
     id: "penda-s4",
     name: "Penda",
     shortName: "PND4",
-    logoColor: "#B4A7D6", // lavender
+    logoColor: "#B4A7D6",
     wins: 0,
     losses: 0,
     players: [
@@ -799,13 +884,13 @@ const season4TeamsRaw: Omit<Team, "averageMMR">[] = [
     id: "muri-s4",
     name: "Muri",
     shortName: "MRI",
-    logoColor: "#4A86E8", // blue
+    logoColor: "#4767AF",
     wins: 0,
     losses: 0,
     players: [
       { id: "s4-muri-1", nickname: "Muri",    mmr: 4300, gold: 0 },
       { id: "s4-muri-2", nickname: "BlisS",  mmr: 5410, gold: 46 },
-      { id: "s4-muri-3", nickname: "Maldini",     mmr: 3200, gold: 46 },
+      { id: "s4-muri-3", nickname: "Maldini",     mmr: 3200, gold: 16 },
       { id: "s4-muri-4", nickname: "Kolly", mmr: 4600, gold: 45 },
       { id: "s4-muri-5", nickname: "skipper", mmr: 3600, gold: 45 },
     ],
@@ -816,7 +901,7 @@ const season4TeamsRaw: Omit<Team, "averageMMR">[] = [
     id: "shaidota-s4",
     name: "Shaidota",
     shortName: "SH4",
-    logoColor: "#93C47D", // light green
+    logoColor: "#93C47D",
     wins: 0,
     losses: 0,
     players: [
@@ -833,7 +918,7 @@ const season4TeamsRaw: Omit<Team, "averageMMR">[] = [
     id: "drnemesis-s4",
     name: "Dr_Nemesis_X",
     shortName: "DNX",
-    logoColor: "#6D9EEB", // light blue
+    logoColor: "#58D8EB",
     wins: 0,
     losses: 0,
     players: [
@@ -850,7 +935,7 @@ const season4TeamsRaw: Omit<Team, "averageMMR">[] = [
     id: "rav-s4",
     name: "rA'V!",
     shortName: "RAV",
-    logoColor: "#F4CCCC", // light red
+    logoColor: "#F9B2B2",
     wins: 0,
     losses: 0,
     players: [
@@ -867,7 +952,7 @@ const season4TeamsRaw: Omit<Team, "averageMMR">[] = [
     id: "nj-s4",
     name: "NJ",
     shortName: "NJ4",
-    logoColor: "#C27BA0", // pink-ish
+    logoColor: "#C27BA0",
     wins: 0,
     losses: 0,
     players: [
@@ -884,7 +969,7 @@ const season4TeamsRaw: Omit<Team, "averageMMR">[] = [
     id: "ericdane-s4",
     name: "Eric Dane",
     shortName: "ED4",
-    logoColor: "#BF9000", // dark gold
+    logoColor: "#7F6000",
     wins: 0,
     losses: 0,
     players: [
@@ -892,7 +977,7 @@ const season4TeamsRaw: Omit<Team, "averageMMR">[] = [
       { id: "s4-ed-2", nickname: "Tintin000",  mmr: 4600, gold: 39 },
       { id: "s4-ed-3", nickname: "Mask",       mmr: 3626, gold: 10 },
       { id: "s4-ed-4", nickname: "Lala",       mmr: 6050, gold: 63 },
-      { id: "s4-ed-5", nickname: "Deathgods",  mmr: 4650, gold: 36 },
+      { id: "s4-ed-5", nickname: "Deathgods",  mmr: 5049, gold: 36 },
     ],
   },
 
@@ -901,7 +986,7 @@ const season4TeamsRaw: Omit<Team, "averageMMR">[] = [
     id: "plutoski-s4",
     name: "plutoski",
     shortName: "PLT",
-    logoColor: "#FFD966", // yellow
+    logoColor: "#F1C232",
     wins: 0,
     losses: 0,
     players: [
@@ -918,7 +1003,7 @@ const season4TeamsRaw: Omit<Team, "averageMMR">[] = [
     id: "vanara-s4",
     name: "Vanara",
     shortName: "VNR",
-    logoColor: "#76A5AF", // teal
+    logoColor: "#76A5AF",
     wins: 0,
     losses: 0,
     players: [
@@ -935,13 +1020,13 @@ const season4TeamsRaw: Omit<Team, "averageMMR">[] = [
     id: "shikamaru-s4",
     name: "Shikamaru",
     shortName: "SHIK4",
-    logoColor: "#E06666", // red
+    logoColor: "#C95757",
     wins: 0,
     losses: 0,
     players: [
       { id: "s4-shika4-1", nickname: "Shikamaru",    mmr: 3322, gold: 0 },
       { id: "s4-shika4-2", nickname: "cpt_flux",        mmr: 6548, gold: 125 },
-      { id: "s4-shika4-3", nickname: "",  mmr: 4231, gold: 51 },
+      { id: "s4-shika4-3", nickname: "322 Enjoyer",  mmr: 4231, gold: 51 },
       { id: "s4-shika4-4", nickname: "Chinigami",    mmr: 2100, gold: 4 },
       { id: "s4-shika4-5", nickname: "Maddy",        mmr: 1386, gold: 2 },
     ],
@@ -952,7 +1037,7 @@ const season4TeamsRaw: Omit<Team, "averageMMR">[] = [
     id: "zromep-s4",
     name: "zRomep",
     shortName: "ZRM",
-    logoColor: "#FFE599", // yellow
+    logoColor: "#C9DC00",
     wins: 0,
     losses: 0,
     players: [

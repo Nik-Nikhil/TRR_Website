@@ -34,6 +34,7 @@ export default function Registration() {
   // Form state
   const [discord, setDiscord] = useState('');
   const [whatsapp, setWhatsapp] = useState('');
+  const [dotabuff, setDotabuff] = useState('');
   const [mmr, setMmr] = useState('');
   const [playerType, setPlayerType] = useState<'core' | 'support' | ''>('');
   const [roles, setRoles] = useState<string[]>([]);
@@ -62,7 +63,7 @@ export default function Registration() {
       // Fetch player from DB
       const { data } = await supabase
         .from('players')
-        .select('id, nickname, avatar_url, current_mmr, discord_username, steam_url')
+        .select('id, nickname, avatar_url, current_mmr, discord_username, steam_url, dotabuff_url')
         .eq('id', session.playerId)
         .maybeSingle();
 
@@ -70,6 +71,7 @@ export default function Registration() {
         setPlayer(data);
         setMmr(data.current_mmr?.toString() || '');
         setDiscord(data.discord_username || '');
+        setDotabuff(data.dotabuff_url || '');
       }
 
       // Check if already registered this season
@@ -119,9 +121,12 @@ export default function Registration() {
 
     setSubmitting(false);
     if (result.success) {
-      // Also update discord in players table
-      if (discord) {
-        await supabase.from('players').update({ discord_username: discord }).eq('id', player.id);
+      // Update discord + dotabuff in players table
+      const updates: any = {};
+      if (discord) updates.discord_username = discord;
+      if (dotabuff) updates.dotabuff_url = dotabuff;
+      if (Object.keys(updates).length > 0) {
+        await supabase.from('players').update(updates).eq('id', player.id);
       }
       setDone(true);
     } else {
@@ -264,6 +269,20 @@ export default function Registration() {
                       onFocus={e => (e.currentTarget.style.borderColor = 'rgba(255,255,255,0.25)')}
                       onBlur={e => (e.currentTarget.style.borderColor = 'rgba(255,255,255,0.1)')} />
                   </div>
+                  <div>
+                    <label className="block text-xs text-white/50 mb-1.5">
+                      Dotabuff URL <span className="text-white/25">(optional)</span>
+                    </label>
+                    <input value={dotabuff} onChange={e => setDotabuff(e.target.value)}
+                      placeholder="https://www.dotabuff.com/players/..."
+                      className="w-full px-4 py-3 rounded-xl text-sm text-white placeholder-white/20 focus:outline-none transition-colors"
+                      style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)' }}
+                      onFocus={e => (e.currentTarget.style.borderColor = 'rgba(255,255,255,0.25)')}
+                      onBlur={e => (e.currentTarget.style.borderColor = 'rgba(255,255,255,0.1)')} />
+                    <p className="text-white/20 text-[10px] mt-1">
+                      Find yours at dotabuff.com → search your Steam name → copy the URL
+                    </p>
+                  </div>
                 </div>
               </div>
             )}
@@ -391,6 +410,7 @@ export default function Registration() {
                     { label: 'Type', value: playerType || '—' },
                     { label: 'Roles', value: roles.map(r => ROLES.find(x => x.id === r)?.label).join(', ') || '—' },
                     { label: 'Ping', value: ping || '—' },
+                    { label: 'Dotabuff', value: dotabuff ? '✓ Added' : '—' },
                   ].map(row => (
                     <div key={row.label} className="flex justify-between text-sm">
                       <span className="text-white/35">{row.label}</span>

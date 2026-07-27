@@ -1,0 +1,1830 @@
+{
+  "season": 4,
+  "type": "double_elimination",
+  "teams": [
+    {
+      "id": "pYro",
+      "name": "pYro",
+      "color": "#3C78D8"
+    },
+    {
+      "id": "LightNing Goku",
+      "name": "LightNing Goku",
+      "color": "#E06666"
+    },
+    {
+      "id": "KaKaroT",
+      "name": "KaKaroT",
+      "color": "#674EA7"
+    },
+    {
+      "id": "Shaidota",
+      "name": "Shaidota",
+      "color": "#93C47D"
+    },
+    {
+      "id": "plutoski",
+      "name": "plutoski",
+      "color": "#F1C232"
+    },
+    {
+      "id": "Rinne",
+      "name": "Rinne",
+      "color": "#B45F06"
+    },
+    {
+      "id": "Vanara",
+      "name": "Vanara",
+      "color": "#76A5AF"
+    },
+    {
+      "id": "NJ",
+      "name": "NJ",
+      "color": "#C27BA0"
+    },
+    {
+      "id": "TamBamGOD",
+      "name": "TamBamGOD",
+      "color": "#FF9900"
+    },
+    {
+      "id": "Phola",
+      "name": "Phola",
+      "color": "#29AF78"
+    },
+    {
+      "id": "S1mpleO",
+      "name": "S1mpleO",
+      "color": "#B02525"
+    },
+    {
+      "id": "Eric Dane",
+      "name": "Eric Dane",
+      "color": "#7F6000"
+    },
+    {
+      "id": "Dr_Nemesis_X",
+      "name": "Dr_Nemesis_X",
+      "color": "#58D8EB"
+    },
+    {
+      "id": "Draco~",
+      "name": "Draco~",
+      "color": "#44DF77"
+    },
+    {
+      "id": "Prime.One",
+      "name": "Prime.One",
+      "color": "#E12FA5"
+    },
+    {
+      "id": "Sherry",
+      "name": "Sherry",
+      "color": "#B47BD1"
+    },
+    {
+      "id": "Future",
+      "name": "Future",
+      "color": "#A4C2F4"
+    },
+    {
+      "id": "Helm",
+      "name": "Helm",
+      "color": "#FCD34D"
+    },
+    {
+      "id": "rA!VI",
+      "name": "rA'VI",
+      "color": "#F9B2B2"
+    },
+    {
+      "id": "Penda",
+      "name": "Penda",
+      "color": "#B4A7D6"
+    },
+    {
+      "id": "Muri",
+      "name": "Muri",
+      "color": "#4767AF"
+    },
+    {
+      "id": "zRomep",
+      "name": "zRomep",
+      "color": "#C9DC00"
+    },
+    {
+      "id": "Sexy",
+      "name": "Sexy",
+      "color": "#007900"
+    },
+    {
+      "id": "Shikamaru",
+      "name": "Shikamaru",
+      "color": "#C95757"
+    }
+  ],
+  "upper": {
+    "rounds": [
+      {
+        "id": "UB_R1",
+        "label": "Round 1",
+        "bestOf": 1,
+        "date": "2nd Aug",
+        "matches": [
+          {
+            "id": "UB_R1_M1",
+            "teams": [
+              "LightNing Goku",
+              "Shaidota"
+            ],
+            "winner": "Shaidota",
+            "time": "1:00 pm",
+            "games": [
+              {
+                "game": 1,
+                "duration": "37:48",
+                "winner": "Shaidota",
+                "radiant": "LightNing Goku",
+                "dire": "Shaidota",
+                "radiantScore": 21,
+                "direScore": 42,
+                "radiantHeroes": [
+                  "Ember Spirit",
+                  "Lion",
+                  "Dawnbreaker",
+                  "Juggernaut",
+                  "Rubick"
+                ],
+                "direHeroes": [
+                  "Shadow Fiend",
+                  "Anti-mage",
+                  "Clockwerk",
+                  "Tidehunter",
+                  "Silencer"
+                ],
+                "dotabuffUrl": "https://www.dotabuff.com/matches/8399174255"
+              }
+            ]
+          },
+          {
+            "id": "UB_R1_M2",
+            "teams": [
+              "plutoski",
+              "Vanara"
+            ],
+            "winner": "Vanara",
+            "games": [
+              {
+                "game": 1,
+                "duration": "56:50",
+                "winner": "Vanara",
+                "radiant": "plutoski",
+                "dire": "Vanara",
+                "radiantScore": 34,
+                "direScore": 56,
+                "radiantHeroes": [
+                  "Lycan",
+                  "Ember Spirit",
+                  "Medusa",
+                  "Disruptor",
+                  "Tusk"
+                ],
+                "direHeroes": [
+                  "Dragon Knight",
+                  "Silencer",
+                  "Magnus",
+                  "Lich",
+                  "Ursa"
+                ],
+                "dotabuffUrl": "https://www.dotabuff.com/matches/8399196254"
+              }
+            ]
+          },
+          {
+            "id": "UB_R1_M3",
+            "teams": [
+              "TamBamGOD",
+              "S1mpleO"
+            ],
+            "winner": "S1mpleO",
+            "games": [
+              {
+                "game": 1,
+                "duration": "1:05:08",
+                "winner": "S1mpleO",
+                "radiant": "TamBamGOD",
+                "dire": "S1mpleO",
+                "radiantScore": 40,
+                "direScore": 42,
+                "radiantHeroes": [
+                  "Axe",
+                  "Windranger",
+                  "Abaddon",
+                  "Sven",
+                  "Lion"
+                ],
+                "direHeroes": [
+                  "Lich",
+                  "Rubick",
+                  "Mars",
+                  "Tiny",
+                  "Medusa"
+                ],
+                "dotabuffUrl": "https://www.dotabuff.com/matches/8399190579"
+              }
+            ]
+          },
+          {
+            "id": "UB_R1_M4",
+            "teams": [
+              "Eric Dane",
+              "Draco~"
+            ],
+            "winner": "Eric Dane",
+            "games": [
+              {
+                "game": 1,
+                "duration": "1:02:58",
+                "winner": "Eric Dane",
+                "radiant": "Draco~",
+                "dire": "Eric Dane",
+                "radiantScore": 56,
+                "direScore": 39,
+                "radiantHeroes": [
+                  "Windranger",
+                  "Shadow Fiend",
+                  "Templar Assassin",
+                  "Pangolier",
+                  "Shadow Shaman"
+                ],
+                "direHeroes": [
+                  "Lifestealer",
+                  "Invoker",
+                  "Queen of Pain",
+                  "Disruptor",
+                  "Mars"
+                ],
+                "dotabuffUrl": "https://www.dotabuff.com/matches/8399200110"
+              }
+            ]
+          },
+          {
+            "id": "UB_R1_M5",
+            "teams": [
+              "Prime.One",
+              "Sherry"
+            ],
+            "winner": "Prime.One",
+            "games": [
+              {
+                "game": 1,
+                "duration": "35:07",
+                "winner": "Prime.One",
+                "radiant": "Sherry",
+                "dire": "Prime.One",
+                "radiantScore": 23,
+                "direScore": 52,
+                "radiantHeroes": [
+                  "Silencer",
+                  "Phoenix",
+                  "Death prophet",
+                  "Vengeful Spirit",
+                  "Sven"
+                ],
+                "direHeroes": [
+                  "Nightstalker",
+                  "Naga Siren",
+                  "Lina",
+                  "Shadow Shaman",
+                  "Lifestealer"
+                ],
+                "dotabuffUrl": "https://www.dotabuff.com/matches/8399194890"
+              }
+            ]
+          },
+          {
+            "id": "UB_R1_M6",
+            "teams": [
+              "Future",
+              "Helm"
+            ],
+            "winner": "Helm",
+            "games": [
+              {
+                "game": 1,
+                "duration": "43:19",
+                "winner": "Helm",
+                "radiant": "Helm",
+                "dire": "Future",
+                "radiantScore": 38,
+                "direScore": 37,
+                "radiantHeroes": [
+                  "Jakiro",
+                  "Vengeful Spirit",
+                  "Outworld Destroyer",
+                  "Juggernaut",
+                  "Weaver"
+                ],
+                "direHeroes": [
+                  "Tusk",
+                  "Ogre Magi",
+                  "Puck",
+                  "Nature's Prophet",
+                  "Slardar"
+                ],
+                "dotabuffUrl": "https://www.dotabuff.com/matches/8399188976"
+              }
+            ]
+          },
+          {
+            "id": "UB_R1_M7",
+            "teams": [
+              "rA!VI",
+              "zRomep"
+            ],
+            "winner": "zRomep",
+            "games": [
+              {
+                "game": 1,
+                "duration": "23:10",
+                "winner": "zRomep",
+                "radiant": "zRomep",
+                "dire": "rA!VI",
+                "radiantScore": 31,
+                "direScore": 11,
+                "radiantHeroes": [
+                  "Nightstalker",
+                  "Silencer",
+                  "Kunkka",
+                  "Tusk",
+                  "Razor"
+                ],
+                "direHeroes": [
+                  "Queen of Pain",
+                  "Lion",
+                  "Timbersaw",
+                  "Tidehunter",
+                  "Disruptor"
+                ],
+                "dotabuffUrl": "https://www.dotabuff.com/matches/8399175283"
+              }
+            ]
+          },
+          {
+            "id": "UB_R1_M8",
+            "teams": [
+              "Sexy",
+              "Shikamaru"
+            ],
+            "winner": "Sexy",
+            "games": [
+              {
+                "game": 1,
+                "duration": "33:44",
+                "winner": "Sexy",
+                "radiant": "Shikamaru",
+                "dire": "Sexy",
+                "radiantScore": 26,
+                "direScore": 47,
+                "radiantHeroes": [
+                  "Puck",
+                  "Phantom Lancer",
+                  "Dawnbreaker",
+                  "Magnus",
+                  "Jakiro"
+                ],
+                "direHeroes": [
+                  "Ember Spirit",
+                  "Disruptor",
+                  "Vengeful Spirit",
+                  "Shadow Fiend",
+                  "Lycan"
+                ],
+                "dotabuffUrl": "https://www.dotabuff.com/matches/8399190410"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "UB_R2",
+        "label": "Round 2",
+        "bestOf": 1,
+        "date": "2nd Aug",
+        "matches": [
+          {
+            "id": "UB_R2_M1",
+            "teams": [
+              "KaKaroT",
+              "zRomep"
+            ],
+            "winner": "zRomep",
+            "games": [
+              {
+                "game": 1,
+                "duration": "35:58",
+                "winner": "zRomep",
+                "radiant": "zRomep",
+                "dire": "KaKaroT",
+                "radiantScore": 52,
+                "direScore": 24,
+                "radiantHeroes": [
+                  "Silencer",
+                  "Queen of Pain",
+                  "Magnus",
+                  "Razor",
+                  "Tusk"
+                ],
+                "direHeroes": [
+                  "Lion",
+                  "Ursa",
+                  "Invoker",
+                  "Mars",
+                  "Jakiro"
+                ],
+                "dotabuffUrl": "https://www.dotabuff.com/matches/8399278485"
+              }
+            ]
+          },
+          {
+            "id": "UB_R2_M2",
+            "teams": [
+              "Phola",
+              "Sexy"
+            ],
+            "winner": "Phola",
+            "games": [
+              {
+                "game": 1,
+                "duration": "40:19",
+                "winner": "Phola",
+                "radiant": "Phola",
+                "dire": "Sexy",
+                "radiantScore": 31,
+                "direScore": 22,
+                "radiantHeroes": [
+                  "Centaur Warrunner",
+                  "Lion",
+                  "Marci",
+                  "Nature's Prophet",
+                  "Puck"
+                ],
+                "direHeroes": [
+                  "Ancient Apparition",
+                  "Huskar",
+                  "Shadow Fiend",
+                  "Slardar",
+                  "Ogre Magi"
+                ],
+                "dotabuffUrl": "https://www.dotabuff.com/matches/8399271206"
+              }
+            ]
+          },
+          {
+            "id": "UB_R2_M3",
+            "teams": [
+              "Penda",
+              "Prime.One"
+            ],
+            "winner": "Prime.One",
+            "games": [
+              {
+                "game": 1,
+                "duration": "35:28",
+                "winner": "Prime.One",
+                "radiant": "Penda",
+                "dire": "Prime.One",
+                "radiantScore": 16,
+                "direScore": 37,
+                "radiantHeroes": [
+                  "Vengeful Spirit",
+                  "Kunkka",
+                  "Pugna",
+                  "Lion",
+                  "Lifestealer"
+                ],
+                "direHeroes": [
+                  "Naga Siren",
+                  "Dragon Knight",
+                  "Tinker",
+                  "Axe",
+                  "Legion Commander"
+                ],
+                "dotabuffUrl": "https://www.dotabuff.com/matches/8399282253"
+              }
+            ]
+          },
+          {
+            "id": "UB_R2_M4",
+            "teams": [
+              "NJ",
+              "Shaidota"
+            ],
+            "winner": "NJ",
+            "games": [
+              {
+                "game": 1,
+                "duration": "44:56",
+                "winner": "NJ",
+                "radiant": "Shaidota",
+                "dire": "NJ",
+                "radiantScore": 27,
+                "direScore": 46,
+                "radiantHeroes": [
+                  "Clockwerk",
+                  "Underlord",
+                  "Shadow Fiend",
+                  "Leshrac",
+                  "Dark Willow"
+                ],
+                "direHeroes": [
+                  "Dawnbreaker",
+                  "Templar Assassin",
+                  "Jakiro",
+                  "Lion",
+                  "Puck"
+                ],
+                "dotabuffUrl": "https://www.dotabuff.com/matches/8399284485"
+              }
+            ]
+          },
+          {
+            "id": "UB_R2_M5",
+            "teams": [
+              "Muri",
+              "Helm"
+            ],
+            "winner": "Helm",
+            "games": [
+              {
+                "game": 1,
+                "duration": "30:28",
+                "winner": "Helm",
+                "radiant": "Muri",
+                "dire": "Helm",
+                "radiantScore": 15,
+                "direScore": 33,
+                "radiantHeroes": [
+                  "Lina",
+                  "Lion",
+                  "Ursa",
+                  "Rubick",
+                  "Tidehunter"
+                ],
+                "direHeroes": [
+                  "Viper",
+                  "Lifestealer",
+                  "Mars",
+                  "Disruptor",
+                  "Vengeful Spirit"
+                ],
+                "dotabuffUrl": "https://www.dotabuff.com/matches/8399281353"
+              }
+            ]
+          },
+          {
+            "id": "UB_R2_M6",
+            "teams": [
+              "pYro",
+              "Vanara"
+            ],
+            "winner": "Vanara",
+            "games": [
+              {
+                "game": 1,
+                "duration": "52:39",
+                "winner": "Vanara",
+                "radiant": "Vanara",
+                "dire": "pYro",
+                "radiantScore": 64,
+                "direScore": 42,
+                "radiantHeroes": [
+                  "Shadow Fiend",
+                  "Witch Doctor",
+                  "Weaver",
+                  "Magnus",
+                  "Sven"
+                ],
+                "direHeroes": [
+                  "Rubick",
+                  "Slardar",
+                  "Grimstroke",
+                  "Lich",
+                  "Lifestealer"
+                ],
+                "dotabuffUrl": "https://www.dotabuff.com/matches/8399289211"
+              }
+            ]
+          },
+          {
+            "id": "UB_R2_M7",
+            "teams": [
+              "Rinne",
+              "Eric Dane"
+            ],
+            "winner": "Eric Dane",
+            "note": "No Dotabuff match found — teams did not use the league ticket. Result recorded as 1-0 to Eric Dane.",
+            "games": [
+              { "game": 1, "duration": "—", "winner": "Eric Dane", "radiant": "Eric Dane", "dire": "Rinne", "radiantScore": 1, "direScore": 0 }
+            ]
+          },
+          {
+            "id": "UB_R2_M8",
+            "teams": [
+              "Dr_Nemesis_X",
+              "S1mpleO"
+            ],
+            "winner": "S1mpleO",
+            "games": [
+              {
+                "game": 1,
+                "duration": "47:17",
+                "winner": "S1mpleO",
+                "radiant": "Dr_Nemesis_X",
+                "dire": "S1mpleO",
+                "radiantScore": 32,
+                "direScore": 46,
+                "radiantHeroes": [
+                  "Huskar",
+                  "Primal Beast",
+                  "Tusk",
+                  "Dawnbreaker",
+                  "Weaver"
+                ],
+                "direHeroes": [
+                  "Disruptor",
+                  "Shadow Shaman",
+                  "Tidehunter",
+                  "Monkey King",
+                  "Ursa"
+                ],
+                "dotabuffUrl": "https://www.dotabuff.com/matches/8399306460"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "UB_R3",
+        "label": "Round 3",
+        "bestOf": 1,
+        "date": "3rd Aug",
+        "matches": [
+          {
+            "id": "UB_R3_M1",
+            "teams": [
+              "Helm",
+              "Prime.One"
+            ],
+            "winner": "Helm",
+            "games": [
+              {
+                "game": 1,
+                "duration": "43:55",
+                "winner": "Helm",
+                "radiant": "Helm",
+                "dire": "Prime.One",
+                "radiantScore": 46,
+                "direScore": 45,
+                "radiantHeroes": [
+                  "Dawnbreaker",
+                  "Warlock",
+                  "Outworld Destroyer",
+                  "Faceless Void",
+                  "Lion"
+                ],
+                "direHeroes": [
+                  "Venomancer",
+                  "Legion Commander",
+                  "Queen of Pain",
+                  "Axe",
+                  "Lifestealer"
+                ],
+                "dotabuffUrl": "https://www.dotabuff.com/matches/8400649667"
+              }
+            ]
+          },
+          {
+            "id": "UB_R3_M2",
+            "teams": [
+              "zRomep",
+              "Eric Dane"
+            ],
+            "winner": "zRomep",
+            "games": [
+              {
+                "game": 1,
+                "duration": "54:43",
+                "winner": "zRomep",
+                "radiant": "zRomep",
+                "dire": "Eric Dane",
+                "radiantScore": 56,
+                "direScore": 23,
+                "radiantHeroes": [
+                  "Jakiro",
+                  "Queen of Pain",
+                  "Night Stalker",
+                  "Monkey King",
+                  "Tusk"
+                ],
+                "direHeroes": [
+                  "Clockwerk",
+                  "Omniknight",
+                  "Lion",
+                  "Sven",
+                  "Ember Spirit"
+                ],
+                "dotabuffUrl": "https://www.dotabuff.com/matches/8400735274"
+              }
+            ]
+          },
+          {
+            "id": "UB_R3_M3",
+            "teams": [
+              "Phola",
+              "NJ"
+            ],
+            "winner": "NJ",
+            "games": [
+              {
+                "game": 1,
+                "duration": "42:57",
+                "winner": "NJ",
+                "radiant": "Phola",
+                "dire": "NJ",
+                "radiantScore": 23,
+                "direScore": 28,
+                "radiantHeroes": [
+                  "Slardar",
+                  "Shadow Fiend",
+                  "Marci",
+                  "Ursa",
+                  "Jakiro"
+                ],
+                "direHeroes": [
+                  "Dawnbreaker",
+                  "Medusa",
+                  "Earthshaker",
+                  "Disruptor",
+                  "Ogre Magi"
+                ],
+                "dotabuffUrl": "https://www.dotabuff.com/matches/8400944633"
+              }
+            ]
+          },
+          {
+            "id": "UB_R3_M4",
+            "teams": [
+              "S1mpleO",
+              "Vanara"
+            ],
+            "winner": "S1mpleO",
+            "games": [
+              {
+                "game": 1,
+                "duration": "37:32",
+                "winner": "S1mpleO",
+                "radiant": "S1mpleO",
+                "dire": "Vanara",
+                "radiantScore": 54,
+                "direScore": 22,
+                "radiantHeroes": [
+                  "Lion",
+                  "Undying",
+                  "Beastmaster",
+                  "Magnus",
+                  "Sven"
+                ],
+                "direHeroes": [
+                  "Pangolier",
+                  "Witch Doctor",
+                  "Pudge",
+                  "Rubick",
+                  "Lifestealer"
+                ],
+                "dotabuffUrl": "https://www.dotabuff.com/matches/8401005980"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "UB_R4",
+        "label": "Upper Semi Finals",
+        "bestOf": 1,
+        "date": "9th-10th Aug",
+        "matches": [
+          {
+            "id": "UB_R4_M1",
+            "teams": [
+              "Helm",
+              "zRomep"
+            ],
+            "winner": "Helm",
+            "games": [
+              {
+                "game": 1,
+                "duration": "48:34",
+                "winner": "Helm",
+                "radiant": "Helm",
+                "dire": "zRomep",
+                "radiantScore": 40,
+                "direScore": 38,
+                "radiantHeroes": [
+                  "Morphling",
+                  "Centaur Warrunner",
+                  "Viper",
+                  "Disruptor",
+                  "Lion"
+                ],
+                "direHeroes": [
+                  "Vengeful Spirit",
+                  "Leshrac",
+                  "Kunkka",
+                  "Ursa",
+                  "Tusk"
+                ],
+                "dotabuffUrl": "https://www.dotabuff.com/matches/8410649863"
+              }
+            ]
+          },
+          {
+            "id": "UB_R4_M2",
+            "teams": [
+              "NJ",
+              "S1mpleO"
+            ],
+            "winner": "S1mpleO",
+            "games": [
+              {
+                "game": 1,
+                "duration": "42:10",
+                "winner": "S1mpleO",
+                "radiant": "S1mpleO",
+                "dire": "NJ",
+                "radiantScore": 34,
+                "direScore": 28,
+                "radiantHeroes": [
+                  "Rubick",
+                  "Vengeful Spirit",
+                  "Mars",
+                  "Earthshaker",
+                  "Gyrocopter"
+                ],
+                "direHeroes": [
+                  "Weaver",
+                  "Dark Seer",
+                  "Void Spirit",
+                  "Spirit Breaker",
+                  "Lion"
+                ],
+                "dotabuffUrl": "https://www.dotabuff.com/matches/8409343808"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "UB_FINAL",
+        "label": "Upper Bracket Final",
+        "bestOf": 3,
+        "date": "10th Aug",
+        "matches": [
+          {
+            "id": "UB_FINAL_M1",
+            "teams": [
+              "Helm",
+              "S1mpleO"
+            ],
+            "winner": "S1mpleO",
+            "games": [
+              {
+                "game": 1,
+                "duration": "36:45",
+                "winner": "S1mpleO",
+                "radiant": "Helm",
+                "dire": "S1mpleO",
+                "radiantScore": 31,
+                "direScore": 30,
+                "radiantHeroes": [
+                  "Mars",
+                  "Outworld Destroyer",
+                  "Disruptor",
+                  "Lich",
+                  "Medusa"
+                ],
+                "direHeroes": [
+                  "Vengeful Spirit",
+                  "Grimstroke",
+                  "Doom",
+                  "Broodmother",
+                  "Shadow Fiend"
+                ],
+                "dotabuffUrl": "https://www.dotabuff.com/matches/8410763280"
+              },
+              {
+                "game": 2,
+                "duration": "56:40",
+                "winner": "Helm",
+                "radiant": "Helm",
+                "dire": "S1mpleO",
+                "radiantScore": 44,
+                "direScore": 31,
+                "radiantHeroes": [
+                  "Queen of Pain",
+                  "Lifestealer",
+                  "Night Stalker",
+                  "Vengeful Spirit",
+                  "Weaver"
+                ],
+                "direHeroes": [
+                  "Disruptor",
+                  "Undying",
+                  "Mars",
+                  "Shadow Fiend",
+                  "Medusa"
+                ],
+                "dotabuffUrl": "https://www.dotabuff.com/matches/8410842959"
+              },
+              {
+                "game": 3,
+                "duration": "58:27",
+                "winner": "S1mpleO",
+                "radiant": "Helm",
+                "dire": "S1mpleO",
+                "radiantScore": 37,
+                "direScore": 44,
+                "radiantHeroes": [
+                  "Jakiro",
+                  "Queen of Pain",
+                  "Mars",
+                  "Vengeful Spirit",
+                  "Lifestealer"
+                ],
+                "direHeroes": [
+                  "Dark Willow",
+                  "Shadow Fiend",
+                  "Silencer",
+                  "Night Stalker",
+                  "Gyrocopter"
+                ],
+                "dotabuffUrl": "https://www.dotabuff.com/matches/8410944118"
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  "lower": {
+    "rounds": [
+      {
+        "id": "LB_R1",
+        "label": "Round 1",
+        "bestOf": 1,
+        "date": "2nd Aug",
+        "matches": [
+          {
+            "id": "LB_R1_M1",
+            "teams": [
+              "rA!VI",
+              "Dr_Nemesis_X"
+            ],
+            "winner": "Dr_Nemesis_X",
+            "games": [
+              {
+                "game": 1,
+                "duration": "29:09",
+                "winner": "Dr_Nemesis_X",
+                "radiant": "Dr_Nemesis_X",
+                "dire": "rA!VI",
+                "radiantScore": 19,
+                "direScore": 13,
+                "radiantHeroes": [
+                  "Undying",
+                  "Muerta",
+                  "Tinker",
+                  "Underlord",
+                  "Shadow Shaman"
+                ],
+                "direHeroes": [
+                  "Nature's Prophet",
+                  "Outworld Destroyer",
+                  "Disruptor",
+                  "Earthshaker",
+                  "Necrophos"
+                ],
+                "dotabuffUrl": "https://www.dotabuff.com/matches/8399397140"
+              }
+            ]
+          },
+          {
+            "id": "LB_R1_M2",
+            "teams": [
+              "Shikamaru",
+              "Rinne"
+            ],
+            "winner": "Rinne",
+            "games": [
+              {
+                "game": 1,
+                "duration": "34:06",
+                "winner": "Rinne",
+                "radiant": "Shikamaru",
+                "dire": "Rinne",
+                "radiantScore": 19,
+                "direScore": 45,
+                "radiantHeroes": [
+                  "Kunkka",
+                  "Warlock",
+                  "Invoker",
+                  "Medusa",
+                  "Ogre Magi"
+                ],
+                "direHeroes": [
+                  "Ursa",
+                  "Templar Assassin",
+                  "Slardar",
+                  "Earthshaker",
+                  "Silencer"
+                ],
+                "dotabuffUrl": "https://www.dotabuff.com/matches/8399382571"
+              }
+            ]
+          },
+          {
+            "id": "LB_R1_M3",
+            "teams": [
+              "Sherry",
+              "pYro"
+            ],
+            "winner": "pYro",
+            "dqTeamId": "Sherry",
+            "note": "Team Sherry was disqualified. Player Zayn (Luna) registered at ~5.6k MMR but was found to hold an Immortal rank (~7.5k+ MMR leaderboard position), violating the rule requiring players to declare their highest MMR account. As a result, Sherry was removed from the tournament and pYro advanced. A rematch between LightNing Goku and pYro was then scheduled to determine the Round 3 lower bracket spot.",
+            "games": []
+          },
+          {
+            "id": "LB_R1_M4",
+            "teams": [
+              "LightNing Goku",
+              "Muri"
+            ],
+            "winner": "LightNing Goku",
+            "games": [
+              {
+                "game": 1,
+                "duration": "34:41",
+                "winner": "LightNing Goku",
+                "radiant": "Muri",
+                "dire": "LightNing Goku",
+                "radiantScore": 19,
+                "direScore": 39,
+                "radiantHeroes": [
+                  "Outworld Destroyer",
+                  "Slark",
+                  "Shadow Shaman",
+                  "Axe",
+                  "Oracle"
+                ],
+                "direHeroes": [
+                  "Invoker",
+                  "Nyx Assassin",
+                  "Ursa",
+                  "Winter Wyvern",
+                  "Pudge"
+                ],
+                "dotabuffUrl": "https://www.dotabuff.com/matches/8399395418"
+              }
+            ]
+          },
+          {
+            "id": "LB_R1_M5",
+            "teams": [
+              "Future",
+              "Shaidota"
+            ],
+            "winner": "Future",
+            "games": [
+              {
+                "game": 1,
+                "duration": "49:09",
+                "winner": "Future",
+                "radiant": "Shaidota",
+                "dire": "Future",
+                "radiantScore": 44,
+                "direScore": 42,
+                "radiantHeroes": [
+                  "Ursa",
+                  "Axe",
+                  "Queen of Pain",
+                  "Lion",
+                  "Vengeful Spirit"
+                ],
+                "direHeroes": [
+                  "Tidehunter",
+                  "Jakiro",
+                  "Templar Assassin",
+                  "Earthshaker",
+                  "Tusk"
+                ],
+                "dotabuffUrl": "https://www.dotabuff.com/matches/8399376436"
+              }
+            ]
+          },
+          {
+            "id": "LB_R1_M6",
+            "teams": [
+              "plutoski",
+              "Penda"
+            ],
+            "winner": "plutoski",
+            "games": [
+              {
+                "game": 1,
+                "duration": "31:54",
+                "winner": "plutoski",
+                "radiant": "Penda",
+                "dire": "plutoski",
+                "radiantScore": 12,
+                "direScore": 22,
+                "radiantHeroes": [
+                  "Dragon Knight",
+                  "Rubick",
+                  "Invoker",
+                  "Disruptor",
+                  "Dark Seer"
+                ],
+                "direHeroes": [
+                  "Beastmaster",
+                  "Nature's Prophet",
+                  "Lion",
+                  "Legion Commander",
+                  "Oracle"
+                ],
+                "dotabuffUrl": "https://www.dotabuff.com/matches/8399363135"
+              }
+            ]
+          },
+          {
+            "id": "LB_R1_M7",
+            "teams": [
+              "Draco~",
+              "Sexy"
+            ],
+            "winner": "Draco~",
+            "games": [
+              {
+                "game": 1,
+                "duration": "44:57",
+                "winner": "Draco~",
+                "radiant": "Sexy",
+                "dire": "Draco~",
+                "radiantScore": 27,
+                "direScore": 47,
+                "radiantHeroes": [
+                  "Nature's Prophet",
+                  "Void Spirit",
+                  "Tidehunter",
+                  "Spirit Breaker",
+                  "Ancient Apparition"
+                ],
+                "direHeroes": [
+                  "Silencer",
+                  "Sven",
+                  "Queen of Pain",
+                  "Bane",
+                  "Dawnbreaker"
+                ],
+                "dotabuffUrl": "https://www.dotabuff.com/matches/8399369358"
+              }
+            ]
+          },
+          {
+            "id": "LB_R1_M8",
+            "teams": [
+              "TamBamGOD",
+              "KaKaroT"
+            ],
+            "winner": "TamBamGOD",
+            "games": [
+              {
+                "game": 1,
+                "duration": "43:42",
+                "winner": "TamBamGOD",
+                "radiant": "KaKaroT",
+                "dire": "TamBamGOD",
+                "radiantScore": 32,
+                "direScore": 67,
+                "radiantHeroes": [
+                  "Juggernaut",
+                  "Queen of Pain",
+                  "Dragon Knight",
+                  "Lion",
+                  "Grimstroke"
+                ],
+                "direHeroes": [
+                  "Doom",
+                  "Kunkka",
+                  "Lich",
+                  "Silencer",
+                  "Lifestealer"
+                ],
+                "dotabuffUrl": "https://www.dotabuff.com/matches/8399371312"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "LB_R2",
+        "label": "Round 2",
+        "bestOf": 1,
+        "date": "2nd Aug",
+        "matches": [
+          {
+            "id": "LB_R2_M1",
+            "teams": [
+              "plutoski",
+              "Rinne"
+            ],
+            "winner": "plutoski",
+            "games": [
+              {
+                "game": 1,
+                "duration": "42:47",
+                "winner": "plutoski",
+                "radiant": "Rinne",
+                "dire": "plutoski",
+                "radiantScore": 27,
+                "direScore": 47,
+                "radiantHeroes": [
+                  "Storm Spirit",
+                  "Lich",
+                  "Wraith King",
+                  "Earthshaker",
+                  "Sand King"
+                ],
+                "direHeroes": [
+                  "Morphling",
+                  "Dawnbreaker",
+                  "Warlock",
+                  "Legion Commander",
+                  "Rubick"
+                ],
+                "dotabuffUrl": "https://www.dotabuff.com/matches/8399450270"
+              }
+            ]
+          },
+          {
+            "id": "LB_R2_M2",
+            "teams": [
+              "Draco~",
+              "Dr_Nemesis_X"
+            ],
+            "winner": "Draco~",
+            "games": [
+              {
+                "game": 1,
+                "duration": "32:25",
+                "winner": "Draco~",
+                "radiant": "Draco~",
+                "dire": "Dr_Nemesis_X",
+                "radiantScore": 34,
+                "direScore": 20,
+                "radiantHeroes": [
+                  "Rubick",
+                  "Morphling",
+                  "Earthshaker",
+                  "Axe",
+                  "Ancient Apparition"
+                ],
+                "direHeroes": [
+                  "Dawnbreaker",
+                  "Oracle",
+                  "Phantom Lancer",
+                  "Spirit Breaker",
+                  "Storm Spirit"
+                ],
+                "dotabuffUrl": "https://www.dotabuff.com/matches/8399678383"
+              }
+            ]
+          },
+          {
+            "id": "LB_R2_M3",
+            "teams": [
+              "TamBamGOD",
+              "Future"
+            ],
+            "winner": "Future",
+            "games": [
+              {
+                "game": 1,
+                "duration": "34:35",
+                "winner": "Future",
+                "radiant": "TamBamGOD",
+                "dire": "Future",
+                "radiantScore": 30,
+                "direScore": 40,
+                "radiantHeroes": [
+                  "Shadow Shaman",
+                  "Windranger",
+                  "Magnus",
+                  "Disruptor",
+                  "Ursa"
+                ],
+                "direHeroes": [
+                  "Terrorblade",
+                  "Dawnbreaker",
+                  "Jakiro",
+                  "Tusk",
+                  "Queen of Pain"
+                ],
+                "dotabuffUrl": "https://www.dotabuff.com/matches/8399533859"
+              }
+            ]
+          },
+          {
+            "id": "LB_R2_M4",
+            "teams": [
+              "LightNing Goku",
+              "pYro"
+            ],
+            "winner": "LightNing Goku",
+            "games": [
+              {
+                "game": 1,
+                "duration": "37:27",
+                "winner": "LightNing Goku",
+                "radiant": "pYro",
+                "dire": "LightNing Goku",
+                "radiantScore": 22,
+                "direScore": 46,
+                "radiantHeroes": [
+                  "Keeper of the Light",
+                  "Vengeful Spirit",
+                  "Dawnbreaker",
+                  "Shadow Shaman",
+                  "Medusa"
+                ],
+                "direHeroes": [
+                  "Lion",
+                  "Pangolier",
+                  "Marci",
+                  "Wraith King",
+                  "Magnus"
+                ],
+                "dotabuffUrl": "https://www.dotabuff.com/matches/8401028141"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "LB_R3",
+        "label": "Round 3",
+        "bestOf": 1,
+        "date": "3rd Aug",
+        "matches": [
+          {
+            "id": "LB_R3_M1",
+            "teams": [
+              "Prime.One",
+              "plutoski"
+            ],
+            "winner": "plutoski",
+            "games": [
+              {
+                "game": 1,
+                "duration": "47:20",
+                "winner": "plutoski",
+                "radiant": "Prime.One",
+                "dire": "plutoski",
+                "radiantScore": 37,
+                "direScore": 45,
+                "radiantHeroes": [
+                  "Nature's Prophet",
+                  "Clinkz",
+                  "Leshrac",
+                  "Underlord",
+                  "Clockwerk"
+                ],
+                "direHeroes": [
+                  "Shadow Shaman",
+                  "Templar Assassin",
+                  "Zeus",
+                  "Wraith King",
+                  "Weaver"
+                ],
+                "dotabuffUrl": "https://www.dotabuff.com/matches/8400828393"
+              }
+            ]
+          },
+          {
+            "id": "LB_R3_M2",
+            "teams": [
+              "Eric Dane",
+              "Draco~"
+            ],
+            "winner": "Eric Dane",
+            "games": [
+              {
+                "game": 1,
+                "duration": "30:31",
+                "winner": "Eric Dane",
+                "radiant": "Draco~",
+                "dire": "Eric Dane",
+                "radiantScore": 15,
+                "direScore": 39,
+                "radiantHeroes": [
+                  "Medusa",
+                  "Ringmaster",
+                  "Queen of Pain",
+                  "Bristleback",
+                  "Silencer"
+                ],
+                "direHeroes": [
+                  "Legion Commander",
+                  "Disruptor",
+                  "Dark Willow",
+                  "Shadow Fiend",
+                  "Slark"
+                ],
+                "dotabuffUrl": "https://www.dotabuff.com/matches/8400942427"
+              }
+            ]
+          },
+          {
+            "id": "LB_R3_M3",
+            "teams": [
+              "Phola",
+              "Future"
+            ],
+            "winner": "Future",
+            "games": [
+              {
+                "game": 1,
+                "duration": "54:30",
+                "winner": "Future",
+                "radiant": "Phola",
+                "dire": "Future",
+                "radiantScore": 48,
+                "direScore": 52,
+                "radiantHeroes": [
+                  "Wraith King",
+                  "Rubick",
+                  "Disruptor",
+                  "Monkey King",
+                  "Queen of Pain"
+                ],
+                "direHeroes": [
+                  "Ember Spirit",
+                  "Dawnbreaker",
+                  "Jakiro",
+                  "Shadow Fiend",
+                  "Clockwerk"
+                ],
+                "dotabuffUrl": "https://www.dotabuff.com/matches/8401068173"
+              }
+            ]
+          },
+          {
+            "id": "LB_R3_M4",
+            "teams": [
+              "Vanara",
+              "LightNing Goku"
+            ],
+            "winner": "Vanara",
+            "games": [
+              {
+                "game": 1,
+                "duration": "47:17",
+                "winner": "Vanara",
+                "radiant": "LightNing Goku",
+                "dire": "Vanara",
+                "radiantScore": 23,
+                "direScore": 36,
+                "radiantHeroes": [
+                  "Phoenix",
+                  "Silencer",
+                  "Mars",
+                  "Wraith King",
+                  "Queen of Pain"
+                ],
+                "direHeroes": [
+                  "Slardar",
+                  "Ogre Magi",
+                  "Void Spirit",
+                  "Dark Willow",
+                  "Lifestealer"
+                ],
+                "dotabuffUrl": "https://www.dotabuff.com/matches/8401197117"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "LB_R4",
+        "label": "Round 4",
+        "bestOf": 1,
+        "date": "8th-9th Aug",
+        "matches": [
+          {
+            "id": "LB_R4_M1",
+            "teams": [
+              "plutoski",
+              "Eric Dane"
+            ],
+            "winner": "plutoski",
+            "note": "No Dotabuff match found — teams did not use the league ticket. Result recorded as 1-0 to plutoski.",
+            "games": [
+              { "game": 1, "duration": "—", "winner": "plutoski", "radiant": "plutoski", "dire": "Eric Dane", "radiantScore": 1, "direScore": 0 }
+            ]
+          },
+          {
+            "id": "LB_R4_M2",
+            "teams": [
+              "Future",
+              "Vanara"
+            ],
+            "winner": "Future",
+            "games": [
+              {
+                "game": 1,
+                "duration": "36:13",
+                "winner": "Future",
+                "radiant": "Vanara",
+                "dire": "Future",
+                "radiantScore": 20,
+                "direScore": 35,
+                "radiantHeroes": [
+                  "Weaver",
+                  "Axe",
+                  "Witch Doctor",
+                  "Shadow Fiend",
+                  "Medusa"
+                ],
+                "direHeroes": [
+                  "Shadow Shaman",
+                  "Lifestealer",
+                  "Slardar",
+                  "Outworld Destroyer",
+                  "Jakiro"
+                ],
+                "dotabuffUrl": "https://www.dotabuff.com/matches/8409222635"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "LB_R5",
+        "label": "Round 5",
+        "bestOf": 1,
+        "date": "9th Aug",
+        "matches": [
+          {
+            "id": "LB_R5_M1",
+            "teams": [
+              "NJ",
+              "plutoski"
+            ],
+            "winner": "plutoski",
+            "games": [
+              {
+                "game": 1,
+                "duration": "59:18",
+                "winner": "plutoski",
+                "radiant": "plutoski",
+                "dire": "NJ",
+                "radiantScore": 43,
+                "direScore": 31,
+                "radiantHeroes": [
+                  "Rubick",
+                  "Terrorblade",
+                  "Warlock",
+                  "Dragon Knight",
+                  "Doom"
+                ],
+                "direHeroes": [
+                  "Axe",
+                  "Lion",
+                  "Vengeful Spirit",
+                  "Medusa",
+                  "Invoker"
+                ],
+                "dotabuffUrl": "https://www.dotabuff.com/matches/8409620081"
+              }
+            ]
+          },
+          {
+            "id": "LB_R5_M2",
+            "teams": [
+              "zRomep",
+              "Future"
+            ],
+            "winner": "Future",
+            "games": [
+              {
+                "game": 1,
+                "duration": "52:35",
+                "winner": "Future",
+                "radiant": "zRomep",
+                "dire": "Future",
+                "radiantScore": 33,
+                "direScore": 41,
+                "radiantHeroes": [
+                  "Razor",
+                  "Silencer",
+                  "Legion Commander",
+                  "Spirit Breaker",
+                  "Riki"
+                ],
+                "direHeroes": [
+                  "Tidehunter",
+                  "Morphling",
+                  "Tusk",
+                  "Huskar",
+                  "Jakiro"
+                ],
+                "dotabuffUrl": "https://www.dotabuff.com/matches/8410753794"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "LB_R6",
+        "label": "Lower Semi-Final",
+        "bestOf": 1,
+        "date": "10th Aug",
+        "matches": [
+          {
+            "id": "LB_FINAL",
+            "teams": [
+              "plutoski",
+              "Future"
+            ],
+            "winner": "Future",
+            "note": "No Dotabuff match found — teams did not use the league ticket. Result recorded as 1-0 to Future.",
+            "games": [
+              { "game": 1, "duration": "—", "winner": "Future", "radiant": "Future", "dire": "plutoski", "radiantScore": 1, "direScore": 0 }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "LB_R7",
+        "label": "Lower Bracket Final",
+        "bestOf": 3,
+        "date": "10th Aug",
+        "matches": [
+          {
+            "id": "LB_R7_M1",
+            "teams": [
+              "Helm",
+              "Future"
+            ],
+            "winner": "Future",
+            "games": [
+              {
+                "game": 1,
+                "duration": "49:02",
+                "winner": "Helm",
+                "radiant": "Helm",
+                "dire": "Future",
+                "radiantScore": 37,
+                "direScore": 34,
+                "radiantHeroes": [
+                  "Silencer",
+                  "Queen of Pain",
+                  "Night Stalker",
+                  "Morphling",
+                  "Lion"
+                ],
+                "direHeroes": [
+                  "Jakiro",
+                  "Ursa",
+                  "Axe",
+                  "Huskar",
+                  "Dazzle"
+                ],
+                "dotabuffUrl": "https://www.dotabuff.com/matches/8411094092"
+              },
+              {
+                "game": 2,
+                "duration": "44:45",
+                "winner": "Future",
+                "radiant": "Helm",
+                "dire": "Future",
+                "radiantScore": 28,
+                "direScore": 36,
+                "radiantHeroes": [
+                  "Puck",
+                  "Ursa",
+                  "Night Stalker",
+                  "Lion",
+                  "Disruptor"
+                ],
+                "direHeroes": [
+                  "Queen of Pain",
+                  "Slardar",
+                  "Phoenix",
+                  "Sven",
+                  "Jakiro"
+                ],
+                "dotabuffUrl": "https://www.dotabuff.com/matches/8411217236"
+              },
+              {
+                "game": 3,
+                "duration": "44:49",
+                "winner": "Future",
+                "radiant": "Helm",
+                "dire": "Future",
+                "radiantScore": 27,
+                "direScore": 39,
+                "radiantHeroes": [
+                  "Dawnbreaker",
+                  "Queen of Pain",
+                  "Witch Doctor",
+                  "Jakiro",
+                  "Morphling"
+                ],
+                "direHeroes": [
+                  "Shadow Demon",
+                  "Shadow Fiend",
+                  "Slardar",
+                  "Muerta",
+                  "Disruptor"
+                ],
+                "dotabuffUrl": "https://www.dotabuff.com/matches/8411337165"
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  "grandFinal": {
+    "id": "GF",
+    "label": "Grand Finals",
+    "bestOf": 3,
+    "date": "10th Aug",
+    "time": "7:00 pm",
+    "teams": [
+      "S1mpleO",
+      "Future"
+    ],
+    "winner": "Future",
+    "games": [
+      {
+        "game": 1,
+        "duration": "39:17",
+        "winner": "Future",
+        "radiant": "S1mpleO",
+        "dire": "Future",
+        "radiantScore": 25,
+        "direScore": 37,
+        "radiantHeroes": [
+          "Rubick",
+          "Shadow Shaman",
+          "Magnus",
+          "Windranger",
+          "Troll Warlord"
+        ],
+        "direHeroes": [
+          "Tusk",
+          "Dawnbreaker",
+          "Leshrac",
+          "Ursa",
+          "Silencer"
+        ],
+        "dotabuffUrl": "https://www.dotabuff.com/matches/8411519459"
+      },
+      {
+        "game": 2,
+        "duration": "41:08",
+        "winner": "Future",
+        "radiant": "S1mpleO",
+        "dire": "Future",
+        "radiantScore": 19,
+        "direScore": 27,
+        "radiantHeroes": [
+          "Dark Willow",
+          "Abaddon",
+          "Mars",
+          "Leshrac",
+          "Ursa"
+        ],
+        "direHeroes": [
+          "Silencer",
+          "Storm Spirit",
+          "Phoenix",
+          "Tidehunter",
+          "Sven"
+        ],
+        "dotabuffUrl": "https://www.dotabuff.com/matches/8411604205"
+      }
+    ]
+  }
+}

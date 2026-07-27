@@ -9,6 +9,7 @@ export interface Player {
   real_name?: string;
   discord_username?: string;
   steam_url?: string;
+  steam_id?: string;
   dotabuff_url?: string;
   avatar_url?: string;
   current_mmr?: number;

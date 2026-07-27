@@ -1,5 +1,5 @@
 import { useNavigate } from 'react-router-dom';
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
   Database, Users, Settings, LogOut, Clock, CheckCircle, 
@@ -25,8 +25,8 @@ import { AdminManagement } from '../components/admin/AdminManagement';
 import AnnouncementManagement from '../components/admin/AnnouncementManagement';
 import { AuctionService } from '../services/auctionService';
 import messagingService from '../services/messagingService';
-import profileUpdateService from '../services/profileUpdateService';
 import registrationRequestService from '../services/registrationRequestService';
+import profileUpdateService from '../services/profileUpdateService';
 
 interface ActivityLog {
   id: string;
@@ -37,10 +37,29 @@ interface ActivityLog {
   type: 'info' | 'warning' | 'error' | 'success';
 }
 
+interface Admin {
+  username: string;
+  displayName: string;
+  role: string;
+  avatarUrl: string;
+}
+
+interface Message {
+  id: string;
+  fromPlayer: string;
+  fromPlayerNickname: string;
+  subject: string;
+  content: string;
+  priority: 'high' | 'medium' | 'low';
+  timestamp: Date;
+  isRead: boolean;
+  toAdmin: string;
+}
+
 interface QuickStat {
   label: string;
   value: string | number;
-  icon: React.ComponentType<any>;
+  icon: React.ComponentType<React.SVGProps<SVGSVGElement>>;
   color: string;
   trend?: string;
   change?: string;
@@ -49,18 +68,19 @@ interface QuickStat {
 export default function AdminDashboard() {
   const navigate = useNavigate();
   const [activeSection, setActiveSection] = useState('dashboard');
-  const [currentAdmin, setCurrentAdmin] = useState<any>(null);
+  const [currentAdmin, setCurrentAdmin] = useState<Admin | null>(null);
   const [pendingCount, setPendingCount] = useState(0);
   const [activityLogs, setActivityLogs] = useState<ActivityLog[]>([]);
   const [showActivityDetails, setShowActivityDetails] = useState(false);
   const [quickStats, setQuickStats] = useState<QuickStat[]>([]);
-  const [messages, setMessages] = useState<any[]>([]);
+  const [messages, setMessages] = useState<Message[]>([]);
   const [unreadCount, setUnreadCount] = useState(0);
   const [showClearModal, setShowClearModal] = useState(false);
   const [registrationRequestsCount, setRegistrationRequestsCount] = useState(0);
+  const [profileRequestsCount, setProfileRequestsCount] = useState(0);
 
   // Calculate real database size
-  const calculateDatabaseSize = () => {
+  const calculateDatabaseSize = useCallback(() => {
     const playersSize = JSON.stringify(players).length;
     const adminsSize = JSON.stringify(admins).length;
     const logsSize = JSON.stringify(activityLogs).length;
@@ -71,7 +91,7 @@ export default function AdminDashboard() {
       return `${(totalBytes / 1024).toFixed(1)} KB`;
     }
     return `${totalMB.toFixed(1)} MB`;
-  };
+  }, [activityLogs]);
 
   useEffect(() => {
     const loadData = async () => {
@@ -84,7 +104,9 @@ export default function AdminDashboard() {
 
     // Get current admin info
     const admin = getAdminByUsername(session.username);
-    setCurrentAdmin(admin);
+    if (admin) {
+      setCurrentAdmin(admin);
+    }
 
     // Load pending approvals
     const pending = getPendingApprovals();
@@ -92,7 +114,7 @@ export default function AdminDashboard() {
 
     // Load activity logs from localStorage or create initial ones
     const savedLogs = localStorage.getItem('adminActivityLogs');
-    const initialLogs: ActivityLog[] = savedLogs ? JSON.parse(savedLogs).map((log: any) => ({
+    const initialLogs: ActivityLog[] = savedLogs ? JSON.parse(savedLogs).map((log: ActivityLog) => ({
       ...log,
       timestamp: new Date(log.timestamp) // Convert string back to Date object
     })) : [
@@ -163,46 +185,61 @@ export default function AdminDashboard() {
     const regCount = await registrationRequestService.getPendingCount();
     setRegistrationRequestsCount(regCount);
 
+    // Load profile update requests count
+    try {
+      const profileCount = await profileUpdateService.getPendingCount();
+      setProfileRequestsCount(profileCount);
+    } catch (error) {
+      console.error('Error loading profile update count:', error);
+    }
+
     // Listen for new messages
-    const handleNewMessage = async (event: any) => {
-      if (admin && event.detail.message.toAdmin === admin.username) {
-        const updatedMessages = await messagingService.getMessagesForAdmin(admin.username);
-        setMessages(updatedMessages);
-        setUnreadCount(await messagingService.getUnreadCount(admin.username));
+    const handleNewMessage = async (event: Event) => {
+      try {
+        const customEvent = event as CustomEvent<{ message: Message }>;
+        if (currentAdmin && customEvent.detail?.message?.toAdmin === currentAdmin.username) {
+          const updatedMessages = await messagingService.getMessagesForAdmin(currentAdmin.username);
+          setMessages(updatedMessages as Message[]);
+          setUnreadCount(await messagingService.getUnreadCount(currentAdmin.username));
+        }
+      } catch (error) {
+        console.error('Error handling new message event:', error);
       }
     };
 
-    window.addEventListener('newAdminMessage', handleNewMessage);
+    window.addEventListener('newAdminMessage', handleNewMessage as EventListener);
     
     return () => {
-      window.removeEventListener('newAdminMessage', handleNewMessage);
+      window.removeEventListener('newAdminMessage', handleNewMessage as EventListener);
     };
     };
     
     loadData();
-  }, [navigate]);
+  }, [calculateDatabaseSize, navigate, pendingCount, currentAdmin]);
 
   // Add activity log function
-  const addActivityLog = (action: string, details: string, type: ActivityLog['type'] = 'info') => {
-    const newLog: ActivityLog = {
-      id: Date.now().toString(),
-      timestamp: new Date(),
-      action,
-      details,
-      user: currentAdmin?.username || 'admin',
-      type
-    };
-    const updatedLogs = [newLog, ...activityLogs].slice(0, 100);
-    setActivityLogs(updatedLogs);
-    localStorage.setItem('adminActivityLogs', JSON.stringify(updatedLogs));
-  };
+  const addActivityLog = useCallback((action: string, details: string, type: ActivityLog['type'] = 'info') => {
+    setActivityLogs((prevLogs) => {
+      const newLog: ActivityLog = {
+        id: `log-${prevLogs.length + 1}`,
+        timestamp: new Date(),
+        action,
+        details,
+        user: currentAdmin?.username || 'admin',
+        type
+      };
+      const updatedLogs = [newLog, ...prevLogs].slice(0, 100);
+      localStorage.setItem('adminActivityLogs', JSON.stringify(updatedLogs));
+      return updatedLogs;
+    });
+  }, [currentAdmin]);
 
   // Clear activity logs
-  const clearActivityLogs = () => {
+  const clearActivityLogs = useCallback(() => {
     setActivityLogs([]);
     localStorage.removeItem('adminActivityLogs');
     const clearLog: ActivityLog = {
-      id: Date.now().toString(),
+      id: `log-1`,
       timestamp: new Date(),
       action: 'System',
       details: 'Activity logs cleared',
@@ -211,7 +248,7 @@ export default function AdminDashboard() {
     };
     setActivityLogs([clearLog]);
     localStorage.setItem('adminActivityLogs', JSON.stringify([clearLog]));
-  };
+  }, [currentAdmin]);
 
   const handleLogout = () => {
     AuthService.logout();
@@ -223,7 +260,7 @@ export default function AdminDashboard() {
     { id: 'dashboard', label: 'Dashboard', icon: BarChart3, description: 'Overview & Analytics' },
     { id: 'messages', label: 'Messages', icon: MessageSquare, description: 'Player Messages', badge: unreadCount > 0 ? unreadCount : undefined },
     { id: 'registration-requests', label: 'Registration Requests', icon: UserPlus, description: 'Approve Registrations', badge: registrationRequestsCount > 0 ? registrationRequestsCount : undefined },
-    { id: 'profile-requests', label: 'Profile Requests', icon: UserPlus, description: 'Approve Changes', badge: profileUpdateService.getPendingCount() > 0 ? profileUpdateService.getPendingCount() : undefined },
+    { id: 'profile-requests', label: 'Profile Requests', icon: UserPlus, description: 'Approve Changes', badge: profileRequestsCount > 0 ? profileRequestsCount : undefined },
     { id: 'players', label: 'Player Management', icon: Users, description: 'Manage Players' },
     { id: 'admin-management', label: 'Admin Management', icon: Shield, description: 'Manage Admins' },
     { id: 'announcements', label: 'Announcements', icon: Megaphone, description: 'Manage Announcements' },
@@ -238,7 +275,7 @@ export default function AdminDashboard() {
   ];
 
   // Quick action cards
-  const quickActions = [
+  const quickActions = useMemo(() => [
     {
       title: 'Manage Players',
       description: 'View and manage registered players',
@@ -270,7 +307,7 @@ export default function AdminDashboard() {
       color: 'orange',
       action: () => setActiveSection('activity')
     }
-  ];
+  ], [addActivityLog]);
 
   // Render sidebar
   const renderSidebar = () => (
@@ -278,7 +315,7 @@ export default function AdminDashboard() {
       {/* Logo/Header */}
       <div className="p-6 border-b border-blue-500/20">
         <div className="flex items-center space-x-3">
-          <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-purple-500 rounded-lg flex items-center justify-center">
+          <div className="w-10 h-10 bg-linear-to-br from-blue-500 to-purple-500 rounded-lg flex items-center justify-center">
             <Shield className="w-6 h-6 text-white" />
           </div>
           <div>
@@ -299,7 +336,7 @@ export default function AdminDashboard() {
             }}
             className={`w-full flex items-center space-x-3 px-4 py-3 rounded-lg transition-all duration-200 group relative ${
               activeSection === item.id
-                ? 'bg-gradient-to-r from-blue-600/20 to-purple-600/20 border border-blue-500/40 text-blue-300'
+                ? 'bg-linear-to-r from-blue-600/20 to-purple-600/20 border border-blue-500/40 text-blue-300'
                 : 'text-gray-400 hover:text-white hover:bg-white/5'
             }`}
           >
@@ -311,7 +348,7 @@ export default function AdminDashboard() {
               <div className="text-xs opacity-70">{item.description}</div>
             </div>
             {item.badge && (
-              <span className="px-2 py-1 bg-red-600 text-white text-xs rounded-full min-w-[20px] text-center">
+              <span className="px-2 py-1 bg-red-600 text-white text-xs rounded-full min-w-5 text-center">
                 {item.badge}
               </span>
             )}
@@ -465,10 +502,12 @@ export default function AdminDashboard() {
                         <button
                           onClick={async () => {
                             messagingService.markAsRead(message.id);
-                            const updatedMessages = await messagingService.getMessagesForAdmin(currentAdmin.username);
-                            setMessages(updatedMessages);
-                            setUnreadCount(await messagingService.getUnreadCount(currentAdmin.username));
-                            addActivityLog('Message', `Marked message from ${message.fromPlayerNickname} as read`, 'info');
+                            if (currentAdmin) {
+                          const updatedMessages = await messagingService.getMessagesForAdmin(currentAdmin.username);
+                              setMessages(updatedMessages as Message[]);
+                              setUnreadCount(await messagingService.getUnreadCount(currentAdmin.username));
+                              addActivityLog('Message', `Marked message from ${message.fromPlayerNickname} as read`, 'info');
+                            }
                           }}
                           className="px-3 py-1 bg-blue-600/20 hover:bg-blue-600/30 border border-blue-500/50 text-blue-300 rounded text-xs transition-colors"
                         >
@@ -478,10 +517,12 @@ export default function AdminDashboard() {
                       <button
                         onClick={async () => {
                           messagingService.deleteMessage(message.id);
-                          const updatedMessages = await messagingService.getMessagesForAdmin(currentAdmin.username);
-                          setMessages(updatedMessages);
-                          setUnreadCount(await messagingService.getUnreadCount(currentAdmin.username));
-                          addActivityLog('Message', `Deleted message from ${message.fromPlayerNickname}`, 'warning');
+                          if (currentAdmin) {
+                            const updatedMessages = await messagingService.getMessagesForAdmin(currentAdmin.username);
+                            setMessages(updatedMessages as Message[]);
+                            setUnreadCount(await messagingService.getUnreadCount(currentAdmin.username));
+                            addActivityLog('Message', `Deleted message from ${message.fromPlayerNickname}`, 'warning');
+                          }
                         }}
                         className="px-3 py-1 bg-red-600/20 hover:bg-red-600/30 border border-red-500/50 text-red-300 rounded text-xs transition-colors"
                       >
@@ -710,7 +751,7 @@ export default function AdminDashboard() {
                 initial={{ scale: 0.9, opacity: 0 }}
                 animate={{ scale: 1, opacity: 1 }}
                 exit={{ scale: 0.9, opacity: 0 }}
-                className="bg-gradient-to-br from-red-900/90 to-orange-900/90 rounded-xl p-6 max-w-md w-full border border-red-500/40"
+                className="bg-linear-to-br from-red-900/90 to-orange-900/90 rounded-xl p-6 max-w-md w-full border border-red-500/40"
                 onClick={(e) => e.stopPropagation()}
               >
                 <div className="text-center mb-4">
@@ -736,7 +777,7 @@ export default function AdminDashboard() {
                 <div className="flex gap-3">
                   <button
                     onClick={handleClearAuctionData}
-                    className="flex-1 px-4 py-2 bg-gradient-to-r from-red-600 to-orange-600 hover:from-red-500 hover:to-orange-500 text-white font-semibold rounded-lg transition-all duration-300 outline-none focus:outline-none"
+                    className="flex-1 px-4 py-2 bg-linear-to-r from-red-600 to-orange-600 hover:from-red-500 hover:to-orange-500 text-white font-semibold rounded-lg transition-all duration-300 outline-none focus:outline-none"
                   >
                     Yes, Clear Everything
                   </button>
@@ -867,7 +908,7 @@ export default function AdminDashboard() {
   );
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-black via-blue-900/10 to-purple-900/20 flex" style={{ paddingTop: '80px' }}>
+    <div className="min-h-screen bg-linear-to-br from-black via-blue-900/10 to-purple-900/20 flex" style={{ paddingTop: '80px' }}>
       {/* Background */}
       <div className="absolute inset-0 -z-10">
         <div className="absolute inset-0 bg-[url('/bg5.webp')] bg-cover bg-center opacity-5" />

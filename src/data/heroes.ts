@@ -135,12 +135,36 @@ export const DOTA_HEROES: DotaHero[] = [
   { id: "zeus", name: "Zeus", videoSrc: "/Video/npc_dota_hero_zuus.webm" }
 ];
 
-// Helper function to find hero by name (case-insensitive)
+// Normalise a string for fuzzy matching: lowercase, strip hyphens/apostrophes/spaces
+const normalise = (s: string) => s.toLowerCase().replace(/[-' ]/g, '');
+
+// Helper function to find hero by name (case-insensitive, fuzzy)
 export const findHeroByName = (name: string): DotaHero | undefined => {
-  return DOTA_HEROES.find(hero => 
-    hero.name.toLowerCase() === name.toLowerCase() ||
-    hero.id.toLowerCase() === name.toLowerCase()
+  const n = normalise(name);
+  return DOTA_HEROES.find(hero =>
+    normalise(hero.name) === n ||
+    normalise(hero.id) === n
   );
+};
+
+/**
+ * Get the best available image URL for a hero name.
+ * Derives the npc slug from the local videoSrc path when found,
+ * which guarantees the correct Valve CDN key even for heroes with
+ * irregular names (Anti-Mage → antimage, Wraith King → skeleton_king, etc.).
+ */
+export const getHeroImageUrl = (name: string): string => {
+  const hero = findHeroByName(name);
+  if (hero?.videoSrc) {
+    // Extract slug: "/Video/npc_dota_hero_antimage.webm" → "antimage"
+    const match = hero.videoSrc.match(/npc_dota_hero_([^.]+)\.webm/);
+    if (match) {
+      return `https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/${match[1]}.png`;
+    }
+  }
+  // Fallback: best-effort slug from the raw name
+  const slug = name.toLowerCase().replace(/[' ]/g, '_').replace(/-/g, '_');
+  return `https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/${slug}.png`;
 };
 
 // Helper function to get all hero names for autocomplete

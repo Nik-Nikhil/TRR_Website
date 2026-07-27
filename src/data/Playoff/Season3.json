@@ -1,0 +1,664 @@
+{
+  "season": 3,
+  "type": "double_elimination",
+  "teams": [
+    { "id": "DynamoDon", "name": "DynamoDon", "color": "#3C78D8" },
+    { "id": "Puppy Boss", "name": "Puppy Boss", "color": "#CC0000" },
+    { "id": "Kakarot", "name": "Kakarot", "color": "#E69138" },
+    { "id": "Sridharocky", "name": "Sridharocky", "color": "#76A5AF" },
+    { "id": "Alcromido", "name": "Alcromido", "color": "#E06666" },
+    { "id": "Rinne", "name": "Rinne", "color": "#F4CCCC" },
+    { "id": "Nj", "name": "Nj", "color": "#B4A7D6" },
+    { "id": "Rut", "name": "Rut", "color": "#FFD966" },
+    { "id": "Maldini", "name": "Maldini", "color": "#F1C232" },
+    { "id": "Pero", "name": "Pero", "color": "#BF9000" },
+    { "id": "Helm", "name": "Helm", "color": "#B6D7A8" },
+    { "id": "Epizeuxius", "name": "Epizeuxius", "color": "#6AA84F" },
+    { "id": "Jinx", "name": "Jinx", "color": "#C27BA0" },
+    { "id": "Shikamaru", "name": "Shikamaru", "color": "#8E7CC3" },
+    { "id": "Shaidota", "name": "Shaidota", "color": "#76A5AF" },
+    { "id": "Nemesis", "name": "Nemesis", "color": "#6D9EEB" }
+  ],
+
+  "upper": {
+    "rounds": [
+      {
+        "id": "UB_R1",
+        "label": "Round 1",
+        "bestOf": 1,
+        "date": "7th June",
+        "matches": [
+          {
+            "id": "UB_R1_M1",
+            "teams": ["DynamoDon", "Alcromido"],
+            "winner": "DynamoDon",
+            "time": "1:00 pm",
+            "games": [{
+      "game": 1,
+      "duration": "1:00:11",
+      "winner": "DynamoDon",
+      "radiant": "DynamoDon",
+      "dire": "Alcromido",
+      "radiantScore": 52,
+      "direScore": 39,
+      "radiantHeroes": ["Keeper of the Light", "Ringmaster", "Shadow Shaman", "Dark Seer", "Wraith King"],
+      "direHeroes": ["Lifestealer", "Warlock", "Queen of Pain", "Spirit Breaker", "Legion Commander"],
+      "dotabuffUrl": "https://www.dotabuff.com/matches/8324566502"
+    }]
+          },
+          {
+            "id": "UB_R1_M2",
+            "teams": ["Shikamaru", "Helm"],
+            "winner": "Shikamaru",
+            "games": [{
+      "game": 1,
+      "duration": "32:55",
+      "winner": "Shikamaru",
+      "radiant": "Shikamaru",
+      "dire": "Helm",
+      "radiantScore": 35,
+      "direScore": 30,
+      "radiantHeroes": ["Kunkka", "Lion", "Ember Spirit", "Oracle", "Wraith King"],
+      "direHeroes": ["Ancient Apparition", "Treant Protector", "Ursa", "Death Prophet", "Nightstalker"],
+      "dotabuffUrl": "https://www.dotabuff.com/matches/8324560632"
+    }]
+          },
+          {
+            "id": "UB_R1_M3",
+            "teams": ["Rut", "Kakarot"],
+            "winner": "Rut",
+            "games": [{
+      "game": 1,
+      "duration": "49:46",
+      "winner": "Rut",
+      "radiant": "Kakarot",
+      "dire": "Rut",
+      "radiantScore": 37,
+      "direScore": 38,
+      "radiantHeroes": ["Drow Ranger", "Weaver", "Legion Commander", "Queen of Pain", "Clockwerk"],
+      "direHeroes": ["Wraith King", "Ancient Apparition", "Puck", "Medusa", "Shadow Shaman"],
+      "dotabuffUrl": "https://www.dotabuff.com/matches/8324605322"
+    }]
+          },
+          {
+            "id": "UB_R1_M4",
+            "teams": ["Nemesis", "Rinne"],
+            "winner": "Nemesis",
+             "games": [{
+      "game": 1,
+      "duration": "32:55",
+      "winner": "Nemesis",
+      "radiant": "Nemesis",
+      "dire": "Rinne",
+      "radiantScore": 51,
+      "direScore": 30,
+      "radiantHeroes": ["Shadow Fiend", "Lone Druid", "Vengeful Spirit", "Huskar", "Clockwerk"],
+      "direHeroes": ["Earthshaker", "Broodmother", "Disruptor", "Mars", "Invoker"],
+      "dotabuffUrl": "https://www.dotabuff.com/matches/8324579151"
+    }]
+          },
+          {
+            "id": "UB_R1_M5",
+            "teams": ["Maldini", "Shaidota"],
+            "winner": "Shaidota",
+            "games": [{
+      "game": 1,
+      "duration": "48:41",
+      "winner": "Shaidota",
+      "radiant": "Maldini",
+      "dire": "Shaidota",
+      "radiantScore": 30,
+      "direScore": 38,
+      "radiantHeroes": ["Ogre Magi", "Legion Commander", "Warlock", "Juggernaut", "Invoker"],
+      "direHeroes": ["Earthshaker", "Abaddon", "Ursa", "Lion", "Magnus"],
+      "dotabuffUrl": "https://www.dotabuff.com/matches/8324573122"
+    }]
+          },
+          {
+            "id": "UB_R1_M6",
+            "teams": ["Puppy Boss", "Pero"],
+            "winner": "Pero",
+            "games": [{
+      "game": 1,
+      "duration": "46:43",
+      "winner": "Pero",
+      "radiant": "Puppy Boss",
+      "dire": "Pero",
+      "radiantScore": 25,
+      "direScore": 39,
+      "radiantHeroes": ["Medusa", "Dragon Knight", "Tidehunter", "Ogre Magi", "Lich"],
+      "direHeroes": ["Axe", "Drow Ranger", "Vengeful Spirit", "Primal Beast", "Clockwerk"],
+      "dotabuffUrl": "https://www.dotabuff.com/matches/8324573928"
+    }]
+          },
+          {
+            "id": "UB_R1_M7",
+            "teams": ["Sridharocky", "Epizeuxius"],
+            "winner": "Epizeuxius",
+             "games": [{
+      "game": 1,
+      "duration": "25:11",
+      "winner": "Epizeuxius",
+      "radiant": "Sridharocky",
+      "dire": "Epizeuxius",
+      "radiantScore": 18,
+      "direScore": 36,
+      "radiantHeroes": ["Lion", "Huskar", "Tiny", "Abaddon", "Nightstalker"],
+      "direHeroes": ["Slark", "Invoker", "Axe", "Lich", "Grimstroke"],
+      "dotabuffUrl": "https://www.dotabuff.com/matches/8324574722"
+    }]
+          },
+          {
+            "id": "UB_R1_M8",
+            "teams": ["Jinx", "Nj"],
+            "winner": "Jinx",
+            "games": [{
+      "game": 1,
+      "duration": "42:28",
+      "winner": "Jinx",
+      "radiant": "Nj",
+      "dire": "Jinx",
+      "radiantScore": 25,
+      "direScore": 57,
+      "radiantHeroes": ["Sven", "Dawnbreaker", "Vengeful Spirit", "Shadow Shaman", "Tiny"],
+      "direHeroes": ["Jakiro", "Ursa", "Timbersaw", "Nightstalker", "Nyx Assassin"],
+      "dotabuffUrl": "https://www.dotabuff.com/matches/8324597662"
+    }]
+          }
+        ]
+      },
+      {
+        "id": "UB_R2",
+        "label": "Round 2",
+        "bestOf": 1,
+        "date": "7th June",
+        "matches": [
+          {
+            "id": "UB_R2_M1",
+            "from": ["UB_R1_M4", "UB_R1_M7"],
+            "teams": ["Epizeuxius", "Nemesis"],
+            "winner": "Nemesis",
+            "time": "3:00 pm",
+            "games": [{
+      "game": 1,
+      "duration": "44:06",
+      "winner": "Nemesis",
+      "radiant": "Nemesis",
+      "dire": "Epizeuxius",
+      "radiantScore": 30,
+      "direScore": 52,
+      "radiantHeroes": ["Lifestealer", "Ursa", "Lich", "Grimstroke", "Axe"],
+      "direHeroes": ["Clockwerk", "Disruptor", "Wraith King", "Windranger", "Kunkka"],
+      "dotabuffUrl": "https://www.dotabuff.com/matches/8324682462"
+    }]
+          },
+          {
+            "id": "UB_R2_M2",
+            "from": ["UB_R1_M6", "UB_R1_M8"],
+            "teams": ["Jinx", "Pero"],
+            "winner": "Pero",
+            "games": [{
+      "game": 1,
+      "duration": "36:36",
+      "winner": "Pero",
+      "radiant": "Pero",
+      "dire": "Jinx",
+      "radiantScore": 45,
+      "direScore": 29,
+      "radiantHeroes": ["Shadow Shaman", "Tidehunter", "Puck", "Juggernaut", "Weaver"],
+      "direHeroes": ["Warlock", "Jakiro", "Lina", "Mars", "Ursa"],
+      "dotabuffUrl": "https://www.dotabuff.com/matches/8324703736"
+    }]
+          },
+          {
+            "id": "UB_R2_M3",
+            "from": ["UB_R1_M3", "UB_R1_M5"],
+            "teams": ["Rut", "Shaidota"],
+            "winner": "Shaidota",
+            "games": [{
+      "game": 1,
+      "duration": "51:13",
+      "winner": "Shaidota",
+      "radiant": "Shaidota",
+      "dire": "Rut",
+      "radiantScore": 50,
+      "direScore": 35,
+      "radiantHeroes": ["Lifestealer", "Primal Beast", "Shadow Shaman", "Death Prophet", "Rubick"],
+      "direHeroes": ["Nature's Prophet", "Grimstroke", "Ursa", "Ancient Apparition", "Earthshaker"],
+      "dotabuffUrl": "https://www.dotabuff.com/matches/8324699856"
+    }]
+          },
+          {
+            "id": "UB_R2_M4",
+            "from": ["UB_R1_M1", "UB_R1_M2"],
+            "teams": ["DynamoDon", "Shikamaru"],
+            "winner": "DynamoDon",
+            "games": [{
+      "game": 1,
+      "duration": "25:07",
+      "winner": "DynamoDon",
+      "radiant": "DynamoDon",
+      "dire": "Shikamaru",
+      "radiantScore": 33,
+      "direScore": 18,
+      "radiantHeroes": ["Juggernaut", "Kunkka", "Shadow Shaman", "Death Prophet", "Silencer"],
+      "direHeroes": ["Oracle", "Arc Warden", "Puck", "Mars", "Tusk"],
+      "dotabuffUrl": "https://www.dotabuff.com/matches/8324678188"
+    }]
+          }
+        ]
+      },
+      {
+        "id": "UB_R3",
+        "label": "Round 3",
+        "bestOf": 1,
+        "date": "8th June",
+        "matches": [
+          {
+            "id": "UB_R3_M1",
+            "from": ["UB_R2_M2", "UB_R2_M4"],
+            "teams": ["DynamoDon", "Pero"],
+            "winner": "DynamoDon",
+            "time": "1:00 pm",
+            "games": [{
+      "game": 1,
+      "duration": "38:07",
+      "winner": "DynamoDon",
+      "radiant": "Pero",
+      "dire": "DynamoDon",
+      "radiantScore": 18,
+      "direScore": 37,
+      "radiantHeroes": ["Axe", "Clockwerk", "Puck", "Razor", "Shadow Shaman"],
+      "direHeroes": ["Spirit Breaker", "Necrophos", "Lion", "Dark Seer", "Lifestealer"],
+      "dotabuffUrl": "https://www.dotabuff.com/matches/8326074697"
+    }]
+          },
+          {
+            "id": "UB_R3_M2",
+            "from": ["UB_R2_M1", "UB_R2_M3"],
+            "teams": ["Nemesis", "Shaidota"],
+            "winner": "Shaidota",
+            "time": "3:00 pm",
+            "games": [{
+      "game": 1,
+      "duration": "1:07:58",
+      "winner": "Shaidota",
+      "radiant": "Nemesis",
+      "dire": "Shaidota",
+      "radiantScore": 38,
+      "direScore": 54,
+      "radiantHeroes": ["Oracle", "Pudge", "Shadow Fiend", "Mars", "Terrorblade"],
+      "direHeroes": ["Lion", "Silencer", "Abaddon", "Earthshaker", "Ursa"],
+      "dotabuffUrl": "https://www.dotabuff.com/matches/8326202558"
+    }]
+          }
+        ]
+      },
+      {
+        "id": "UB_R4",
+        "label": "Upper Bracket Final",
+        "bestOf": 1,
+        "date": "14th June",
+        "matches": [
+          {
+            "id": "UB_FINAL",
+            "from": ["UB_R3_M1", "UB_R3_M2"],
+            "teams": ["DynamoDon", "Shaidota"],
+            "winner": "DynamoDon",
+            "time": "1:30 pm",
+            "games": [{
+      "game": 1,
+      "duration": "42:28",
+      "winner": "DynamoDon",
+      "radiant": "Shaidota",
+      "dire": "DynamoDon",
+      "radiantScore": 22,
+      "direScore": 31,
+      "radiantHeroes": ["Axe", "Wraith King", "Magnus", "Ogre Magi", "Shadow Shaman"],
+      "direHeroes": ["Rubick", "Jakiro", "Timbersaw", "Juggernaut", "Dark Seer"],
+      "dotabuffUrl": "https://www.dotabuff.com/matches/8333999868"
+    }]
+            
+          }
+        ]
+      }
+    ]
+  },
+
+  "lower": {
+    "rounds": [
+      {
+        "id": "LB_R1",
+        "label": "Round 1",
+        "bestOf": 1,
+        "date": "7th June",
+        "matches": [
+          {
+            "id": "LB_R1_M1",
+            "teams": ["Sridharocky", "Rinne"],
+            "winner": "Rinne",
+            "time": "3:00 pm",
+            "note": "Sridharocky forfeited — their team was late to show up, so Rinne was given a bye.",
+            "games": []
+          },
+          {
+            "id": "LB_R1_M2",
+            "teams": ["Nj", "Puppy Boss"],
+            "winner": "Nj",
+            "games": [{
+      "game": 1,
+      "duration": "44:06",
+      "winner": "Nj",
+      "radiant": "Puppy Boss",
+      "dire": "Nj",
+      "radiantScore": 23,
+      "direScore": 33,
+      "radiantHeroes": ["Shadow Fiend", "Timbersaw", "Slardar", "Lion", "Dark Willow"],
+      "direHeroes": ["Legion Commander", "Drow Ranger", "Ogre Magi", "Invoker", "Jakiro"],
+      "dotabuffUrl": "https://www.dotabuff.com/matches/8324699765"
+    }]
+          },
+          {
+            "id": "LB_R1_M3",
+            "teams": ["Kakarot", "Maldini"],
+            "winner": "Maldini",
+            "games": [{
+      "game": 1,
+      "duration": "39:47",
+      "winner": "Maldini",
+      "radiant": "Maldini",
+      "dire": "Kakarot",
+      "radiantScore": 46,
+      "direScore": 29,
+      "radiantHeroes": ["Mars", "Vengeful Spirit", "Ursa", "Slardar", "Silencer"],
+      "direHeroes": ["Underlord", "Riki", "Tusk", "Puck", "Crystal Maiden"],
+      "dotabuffUrl": "https://www.dotabuff.com/matches/8324694168"
+    }]
+          },
+          {
+            "id": "LB_R1_M4",
+            "teams": ["Alcromido", "Helm"],
+            "winner": "Helm",
+            "games": [{
+      "game": 1,
+      "duration": "50:22",
+      "winner": "Helm",
+      "radiant": "Helm",
+      "dire": "Alcromido",
+      "radiantScore": 63,
+      "direScore": 40,
+      "radiantHeroes": ["Undying", "Windranger", "Razor", "Dark Seer", "Lion"],
+      "direHeroes": ["Shadow Shaman", "Invoker", "Axe", "Earthshaker", "Dragon Knight"],
+      "dotabuffUrl": "https://www.dotabuff.com/matches/8324685042"
+    }]
+          }
+        ]
+      },
+      {
+        "id": "LB_R2",
+        "label": "Round 2",
+        "bestOf": 1,
+        "date": "7th June",
+        "matches": [
+          {
+            "id": "LB_R2_M1",
+            "from": ["LB_R1_M1"],
+            "teams": ["Shikamaru", "Rinne"],
+            "winner": "Shikamaru",
+            "time": "4:15 pm",
+            "games": [{
+      "game": 1,
+      "duration": "1:08:09",
+      "winner": "Shikamaru",
+      "radiant": "Shikamaru",
+      "dire": "Rinne",
+      "radiantScore": 67,
+      "direScore": 45,
+      "radiantHeroes": ["Kunkka", "Windranger", "Razor", "Leshrac", "Silencer"],
+      "direHeroes": ["Mars", "Lion", "Ursa", "Monkey King", "Dark Willow"],
+      "dotabuffUrl": "https://www.dotabuff.com/matches/8324774137"
+    }]
+          },
+          {
+            "id": "LB_R2_M2",
+            "from": ["LB_R1_M2"],
+            "teams": ["Epizeuxius", "Nj"],
+            "winner": "Epizeuxius",
+            "time": "5:45 pm",
+            "games": [{
+      "game": 1,
+      "duration": "44:04",
+      "winner": "Epizeuxius",
+      "radiant": "Nj",
+      "dire": "Epizeuxius",
+      "radiantScore": 31,
+      "direScore": 26,
+      "radiantHeroes": ["Ursa", "Nightstalker", "Skywrath Mage", "Grimstroke", "Pudge"],
+      "direHeroes": ["Vengeful Spirit", "Invoker", "Medusa", "Legion Commander", "Shadow Shaman"],
+      "dotabuffUrl": "https://www.dotabuff.com/matches/8324871267"
+    }]
+          },
+          {
+            "id": "LB_R2_M3",
+            "from": ["LB_R1_M3"],
+            "teams": ["Jinx", "Maldini"],
+            "winner": "Jinx",
+            "time": "7:00 pm",
+            "games": [{
+      "game": 1,
+      "duration": "33:44",
+      "winner": "Jinx",
+      "radiant": "Maldini",
+      "dire": "Jinx",
+      "radiantScore": 11,
+      "direScore": 39,
+      "radiantHeroes": ["Mars", "Vengeful Spirit", "Medusa", "Slardar", "Silencer"],
+      "direHeroes": ["Phoenix", "Jakiro", "Juggernaut", "Dark Seer", "Tusk"],
+      "dotabuffUrl": "https://www.dotabuff.com/matches/8324993184"
+    }]
+          },
+          {
+            "id": "LB_R2_M4",
+            "from": ["LB_R1_M4"],
+            "teams": ["Rut", "Helm"],
+            "winner": "Helm",
+            "time": "8:00 pm",
+            "games": [{
+      "game": 1,
+      "duration": "27:56",
+      "winner": "Helm",
+      "radiant": "Helm",
+      "dire": "Jinx",
+      "radiantScore": 36,
+      "direScore": 16,
+      "radiantHeroes": ["Undying", "Marci", "Clinkz", "Mars", "Shadow Shaman"],
+      "direHeroes": ["Huskar", "Shadow Demon", "Underlord", "Disruptor", "Slark"],
+      "dotabuffUrl": "https://www.dotabuff.com/matches/8325096117"
+    }]
+          }
+        ]
+      },
+      {
+        "id": "LB_R3",
+        "label": "Round 3",
+        "bestOf": 1,
+        "date": "8th June",
+        "matches": [
+          {
+            "id": "LB_R3_M1",
+            "from": ["LB_R2_M1", "LB_R2_M2"],
+            "teams": ["Shikamaru", "Epizeuxius"],
+            "winner": "Shikamaru",
+            "time": "5:00 pm",
+            "games": [{
+      "game": 1,
+      "duration": "44:23",
+      "winner": "Shikamaru",
+      "radiant": "Shikamaru",
+      "dire": "Epizeuxius",
+      "radiantScore": 39,
+      "direScore": 17,
+      "radiantHeroes": ["Kunkka", "Invoker", "Drow Ranger", "Bane", "Silencer"],
+      "direHeroes": ["Underlord", "Shadow Shaman", "Windranger", "Lifestealer", "Dragon Knight"],
+      "dotabuffUrl": "https://www.dotabuff.com/matches/8326367385"
+    }]
+          },
+          {
+            "id": "LB_R3_M2",
+            "from": ["LB_R2_M3", "LB_R2_M4"],
+            "teams": ["Jinx", "Helm"],
+            "winner": "Jinx",
+            "time": "7:00 pm",
+             "games": [{
+      "game": 1,
+      "duration": "36:07",
+      "winner": "Jinx",
+      "radiant": "Helm",
+      "dire": "Jinx",
+      "radiantScore": 22,
+      "direScore": 28,
+      "radiantHeroes": ["Templar Assassin", "Dragon Knight", "Phoenix", "Mars", "Shadow Shaman"],
+      "direHeroes": ["Lion", "Dark Seer", "Oracle", "Timbersaw", "Lifestealer"],
+      "dotabuffUrl": "https://www.dotabuff.com/matches/8326529201"
+    }]
+          }
+        ]
+      },
+      {
+        "id": "LB_R4",
+        "label": "Round 4",
+        "bestOf": 1,
+        "date": "14th June",
+        "matches": [
+          {
+            "id": "LB_R4_M1",
+            "from": ["LB_R3_M1"],
+            "teams": ["Pero", "Shikamaru"],
+            "winner": "Shikamaru",
+            "time": "5:00 pm",
+            "games": [{
+      "game": 1,
+      "duration": "33:02",
+      "winner": "Shikamaru",
+      "radiant": "Shikamaru",
+      "dire": "Pero",
+      "radiantScore": 30,
+      "direScore": 4,
+      "radiantHeroes": ["Lich", "Puck", "Shadow Fiend", "Dawnbreaker", "Silencer"],
+      "direHeroes": ["Centaur Warrunner", "Dark Willow", "Meepo", "Lina", "Abaddon"],
+      "dotabuffUrl": "https://www.dotabuff.com/matches/8334219092"
+    }]
+          },
+          {
+            "id": "LB_R4_M2",
+            "from": ["LB_R3_M2"],
+            "teams": ["Nemesis", "Jinx"],
+            "winner": "Nemesis",
+            "time": "3:00 pm",
+            "games": [{
+      "game": 1,
+      "duration": "35:49",
+      "winner": "Nemesis",
+      "radiant": "Nemesis",
+      "dire": "Jinx",
+      "radiantScore": 31,
+      "direScore": 23,
+      "radiantHeroes": ["Huskar", "Shadow Shaman", "Magnus", "Clockwerk", "Lina"],
+      "direHeroes": ["Arc Warden", "Drow Ranger", "Tusk", "Mars", "Dark Willow"],
+      "dotabuffUrl": "https://www.dotabuff.com/matches/8334096027"
+    }]
+          }
+        ]
+      },
+      {
+        "id": "LB_R5",
+        "label": "Round 5",
+        "bestOf": 1,
+        "date": "14th June",
+        "matches": [
+          {
+            "id": "LB_R5_M1",
+            "from": ["LB_R4_M1", "LB_R4_M2"],
+            "teams": ["Shikamaru", "Nemesis"],
+            "winner": "Nemesis",
+            "time": "7:00 pm",
+            "games": [{
+      "game": 1,
+      "duration": "42:49",
+      "winner": "Nemesis",
+      "radiant": "Shikamaru",
+      "dire": "Nemesis",
+      "radiantScore": 19,
+      "direScore": 34,
+      "radiantHeroes": ["Windranger", "Kunkka", "Death Prophet", "Wraith King", "Oracle"],
+      "direHeroes": ["Spectre", "Keeper of the Light", "Disruptor", "Axe", "Earth Spirit"],
+      "dotabuffUrl": "https://www.dotabuff.com/matches/8334378130"
+    }]
+          }
+        ]
+      },
+      {
+        "id": "LB_R6",
+        "label": "Lower Bracket Final",
+        "bestOf": 1,
+        "date": "15th June",
+        "matches": [
+          {
+            "id": "LB_FINAL",
+            "from": ["LB_R5_M1"],
+            "teams": ["Shaidota", "Nemesis"],
+            "winner": "Nemesis",
+            "time": "1:00 pm",
+            "games": [{
+      "game": 1,
+      "duration": "41:59",
+      "winner": "Nemesis",
+      "radiant": "Nemesis",
+      "dire": "Shaidota",
+      "radiantScore": 33,
+      "direScore": 24,
+      "radiantHeroes": ["Undying", "Clockwerk", "Wraith King", "Disruptor", "Shadow Fiend"],
+      "direHeroes": ["Lich", "Vengeful Spirit", "Death Prophet", "Ursa", "Earthshaker"],
+      "dotabuffUrl": "https://www.dotabuff.com/matches/8335501715"
+    }]
+          }
+        ]
+      }
+    ]
+  },
+
+  "grandFinal": {
+    "id": "GF",
+    "label": "Grand Finals",
+    "bestOf": 3,
+    "date": "15th June",
+    "time": "4:00 pm",
+    "teams": ["DynamoDon", "Nemesis"],
+    "winner": "DynamoDon",
+    "games": [{
+      "game": 1,
+      "duration": "34:52",
+      "winner": "DynamoDon",
+      "radiant": "Nemesis",
+      "dire": "DynamoDon",
+      "radiantScore": 17,
+      "direScore": 46,
+      "radiantHeroes": ["Huskar", "Spirit Breaker", "Ursa", "Drow Ranger", "Shadow Shaman"],
+      "direHeroes": ["Lifestealer", "Lion", "Chaos Knight", "Razor", "Dark Seer"],
+      "dotabuffUrl": "https://www.dotabuff.com/matches/8335674313"
+    },
+  {
+    "game": 2,
+      "duration": "44:25",
+      "winner": "DynamoDon",
+      "radiant": "DynamoDon",
+      "dire": "Nemesis",
+      "radiantScore": 35,
+      "direScore": 31,
+      "radiantHeroes": ["Morphling", "Shadow Shaman", "Death Prophet", "Grimstroke", "Primal Beast"],
+      "direHeroes": ["Dawnbreaker", "Sniper", "Abaddon", "Lifestealer","Tiny"],
+      "dotabuffUrl": "https://www.dotabuff.com/matches/8335760462"
+
+  }]
+  }
+}
